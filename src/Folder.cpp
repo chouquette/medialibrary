@@ -449,9 +449,17 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
         return nullptr;
+    std::shared_ptr<fs::IDevice> deviceFs;
     std::shared_ptr<fs::IDirectory> folderFs;
     try
     {
+        /*
+         * It's ok to instanciate a fs::IFolder even though the fs factories are
+         * not started, since no actual FS interraction will happen by doing so.
+         * This allows us to use the sanitized mrl that's returned
+         * by fs::IFolder::mrl() (decoded & reencoded to ensure it matches our
+         * encoding scheme)
+         */
         folderFs = fsFactory->createDirectory( mrl );
     }
     catch ( const fs::errors::System& ex )
@@ -460,46 +468,70 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
                    ex.what() );
         return nullptr;
     }
-
-    auto deviceFs = folderFs->device();
-    if ( deviceFs == nullptr )
+    if ( fsFactory->isStarted() == true )
     {
-        LOG_WARN( "Failed to get device containing an existing folder: ",
-                  folderFs->mrl() );
-        return nullptr;
-    }
-    if ( deviceFs->isRemovable() == false )
-    {
-        std::string req = "SELECT * FROM " + Folder::Table::Name +
-                          " WHERE path = ? AND is_removable = 0";
-        if ( bannedType == BannedType::Any )
-            return fetch( ml, req, folderFs->mrl() );
-        req += " AND is_banned = ?";
-        return fetch( ml, req, folderFs->mrl(),
-                      bannedType == BannedType::Yes ? true : false );
+        /* If the fs factory is started, we can probe the devices it knows */
+        deviceFs = folderFs->device();
+        if ( deviceFs == nullptr )
+        {
+            LOG_WARN( "Failed to get device containing an existing folder: ",
+                      folderFs->mrl() );
+            return nullptr;
+        }
     }
 
-    auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
-    // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
-    if ( device == nullptr )
-        return nullptr;
-    auto path = deviceFs->relativeMrl( folderFs->mrl() );
+    int64_t deviceId;
+    std::string path;
+
+    if ( deviceFs != nullptr )
+    {
+        if ( deviceFs->isRemovable() == false )
+        {
+            std::string req = "SELECT * FROM " + Folder::Table::Name +
+                              " WHERE path = ? AND is_removable = 0";
+            if ( bannedType == BannedType::Any )
+                return fetch( ml, req, folderFs->mrl() );
+            req += " AND is_banned = ?";
+            return fetch( ml, req, folderFs->mrl(),
+                          bannedType == BannedType::Yes ? true : false );
+        }
+        auto device = Device::fromUuid( ml, deviceFs->uuid(), fsFactory->scheme() );
+        // We are trying to find a folder. If we don't know the device it's on, we don't know the folder.
+        if ( device == nullptr )
+            return nullptr;
+
+        path = deviceFs->relativeMrl( folderFs->mrl() );
+        deviceId = device->id();
+    }
+    else
+    {
+        /*
+         * If it's not started, or if the device was unknown, we can try to
+         * probe the previously known mountpoints that were stored in database
+         */
+        auto deviceTuple = Device::fromMountpoint( ml, mrl );
+        deviceId = std::get<0>( deviceTuple );
+        if ( deviceId == 0 )
+            return nullptr;
+        path = utils::file::removePath( mrl, std::get<1>( deviceTuple ) );
+    }
+
     std::string req = "SELECT * FROM " + Folder::Table::Name +
                       " WHERE path = ? AND device_id = ?";
     std::shared_ptr<Folder> folder;
     if ( bannedType == BannedType::Any )
     {
-        folder = fetch( ml, req, path, device->id() );
+        folder = fetch( ml, req, path, deviceId );
     }
     else
     {
         req += " AND is_banned = ?";
-        folder = fetch( ml, req, path, device->id(),
+        folder = fetch( ml, req, path, deviceId,
                         bannedType == BannedType::Yes ? true : false );
     }
     if ( folder == nullptr )
         return nullptr;
-    folder->m_fullPath = deviceFs->absoluteMrl( path );
+    folder->m_fullPath = deviceFs != nullptr ? deviceFs->absoluteMrl( path ) : mrl;
     return folder;
 }
 
