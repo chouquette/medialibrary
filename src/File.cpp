@@ -447,9 +447,22 @@ std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string&
 
 std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    static const std::string req = "SELECT * FROM " + File::Table::Name +  " WHERE mrl = ? "
-            "AND folder_id IS NULL";
+    auto scheme = utils::url::scheme( mrl );
+    static const std::string req = "SELECT * FROM " + File::Table::Name +
+            " WHERE mrl = ? AND folder_id IS NULL";
     auto file = fetch( ml, req, mrl );
+    if ( file == nullptr && scheme != "file://" )
+    {
+        auto pattern = scheme + "%/" + utils::url::path( mrl );
+        static const std::string reqFallback = "SELECT * FROM " + File::Table::Name +
+                " WHERE mrl LIKE ? AND folder_id IS NULL AND is_network != 0";
+        auto res = fetchAll<File>( ml, reqFallback, pattern );
+        if ( res.empty() == true )
+            return nullptr;
+        if ( res.size() > 1 )
+            LOG_WARN( "Multiple MRL matched ", mrl );
+        file = res[0];
+    }
     if ( file == nullptr )
         return nullptr;
     assert( file->m_isExternal == true );

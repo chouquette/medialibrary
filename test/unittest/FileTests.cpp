@@ -137,3 +137,18 @@ TEST_F( Files, SetMediaId )
     files = m->files();
     ASSERT_EQ( 2u, files.size() );
 }
+
+TEST_F( Files, ByMrlNetwork )
+{
+    auto m1 = Media::createExternal( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    ASSERT_NE( nullptr, m1 );
+    auto f1 = File::fromExternalMrl( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    ASSERT_NE( nullptr, f1 );
+
+    auto f2 = File::fromExternalMrl( ml.get(), "https://1.2.3.4/path/to/file.mkv" );
+    ASSERT_EQ( nullptr, f2 );
+
+    f2 = File::fromExternalMrl( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    ASSERT_NE( nullptr, f2 );
+    ASSERT_EQ( f1->id(), f2->id() );
+}
