@@ -611,6 +611,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
                                                 std::shared_ptr<File> file,
                                                 IMedia::Type newType ) const
 {
+    LOG_DEBUG( "Converting media ", item.mrl(), " from external to internal" );
     // If the file is on a removable device, we need to update its mrl
     assert( sqlite::Transaction::transactionInProgress() == true );
     auto fsDir = item.parentFolderFs();
