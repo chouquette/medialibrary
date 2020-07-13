@@ -287,7 +287,7 @@ TEST_F( Playlists, DeleteFile )
 {
     for ( auto i = 1; i < 6; ++i )
     {
-        auto m = ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        auto m = ml->addMedia( "file://media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
         ASSERT_NE( nullptr, m );
         auto res = pl->append( *m );
         ASSERT_TRUE( res );
