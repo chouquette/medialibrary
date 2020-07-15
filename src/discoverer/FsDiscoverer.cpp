@@ -502,6 +502,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     // But gracefully handle failure in release mode
     if( deviceFs == nullptr )
         return false;
+    auto t = m_ml->getConn()->newTransaction();
     auto device = Device::fromUuid( m_ml, deviceFs->uuid(), fsFactory.scheme() );
     if ( device == nullptr )
     {
@@ -525,6 +526,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                              *device, *deviceFs );
     if ( f == nullptr )
         return false;
+    t->commit();
     checkFolder( std::move( folder ), std::move( f ), interruptProbe, fsFactory, true );
     return true;
 }
