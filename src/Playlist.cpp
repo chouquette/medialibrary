@@ -789,7 +789,7 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
                 auto device = fsFactory->createDevice( uuid );
                 if ( device == nullptr )
                     continue;
-                mrl = device->mountpoint() + folderPath + mrl;
+                mrl = device->absoluteMrl( folderPath + mrl );
             }
             // account for potential leftovers & badly encoded mrls
             mrl = utils::url::decode( mrl );
