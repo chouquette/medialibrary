@@ -420,11 +420,6 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
         LOG_WARN( "Failed to find folder containing ", mrl );
         return nullptr;
     }
-    if ( folder->isPresent() == false )
-    {
-        LOG_INFO( "Found a folder containing ", mrl, " but it is not present" );
-        return nullptr;
-    }
     file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
     if ( file == nullptr )
     {
