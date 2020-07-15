@@ -41,7 +41,7 @@ public:
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
     virtual bool isNetwork() const override;
-    virtual const std::string& mountpoint() const override;
+    virtual std::vector<std::string> mountpoints() const override;
     virtual void addMountpoint( std::string mountpoint ) override;
     virtual void removeMountpoint( const std::string& mountpoint ) override;
     virtual std::tuple<bool, std::string>

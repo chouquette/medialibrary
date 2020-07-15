@@ -390,7 +390,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         LOG_ERROR( "Can't add a local folder with unknown storage device. ");
         return;
     }
-    auto entryPoint = device->mountpoint();
+    auto entryPoint = device->mountpoints()[0];
     if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
     {
         auto probePtr = std::make_unique<prober::PathProbe>(

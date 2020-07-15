@@ -73,12 +73,12 @@ bool CommonDevice::isNetwork() const
     return m_isNetwork;
 }
 
-const std::string& CommonDevice::mountpoint() const
+std::vector<std::string> CommonDevice::mountpoints() const
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( m_mountpoints.empty() == true )
         throw fs::errors::DeviceRemoved();
-    return m_mountpoints[0];
+    return m_mountpoints;
 }
 
 void CommonDevice::addMountpoint( std::string mountpoint )

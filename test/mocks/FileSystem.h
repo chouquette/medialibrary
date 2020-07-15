@@ -97,8 +97,8 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         ret->setPresent( false );
         // Now flag the mountpoint as belonging to its containing device, since it's now
         // just a regular folder
-        auto d = device( ret->mountpoint() );
-        d->invalidateMountpoint( ret->mountpoint() );
+        auto d = device( ret->mountpoints()[0] );
+        d->invalidateMountpoint( ret->mountpoints()[0] );
         m_cb->onDeviceUnmounted( *ret );
         return ret;
     }
@@ -113,8 +113,8 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         d->setPresent( false );
         // And now fetch the device that contains the mountpoint of the device
         // we just removed.
-        auto mountpointDevice = device( d->mountpoint() );
-        mountpointDevice->invalidateMountpoint( d->mountpoint() );
+        auto mountpointDevice = device( d->mountpoints()[0] );
+        mountpointDevice->invalidateMountpoint( d->mountpoints()[0] );
         m_cb->onDeviceUnmounted( *d );
     }
 
@@ -129,17 +129,17 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         // Look for the containing device before marking the actual device back as present.
         // otherwise, we will get the device mountpoint itself, instead of the device that contains
         // the mountpoint
-        auto mountpointDevice = device( d->mountpoint() );
+        auto mountpointDevice = device( d->mountpoints()[0] );
         d->setPresent( true );
-        mountpointDevice->setMountpointRoot( d->mountpoint(), d->root() );
+        mountpointDevice->setMountpointRoot( d->mountpoints()[0], d->root() );
         m_cb->onDeviceMounted( *d );
     }
 
     void addDevice( std::shared_ptr<Device> dev )
     {
-        auto d = device( dev->mountpoint() );
+        auto d = device( dev->mountpoints()[0] );
         if ( d != nullptr )
-            d->setMountpointRoot( dev->mountpoint(), dev->root() );
+            d->setMountpointRoot( dev->mountpoints()[0], dev->root() );
         devices.push_back( dev );
         dev->setPresent( true );
         if ( m_cb != nullptr )
@@ -395,9 +395,14 @@ public:
         return false;
     }
 
-    virtual const std::string& mountpoint() const override
+    const std::string& mountpoint() const
     {
         return m_mountpoint;
+    }
+
+    virtual std::vector<std::string> mountpoints() const override
+    {
+        return std::vector<std::string>{ { m_mountpoint } };
     }
 
     virtual void addMountpoint( std::string ) override

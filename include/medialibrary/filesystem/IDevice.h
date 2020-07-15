@@ -24,6 +24,7 @@
 
 #include <string>
 #include <tuple>
+#include <vector>
 
 namespace medialibrary
 {
@@ -51,7 +52,7 @@ public:
      *
      * If the device has multiple mountpoints, the result is undetermined
      */
-    virtual const std::string& mountpoint() const = 0;
+    virtual std::vector<std::string> mountpoints() const = 0;
 
     virtual void addMountpoint( std::string mountpoint ) = 0;
     virtual void removeMountpoint( const std::string& mountpoint ) = 0;

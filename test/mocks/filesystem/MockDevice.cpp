@@ -44,7 +44,7 @@ Device::Device( const std::string& mountpoint, const std::string& uuid, bool rem
 
 void Device::setupRoot()
 {
-    m_root = std::make_shared<Directory>( mountpoint(), shared_from_this() );
+    m_root = std::make_shared<Directory>( mountpoints()[0], shared_from_this() );
 }
 
 std::shared_ptr<Directory> Device::root()
