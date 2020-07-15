@@ -134,7 +134,7 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
         if ( device == nullptr )
         {
             device = std::make_shared<Device>( uuid, mountpoint,
-                                               m_scheme, removable, true );
+                                               m_scheme, removable, m_isNetwork );
             m_devices.push_back( device );
             addMountpoint = false;
         }
