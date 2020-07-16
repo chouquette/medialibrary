@@ -92,7 +92,14 @@ private:
     friend thread_id this_thread::get_id();
     friend Thread;
     friend std::hash<thread_id>;
+    friend std::ostream& operator<<( std::ostream& s, const thread_id& id );
 };
+
+std::ostream& operator<<( std::ostream& s, const thread_id& id )
+{
+    return s << id.m_id;
+}
+
 }
 
 // Compatibility thread class, for platforms that don't implement C++11 (or do it incorrectly)
