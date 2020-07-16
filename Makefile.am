@@ -398,7 +398,10 @@ samples_LDADD = 		\
 	$(SQLITE_LIBS)		\
 	$(NULL)
 
-check_PROGRAMS += test_discoverer sqlite_load test_fast_teardown test_fast_discover
+check_PROGRAMS += test_discoverer test_fast_teardown test_fast_discover
+if !HAVE_WIN32
+check_PROGRAMS += sqlite_load
+endif
 
 test_discoverer_SOURCES = test/discoverer/main.cpp
 test_discoverer_CXXFLAGS = $(MEDIALIB_CPPFLAGS)
