@@ -72,13 +72,33 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::typ
 };
 
 template <typename T>
-struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value ||
-                                         IsSameDecay<T, const char*>::value ||
-                                         IsSameDecay<T, char*>::value>::type>
+struct Traits<T, typename std::enable_if<std::is_same<T, const char*>::value>::type>
+{
+    static int Bind(sqlite3_stmt* stmt, int pos, const char* value )
+    {
+        return sqlite3_bind_text( stmt, pos, value, -1, SQLITE_STATIC );
+    }
+
+    static std::string Load( sqlite3_stmt* stmt, int pos )
+    {
+        auto tmp = reinterpret_cast<const char*>( sqlite3_column_text( stmt, pos ) );
+        if ( tmp != nullptr )
+            return std::string( tmp );
+        return std::string();
+    }
+};
+
+template <typename T>
+struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::type>
 {
     static int Bind(sqlite3_stmt* stmt, int pos, const std::string& value )
     {
         return sqlite3_bind_text( stmt, pos, value.c_str(), -1, SQLITE_STATIC );
+    }
+
+    static int Bind(sqlite3_stmt* stmt, int pos, std::string&& value )
+    {
+        return sqlite3_bind_text( stmt, pos, value.c_str(), -1, SQLITE_TRANSIENT );
     }
 
     static std::string Load( sqlite3_stmt* stmt, int pos )
