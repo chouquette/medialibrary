@@ -26,6 +26,8 @@
 
 #include "medialibrary/IMediaLibrary.h"
 #include "test/mocks/NoopCallback.h"
+#include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
 
 #include <iostream>
 #include <condition_variable>
@@ -47,7 +49,7 @@ public:
 
     bool waitForCompletion()
     {
-        std::unique_lock<std::mutex> lock( m_mutex );
+        std::unique_lock<compat::Mutex> lock( m_mutex );
         m_cond.wait( lock, [this](){
             return (m_nbDiscoveryToRun > 0 &&
                     m_nbDiscoveryToRun == m_nbDiscoveryCompleted &&
@@ -61,7 +63,7 @@ private:
     virtual void onDiscoveryStarted( const std::string& ) override
     {
         {
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::lock_guard<compat::Mutex> lock( m_mutex );
             m_nbDiscoveryToRun++;
             m_isParsingCompleted = false;
         }
@@ -70,7 +72,7 @@ private:
     virtual void onDiscoveryCompleted(const std::string&, bool success ) override
     {
         {
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::lock_guard<compat::Mutex> lock( m_mutex );
             if ( success == true )
                 m_nbDiscoveryCompleted++;
             else
@@ -81,7 +83,7 @@ private:
     virtual void onParsingStatsUpdated(uint32_t percent) override
     {
         {
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::lock_guard<compat::Mutex> lock( m_mutex );
             m_isParsingCompleted = percent == 100;
         }
         m_cond.notify_all();
@@ -89,15 +91,15 @@ private:
     virtual void onBackgroundTasksIdleChanged(bool isIdle) override
     {
         {
-            std::lock_guard<std::mutex> lock( m_mutex );
+            std::lock_guard<compat::Mutex> lock( m_mutex );
             m_isIdle = isIdle;
         }
         m_cond.notify_all();
     }
 
 private:
-    std::condition_variable m_cond;
-    std::mutex m_mutex;
+    compat::ConditionVariable m_cond;
+    compat::Mutex m_mutex;
     uint32_t m_nbDiscoveryToRun;
     uint32_t m_nbDiscoveryCompleted;
     bool m_isParsingCompleted;
