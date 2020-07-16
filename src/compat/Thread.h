@@ -86,7 +86,7 @@ public:
     bool operator>=(const thread_id& r) const noexcept { return m_id >= r.m_id; }
 
 private:
-    thread_id( native_thread_id_type id ) : m_id( id ) {}
+    explicit thread_id( native_thread_id_type id ) : m_id( id ) {}
 
     native_thread_id_type m_id;
 
@@ -216,9 +216,9 @@ namespace this_thread
     inline Thread::id get_id()
     {
 #ifdef _WIN32
-        return { GetCurrentThreadId() };
+        return Thread::id{ GetCurrentThreadId() };
 #else
-        return { pthread_self() };
+        return Thread::id{ pthread_self() };
 #endif
     }
 
