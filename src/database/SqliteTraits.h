@@ -41,12 +41,6 @@ struct ForeignKey
     int64_t value;
 };
 
-struct NullableString
-{
-    explicit NullableString( std::string str ) : s( std::move( str ) ) {}
-    std::string s;
-};
-
 template <typename ToCheck, typename T>
 using IsSameDecay = std::is_same<typename std::decay<ToCheck>::type, T>;
 
@@ -143,17 +137,6 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 
     static constexpr sqlite_int64
     (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int64;
-};
-
-template <typename T>
-struct Traits<T, typename std::enable_if<IsSameDecay<T, NullableString>::value>::type>
-{
-    static int Bind( sqlite3_stmt *stmt, int pos, const NullableString& ns )
-    {
-        if ( ns.s.empty() == false )
-            return Traits<std::string>::Bind( stmt, pos, ns.s );
-        return sqlite3_bind_null( stmt, pos );
-    }
 };
 
 template <typename Gen, template <typename...> class Inst>
