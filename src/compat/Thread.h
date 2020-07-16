@@ -95,7 +95,7 @@ private:
     friend std::ostream& operator<<( std::ostream& s, const thread_id& id );
 };
 
-std::ostream& operator<<( std::ostream& s, const thread_id& id )
+inline std::ostream& operator<<( std::ostream& s, const thread_id& id )
 {
     return s << id.m_id;
 }
