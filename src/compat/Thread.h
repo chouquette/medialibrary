@@ -39,6 +39,7 @@ namespace this_thread = std::this_thread;
 #include <memory>
 #include <system_error>
 #include <unistd.h>
+#include <chrono>
 
 #ifdef _WIN32
 #include <windows.h>
