@@ -76,7 +76,8 @@ Connection::Handle Connection::handle()
      */
     std::unique_lock<compat::Mutex> lock( m_connMutex );
     auto it = m_conns.find( compat::this_thread::get_id() );
-    if ( it == end( m_conns ) )
+    if ( it != end( m_conns ) )
+        return it->second.get();
     {
         sqlite3* dbConnection;
         auto flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
@@ -134,7 +135,6 @@ Connection::Handle Connection::handle()
         static thread_local ThreadSpecificConnection tsc( shared_from_this() );
         return dbConnection;
     }
-    return it->second.get();
 }
 
 std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
