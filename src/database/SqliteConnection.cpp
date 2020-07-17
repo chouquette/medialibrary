@@ -152,7 +152,6 @@ Connection::WriteContext Connection::acquireWriteContext()
 
 void Connection::setPragma( Connection::Handle conn, const std::string& pragmaName,
                             const std::string& value )
-
 {
     std::string reqBase = std::string{ "PRAGMA " } + pragmaName;
     std::string reqSet = reqBase + " = " + value;
