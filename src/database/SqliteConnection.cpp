@@ -78,63 +78,61 @@ Connection::Handle Connection::handle()
     auto it = m_conns.find( compat::this_thread::get_id() );
     if ( it != end( m_conns ) )
         return it->second.get();
+    sqlite3* dbConnection;
+    auto flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
+    if ( m_conns.empty() == true )
+        flags |= SQLITE_OPEN_CREATE;
+    auto res = sqlite3_open_v2( m_dbPath.c_str(), &dbConnection, flags, nullptr );
+    ConnPtr dbConn( dbConnection, &sqlite3_close );
+    if ( res != SQLITE_OK )
     {
-        sqlite3* dbConnection;
-        auto flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
-        if ( m_conns.empty() == true )
-            flags |= SQLITE_OPEN_CREATE;
-        auto res = sqlite3_open_v2( m_dbPath.c_str(), &dbConnection, flags, nullptr );
-        ConnPtr dbConn( dbConnection, &sqlite3_close );
-        if ( res != SQLITE_OK )
-        {
-            int err = sqlite3_system_errno(dbConnection);
-            LOG_ERROR( "Failed to connect to database. OS error: ", err );
-            errors::mapToException( "<connecting to db>", "", res );
-        }
-        /*
-         * Fetch the absolute path to the database. If for whatever reason we were
-         * to change directories during the runtime, we'd end up having a connection
-         * to a different database in case the provided path is relative.
-         * See #262
-         */
-        if ( m_conns.empty() == true )
-        {
-            m_dbPath = sqlite3_db_filename( dbConnection, nullptr );
-            LOG_DEBUG( "Fetched absolute database path from sqlite: ", m_dbPath );
-        }
+        int err = sqlite3_system_errno(dbConnection);
+        LOG_ERROR( "Failed to connect to database. OS error: ", err );
+        errors::mapToException( "<connecting to db>", "", res );
+    }
+    /*
+     * Fetch the absolute path to the database. If for whatever reason we were
+     * to change directories during the runtime, we'd end up having a connection
+     * to a different database in case the provided path is relative.
+     * See #262
+     */
+    if ( m_conns.empty() == true )
+    {
+        m_dbPath = sqlite3_db_filename( dbConnection, nullptr );
+        LOG_DEBUG( "Fetched absolute database path from sqlite: ", m_dbPath );
+    }
 
-        res = sqlite3_extended_result_codes( dbConnection, 1 );
-        if ( res != SQLITE_OK )
-            errors::mapToException( "<enabling extended errors>", "", res );
-        // Don't use public wrapper, they need to be able to call getConn, which
-        // would result from a recursive call and a deadlock from here.
-        setPragma( dbConnection, "foreign_keys", "1" );
-        setPragma( dbConnection, "recursive_triggers", "1" );
+    res = sqlite3_extended_result_codes( dbConnection, 1 );
+    if ( res != SQLITE_OK )
+        errors::mapToException( "<enabling extended errors>", "", res );
+    // Don't use public wrapper, they need to be able to call getConn, which
+    // would result from a recursive call and a deadlock from here.
+    setPragma( dbConnection, "foreign_keys", "1" );
+    setPragma( dbConnection, "recursive_triggers", "1" );
 #ifdef __ANDROID__
-        // https://github.com/mozilla/mentat/issues/505
-        // Should solve `Failed to run request <DELETE FROM File WHERE id_file = ?>: disk I/O error(6410)`
-        setPragma( dbConnection, "temp_store", "2" );
+    // https://github.com/mozilla/mentat/issues/505
+    // Should solve `Failed to run request <DELETE FROM File WHERE id_file = ?>: disk I/O error(6410)`
+    setPragma( dbConnection, "temp_store", "2" );
 #endif
 #if DEBUG_SQLITE_TRIGGERS
-        sqlite3_trace_v2( dbConnection, SQLITE_TRACE_STMT | SQLITE_TRACE_CLOSE,
-                          [](unsigned int t, void* , void* p, void* x) {
-            if ( t == SQLITE_TRACE_STMT )
-            {
-                const char* str = static_cast<const char*>( x );
-                LOG_VERBOSE( "Executed: ", str );
-            }
-            else if ( t == SQLITE_TRACE_CLOSE )
-            {
-                LOG_VERBOSE( "Connection ", p, " was closed" );
-            }
-            return 0;
-        }, nullptr );
+    sqlite3_trace_v2( dbConnection, SQLITE_TRACE_STMT | SQLITE_TRACE_CLOSE,
+                      [](unsigned int t, void* , void* p, void* x) {
+        if ( t == SQLITE_TRACE_STMT )
+        {
+            const char* str = static_cast<const char*>( x );
+            LOG_VERBOSE( "Executed: ", str );
+        }
+        else if ( t == SQLITE_TRACE_CLOSE )
+        {
+            LOG_VERBOSE( "Connection ", p, " was closed" );
+        }
+        return 0;
+    }, nullptr );
 #endif
-        m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
-        sqlite3_update_hook( dbConnection, &updateHook, this );
-        static thread_local ThreadSpecificConnection tsc( shared_from_this() );
-        return dbConnection;
-    }
+    m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
+    sqlite3_update_hook( dbConnection, &updateHook, this );
+    static thread_local ThreadSpecificConnection tsc( shared_from_this() );
+    return dbConnection;
 }
 
 std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
