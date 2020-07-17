@@ -72,20 +72,6 @@ public:
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
-    /**
-     * @brief setForeignKeyEnabled Enables/disables foreign key for the sqlite
-     *        connection for the current thread.
-     *
-     * This will not change existing connection in other threads
-     */
-    void setForeignKeyEnabled( bool value );
-    /**
-     * @brief setRecursiveTriggersEnabled Enables/disables recursive trigger for
-     *          the connection for the current thread.
-     *
-     * This will not change existing connection in other threads
-     */
-    void setRecursiveTriggersEnabled( bool value );
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
     bool checkSchemaIntegrity();
@@ -106,6 +92,22 @@ private:
 
     void setPragma( Handle conn, const std::string& pragmaName,
                     const std::string& value );
+
+    /**
+     * @brief setForeignKeyEnabled Enables/disables foreign key for the sqlite
+     *        connection for the current thread.
+     *
+     * This will not change existing connection in other threads
+     */
+    void setForeignKeyEnabled( bool value );
+    /**
+     * @brief setRecursiveTriggersEnabled Enables/disables recursive trigger for
+     *          the connection for the current thread.
+     *
+     * This will not change existing connection in other threads
+     */
+    void setRecursiveTriggersEnabled( bool value );
+
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
     static void logCallback( void*, int c, const char* str );
