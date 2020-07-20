@@ -3,7 +3,7 @@ variables:
   MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20200625153341
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20200617113312
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20200617114747
-  VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20191204094457
+  VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20200529132440
 
 linux:
     image: $MEDIALIBRARY_IMG
