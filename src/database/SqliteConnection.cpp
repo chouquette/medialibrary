@@ -131,7 +131,14 @@ Connection::Handle Connection::handle()
 #endif
     m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
     sqlite3_update_hook( dbConnection, &updateHook, this );
+#if !defined(_WIN32) || defined(__clang__)
+    /*
+     * Thread local object with destructors don't behave properly when built
+     * with g++.
+     * See #264
+     */
     static thread_local ThreadSpecificConnection tsc( shared_from_this() );
+#endif
     return dbConnection;
 }
 
