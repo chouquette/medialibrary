@@ -52,7 +52,8 @@ private:
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                       std::shared_ptr<Folder> currentFolder,
                       const IInterruptProbe& interruptProbe,
-                      fs::IFileSystemFactory& fsFactory, bool newFolder ) const;
+                      fs::IFileSystemFactory& fsFactory, bool newFolder,
+                      bool rootFolder ) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                      std::shared_ptr<Folder> parentFolder,
                      const IInterruptProbe& interruptProbe ) const;
@@ -62,7 +63,8 @@ private:
     bool reloadFolder( std::shared_ptr<Folder> folder,
                        const IInterruptProbe& probe, fs::IFileSystemFactory& fsFactory );
     void checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
-                              fs::IFileSystemFactory& fsFactory, bool newFolder) const;
+                              fs::IFileSystemFactory& fsFactory, bool newFolder,
+                              bool rootFolder ) const;
 
 
 private:

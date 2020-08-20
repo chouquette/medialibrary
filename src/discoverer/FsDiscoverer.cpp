@@ -143,7 +143,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     try
     {
         checkFolder( std::move( directory ), std::move( f ), probe, fsFactory,
-                     false );
+                     false, true );
     }
     catch ( fs::errors::DeviceRemoved& )
     {
@@ -155,7 +155,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
 
 void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
                                         fs::IFileSystemFactory& fsFactory,
-                                        bool newFolder ) const
+                                        bool newFolder, bool rootFolder ) const
 {
     // Even when we're discovering a new folder, we want to rule out device removal as the cause of
     // an IO error. If this is the cause, simply abort the discovery. All the folder we have
@@ -265,7 +265,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                                 std::shared_ptr<Folder> currentFolder,
                                 const IInterruptProbe& interruptProbe,
                                 fs::IFileSystemFactory& fsFactory,
-                                bool newFolder ) const
+                                bool newFolder, bool rootFolder ) const
 {
     try
     {
@@ -334,7 +334,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             // In any case, check for modifications, as a change related to a mountpoint might
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
-            checkFolder( subFolder, folderInDb, interruptProbe, fsFactory, false );
+            checkFolder( subFolder, folderInDb, interruptProbe, fsFactory,
+                         false, false );
             subFoldersInDB.erase( it );
         }
         if ( m_probe->deleteUnseenFolders() == true )
@@ -353,7 +354,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     catch ( const fs::errors::System& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
-        checkRemovedDevices( *currentFolderFs, *currentFolder, fsFactory, newFolder );
+        checkRemovedDevices( *currentFolderFs, *currentFolder, fsFactory,
+                             newFolder, rootFolder );
         // If the device has indeed been removed, fs::errors::DeviceRemoved will
         // be thrown, otherwise, we just failed to browse that folder and will
         // have to try again later.
@@ -527,7 +529,8 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     if ( f == nullptr )
         return false;
     t->commit();
-    checkFolder( std::move( folder ), std::move( f ), interruptProbe, fsFactory, true );
+    checkFolder( std::move( folder ), std::move( f ), interruptProbe, fsFactory,
+                 true, true );
     return true;
 }
 
