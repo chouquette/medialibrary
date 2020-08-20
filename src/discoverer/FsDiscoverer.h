@@ -49,10 +49,6 @@ public:
                          const IInterruptProbe& interruptProbe ) override;
 
 private:
-    ///
-    /// \brief checkSubfolders
-    /// \return true if files in this folder needs to be listed, false otherwise
-    ///
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                       std::shared_ptr<Folder> currentFolder,
                       const IInterruptProbe& interruptProbe,
