@@ -181,6 +181,19 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder
         if ( device == nullptr || device->isPresent() == false )
             throw fs::errors::DeviceRemoved{};
         LOG_INFO( "Device was not removed" );
+
+        // When a network device gets detected, it may be unaccessible for a while
+        // which may cause the discovery to fail, but we don't want to remove the
+        // folder in this case. However if we are browsing a subfolder, it means
+        // the device is readable, and a folder not being found means it has
+        // been deleted, in which case we're fine with deleting the folder
+        // from the database
+        if ( rootFolder == true )
+        {
+            LOG_DEBUG( "The device is present but can be read from. "
+                       "Assuming it isn't ready yet" );
+            return;
+        }
     }
     // However if the device isn't removable, we want to:
     // - ignore it when we're discovering a new folder.
