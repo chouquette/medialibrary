@@ -7,11 +7,11 @@ variables:
 
 linux:
     image: $MEDIALIBRARY_IMG
-    only:
-      - merge_requests
-      - master@videolan/medialibrary
-    except:
-      - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
     tags:
       - docker
       - amd64
@@ -25,11 +25,11 @@ linux:
 
 win32:
     image: $MEDIALIBRARY_WIN32_IMG
-    only:
-      - merge_requests
-      - master@videolan/medialibrary
-    except:
-      - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
     tags:
       - docker
       - amd64
@@ -48,11 +48,11 @@ win32:
 
 win64:
     image: $MEDIALIBRARY_WIN64_IMG
-    only:
-      - merge_requests
-      - master@videolan/medialibrary
-    except:
-      - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
     tags:
       - docker
       - amd64
@@ -74,8 +74,10 @@ coverage:
     tags:
       - docker
       - amd64
-    only:
-        - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: on_success
+      - when: never
     script:
         - ./bootstrap
         - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
@@ -100,8 +102,10 @@ coverage:
 
 asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
-    only:
-      - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: on_success
+      - when: never
     tags:
       - docker
       - amd64
@@ -125,8 +129,10 @@ asan-ubsan:
 
 tsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
-    only:
-      - schedules
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: on_success
+      - when: never
     tags:
       - docker
       - amd64
