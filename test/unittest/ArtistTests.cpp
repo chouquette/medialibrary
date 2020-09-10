@@ -377,9 +377,13 @@ TEST_F( Artists, SortMediaByAlbum )
 {
     auto artist = ml->createArtist( "Russian Otters" );
 
+    /*
+     * Create 2 albums with the same name to ensure we're correctly grouping
+     * the tracks regardless of the album name
+     */
     std::shared_ptr<Album> albums[] = {
         std::static_pointer_cast<Album>( ml->createAlbum( "album1" ) ),
-        std::static_pointer_cast<Album>( ml->createAlbum( "album2" ) ),
+        std::static_pointer_cast<Album>( ml->createAlbum( "album1" ) ),
     };
     // Iterate by track first to interleave ids and ensure we're sorting correctly
     for (auto iTrack = 1; iTrack <= 2; ++iTrack)

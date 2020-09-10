@@ -139,9 +139,9 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     case SortingCriteria::Album:
     case SortingCriteria::Default:
         if ( desc == true )
-            orderBy += "alb.title DESC, atr.disc_number, atr.track_number";
+            orderBy += "alb.title DESC, alb.id_album DESC, atr.disc_number, atr.track_number";
         else
-            orderBy += "alb.title, atr.disc_number, atr.track_number";
+            orderBy += "alb.title, alb.id_album, atr.disc_number, atr.track_number";
         break;
     }
 
