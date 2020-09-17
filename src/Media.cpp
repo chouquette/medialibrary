@@ -1905,8 +1905,8 @@ bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
     // won't match for real_last_played_date < X
     // However we need to take care about media that were inserted but never played
     const std::string req = "DELETE FROM " + Media::Table::Name + " "
-            "WHERE ( real_last_played_date < ? OR "
-                "( real_last_played_date IS NULL AND insertion_date < ? ) )"
+            "WHERE ( last_played_date < ? OR "
+                "( last_played_date IS NULL AND insertion_date < ? ) )"
             "AND import_type != ? "
             "AND nb_playlists = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
