@@ -56,6 +56,7 @@ bool DebugVerbose = false;
     X("playlist_external_folder") \
     X("playlist_same_folder") \
     X("playlist_mixed_content") \
+    X("playlist_extended_m3u") \
     X("same_album_with_subfolder") \
     X("compilation_different_years") \
     X("tvshow") \

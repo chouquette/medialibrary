@@ -1,0 +1,12 @@
+{
+    "input": [
+        "playlist/extended_m3u"
+    ],
+    "expected": {
+        "nbPlaylists": 1,
+        "playlists": [{
+            "name": "My Playlist",
+            "nbItems": 3
+        }]
+    }
+}
