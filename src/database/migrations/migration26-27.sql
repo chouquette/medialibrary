@@ -82,8 +82,12 @@ MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 27 ),
     " AND type = 50 AND md.id_media = m.id_media "
 ")"
 #ifdef __ANDROID__
-" WHERE m.duration > 0",
+" WHERE m.duration > 0"
 #endif
+/* terminate the request, otherwise it will be concatenated with the next one
+ * see #270
+ */
+,
 
 #endif
 
