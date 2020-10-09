@@ -65,7 +65,7 @@ MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 27 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 27 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 27 ),
 
-#if defined(__ANDROID__) || (defined(__APPLE__) && defined(TARGET_OS_IPHONE))
+#if defined(__ANDROID__) || (defined(__APPLE__) && TARGET_OS_IPHONE)
 
 "UPDATE " + Media::Table::Name + " AS m SET progress = (" +
 
