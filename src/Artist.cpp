@@ -238,7 +238,7 @@ std::shared_ptr<Album> Artist::unknownAlbum()
         album = Album::createUnknownAlbum( m_ml, this );
         if ( album == nullptr )
             return nullptr;
-        m_nbAlbums = 1;
+        m_nbAlbums++;
     }
     return album;
 }
