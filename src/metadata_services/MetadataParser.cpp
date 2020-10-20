@@ -908,40 +908,12 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
     auto t = m_ml->getConn()->newTransaction();
 
-    if ( thumbnail != nullptr )
-    {
-        if ( thumbnail->id() == 0 )
-            thumbnail->insert();
-        // Don't rely on the same thumbnail as the one for the album, the
-        // user can always update the media specific thumbnail, and we don't
-        // want that to propagate to the album
-        media->setThumbnail( thumbnail );
-    }
     if ( album == nullptr )
     {
         const auto& albumName = item.meta( IItem::Metadata::Album );
         album = m_ml->createAlbum( albumName );
         if ( album == nullptr )
             return Status::Fatal;
-        if ( thumbnail != nullptr )
-            album->setThumbnail( thumbnail );
-    }
-    else if ( thumbnail != nullptr &&
-              album->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                ThumbnailStatus::Missing )
-    {
-        album->setThumbnail( thumbnail );
-        // Since we just assigned a thumbnail to the album, check if
-        // other tracks from this album require a thumbnail
-        for ( auto t : album->cachedTracks() )
-        {
-            if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                 ThumbnailStatus::Missing )
-            {
-                auto m = static_cast<Media*>( t.get() );
-                m->setThumbnail( thumbnail );
-            }
-        }
     }
 
     try
@@ -971,7 +943,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
         return Status::Completed;
     }
 
-    link( item, *album, artists.first, artists.second, thumbnail );
+    link( item, *album, artists.first, artists.second, newAlbum, thumbnail );
     media->save();
     t->commit();
 
@@ -1317,7 +1289,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
 
 void MetadataAnalyzer::link( IItem& item, Album& album,
                              std::shared_ptr<Artist> albumArtist,
-                             std::shared_ptr<Artist> artist,
+                             std::shared_ptr<Artist> artist, bool newAlbum,
                              std::shared_ptr<Thumbnail> mediaThumbnail )
 {
     Media& media = static_cast<Media&>( *item.media() );
@@ -1331,30 +1303,8 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
 
     if ( mediaThumbnail != nullptr )
     {
-        auto albumThumbnail = album.thumbnail( mediaThumbnail->sizeType() );
-
-        // We might modify albumArtist later, hence handle thumbnails before.
-        // If we have an albumArtist (meaning the track was properly tagged, we
-        // can assume this artist is a correct match. We can use the thumbnail from
-        // the current album for the albumArtist, if none has been set before.
-        // Although we don't want to do this for unknown/various artists, as the
-        // thumbnail wouldn't reflect those "special" artists
-        if ( albumArtist->id() != UnknownArtistID &&
-             albumArtist->id() != VariousArtistID &&
-             albumThumbnail != nullptr )
-        {
-            auto albumArtistThumbnail = albumArtist->thumbnail( mediaThumbnail->sizeType() );
-            // If the album artist has no thumbnail, let's assign it
-            if ( albumArtistThumbnail == nullptr )
-            {
-                albumArtist->setThumbnail( mediaThumbnail );
-            }
-            else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
-            {
-                // We only want to change the thumbnail if it was assigned from an
-                // album this artist was only featuring on
-            }
-        }
+        assignThumbnails( media, album, *albumArtist, newAlbum,
+                          std::move( mediaThumbnail ) );
     }
 
     albumArtist->addMedia( media );
@@ -1407,6 +1357,63 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
            static_cast<uint32_t>( discNumber ) > album.nbDiscs() ) )
     {
         album.setNbDiscs( std::max( discTotal, discNumber ) );
+    }
+}
+
+void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
+                                         Artist& albumArtist, bool newAlbum,
+                                         std::shared_ptr<Thumbnail> thumbnail )
+{
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( thumbnail != nullptr );
+
+    if ( thumbnail->id() == 0 )
+        thumbnail->insert();
+    // Don't rely on the same thumbnail as the one for the album, the
+    // user can always update the media specific thumbnail, and we don't
+    // want that to propagate to the album
+    media.setThumbnail( thumbnail );
+    if ( newAlbum == true )
+        album.setThumbnail( thumbnail );
+    else if ( album.thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                ThumbnailStatus::Missing )
+    {
+        album.setThumbnail( thumbnail );
+        // Since we just assigned a thumbnail to the album, check if
+        // other tracks from this album require a thumbnail
+        for ( auto t : album.cachedTracks() )
+        {
+            if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                 ThumbnailStatus::Missing )
+            {
+                auto m = static_cast<Media*>( t.get() );
+                m->setThumbnail( thumbnail );
+            }
+        }
+    }
+    auto albumThumbnail = album.thumbnail( thumbnail->sizeType() );
+
+    // We might modify albumArtist later, hence handle thumbnails before.
+    // If we have an albumArtist (meaning the track was properly tagged, we
+    // can assume this artist is a correct match. We can use the thumbnail from
+    // the current album for the albumArtist, if none has been set before.
+    // Although we don't want to do this for unknown/various artists, as the
+    // thumbnail wouldn't reflect those "special" artists
+    if ( albumArtist.id() != UnknownArtistID &&
+         albumArtist.id() != VariousArtistID &&
+         albumThumbnail != nullptr )
+    {
+        auto albumArtistThumbnail = albumArtist.thumbnail( thumbnail->sizeType() );
+        // If the album artist has no thumbnail, let's assign it
+        if ( albumArtistThumbnail == nullptr )
+        {
+            albumArtist.setThumbnail( thumbnail );
+        }
+        else if ( albumArtistThumbnail->origin() == Thumbnail::Origin::Artist )
+        {
+            // We only want to change the thumbnail if it was assigned from an
+            // album this artist was only featuring on
+        }
     }
 }
 

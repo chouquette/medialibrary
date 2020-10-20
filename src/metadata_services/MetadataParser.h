@@ -80,7 +80,11 @@ protected:
     std::shared_ptr<AlbumTrack> handleTrack( std::shared_ptr<Album> album, IItem& item,
                                              std::shared_ptr<Artist> artist, Genre* genre ) const;
     void link( IItem& item, Album& album, std::shared_ptr<Artist> albumArtist,
-               std::shared_ptr<Artist> artist, std::shared_ptr<Thumbnail> thumbnail );
+               std::shared_ptr<Artist> artist, bool newAlbum,
+               std::shared_ptr<Thumbnail> thumbnail );
+    void assignThumbnails( Media& media, Album &album,
+                           Artist& albumArtist, bool newAlbum,
+                           std::shared_ptr<Thumbnail> thumbnail );
     std::shared_ptr<Album> findAlbum( IItem& item, std::shared_ptr<Artist> albumArtist,
                                         std::shared_ptr<Artist> artist );
     std::shared_ptr<Genre> handleGenre( IItem& item ) const;
