@@ -871,6 +871,8 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     /*
      * Check for a cover file out of the transaction/retry scope
      * We only check for album artwork when the album is about to be created
+     * If a thumbnail needs to be inserted in database, this will be done later
+     * in the transaction scope
      */
     std::shared_ptr<Thumbnail> thumbnail;
 
@@ -903,10 +905,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
                                                      false );
         }
     }
-    /*
-     * In any case, we don't insert the thumbnail in DB yet, to process everything
-     * as part of the transaction
-     */
+
     auto t = m_ml->getConn()->newTransaction();
 
     if ( thumbnail != nullptr )
