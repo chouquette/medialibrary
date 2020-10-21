@@ -1028,14 +1028,9 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item, std::shared_ptr
                                                     std::shared_ptr<Artist> trackArtist )
 {
     const auto& albumName = item.meta( IItem::Metadata::Album );
+
     if ( albumName.empty() == true )
-    {
-        if ( albumArtist != nullptr )
-            return albumArtist->unknownAlbum();
-        if ( trackArtist != nullptr )
-            return trackArtist->unknownAlbum();
-        return m_unknownArtist->unknownAlbum();
-    }
+        return handleUnknownAlbum( albumArtist.get(), trackArtist.get() );
 
     auto file = static_cast<File*>( item.file().get() );
     if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
@@ -1188,6 +1183,16 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item, std::shared_ptr
     m_previousFolderId = file->folderId();
     m_previousAlbum = albums[0];
     return albums[0];
+}
+
+std::shared_ptr<Album>
+MetadataAnalyzer::handleUnknownAlbum( Artist* albumArtist, Artist* trackArtist )
+{
+    if ( albumArtist != nullptr )
+        return albumArtist->unknownAlbum();
+    if ( trackArtist != nullptr )
+        return trackArtist->unknownAlbum();
+    return m_unknownArtist->unknownAlbum();
 }
 
 ///
