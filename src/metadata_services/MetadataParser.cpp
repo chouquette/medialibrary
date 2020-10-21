@@ -930,7 +930,8 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
 
-    if ( thumbnail != nullptr && thumbnail->isOwned() == false )
+    if ( thumbnail != nullptr && thumbnail->id() != 0 &&
+         thumbnail->isOwned() == false )
     {
         assert( thumbnail->status() == ThumbnailStatus::Available );
         thumbnail->relocate();
