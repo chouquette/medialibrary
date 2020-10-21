@@ -64,7 +64,8 @@ bool DebugVerbose = false;
     X("media_groups") \
     X("attached_subs") \
     X("attached_audio") \
-    X_NO_WIN32("hidden")
+    X_NO_WIN32("hidden") \
+    X("thumbnail_sharing")
 
 
 #define REDUCED_TEST_CASE_LIST \

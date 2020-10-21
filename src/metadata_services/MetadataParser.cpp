@@ -1399,26 +1399,28 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
     // Don't rely on the same thumbnail as the one for the album, the
     // user can always update the media specific thumbnail, and we don't
     // want that to propagate to the album
-    media.setThumbnail( thumbnail );
-    if ( newAlbum == true )
-        album.setThumbnail( thumbnail );
-    else if ( album.thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                ThumbnailStatus::Missing )
+    if ( album.isUnknownAlbum() == false )
     {
-        album.setThumbnail( thumbnail );
-        // Since we just assigned a thumbnail to the album, check if
-        // other tracks from this album require a thumbnail
-        for ( auto t : album.cachedTracks() )
+        media.setThumbnail( thumbnail );
+        if ( newAlbum == true )
+            album.setThumbnail( thumbnail );
+        else if ( album.thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                    ThumbnailStatus::Missing )
         {
-            if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                 ThumbnailStatus::Missing )
+            album.setThumbnail( thumbnail );
+            // Since we just assigned a thumbnail to the album, check if
+            // other tracks from this album require a thumbnail
+            for ( auto t : album.cachedTracks() )
             {
-                auto m = static_cast<Media*>( t.get() );
-                m->setThumbnail( thumbnail );
+                if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+                     ThumbnailStatus::Missing )
+                {
+                    auto m = static_cast<Media*>( t.get() );
+                    m->setThumbnail( thumbnail );
+                }
             }
         }
     }
-    auto albumThumbnail = album.thumbnail( thumbnail->sizeType() );
 
     // We might modify albumArtist later, hence handle thumbnails before.
     // If we have an albumArtist (meaning the track was properly tagged, we
@@ -1427,8 +1429,7 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
     // Although we don't want to do this for unknown/various artists, as the
     // thumbnail wouldn't reflect those "special" artists
     if ( albumArtist.id() != UnknownArtistID &&
-         albumArtist.id() != VariousArtistID &&
-         albumThumbnail != nullptr )
+         albumArtist.id() != VariousArtistID )
     {
         auto albumArtistThumbnail = albumArtist.thumbnail( thumbnail->sizeType() );
         // If the album artist has no thumbnail, let's assign it

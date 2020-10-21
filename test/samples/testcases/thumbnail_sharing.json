@@ -1,0 +1,101 @@
+{
+    "input": [
+        "music/thumbnail_sharing"
+    ],
+    "expected": {
+        "nbAudios": 8,
+        "nbVideos": 0,
+        "nbThumbnails": 3,
+        "comment": "We have 4 albums:",
+        "comment": "- Known artist (1) / known album",
+        "comment": "Any cover can be shared across album/artist/media",
+
+        "comment": "- Known artist (2) / unknown album",
+        "comment": "The cover can be assigned to the artist, but not the album",
+
+        "comment": "- Unknown artist / unknown album",
+        "comment": "nothing is shared and no thumbnail should be assigned to anything",
+
+        "comment": "- Unknown artist / known album",
+        "comment": "A thumbnail can be assigned to the album, but not to the artist",
+        "albums": [
+            {
+                "title": "album",
+                "artist": "artist 1",
+                "hasArtwork": true,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": true
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": true
+                    }
+                ]
+            },
+            {
+                "title": "",
+                "artist": "artist 2",
+                "hasArtwork": false,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": false
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": false
+                    }
+                ]
+            },
+            {
+                "title": "",
+                "artist": "",
+                "hasArtwork": false,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": false
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": false
+                    }
+                ]
+            },
+            {
+                "title": "Known album",
+                "artist": "",
+                "hasArtwork": true,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": true
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": true
+                    }
+                ]
+            }
+        ],
+        "artists": [
+            {
+                "name": "artist 1",
+                "hasArtwork": true,
+                "nbAlbums": 1
+            },
+            {
+                "name": "artist 2",
+                "hasArtwork": true,
+                "nbAlbums": 1
+            },
+            {
+                "id": 1,
+                "nbAlbum": 2,
+                "hasArtwork": false
+            }
+        ]
+    }
+}
