@@ -82,6 +82,7 @@ protected:
     void link( IItem& item, Album& album, std::shared_ptr<Artist> albumArtist,
                std::shared_ptr<Artist> artist, bool newAlbum,
                std::shared_ptr<Thumbnail> thumbnail );
+    std::shared_ptr<Thumbnail> fetchThumbnail( IItem& item, Album* album );
     void assignThumbnails( Media& media, Album &album,
                            Artist& albumArtist, bool newAlbum,
                            std::shared_ptr<Thumbnail> thumbnail );

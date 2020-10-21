@@ -880,37 +880,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
      * If a thumbnail needs to be inserted in database, this will be done later
      * in the transaction scope
      */
-    std::shared_ptr<Thumbnail> thumbnail;
-
-    /* First, let's try to find a cover file if this is a new album */
-    if ( newAlbum == true )
-    {
-        thumbnail = findAlbumArtwork( item );
-    }
-    else
-    {
-        /*
-         * If this is not a new album, it might have been assigned a thumbnail
-         * already.
-         */
-        thumbnail = album->thumbnail( ThumbnailSizeType::Thumbnail );
-    }
-    if ( thumbnail == nullptr )
-    {
-        /* If we haven't find any thumbnail yet, let's check for embedded cover */
-        auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
-        if ( artworkMrl.empty() == false )
-        {
-            // If this task is a refresh task, we already dropped the thumbnail
-            // in case we had an artwork mrl.
-            // If this is a new media, we won't have a thumbnail at all
-            assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
-            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                     Thumbnail::Origin::Media,
-                                                     ThumbnailSizeType::Thumbnail,
-                                                     false );
-        }
-    }
+    auto thumbnail = fetchThumbnail( item, album.get() );
 
     auto t = m_ml->getConn()->newTransaction();
 
@@ -1378,6 +1348,44 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
     {
         album.setNbDiscs( std::max( discTotal, discNumber ) );
     }
+}
+
+std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
+                                                             Album* album )
+{
+    /* First, let's try to find a cover file if this is a new album */
+    std::shared_ptr<Thumbnail> thumbnail;
+    if ( album == nullptr )
+    {
+        thumbnail = findAlbumArtwork( item );
+    }
+    else
+    {
+        /*
+         * If this is not a new album, it might have been assigned a thumbnail
+         * already.
+         */
+        thumbnail = album->thumbnail( ThumbnailSizeType::Thumbnail );
+    }
+    if ( thumbnail == nullptr )
+    {
+        /* If we haven't find any thumbnail yet, let's check for embedded cover */
+        auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
+        if ( artworkMrl.empty() == false )
+        {
+            auto media = static_cast<Media*>( item.media().get() );
+
+            // If this task is a refresh task, we already dropped the thumbnail
+            // in case we had an artwork mrl.
+            // If this is a new media, we won't have a thumbnail at all
+            assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
+            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
+                                                     Thumbnail::Origin::Media,
+                                                     ThumbnailSizeType::Thumbnail,
+                                                     false );
+        }
+    }
+    return thumbnail;
 }
 
 void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
