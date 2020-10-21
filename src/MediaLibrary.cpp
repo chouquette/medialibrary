@@ -1400,6 +1400,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 needRescan = true;
                 previousVersion = 27;
             }
+            if ( previousVersion == 27 )
+            {
+                migrateModel27to28();
+                previousVersion = 28;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -2119,6 +2124,26 @@ void MediaLibrary::migrateModel26to27()
     m_settings.load();
 
     m_settings.setDbModelVersion( 27 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel27to28()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration27-28.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
+    Settings::createTable( dbConn );
+    m_settings.load();
+
+    m_settings.setDbModelVersion( 28 );
     t->commit();
 }
 
