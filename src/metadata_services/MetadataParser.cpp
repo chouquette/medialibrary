@@ -1395,8 +1395,6 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
     assert( sqlite::Transaction::transactionInProgress() == true );
     assert( thumbnail != nullptr );
 
-    if ( thumbnail->id() == 0 )
-        thumbnail->insert();
     // Don't rely on the same thumbnail as the one for the album, the
     // user can always update the media specific thumbnail, and we don't
     // want that to propagate to the album
