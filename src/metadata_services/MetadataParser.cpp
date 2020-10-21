@@ -916,8 +916,10 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
     if ( album == nullptr )
     {
-        const auto& albumName = item.meta( IItem::Metadata::Album );
-        album = m_ml->createAlbum( albumName );
+        if ( albumName.empty() == false )
+            album = m_ml->createAlbum( albumName );
+        else
+            album = createUnknownAlbum( artists.first.get(), artists.second.get() );
         if ( album == nullptr )
             return Status::Fatal;
     }
@@ -1197,6 +1199,15 @@ MetadataAnalyzer::handleUnknownAlbum( Artist* albumArtist, Artist* trackArtist )
     if ( trackArtist != nullptr )
         return trackArtist->unknownAlbum();
     return m_unknownArtist->unknownAlbum();
+}
+
+std::shared_ptr<Album> MetadataAnalyzer::createUnknownAlbum(Artist* albumArtist, Artist* trackArtist)
+{
+    if ( albumArtist != nullptr )
+        return albumArtist->createUnknownAlbum();
+    if ( trackArtist != nullptr )
+        return trackArtist->createUnknownAlbum();
+    return m_unknownArtist->createUnknownAlbum();
 }
 
 ///

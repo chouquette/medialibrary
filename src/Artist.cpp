@@ -232,15 +232,16 @@ std::shared_ptr<Album> Artist::unknownAlbum()
 {
     static const std::string req = "SELECT * FROM " + Album::Table::Name +
                         " WHERE artist_id = ? AND title IS NULL";
-    auto album = Album::fetch( m_ml, req, m_id );
-    if ( album == nullptr )
-    {
-        album = Album::createUnknownAlbum( m_ml, this );
-        if ( album == nullptr )
-            return nullptr;
-        m_nbAlbums++;
-    }
-    return album;
+    return Album::fetch( m_ml, req, m_id );
+}
+
+std::shared_ptr<Album> Artist::createUnknownAlbum()
+{
+    auto alb = Album::createUnknownAlbum( m_ml, this );
+    if ( alb == nullptr )
+        return nullptr;
+    m_nbAlbums++;
+    return alb;
 }
 
 const std::string& Artist::musicBrainzId() const

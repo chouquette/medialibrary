@@ -101,6 +101,7 @@ public:
     virtual bool setThumbnail( const std::string& thumbnailMrl,
                                ThumbnailSizeType sizeType  ) override;
     std::shared_ptr<Album> unknownAlbum();
+    std::shared_ptr<Album> createUnknownAlbum();
     virtual const std::string& musicBrainzId() const override;
     bool setMusicBrainzId( const std::string& musicBrainzId );
     virtual unsigned int nbAlbums() const override;

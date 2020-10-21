@@ -241,7 +241,11 @@ TEST_F( Artists, UnknownAlbum )
 {
     auto a = ml->createArtist( "Explotters in the sky" );
     auto album = a->unknownAlbum();
+    ASSERT_EQ( nullptr, album );
+    album = a->createUnknownAlbum();
+
     auto album2 = a->unknownAlbum();
+    ASSERT_NE( nullptr, album );
 
     ASSERT_NE( nullptr, album );
     ASSERT_NE( nullptr, album2 );
