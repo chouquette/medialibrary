@@ -865,7 +865,13 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     auto artists = findOrCreateArtist( item );
     if ( artists.first == nullptr && artists.second == nullptr )
         return Status::Fatal;
-    auto album = findAlbum( item, artists.first, artists.second );
+    const auto& albumName = item.meta( IItem::Metadata::Album );
+
+    std::shared_ptr<Album> album;
+    if ( albumName.empty() == false )
+        album = findAlbum( item, albumName, artists.first, artists.second );
+    else
+        album = handleUnknownAlbum( artists.first.get(), artists.second.get() );
     auto newAlbum = album == nullptr;
 
     /*
@@ -1024,14 +1030,12 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item ) const
 
 /* Album handling */
 
-std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item, std::shared_ptr<Artist> albumArtist,
+std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
+                                                    const std::string& albumName,
+                                                    std::shared_ptr<Artist> albumArtist,
                                                     std::shared_ptr<Artist> trackArtist )
 {
-    const auto& albumName = item.meta( IItem::Metadata::Album );
-
-    if ( albumName.empty() == true )
-        return handleUnknownAlbum( albumArtist.get(), trackArtist.get() );
-
+    assert( albumName.empty() == false );
     auto file = static_cast<File*>( item.file().get() );
     if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
          m_previousFolderId != 0 && file->folderId() == m_previousFolderId )
