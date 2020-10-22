@@ -168,6 +168,15 @@ public:
     uint32_t nbAttempts() const;
 
     /**
+     * @brief hash returns this thumbnail sha1
+     */
+    const std::string& hash() const;
+    /**
+     * @brief fileSize Returns this thumbnail size on disk, in bytes
+     */
+    uint64_t fileSize() const;
+
+    /**
      * @brief relocate Moves the file associated with the thumbnail to the dedicated
      * media library folder.
      *
@@ -272,6 +281,8 @@ private:
     uint32_t m_nbAttempts;
     bool m_isOwned;
     uint32_t m_sharedCounter;
+    uint64_t m_fileSize;
+    std::string m_hash;
 
     friend Thumbnail::Table;
 };
