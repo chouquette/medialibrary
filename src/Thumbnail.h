@@ -94,7 +94,7 @@ public:
      * thumbnail they link to will be updated), this must return true.
      * If the user wishes to keep the previous thumbnail for other entities
      * linking to it, they should return false. In which case, the new thumbnail
-     * will be inserted if requred, and a new linking record will be inserted
+     * will be inserted if required, and a new linking record will be inserted
      * to link the new thumbnail with the updated entity
      */
     using ShouldUpdateCb = bool( const Thumbnail& currentThumbnail );
