@@ -306,8 +306,6 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
      * know if we should replace the thumbnail itself, causing all other
      * entities using that thumbnail to use the new version, or insert it as a
      * new thumbnail and link the targeted entity with it.
-     *
-     *
      */
     if ( oldThumbnail == nullptr )
     {
