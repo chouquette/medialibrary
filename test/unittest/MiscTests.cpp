@@ -31,6 +31,7 @@
 #include "database/SqliteConnection.h"
 #include "utils/Strings.h"
 #include "utils/Defer.h"
+#include "utils/Md5.h"
 
 #include "Artist.h"
 #include "Media.h"
@@ -260,6 +261,19 @@ TEST_F( Misc, Defer )
     }
     ASSERT_TRUE( set );
     ASSERT_EQ( 1u, i );
+}
+
+TEST_F( Misc, Md5Buffer )
+{
+    ASSERT_EQ( "F96B697D7CB7938D525A2F31AAF161D0",
+               utils::Md5Hasher::fromBuff( (const uint8_t*)"message digest",
+                                                strlen( "message digest" ) ) );
+}
+
+TEST_F( Misc, Md5File )
+{
+    ASSERT_EQ( "5BF2922FB1FF5800D533AE34785953F1",
+               utils::Md5Hasher::fromFile( SRC_DIR "/test/unittest/md5_input.bin" ) );
 }
 
 class MiscDb : public Tests
