@@ -42,6 +42,7 @@ namespace fs
  */
 bool copy( const std::string& from, const std::string& to );
 bool remove( const std::string& path );
+uint64_t fileSize( const std::string& path );
 
 }
 

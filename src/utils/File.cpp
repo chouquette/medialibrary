@@ -26,10 +26,14 @@
 
 #include "File.h"
 
+#include "medialibrary/filesystem/Errors.h"
+
 #include <memory>
 #include <cstdio>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 namespace medialibrary
 {
@@ -89,6 +93,17 @@ bool copy( const std::string& from, const std::string& to )
 bool remove( const std::string& path )
 {
     return unlink( path.c_str() ) == 0;
+}
+
+uint64_t fileSize( const std::string& path )
+{
+    struct stat s;
+    if ( stat( path.c_str(), &s ) != 0 )
+    {
+        throw ::medialibrary::fs::errors::Exception{ std::string{
+            "Failed to compute file size for " + path } };
+    }
+    return s.st_size;
 }
 
 }
