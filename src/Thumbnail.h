@@ -177,6 +177,13 @@ public:
     uint64_t fileSize() const;
 
     /**
+     * @brief setHash Sets the thumbnail hash & file size
+     * @param hash A hash of this thumbnail file
+     * @param fileSize The file size
+     */
+    void setHash( std::string hash, uint64_t fileSize );
+
+    /**
      * @brief relocate Moves the file associated with the thumbnail to the dedicated
      * media library folder.
      *

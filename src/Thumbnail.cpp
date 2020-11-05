@@ -251,6 +251,19 @@ uint64_t Thumbnail::fileSize() const
     return m_fileSize;
 }
 
+void Thumbnail::setHash( std::string hash, uint64_t fileSize )
+{
+    /*
+     * We expect this to be called only before insertion and do not support
+     * updating the hash at a later time
+     */
+    assert( m_id == 0 );
+    /* We also don't care about thumbnail hash for anything not embedded in a media */
+    assert( m_origin == Origin::Media );
+    m_hash = hash;
+    m_fileSize = fileSize;
+}
+
 void Thumbnail::relocate()
 {
     // There is no point in relocating a failure record.
@@ -740,10 +753,10 @@ int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );
     static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
-            "(mrl, status, is_owned) VALUES(?, ?, ?)";
+            "(mrl, status, is_owned, file_size, hash) VALUES(?, ?, ?, ?, ?)";
     auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
                             m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
-                            m_status, m_isOwned );
+                            m_status, m_isOwned, m_fileSize, m_hash );
     if ( pKey == 0 )
         return 0;
     m_id = pKey;
