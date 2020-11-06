@@ -27,6 +27,11 @@
 namespace medialibrary
 {
 
+namespace parser
+{
+class IEmbeddedThumbnail;
+}
+
 class Thumbnail : public DatabaseHelpers<Thumbnail>
 {
 public:
@@ -124,6 +129,17 @@ public:
      * @param sizeType The thumbnail size type
      */
     Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status, Origin origin,
+               ThumbnailSizeType sizeType );
+
+    /**
+     * @brief Thumbnail Builds a thumbnail that represents an embedded artwork
+     * @param ml A pointer to the media library instance
+     * @param e An instance of an embedded thumbnail
+     * @param sizeType The thumbnail size type
+     *
+     * This assumes that the origin is Origin::Media
+     */
+    Thumbnail( MediaLibraryPtr ml, std::shared_ptr<parser::IEmbeddedThumbnail> e,
                ThumbnailSizeType sizeType );
 
     int64_t id() const;
@@ -290,6 +306,7 @@ private:
     uint32_t m_sharedCounter;
     uint64_t m_fileSize;
     std::string m_hash;
+    std::shared_ptr<parser::IEmbeddedThumbnail> m_embeddedThumbnail;
 
     friend Thumbnail::Table;
 };

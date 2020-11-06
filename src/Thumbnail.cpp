@@ -32,6 +32,7 @@
 #include "Artist.h"
 #include "Media.h"
 #include "medialibrary/filesystem/Errors.h"
+#include "medialibrary/parser/IItem.h"
 
 namespace medialibrary
 {
@@ -105,6 +106,23 @@ Thumbnail::Thumbnail( MediaLibraryPtr ml, ThumbnailStatus status,
             m_status != ThumbnailStatus::Missing );
 }
 
+Thumbnail::Thumbnail( MediaLibraryPtr ml,
+                      std::shared_ptr<parser::IEmbeddedThumbnail> embeddedThumb,
+                      ThumbnailSizeType sizeType )
+    : m_ml( ml )
+    , m_id( 0 )
+    , m_origin( Origin::Media )
+    , m_sizeType( sizeType )
+    , m_status( ThumbnailStatus::Available )
+    , m_nbAttempts( 0 )
+    , m_isOwned( false )
+    , m_sharedCounter( 0 )
+    , m_fileSize( embeddedThumb->size() )
+    , m_embeddedThumbnail( std::move( embeddedThumb ) )
+{
+
+}
+
 int64_t Thumbnail::id() const
 {
     return m_id;
@@ -113,6 +131,11 @@ int64_t Thumbnail::id() const
 const std::string& Thumbnail::mrl() const
 {
     assert( status() == ThumbnailStatus::Available  );
+    /*
+     * As long as we're manipulating an embedded thumbnail, it is not saved on
+     * disk and has no mrl
+     */
+    assert( m_embeddedThumbnail == nullptr );
     return m_mrl;
 }
 
@@ -268,6 +291,9 @@ void Thumbnail::relocate()
 {
     // There is no point in relocating a failure record.
     assert( status() == ThumbnailStatus::Available );
+    assert( m_id != 0 );
+    assert( m_embeddedThumbnail == nullptr );
+    assert( m_isOwned == false );
 
     auto originalMrl = m_mrl;
     auto destPath = m_ml->thumbnailPath() +
@@ -760,6 +786,16 @@ int64_t Thumbnail::insert()
     if ( pKey == 0 )
         return 0;
     m_id = pKey;
+    if ( m_embeddedThumbnail != nullptr )
+    {
+        auto destPath = m_ml->thumbnailPath() +
+                        std::to_string( m_id ) + "." +
+                        m_embeddedThumbnail->extension();
+        LOG_DEBUG( "Saving embedded thumbnail to ", destPath );
+        m_embeddedThumbnail->save( destPath );
+        update( utils::file::toMrl( destPath ), true );
+        m_embeddedThumbnail = nullptr;
+    }
     return m_id;
 }
 
