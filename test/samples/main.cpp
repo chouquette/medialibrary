@@ -29,6 +29,7 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
+#include <vlcpp/vlc.hpp>
 
 static std::string TestDirectory = SRC_DIR "/test/samples/";
 static std::string ForcedTestDirectory;
@@ -65,7 +66,8 @@ bool DebugVerbose = false;
     X("attached_subs") \
     X("attached_audio") \
     X_NO_WIN32("hidden") \
-    X("thumbnail_sharing")
+    X_NO_VLC30("thumbnail_sharing") \
+    X_NO_VLC30("thumbnail_embedded_sharing")
 
 
 #define REDUCED_TEST_CASE_LIST \
@@ -79,6 +81,12 @@ static std::tuple<std::string, bool> testCases[] = {
 #else
     #define X_NO_WIN32(val)
 #endif
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    #define X_NO_VLC30(val) X(val)
+#else
+    #define X_NO_VLC30(val)
+#endif
+
     TEST_CASE_LIST
     #undef X
     #define X(TESTCASE) std::make_tuple( TESTCASE, true ),

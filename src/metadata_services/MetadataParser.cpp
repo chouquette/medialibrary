@@ -40,6 +40,7 @@
 #include "ShowEpisode.h"
 #include "Movie.h"
 #include "utils/Directory.h"
+#include "utils/File.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/ModificationsNotifier.h"
@@ -1354,39 +1355,37 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
 std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
                                                              Album* album )
 {
-    /* First, let's try to find a cover file if this is a new album */
     std::shared_ptr<Thumbnail> thumbnail;
-    if ( album == nullptr )
-    {
-        thumbnail = findAlbumArtwork( item );
-    }
-    else
+
+    /* First, probe the media for an embedded thumbnail */
+    const auto& embeddedThumbnails = item.embeddedThumbnails();
+    if ( embeddedThumbnails.empty() == false )
     {
         /*
-         * If this is not a new album, it might have been assigned a thumbnail
-         * already.
+         * If we have an embedded thumbnail, we need to compute its hash in any
+         * case. Either we'll be storing it for the first time, or we need to
+         * be able to compare it later.
          */
-        thumbnail = album->thumbnail( ThumbnailSizeType::Thumbnail );
-    }
-    if ( thumbnail == nullptr )
-    {
-        /* If we haven't find any thumbnail yet, let's check for embedded cover */
-        auto artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
-        if ( artworkMrl.empty() == false )
-        {
-            auto media = static_cast<Media*>( item.media().get() );
+        thumbnail = std::make_shared<Thumbnail>( m_ml, embeddedThumbnails[0],
+                ThumbnailSizeType::Thumbnail );
 
-            // If this task is a refresh task, we already dropped the thumbnail
-            // in case we had an artwork mrl.
-            // If this is a new media, we won't have a thumbnail at all
-            assert( media->thumbnail( ThumbnailSizeType::Thumbnail ) == nullptr );
-            thumbnail = std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                                     Thumbnail::Origin::Media,
-                                                     ThumbnailSizeType::Thumbnail,
-                                                     false );
-        }
+        auto fileSize = embeddedThumbnails[0]->size();
+        thumbnail->setHash( embeddedThumbnails[0]->hash(), fileSize );
+        return thumbnail;
     }
-    return thumbnail;
+    /*
+     * If the album wasn't already created and we have an embedded thumbnail
+     * we don't need to verify anything else, just use that embedded thumbnail.
+     * If we didn't find an embedded thumbnail, let's check the folder for a
+     * cover file.
+     */
+    if ( album == nullptr )
+    {
+        if ( thumbnail != nullptr )
+            return thumbnail;
+        return findAlbumArtwork( item );
+    }
+    return album->thumbnail( ThumbnailSizeType::Thumbnail );
 }
 
 void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
@@ -1395,18 +1394,35 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
     assert( thumbnail != nullptr );
+    assert( thumbnail->origin() == Thumbnail::Origin::Media ||
+            thumbnail->origin() == Thumbnail::Origin::CoverFile );
 
-    if ( album.isUnknownAlbum() == false )
+    /* We need to assign a thumbnail to the media, album, and artist.
+     * The thumbnail we are assigning either comes from an embedded artwork, or
+     * a file in the album folder.
+     * If it is an embedded file, it might be identical to the one already
+     * assigned to the album, in which case we need to share it.
+     * There might also be only a single file with embedded artwork in the
+     * album, in which case we should override the album thumbnail with the
+     * embedded one, as it's more likely to be relevant
+     */
+    if ( newAlbum == true && album.isUnknownAlbum() == false )
     {
+        album.setThumbnail( thumbnail );
         media.setThumbnail( thumbnail );
-        if ( newAlbum == true )
-            album.setThumbnail( thumbnail );
-        else if ( album.thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
-                    ThumbnailStatus::Missing )
+    }
+    else if ( album.isUnknownAlbum() == false )
+    {
+        assert( newAlbum == false );
+        auto albumThumbnail = album.thumbnail( ThumbnailSizeType::Thumbnail );
+        /* If the album has no thumbnail, we just need to assign one */
+        if ( albumThumbnail == nullptr )
         {
             album.setThumbnail( thumbnail );
-            // Since we just assigned a thumbnail to the album, check if
-            // other tracks from this album require a thumbnail
+            /*
+             * Since we just assigned a thumbnail to the album, check if
+             * other tracks from this album require a thumbnail
+             */
             for ( auto t : album.cachedTracks() )
             {
                 if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
@@ -1417,6 +1433,75 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
                 }
             }
         }
+        /*
+         * If it already has a thumbnail, we need to check if the new one is a
+         * better choice.
+         * This can only happen if the thumbnail is embedded, if it comes from
+         * a cover file, it was already assigned
+         */
+        else if ( thumbnail->origin() == Thumbnail::Origin::Media )
+        {
+            switch ( albumThumbnail->origin() )
+            {
+                /* If the cover was user provided, we must not override it. */
+                case Thumbnail::Origin::UserProvided:
+                    media.setThumbnail( thumbnail );
+                    break;
+                /*
+                 * If we assigned the album with a thumbnail found in the album
+                 * folder, we can favor the embedded one directly as it's less
+                 * error prone.
+                 * If we got this cover from the artist, use the newly found
+                 * media one since it's most likely to be more relevant.
+                 */
+                case Thumbnail::Origin::CoverFile:
+                case Thumbnail::Origin::AlbumArtist:
+                case Thumbnail::Origin::Artist:
+                    album.setThumbnail( thumbnail );
+                    media.setThumbnail( thumbnail );
+                    break;
+                case Thumbnail::Origin::Media:
+                {
+                    if ( albumThumbnail->fileSize() != thumbnail->fileSize() ||
+                         albumThumbnail->hash() != thumbnail->hash() )
+                    {
+                        /* We already had a cover from the album, coming from an
+                         * embedded file and the new embedded file differs.
+                         * Just keep the previous album cover, and assign the
+                         * new embedded cover to the media
+                         */
+                        media.setThumbnail( thumbnail );
+                    }
+                    else
+                    {
+                        /* We have a new embedded cover that is identical to the
+                         * new one: just share the previous one.
+                         */
+                        media.setThumbnail( albumThumbnail );
+                    }
+                    break;
+                }
+                default:
+                    assert( !"Invalid thumbnail origin" );
+            }
+        }
+        else
+        {
+            /* The cover comes from the album cover: share the album one */
+            media.setThumbnail( albumThumbnail );
+        }
+    }
+    else
+    {
+        assert( album.isUnknownAlbum() == true );
+        /*
+         * If the album is unknown and the cover came from the media, assign it
+         * otherwise don't assign anything since it can be a large folder with
+         * a lot of music, we don't want to use an image file that would lie
+         * there while being unrelated to the various tracks in it
+         */
+        if ( thumbnail->origin() == Thumbnail::Origin::Media )
+            media.setThumbnail( thumbnail );
     }
 
     // We might modify albumArtist later, hence handle thumbnails before.

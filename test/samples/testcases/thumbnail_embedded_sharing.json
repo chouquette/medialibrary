@@ -1,0 +1,55 @@
+{
+    "input": [
+        "music/thumbnail_embedded_sharing"
+    ],
+    "expected": {
+        "nbAudios": 4,
+        "nbVideos": 0,
+        "nbThumbnails": 3,
+
+        "albums": [
+            {
+                "title": "album",
+                "artist": "artist 1",
+                "hasArtwork": true,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": true
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": true
+                    }
+                ]
+            },
+            {
+                "title": "album 2",
+                "artist": "artist 2",
+                "hasArtwork": true,
+                "tracks": [
+                    {
+                        "title": "Track 1",
+                        "hasArtwork": true
+                    },
+                    {
+                        "title": "Track 2",
+                        "hasArtwork": true
+                    }
+                ]
+            }
+        ],
+        "artists": [
+            {
+                "name": "artist 1",
+                "hasArtwork": true,
+                "nbAlbums": 1
+            },
+            {
+                "name": "artist 2",
+                "hasArtwork": true,
+                "nbAlbums": 1
+            }
+        ]
+    }
+}
