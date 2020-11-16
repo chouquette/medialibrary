@@ -649,9 +649,9 @@ MediaPtr MediaLibrary::media( const std::string& mrl ) const
     return file->media();
 }
 
-MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl )
+MediaPtr MediaLibrary::addExternalMedia( const std::string& mrl, int64_t duration )
 {
-    return Media::createExternal( this, mrl );
+    return Media::createExternal( this, mrl, duration );
 }
 
 MediaPtr MediaLibrary::addStream( const std::string& mrl )

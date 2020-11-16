@@ -266,7 +266,7 @@ TEST_P( ReducedTests, OverrideExternalMedia )
             auto ext = utils::file::extension( f->mrl() );
             if ( m_ml->isMediaExtensionSupported( ext.c_str() ) == false )
                 continue;
-            auto media = m_ml->addExternalMedia( f->mrl() );
+            auto media = m_ml->addExternalMedia( f->mrl(), -1 );
             ASSERT_NE( nullptr, media );
             ASSERT_TRUE( media->isExternalMedia() );
             ASSERT_EQ( -1, media->duration() );

@@ -107,14 +107,16 @@ class Media : public IMedia,
         Media( MediaLibraryPtr ml, const std::string& title, Type type,
                int64_t duration, int64_t deviceId, int64_t folderId );
 
-        Media( MediaLibraryPtr ml, const std::string& fileName, ImportType type );
+        Media( MediaLibraryPtr ml, const std::string& fileName, ImportType type,
+               int64_t duration );
 
         static std::shared_ptr<Media> create( MediaLibraryPtr ml, Type type,
                                               int64_t deviceId, int64_t folderId,
                                               const std::string& fileName,
                                               int64_t duration );
         static std::shared_ptr<Media> createExternal( MediaLibraryPtr ml,
-                                                      const std::string& fileName );
+                                                      const std::string& fileName,
+                                                      int64_t duration );
         static std::shared_ptr<Media> createStream( MediaLibraryPtr ml,
                                                     const std::string& fileName );
         static void createTable( sqlite::Connection* connection );
@@ -323,7 +325,8 @@ private:
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
                                                            const std::string& mrl,
-                                                           ImportType importType );
+                                                           ImportType importType,
+                                                           int64_t duration );
         std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
 
         /*

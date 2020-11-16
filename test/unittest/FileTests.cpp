@@ -140,7 +140,7 @@ TEST_F( Files, SetMediaId )
 
 TEST_F( Files, ByMrlNetwork )
 {
-    auto m1 = Media::createExternal( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    auto m1 = Media::createExternal( ml.get(), "smb://1.2.3.4/path/to/file.mkv", -1 );
     ASSERT_NE( nullptr, m1 );
     auto f1 = File::fromExternalMrl( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
     ASSERT_NE( nullptr, f1 );

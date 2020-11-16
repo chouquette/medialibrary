@@ -332,7 +332,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         // subitem, ie. the playlist item we're adding.
         if ( File::exists( m_ml, mrl ) == false )
         {
-            auto externalMedia = Media::createExternal( m_ml, mrl );
+            auto externalMedia = Media::createExternal( m_ml, mrl, -1 );
             if ( externalMedia == nullptr )
             {
                 LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );

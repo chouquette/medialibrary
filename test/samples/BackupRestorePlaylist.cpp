@@ -103,7 +103,7 @@ TEST_F( MiscTests, ExportRestorePlaylist )
     auto pl1 = std::static_pointer_cast<Playlist>( m_ml->createPlaylist( "Exported Playlist 1" ) );
     auto m1 = media[0];
     auto m2 = media[1];
-    auto m3 = m_ml->addExternalMedia( "http://example.org/sea&otter.avi" );
+    auto m3 = m_ml->addExternalMedia( "http://example.org/sea&otter.avi", -1 );
     pl1->append( *m1 );
     pl1->append( *m2 );
     pl1->append( *m3 );

@@ -383,6 +383,7 @@ public:
     /**
      * @brief addExternalMedia Adds an external media to the list of known media
      * @param mrl This media MRL
+     * @param duration A duration for this media (values <= 0 are ignored)
      *
      * Once created, this media can be used just like any other media, except
      * it won't have a subType, and won't be analyzed to extract tracks and
@@ -392,7 +393,7 @@ public:
      *
      * The media can be fetched using media( std::string ) afterward.
      */
-    virtual MediaPtr addExternalMedia( const std::string& mrl ) = 0;
+    virtual MediaPtr addExternalMedia( const std::string& mrl, int64_t duration ) = 0;
     /**
      * @brief addStream Create an external media of type IMedia::Type::Stream
      *

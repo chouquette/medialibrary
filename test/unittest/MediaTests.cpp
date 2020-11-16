@@ -642,7 +642,7 @@ TEST_F( Medias, SortByFilename )
 
 TEST_F( Medias, SetType )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3", -1 ) );
     ASSERT_TRUE( m1->isExternalMedia() );
 
     auto res = m1->setType( IMedia::Type::Video );
@@ -661,7 +661,7 @@ TEST_F( Medias, SetType )
 
 TEST_F( Medias, SetTypeBuffered )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3", -1 ) );
     ASSERT_TRUE( m1->isExternalMedia() );
 
     m1->setTypeBuffered( IMedia::Type::Video );
@@ -826,10 +826,11 @@ TEST_F( Medias, MetadataCheckDbModel )
 
 TEST_F( Medias, ExternalMrl )
 {
-    auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv" );
+    auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv", 1234 );
     ASSERT_NE( nullptr, m );
 
     ASSERT_EQ( m->title(), "sea-otters.mkv" );
+    ASSERT_EQ( 1234, m->duration() );
     ASSERT_TRUE( m->isExternalMedia() );
 
     // External files shouldn't appear in listings
@@ -864,6 +865,10 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_TRUE( files[1]->isExternal() );
     ASSERT_FALSE( files[1]->isNetwork() );
     ASSERT_EQ( File::Type::Subtitles, files[1]->type() );
+
+    auto m3 = ml->addExternalMedia( "https://foo.bar/media.mkv", -1234 );
+    ASSERT_NE( nullptr, m3 );
+    ASSERT_EQ( -1, m3->duration() );
 }
 
 TEST_F( Medias, AddStream )
@@ -879,8 +884,8 @@ TEST_F( Medias, AddStream )
 
 TEST_F( Medias, DuplicatedExternalMrl )
 {
-    auto m = ml->addExternalMedia( "http://foo.bar" );
-    auto m2 = ml->addExternalMedia( "http://foo.bar" );
+    auto m = ml->addExternalMedia( "http://foo.bar", 1 );
+    auto m2 = ml->addExternalMedia( "http://foo.bar", 2 );
     ASSERT_NE( nullptr, m );
     ASSERT_EQ( nullptr, m2 );
 }
@@ -950,7 +955,7 @@ TEST_F( Medias, CreateStream )
 
 TEST_F( Medias, SearchExternal )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "localfile.mkv" ) );
+    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "localfile.mkv", -1 ) );
     m1->setTitle( "local otter", false );
     auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://remote.file/media.asf" ) );
     m2->setTitle( "remote otter", false );
@@ -969,8 +974,8 @@ TEST_F( Medias, SearchExternal )
 
 TEST_F( Medias, VacuumOldExternal )
 {
-    auto m1 = ml->addExternalMedia( "foo.avi" );
-    auto m2 = ml->addExternalMedia( "bar.mp3" );
+    auto m1 = ml->addExternalMedia( "foo.avi", -1 );
+    auto m2 = ml->addExternalMedia( "bar.mp3", -1 );
     auto s1 = ml->addStream( "http://baz.mkv" );
 
     ASSERT_NE( nullptr, m1 );
@@ -1005,8 +1010,8 @@ TEST_F( Medias, VacuumOldExternal )
 
 TEST_F( Medias, VacuumNeverPlayedMedia )
 {
-    auto m1 = ml->addExternalMedia( "foo.avi" );
-    auto m2 = ml->addExternalMedia( "bar.mp3" );
+    auto m1 = ml->addExternalMedia( "foo.avi", -1 );
+    auto m2 = ml->addExternalMedia( "bar.mp3", -1 );
     auto s1 = ml->addStream( "http://baz.mkv" );
 
     ASSERT_NE( nullptr, m1 );
@@ -1028,7 +1033,7 @@ TEST_F( Medias, VacuumNeverPlayedMedia )
 
 TEST_F( Medias, RemoveExternal )
 {
-    auto m = ml->addExternalMedia( "http://extern.al/media.mkv" );
+    auto m = ml->addExternalMedia( "http://extern.al/media.mkv", -1 );
     ASSERT_NE( nullptr, m );
 
     auto res = ml->removeExternalMedia( m );
@@ -1042,7 +1047,7 @@ TEST_F( Medias, RemoveExternal )
 
 TEST_F( Medias, NbPlaylists )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addExternalMedia( "media.mkv" ) );
+    auto m = std::static_pointer_cast<Media>( ml->addExternalMedia( "media.mkv", -1 ) );
     ASSERT_EQ( 0u, m->nbPlaylists() );
 
     auto playlist = ml->createPlaylist( "playlisẗ" );
