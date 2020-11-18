@@ -37,6 +37,16 @@ namespace medialibrary
 namespace parser
 {
 
+class IEmbeddedThumbnail
+{
+public:
+    virtual ~IEmbeddedThumbnail() = default;
+    virtual bool save( const std::string& path ) = 0;
+    virtual size_t size() const = 0;
+    virtual std::string hash() const = 0;
+    virtual std::string extension() const = 0;
+};
+
 class IItem
 {
 public:
@@ -235,6 +245,9 @@ public:
     virtual int64_t linkToId() const = 0;
     virtual int64_t linkExtra() const = 0;
     virtual const std::string& linkToMrl() const = 0;
+    virtual const std::vector<std::shared_ptr<IEmbeddedThumbnail>>&
+        embeddedThumbnails() const = 0;
+    virtual void addEmbeddedThumbnail( std::shared_ptr<IEmbeddedThumbnail> t ) = 0;
 };
 
 }

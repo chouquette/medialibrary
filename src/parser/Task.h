@@ -311,6 +311,10 @@ public:
 
     bool needEntityRestoration() const;
 
+    virtual const std::vector<std::shared_ptr<IEmbeddedThumbnail>>&
+        embeddedThumbnails() const override;
+    virtual void addEmbeddedThumbnail( std::shared_ptr<IEmbeddedThumbnail> t ) override;
+
 private:
     MediaLibraryPtr m_ml = nullptr;
     int64_t     m_id = 0;
@@ -336,6 +340,7 @@ private:
     std::shared_ptr<fs::IFile> m_fileFs;
     FolderPtr m_parentFolder;
     std::shared_ptr<fs::IDirectory> m_parentFolderFs;
+    std::vector<std::shared_ptr<IEmbeddedThumbnail>> m_embeddedThumbnails;
 
     friend Task::Table;
 };

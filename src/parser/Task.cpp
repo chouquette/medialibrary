@@ -1044,6 +1044,17 @@ bool Task::needEntityRestoration() const
            ( m_file == nullptr && m_fileId != 0 );
 }
 
+const std::vector<std::shared_ptr<IEmbeddedThumbnail>>&
+Task::embeddedThumbnails() const
+{
+    return m_embeddedThumbnails;
+}
+
+void Task::addEmbeddedThumbnail( std::shared_ptr<IEmbeddedThumbnail> t )
+{
+    m_embeddedThumbnails.push_back( std::move( t ) );
+}
+
 }
 
 }
