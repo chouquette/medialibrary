@@ -61,13 +61,20 @@ Status VLCMetadataService::run( IItem& item )
     VLC::Media::ParsedStatus status;
     bool done = false;
 
-    auto event = vlcMedia.eventManager().onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        status = s;
-        done = true;
-        m_cond.notify_all();
-    });
     {
+        /*
+         * Store a copy of the event manager. When the instance falls out of
+         * scope, all events registered through it will be unregistered
+         * automatically
+         */
+        auto em = vlcMedia.eventManager();
+        em.onParsedChanged( [this, &status, &done](VLC::Media::ParsedStatus s ) {
+            std::lock_guard<compat::Mutex> lock( m_mutex );
+            status = s;
+            done = true;
+            m_cond.notify_all();
+        });
+
         {
             // We need m_currentMedia to be updated from a locked context
             // but we also need parseWithOption to be called with the lock
@@ -90,7 +97,6 @@ Status VLCMetadataService::run( IItem& item )
         });
         m_currentMedia = VLC::Media{};
     }
-    event->unregister();
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return Status::Fatal;
     auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
