@@ -32,6 +32,54 @@ namespace medialibrary
 namespace parser
 {
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+
+class VLCEmbeddedThumbnail4_0 : public IEmbeddedThumbnail
+{
+public:
+    VLCEmbeddedThumbnail4_0( VLC::Picture pic );
+    bool save( const std::string& path ) override;
+    virtual size_t size() const override;
+    virtual std::string hash() const override;
+    virtual std::string extension() const override;
+
+private:
+    VLC::Picture m_pic;
+};
+
+#elif defined(FORCE_ATTACHMENTS_API)
+
+class VLCEmbeddedThumbnailForced : public IEmbeddedThumbnail
+{
+public:
+    VLCEmbeddedThumbnailForced( libvlc_picture_t* pic );
+    virtual ~VLCEmbeddedThumbnailForced();
+    bool save( const std::string& path ) override;
+    virtual size_t size() const override;
+    virtual std::string hash() const override;
+    virtual std::string extension() const override;
+
+private:
+    libvlc_picture_t *m_pic;
+};
+
+#else
+
+class VLCEmbeddedThumbnail3_0 : public IEmbeddedThumbnail
+{
+public:
+    VLCEmbeddedThumbnail3_0( std::string path );
+    bool save( const std::string& path ) override;
+    virtual size_t size() const override;
+    virtual std::string hash() const override;
+    virtual std::string extension() const override;
+
+private:
+    std::string m_thumbnailPath;
+};
+
+#endif
+
 class VLCMetadataService : public IParserService
 {
 public:
@@ -47,6 +95,10 @@ private:
     virtual void stop() override;
 
     void mediaToItem( VLC::Media& media, parser::IItem& item );
+
+#if defined(FORCE_ATTACHMENTS_API)
+    static void onAttachedThumbnailsFound( const libvlc_event_t* e, void* data );
+#endif
 
 private:
     VLC::Instance m_instance;

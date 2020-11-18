@@ -284,6 +284,16 @@ AM_CONDITIONAL(HAVE_LIBVLC, [test "${with_libvlc}" != "no"])
 AM_CONDITIONAL(HAVE_LIBVLC4, [test "${have_libvlc4}" = "yes" ])
 AM_CONDITIONAL([HAVE_LIBJPEG], [test "${have_libjpeg}" = "yes"])
 
+AC_ARG_ENABLE(force-attachments-api, [AC_HELP_STRING([--enable-force-attachments-api], [Force use of VLC attachments API when using libvlc 3 (default disabled)])])
+AH_TEMPLATE(FORCE_ATTACHMENTS_API, [Define to 1 if attachment API should be used])
+AS_IF([test "${enable_force_attachments_api}" = "yes"],[
+  AS_IF([test "${have_libvlc4}"], [
+      AC_MSG_ERROR("--enable-force-attachments-api only makes sense when using libvlc 3.x")
+  ])
+  AC_DEFINE(FORCE_ATTACHMENTS_API)
+])
+
+
 PKG_CHECK_MODULES(SQLITE, [sqlite3 >= 3.25.0])
 
 AC_ARG_ENABLE(tests,AC_HELP_STRING([--disable-tests], [Disable build of automated tests suites]))

@@ -34,6 +34,12 @@
 #include "utils/Filename.h"
 #include "logging/Logger.h"
 #include "utils/Url.h"
+#include "utils/Md5.h"
+#include "utils/Defer.h"
+
+#ifndef USE_EMBEDDED_THUMBNAIL_API
+# include "utils/File.h"
+#endif
 
 namespace medialibrary
 {
@@ -49,6 +55,21 @@ bool VLCMetadataService::initialize( IMediaLibrary* )
 {
     return true;
 }
+
+#if defined(FORCE_ATTACHMENTS_API)
+
+void VLCMetadataService::onAttachedThumbnailsFound( const libvlc_event_t* e, void* data )
+{
+    assert( e->type == libvlc_MediaAttachedThumbnailsFound );
+    auto item = reinterpret_cast<IItem*>( data );
+    auto pictureList = e->u.media_attached_thumbnails_found.thumbnails;
+    if ( libvlc_picture_list_count( pictureList ) == 0 )
+        return;
+    item->addEmbeddedThumbnail( std::make_shared<VLCEmbeddedThumbnailForced>(
+                                    libvlc_picture_list_at( pictureList, 0 ) ) );
+}
+
+#endif
 
 Status VLCMetadataService::run( IItem& item )
 {
@@ -74,6 +95,31 @@ Status VLCMetadataService::run( IItem& item )
             done = true;
             m_cond.notify_all();
         });
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        em.onAttachedThumbnailsFound( [&item]( const std::vector<VLC::Picture>& pics ) {
+            if ( pics.empty() == false )
+            {
+                item.addEmbeddedThumbnail(
+                            std::make_shared<VLCEmbeddedThumbnail4_0>( pics[0] ) );
+            }
+        });
+#elif defined(FORCE_ATTACHMENTS_API)
+        /*
+         * We can force the use of the 4.0 attachment API if the patches have
+         * been backported to 3.0, however libvlcpp doesn't expose it so we have
+         * to fallback to the C API
+         */
+        if ( libvlc_event_attach( em, libvlc_MediaAttachedThumbnailsFound,
+                             &onAttachedThumbnailsFound, &item ) != 0 )
+        {
+            LOG_ERROR( "Failed to attach to thumbnail found event" );
+            return Status::Fatal;
+        }
+        auto unregister = utils::make_defer([&em, &item]() {
+            libvlc_event_detach( em, libvlc_MediaAttachedThumbnailsFound,
+                                 &onAttachedThumbnailsFound, &item );
+        });
+#endif
 
         {
             // We need m_currentMedia to be updated from a locked context
@@ -99,21 +145,28 @@ Status VLCMetadataService::run( IItem& item )
     }
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return Status::Fatal;
-    auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
     if ( item.fileType() == IFile::Type::Playlist &&
          vlcMedia.subitems()->count() == 0 )
     {
         LOG_DEBUG( "Discarding playlist file with no subitem: ", mrl );
         return Status::Fatal;
     }
-    if ( utils::url::schemeIs( "attachment://", artworkMrl ) == true )
+#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0) && !defined(FORCE_ATTACHMENTS_API)
+    auto artworkMrl = vlcMedia.meta( libvlc_meta_ArtworkURL );
+    if ( artworkMrl.empty() == false )
     {
-        LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
-        VLC::MediaPlayer mp( vlcMedia );
-        auto res = MetadataCommon::startPlayback( vlcMedia, mp, m_mutex, m_cond );
-        if ( res == false )
-            return Status::Fatal;
+        if ( utils::url::schemeIs( "attachment://", artworkMrl ) == true )
+        {
+            LOG_WARN( "Artwork for ", mrl, " is an attachment. Falling back to playback" );
+            VLC::MediaPlayer mp( vlcMedia );
+            auto res = MetadataCommon::startPlayback( vlcMedia, mp, m_mutex, m_cond );
+            if ( res == false )
+                return Status::Fatal;
+        }
+        item.addEmbeddedThumbnail( std::make_shared<VLCEmbeddedThumbnail3_0>(
+            utils::url::toLocalPath( vlcMedia.meta( libvlc_meta_ArtworkURL ) ) ) );
     }
+#endif
     mediaToItem( vlcMedia, item );
     return Status::Success;
 }
@@ -238,6 +291,123 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
         }
     }
 }
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+
+VLCEmbeddedThumbnail4_0::VLCEmbeddedThumbnail4_0( VLC::Picture pic )
+    : m_pic( std::move( pic ) )
+{
+}
+
+bool VLCEmbeddedThumbnail4_0::save( const std::string& path )
+{
+    return m_pic.save( path );
+}
+
+size_t VLCEmbeddedThumbnail4_0::size() const
+{
+    size_t size;
+    m_pic.buffer( &size );
+    return size;
+}
+
+std::string VLCEmbeddedThumbnail4_0::hash() const
+{
+    size_t size;
+    auto buff = m_pic.buffer( &size );
+    return utils::Md5Hasher::fromBuff( buff, size );
+}
+
+std::string VLCEmbeddedThumbnail4_0::extension() const
+{
+    switch ( m_pic.type() )
+    {
+    case VLC::Picture::Type::Argb:
+        return "bmp";
+    case VLC::Picture::Type::Jpg:
+        return "jpg";
+    case VLC::Picture::Type::Png:
+        return "png";
+    }
+    assert( !"Invalid thumbnail type" );
+    return nullptr;
+}
+
+#elif defined(FORCE_ATTACHMENTS_API)
+
+VLCEmbeddedThumbnailForced::VLCEmbeddedThumbnailForced( libvlc_picture_t *pic )
+    : m_pic( pic )
+{
+    libvlc_picture_retain( m_pic );
+}
+
+VLCEmbeddedThumbnailForced::~VLCEmbeddedThumbnailForced()
+{
+    libvlc_picture_release( m_pic );
+}
+
+bool VLCEmbeddedThumbnailForced::save( const std::string& path )
+{
+    return libvlc_picture_save( m_pic, path.c_str() ) == 0;
+}
+
+size_t VLCEmbeddedThumbnailForced::size() const
+{
+    size_t size;
+    libvlc_picture_get_buffer( m_pic, &size );
+    return size;
+}
+
+std::string VLCEmbeddedThumbnailForced::hash() const
+{
+    size_t size;
+    auto buff = libvlc_picture_get_buffer( m_pic, &size );
+    return utils::Md5Hasher::fromBuff( buff, size );
+}
+
+std::string VLCEmbeddedThumbnailForced::extension() const
+{
+    switch ( libvlc_picture_type( m_pic ) )
+    {
+    case libvlc_picture_Argb:
+        return "bmp";
+    case libvlc_picture_Jpg:
+        return "jpg";
+    case libvlc_picture_Png:
+        return "png";
+    }
+    assert( !"Invalid thumbnail type" );
+    return nullptr;
+}
+
+#else
+
+VLCEmbeddedThumbnail3_0::VLCEmbeddedThumbnail3_0( std::string path )
+    : m_thumbnailPath( std::move( path ) )
+{
+}
+
+bool VLCEmbeddedThumbnail3_0::save( const std::string& path )
+{
+    return utils::fs::copy( m_thumbnailPath, path );
+}
+
+size_t VLCEmbeddedThumbnail3_0::size() const
+{
+    return utils::fs::fileSize( m_thumbnailPath );
+}
+
+std::string VLCEmbeddedThumbnail3_0::hash() const
+{
+    return utils::Md5Hasher::fromFile( m_thumbnailPath );
+}
+
+std::string VLCEmbeddedThumbnail3_0::extension() const
+{
+    return utils::file::extension( m_thumbnailPath );
+}
+
+#endif
 
 }
 }
