@@ -41,7 +41,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <assert.h>
-#include <fstream>
+#include <memory>
 
 #include "Md5.h"
 
@@ -93,13 +93,15 @@ std::string Md5Hasher::fromBuff( const uint8_t* buff, size_t size )
 
 std::string Md5Hasher::fromFile( const std::string& path )
 {
-    std::ifstream ifs{ path, std::ios_base::in | std::ios_base::binary };
+    std::unique_ptr<FILE, decltype(&fclose)> file{
+        fopen( path.c_str(), "rb" ), &fclose
+    };
     uint8_t buff[ 64 * 64 ];
     Md5Hasher hasher{};
-    while ( ifs.eof() == false )
+    while ( feof( file.get() ) == false )
     {
-        ifs.read( reinterpret_cast<char*>( buff ), sizeof( buff ) );
-        hasher.update( buff, ifs.gcount() );
+        auto read = fread( buff, 1, sizeof( buff ), file.get() );
+        hasher.update( buff, read );
     }
     return hasher.finalize();
 }
