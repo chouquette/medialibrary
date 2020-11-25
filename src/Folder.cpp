@@ -644,16 +644,49 @@ const std::string& Folder::mrl() const
     if ( m_fullPath.empty() == false )
         return m_fullPath;
 
+    /*
+     * We need the device entity to know its scheme, in order to fetch the
+     * fs factory associated with it
+     */
+    auto d = device();
+    if ( d == nullptr )
+        throw fs::errors::DeviceRemoved{};
+
+    /* Fetch and start the fs factory if required */
+    auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
+    if ( fsFactory == nullptr )
+        throw fs::errors::UnknownScheme{ m_device->scheme() };
+    if ( fsFactory->isStarted() == false )
+    {
+        /*
+         * Starting the factory will refresh its device list. This is synchronous
+         * for local devices, and asynchronous for network devices.
+         * For network devices, we'll try to rely on a previously seen mountpoint
+         * in the likely case that the factory doesn't refresh the devices we're
+         * about to probe
+         */
+        m_ml->startFsFactory( *fsFactory );
+    }
+
     // We can't compute the full path of a folder if it's removable and the
     // device isn't present. When there's no device, we don't know the
     // mountpoint, therefor we don't know the full path. Calling isPresent will
     // ensure we have the device representation cached locally
     if ( isPresent() == false )
+    {
+        if ( d->isNetwork() == true )
+        {
+            auto mountpoint = d->cachedMountpoint();
+            if ( mountpoint.empty() == false )
+            {
+                m_fullPath = mountpoint + m_path;
+                return m_fullPath;
+            }
+        }
         throw fs::errors::DeviceRemoved{};
+    }
 
-    auto fsFactory = m_ml->fsFactoryForMrl( m_device->scheme() );
-    if ( fsFactory == nullptr )
-        throw fs::errors::UnknownScheme{ m_device->scheme() };
+
     auto deviceFs = fsFactory->createDevice( m_device->uuid() );
     // In case the device lister hasn't been updated accordingly, we might think
     // a device still is present while it's not.
