@@ -145,6 +145,8 @@ private:
     static std::string sortRequest( const QueryParameters* params );
     static std::string filterByMediaType( IMedia::Type type );
 
+    std::shared_ptr<Device> device() const;
+
 private:
     MediaLibraryPtr m_ml;
 

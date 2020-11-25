@@ -582,6 +582,18 @@ std::string Folder::filterByMediaType( IMedia::Type type )
     }
 }
 
+std::shared_ptr<Device> Folder::device() const
+{
+    if ( m_device == nullptr )
+    {
+        m_device = Device::fetch( m_ml, m_deviceId );
+        // There must be a device containing the folder, since we never create a folder
+        // without a device
+        assert( m_device != nullptr );
+    }
+    return m_device;
+}
+
 Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
                                   const QueryParameters* params )
 {
@@ -765,15 +777,10 @@ bool Folder::forceNonRemovable( const std::string& fullMrl )
 
 bool Folder::isPresent() const
 {
-    if ( m_device == nullptr )
-        m_device = Device::fetch( m_ml, m_deviceId );
-    // There must be a device containing the folder, since we never create a folder
-    // without a device
-    assert( m_device != nullptr );
-    // However, handle potential sporadic errors gracefully
-    if( m_device == nullptr )
+    auto d = device();
+    if( d == nullptr )
         return false;
-    return m_device->isPresent();
+    return d->isPresent();
 }
 
 bool Folder::isBanned() const
