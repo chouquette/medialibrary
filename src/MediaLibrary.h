@@ -235,7 +235,7 @@ public:
      */
     void startFsFactoriesAndRefresh();
 
-    void startFsFactory( fs::IFileSystemFactory& fsFactory );
+    void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
     virtual bool forceRescan() override;
 
@@ -354,7 +354,7 @@ protected:
     /* All fs factory callbacks must outlive the fs factory itself, since
      * it might invoke some of the callback interface methods during teardown
      */
-    FsFactoryCb m_fsFactoryCb;
+    mutable FsFactoryCb m_fsFactoryCb;
 
     std::string m_thumbnailPath;
     std::string m_playlistPath;

@@ -2622,7 +2622,7 @@ void MediaLibrary::startFsFactoriesAndRefresh()
     }
 }
 
-void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory )
+void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 {
     fsFactory.start( &m_fsFactoryCb );
     fsFactory.refreshDevices();
