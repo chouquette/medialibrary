@@ -75,6 +75,16 @@ public:
      */
     bool addMountpoint( const std::string& mrl, int64_t seenDate );
 
+
+    /**
+     * @brief cachedMountpoint Fetches a cached mountpoint from the database
+     * @param ml A media library instance
+     * @return A previously seen mountpoint for this device
+     *
+     * This is only valid for network devices.
+     */
+    std::string cachedMountpoint() const;
+
     static std::shared_ptr<Device> create(MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable , bool isNetwork);
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
@@ -104,6 +114,7 @@ public:
      */
     static std::tuple<int64_t, std::string> fromMountpoint( MediaLibraryPtr ml,
                                                    const std::string& mrl );
+
 private:
     MediaLibraryPtr m_ml;
     // This is a database ID

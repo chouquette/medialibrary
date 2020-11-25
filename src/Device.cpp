@@ -345,4 +345,18 @@ Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
     return std::make_tuple( 0, "" );
 }
 
+std::string Device::cachedMountpoint() const
+{
+    static const std::string req = "SELECT mrl FROM " +
+        MountpointTable::Name + " WHERE device_id = ? ORDER BY last_seen DESC";
+    auto dbConn = m_ml->getConn();
+    auto ctx = dbConn->acquireReadContext();
+    sqlite::Statement stmt{ dbConn->handle(), req };
+    stmt.execute( m_id );
+    auto row = stmt.row();
+    if ( row == nullptr )
+        return {};
+    return row.extract<std::string>();
+}
+
 }

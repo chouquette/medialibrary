@@ -283,6 +283,33 @@ TEST_F( DeviceEntity, Mountpoints )
     ASSERT_EQ( "smb://1.2.3.4/", std::get<1>( match ) );
 }
 
+TEST_F( DeviceEntity, FetchCachedMountpoint )
+{
+    auto d = Device::create( ml.get(), "{fake-uuid}", "smb://", true, true );
+    ASSERT_NE( nullptr, d );
+
+    auto mountpoint = d->cachedMountpoint();
+    ASSERT_TRUE( mountpoint.empty() );
+
+    auto res = d->addMountpoint( "smb://1.2.3.4", 0 );
+    ASSERT_TRUE( res );
+
+    mountpoint = d->cachedMountpoint();
+    ASSERT_EQ( "smb://1.2.3.4/", mountpoint );
+
+    /* Ensure that we get the last known mountpoint */
+    res = d->addMountpoint( "smb://4.3.2.1", 999 );
+    ASSERT_TRUE( res );
+    mountpoint = d->cachedMountpoint();
+    ASSERT_EQ( "smb://4.3.2.1/", mountpoint );
+
+    /* Now bump the previous mountpoint and check that it's now returned */
+    res = d->addMountpoint( "smb://1.2.3.4", 1000 );
+    ASSERT_TRUE( res );
+    mountpoint = d->cachedMountpoint();
+    ASSERT_EQ( "smb://1.2.3.4/", mountpoint );
+}
+
 // Filesystem tests:
 
 TEST_F( DeviceFs, RemoveDisk )
