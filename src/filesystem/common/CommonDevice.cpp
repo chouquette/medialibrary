@@ -91,8 +91,9 @@ void CommonDevice::addMountpoint( std::string mountpoint )
     m_mountpoints.push_back( std::move( mountpoint ) );
 }
 
-void CommonDevice::removeMountpoint( const std::string& mountpoint )
+void CommonDevice::removeMountpoint( const std::string& mp )
 {
+    auto mountpoint = utils::file::toFolderPath( mp );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     auto it = std::find( begin( m_mountpoints ), end( m_mountpoints ), mountpoint );
     if ( it != end( m_mountpoints ) )
