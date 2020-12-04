@@ -2754,7 +2754,8 @@ void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
         // We also want to resume any parsing tasks that were previously
         // started before the device went away
         assert( deviceFs.isPresent() == true );
-        m_ml->m_discovererWorker->reloadDevice( device->id() );
+        if ( m_ml->m_discovererWorker != nullptr )
+            m_ml->m_discovererWorker->reloadDevice( device->id() );
         if ( m_ml->m_parser != nullptr )
             m_ml->m_parser->refreshTaskList();
     }
