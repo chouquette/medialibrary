@@ -33,6 +33,7 @@
 #include "utils/Url.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/Errors.h"
 
 namespace medialibrary
 {
@@ -442,7 +443,15 @@ std::shared_ptr<File> File::fromFileName( MediaLibraryPtr ml, const std::string&
 
 std::shared_ptr<File> File::fromExternalMrl( MediaLibraryPtr ml, const std::string& mrl )
 {
-    auto scheme = utils::url::scheme( mrl );
+    std::string scheme;
+    try
+    {
+        scheme = utils::url::scheme( mrl );
+    }
+    catch ( const fs::errors::UnhandledScheme& )
+    {
+        return nullptr;
+    }
     static const std::string req = "SELECT * FROM " + File::Table::Name +
             " WHERE mrl = ? AND folder_id IS NULL";
     auto file = fetch( ml, req, mrl );
