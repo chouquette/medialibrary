@@ -285,7 +285,7 @@ class NoopFile : public fs::IFile
     std::string m_fileName;
     std::string m_extension;
     std::string m_linkedWith;
-    unsigned int m_lastModifDate;
+    time_t m_lastModifDate;
     int64_t m_size;
 
 public:
@@ -323,7 +323,7 @@ public:
         return m_extension;
     }
 
-    virtual unsigned int lastModificationDate() const
+    virtual time_t lastModificationDate() const
     {
         // Ensure a non-0 value so tests can easily verify that the value
         // is initialized
@@ -350,7 +350,7 @@ public:
         return m_linkedWith;
     }
 
-    void setLastModificationDate( unsigned int date )
+    void setLastModificationDate( time_t date )
     {
         m_lastModifDate = date;
     }

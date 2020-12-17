@@ -147,9 +147,9 @@ IFile::Type File::type() const
     return m_type;
 }
 
-unsigned int File::lastModificationDate() const
+time_t File::lastModificationDate() const
 {
-    return static_cast<unsigned int>( m_lastModificationDate );
+    return m_lastModificationDate;
 }
 
 int64_t File::size() const
@@ -162,7 +162,7 @@ bool File::isExternal() const
     return m_isExternal;
 }
 
-bool File::updateFsInfo( uint32_t newLastModificationDate, int64_t newSize )
+bool File::updateFsInfo( time_t newLastModificationDate, int64_t newSize )
 {
     if ( m_lastModificationDate == newLastModificationDate && m_size == newSize )
         return true;

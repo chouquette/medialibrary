@@ -346,8 +346,8 @@ private:
         int64_t m_duration;
         float m_progress;
         unsigned int m_playCount;
-        std::time_t m_lastPlayedDate;
-        const std::time_t m_insertionDate;
+        time_t m_lastPlayedDate;
+        const time_t m_insertionDate;
         unsigned int m_releaseDate;
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title

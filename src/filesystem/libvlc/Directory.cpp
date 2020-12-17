@@ -130,7 +130,7 @@ void Directory::read() const
 void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
                          std::string linkedWith ) const
 {
-    uint32_t lastModificationDate = 0;
+    time_t lastModificationDate = 0;
     int64_t fileSize = 0;
 
     if ( m_fsFactory.isNetworkFileSystem() == false )

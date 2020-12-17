@@ -38,16 +38,16 @@ class File : public CommonFile
 {
 public:
     File( std::string mrl, IFileSystemFactory& fsFactory,
-          uint32_t lastModificationDate, int64_t size );
+          time_t lastModificationDate, int64_t size );
     File( std::string mrl, IFileSystemFactory& fsFactory,
-          uint32_t lastModificationDate, int64_t size,
+          time_t lastModificationDate, int64_t size,
           IFile::LinkedFileType linkedType, std::string linkedFile );
-    virtual unsigned int lastModificationDate() const override;
+    virtual time_t lastModificationDate() const override;
     virtual int64_t size() const override;
     virtual bool isNetwork() const override;
 
 private:
-    uint32_t m_lastModificationDate;
+    time_t m_lastModificationDate;
     int64_t m_size;
     bool m_isNetwork;
 };

@@ -39,7 +39,7 @@ public:
 
     virtual const std::string& name() const override;
     virtual const std::string& extension() const override;
-    virtual unsigned int lastModificationDate() const override;
+    virtual time_t lastModificationDate() const override;
     virtual int64_t size() const override;
     void markAsModified();
     virtual const std::string& mrl() const override;
@@ -50,7 +50,7 @@ public:
 private:
     std::string m_name;
     std::string m_extension;
-    unsigned int m_lastModification;
+    time_t m_lastModification;
     std::string m_mrl;
     std::string m_linkedWith;
 };

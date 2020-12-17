@@ -60,10 +60,10 @@ public:
     void setMrl( std::string mrl );
     static bool setMrl(MediaLibraryPtr ml, const std::string &mrl, int64_t fileId );
     virtual Type type() const override;
-    virtual unsigned int lastModificationDate() const override;
+    virtual time_t lastModificationDate() const override;
     virtual int64_t size() const override;
     virtual bool isExternal() const override;
-    bool updateFsInfo( uint32_t newLastModificationDate, int64_t newSize );
+    bool updateFsInfo( time_t newLastModificationDate, int64_t newSize );
     virtual bool isRemovable() const override;
     virtual bool isNetwork() const override;
     virtual bool isMain() const override;
@@ -138,7 +138,7 @@ private:
     // or the full file MRL for non removable ones
     std::string m_mrl;
     const Type m_type;
-    std::time_t m_lastModificationDate;
+    time_t m_lastModificationDate;
     int64_t m_size;
     const int64_t m_folderId;
     const bool m_isRemovable;

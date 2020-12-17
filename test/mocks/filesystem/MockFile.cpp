@@ -74,7 +74,7 @@ const std::string &File::linkedWith() const
     return m_linkedWith;
 }
 
-unsigned int File::lastModificationDate() const
+time_t File::lastModificationDate() const
 {
     return m_lastModification;
 }

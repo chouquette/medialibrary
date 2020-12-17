@@ -68,7 +68,7 @@ public:
      */
     virtual const std::string& mrl() const = 0;
     virtual Type type() const = 0;
-    virtual unsigned int lastModificationDate() const = 0;
+    virtual time_t lastModificationDate() const = 0;
     virtual int64_t size() const = 0;
     virtual bool isRemovable() const = 0;
     ///
