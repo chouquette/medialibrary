@@ -53,23 +53,26 @@ ThumbnailerWorker::~ThumbnailerWorker()
     stop();
 }
 
-void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
-                                          uint32_t desiredWidth, uint32_t desiredHeight,
-                                          float position )
+void ThumbnailerWorker::requestThumbnailInternal( int64_t mediaId, MediaPtr media,
+                                                  ThumbnailSizeType sizeType,
+                                                  uint32_t desiredWidth,
+                                                  uint32_t desiredHeight,
+                                                  float position )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
 
-    if ( m_queuedMedia.find( media->id() ) != cend( m_queuedMedia ) )
+    if ( m_queuedMedia.find( mediaId ) != cend( m_queuedMedia ) )
         return;
 
     Task t{
+        mediaId,
         std::move( media ),
         sizeType,
         desiredWidth,
         desiredHeight,
         position
     };
-    m_queuedMedia.insert( t.media->id() );
+    m_queuedMedia.insert( mediaId );
     m_tasks.push( std::move( t ) );
     assert( m_tasks.size() == m_queuedMedia.size() );
     if ( m_thread.get_id() == compat::Thread::id{} )
@@ -79,6 +82,22 @@ void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType size
     }
     else
         m_cond.notify_all();
+}
+
+void ThumbnailerWorker::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
+                                          uint32_t desiredWidth, uint32_t desiredHeight,
+                                          float position )
+{
+    requestThumbnailInternal( mediaId, nullptr, sizeType, desiredWidth, desiredHeight, position );
+}
+
+void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
+                                          uint32_t desiredWidth, uint32_t desiredHeight,
+                                          float position )
+{
+    /* Call media->id() before moving media */
+    int64_t mediaId = media->id();
+    requestThumbnailInternal( mediaId, std::move(media), sizeType, desiredWidth, desiredHeight, position );
 }
 
 void ThumbnailerWorker::pause()
@@ -117,8 +136,15 @@ void ThumbnailerWorker::run()
                 }
                 t = std::move( m_tasks.front() );
                 m_tasks.pop();
-                m_queuedMedia.erase( t.media->id() );
+                m_queuedMedia.erase( t.mediaId );
                 assert( m_tasks.size() == m_queuedMedia.size() );
+            }
+            if ( t.media == nullptr )
+            {
+                t.media = m_ml->media( t.mediaId );
+                if ( t.media == nullptr )
+                    /* No media found with this id */
+                    continue;
             }
             bool res = generateThumbnail( t );
             m_ml->getCb()->onMediaThumbnailReady( t.media, t.sizeType, res );

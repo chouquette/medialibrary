@@ -881,6 +881,10 @@ public:
      *                                     is supported.
      */
     virtual bool isSubtitleExtensionSupported( const char* ext ) const = 0;
+
+    virtual bool requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
+                                   uint32_t desiredWidth, uint32_t desiredHeight,
+                                   float position ) = 0;
 };
 
 }

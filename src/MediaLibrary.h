@@ -263,6 +263,9 @@ public:
 
     virtual bool deleteRemovableDevices() override;
 
+    virtual bool requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
+                                   uint32_t desiredWidth, uint32_t desiredHeight,
+                                   float position ) override;
 
 protected:
     // Allow access to unit test MediaLibrary implementations

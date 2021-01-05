@@ -46,13 +46,17 @@ public:
     void requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position );
+    void requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
+                           uint32_t desiredWidth, uint32_t desiredHeight,
+                           float position );
     void pause();
     void resume();
 
 private:
     struct Task
     {
-        MediaPtr media;
+        int64_t mediaId;
+        MediaPtr media; /* may be null */
         ThumbnailSizeType sizeType;
         uint32_t desiredWidth;
         uint32_t desiredHeight;
@@ -64,6 +68,11 @@ private:
     void stop();
 
     bool generateThumbnail( Task task );
+    void requestThumbnailInternal( int64_t mediaId, MediaPtr media,
+                                   ThumbnailSizeType sizeType,
+                                   uint32_t desiredWidth,
+                                   uint32_t desiredHeight,
+                                   float position );
 
 private:
     MediaLibraryPtr m_ml;

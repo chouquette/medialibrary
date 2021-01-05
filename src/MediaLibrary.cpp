@@ -2803,5 +2803,16 @@ const std::vector<const char*>& MediaLibrary::supportedPlaylistExtensions() cons
     return SupportedPlaylistExtensions;
 }
 
+bool MediaLibrary::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
+                                     uint32_t desiredWidth, uint32_t desiredHeight,
+                                     float position )
+{
+    auto worker = thumbnailer();
+    if ( worker == nullptr )
+        return false;
+    worker->requestThumbnail( mediaId, sizeType, desiredWidth, desiredHeight, position );
+    return true;
+}
+
 
 }
