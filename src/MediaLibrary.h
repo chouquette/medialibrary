@@ -267,6 +267,8 @@ public:
                                    uint32_t desiredWidth, uint32_t desiredHeight,
                                    float position ) override;
 
+    virtual BookmarkPtr bookmark( int64_t bookmarkId ) const override;
+
 protected:
     // Allow access to unit test MediaLibrary implementations
     static const std::vector<const char*> SupportedMediaExtensions;

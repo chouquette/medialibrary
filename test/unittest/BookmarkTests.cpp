@@ -293,3 +293,15 @@ TEST_F( Bookmarks, OrderByCreationDate )
     ASSERT_EQ( b3->id(), bookmarks[1]->id() );
     ASSERT_EQ( b1->id(), bookmarks[2]->id() );
 }
+
+TEST_F( Bookmarks, Fetch )
+{
+    auto b = Bookmark::create( ml.get(), 1, m->id() );
+    ASSERT_NE( nullptr, b );
+
+    auto b2 = ml->bookmark( b->id() );
+    ASSERT_NE( b2, nullptr );
+
+    b2 = ml->bookmark( b->id() + 1 );
+    ASSERT_EQ( nullptr, b2 );
+}

@@ -2814,5 +2814,9 @@ bool MediaLibrary::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType
     return true;
 }
 
+BookmarkPtr MediaLibrary::bookmark( int64_t bookmarkId ) const
+{
+    return Bookmark::fetch( this, bookmarkId );
+}
 
 }

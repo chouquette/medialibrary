@@ -885,6 +885,8 @@ public:
     virtual bool requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
                                    uint32_t desiredWidth, uint32_t desiredHeight,
                                    float position ) = 0;
+
+    virtual BookmarkPtr bookmark( int64_t bookmarkId ) const = 0;
 };
 
 }
