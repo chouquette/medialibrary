@@ -46,6 +46,7 @@
 #include "Playlist.h"
 #include "MediaGroup.h"
 #include "parser/Task.h"
+#include "parser/Parser.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -1095,7 +1096,15 @@ bool Media::setType( IMedia::Type type )
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, m_id ) == false )
         return false;
     if ( m_type == IMedia::Type::Unknown )
-        parser::Task::createMediaRefreshTask( m_ml, shared_from_this() );
+    {
+        auto task = parser::Task::createMediaRefreshTask( m_ml, shared_from_this() );
+        if ( task != nullptr )
+        {
+            auto parser = m_ml->getParser();
+            if ( parser != nullptr )
+                parser->parse( std::move( task ) );
+        }
+    }
     m_type = type;
     return true;
 }

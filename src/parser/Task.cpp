@@ -36,7 +36,6 @@
 #include "Playlist.h"
 #include "Media.h"
 #include "parser/Task.h"
-#include "parser/Parser.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/Strings.h"
@@ -699,13 +698,6 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
               std::shared_ptr<Folder> parentFolder, std::shared_ptr<fs::IDirectory> parentFolderFs,
               IFile::Type fileType )
 {
-    /*
-     * Fetch the parser before creating the task.
-     * As the parser is lazylily initialized, fetching it after we create the
-     * task would start the restoration of previous tasks, but would include
-     * the newly created task, causing the first job to be run twice.
-     */
-    auto parser = ml->getParser();
     auto parentFolderId = parentFolder->id();
 
     auto mrl = fileFs->mrl();
@@ -719,8 +711,6 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Creation,
                  self->mrl(), fileType, parentFolderId ) == false )
         return nullptr;
-    if ( parser != nullptr )
-        parser->parse( self );
     return self;
 }
 
@@ -730,7 +720,6 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                          std::shared_ptr<Folder> parentFolder,
                          std::shared_ptr<fs::IDirectory> parentFolderFs )
 {
-    auto parser = ml->getParser();
     auto parentFolderId = file->folderId();
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ),
                                         std::move( parentFolder ),
@@ -743,8 +732,6 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
                  self->mrl(), self->file()->type(), self->file()->id(),
                  parentFolderId ) == false )
         return nullptr;
-    if ( parser != nullptr )
-        parser->parse( self );
     return self;
 }
 
@@ -788,7 +775,6 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
                                             int64_t linkToId, Task::LinkType linkToType,
                                             int64_t linkToExtra )
 {
-    auto parser = ml->getParser();
     auto self = std::make_shared<Task>( ml, std::move( mrl ), linkToId, linkToType,
                                         linkToExtra );
     const std::string req = "INSERT INTO " + Task::Table::Name +
@@ -798,8 +784,6 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
                  IFile::Type::Unknown, nullptr, nullptr, linkToId, linkToType,
                  linkToExtra ) == false )
         return nullptr;
-    if ( parser != nullptr )
-        parser->parse( self );
     return self;
 }
 
@@ -819,16 +803,12 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
                  self->mrl(), fileType, linkToType, linkToExtra,
                  self->linkToMrl() ) == false )
         return nullptr;
-    auto parser = ml->getParser();
-    if ( parser != nullptr )
-        parser->parse( self );
     return self;
 }
 
 std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string mrl,
                                                IFile::Type fileType )
 {
-    auto parser = ml->getParser();
     auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType );
     const std::string req = "INSERT INTO " + Table::Name +
             "(attempts_left, type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
@@ -836,8 +816,6 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
     if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Restore,
                  self->mrl(), fileType ) == false )
         return nullptr;
-    if ( parser != nullptr )
-        parser->parse( self );
     return self;
 }
 

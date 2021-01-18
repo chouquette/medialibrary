@@ -52,6 +52,7 @@
 #include "AudioTrack.h"
 #include "SubtitleTrack.h"
 #include "parser/Task.h"
+#include "parser/Parser.h"
 #include "MediaGroup.h"
 
 #include <cstdlib>
@@ -345,12 +346,14 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
         }
         try
         {
-            if ( Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
-                                       Task::LinkType::Playlist,
-                                       subitem.linkExtra() ) == nullptr )
-            {
+            auto task = Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
+                                              Task::LinkType::Playlist,
+                                              subitem.linkExtra() );
+            if ( task == nullptr )
                 return;
-            }
+            auto parser = m_ml->getParser();
+            if ( parser != nullptr )
+                parser->parse( std::move( task ) );
         }
         catch ( const sqlite::errors::ConstraintUnique& ex )
         {

@@ -793,11 +793,14 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     std::unique_ptr<sqlite::Transaction> t;
     if ( parentPlaylist.first != 0 )
         t = getConn()->newTransaction();
+    auto parser = getParser();
     try
     {
         assert( fileType != IFile::Type::Unknown );
-        parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
+        auto task = parser::Task::create( this, std::move( fileFs ), std::move( parentFolder ),
                               std::move( parentFolderFs ), fileType );
+        if ( task != nullptr && parser != nullptr )
+            parser->parse( std::move( task ) );
     }
     catch ( const sqlite::errors::ConstraintUnique& ex )
     {
@@ -810,10 +813,13 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     {
         try
         {
-            if ( parser::Task::createLinkTask( this, mrl, parentPlaylist.first,
+            auto task = parser::Task::createLinkTask( this, mrl, parentPlaylist.first,
                                                parser::IItem::LinkType::Playlist,
-                                               parentPlaylist.second ) == nullptr )
+                                               parentPlaylist.second );
+            if ( task == nullptr )
                 return;
+            if ( parser != nullptr )
+                parser->parse( std::move( task ) );
             t->commit();
         }
         catch( const sqlite::errors::ConstraintViolation& ex )
@@ -833,8 +839,14 @@ void MediaLibrary::onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs,
 {
     try
     {
-        parser::Task::createLinkTask( this, fileFs->mrl(), fileType, fileFs->linkedWith(),
-                                      parser::Task::LinkType::Media, 0 );
+        auto task = parser::Task::createLinkTask( this, fileFs->mrl(), fileType, fileFs->linkedWith(),
+                                                  parser::Task::LinkType::Media, 0 );
+        if ( task != nullptr )
+        {
+            auto parser = getParser();
+            if ( parser != nullptr )
+                parser->parse( std::move( task ) );
+        }
     }
     catch ( const sqlite::errors::ConstraintUnique& ex )
     {
@@ -851,10 +863,16 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
     auto mrl = fileFs->mrl();
     try
     {
-        parser::Task::createRefreshTask( this, std::move( file ),
-                                         std::move( fileFs ),
-                                         std::move( parentFolder ),
-                                         std::move( parentFolderFs ) );
+        auto task = parser::Task::createRefreshTask( this, std::move( file ),
+                                                     std::move( fileFs ),
+                                                     std::move( parentFolder ),
+                                                     std::move( parentFolderFs ) );
+        if ( task != nullptr )
+        {
+            auto parser = getParser();
+            if ( parser != nullptr )
+                parser->parse( std::move( task ) );
+        }
     }
     catch( const sqlite::errors::ConstraintViolation& ex )
     {
@@ -2255,7 +2273,13 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
         for ( const auto& mrl : backup )
         {
             LOG_DEBUG( "Queuing restore task for ", mrl );
-            parser::Task::createRestoreTask( this, mrl, IFile::Type::Playlist );
+            auto task = parser::Task::createRestoreTask( this, mrl, IFile::Type::Playlist );
+            if ( task != nullptr )
+            {
+                auto parser = getParser();
+                if ( parser != nullptr )
+                    parser->parse( std::move( task ) );
+            }
         }
     }
     resumeBackgroundOperations();
