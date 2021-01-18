@@ -1423,6 +1423,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 migrateModel27to28();
                 previousVersion = 28;
             }
+            if ( previousVersion == 28 )
+            {
+                migrateModel28to29();
+                previousVersion = 29;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -2163,6 +2168,42 @@ void MediaLibrary::migrateModel27to28()
 
     m_settings.setDbModelVersion( 28 );
     t->commit();
+}
+
+void MediaLibrary::migrateModel28to29()
+{
+    /*
+     * This migration doesn't impact the database model but attempts to fix
+     * invalid URL encoding for playlists content.
+     * See #255
+     */
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    const std::string req = "SELECT f.id_file, f.mrl FROM " + File::Table::Name + " f "
+            "INNER JOIN " + Media::Table::Name + " m ON f.media_id = m.id_media "
+            "WHERE f.type = ? AND m.nb_playlists > 0";
+    sqlite::Statement stmt{ dbConn->handle(), req };
+    stmt.execute( IFile::Type::Main );
+    sqlite::Row row;
+    bool needParserStart = false;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        int64_t fileId;
+        std::string mrl;
+        row >> fileId >> mrl;
+        assert( row.hasRemainingColumns() == false );
+        std::string reEncodedMrl = utils::url::encode( utils::url::decode( mrl ) );
+        if ( reEncodedMrl != mrl )
+            File::setMrl( this, reEncodedMrl, fileId );
+    }
+
+    m_settings.setDbModelVersion( 29 );
+    t->commit();
+
+    if ( needParserStart == true )
+        getParserLocked();
 }
 
 void MediaLibrary::migrationEpilogue( uint32_t originalPreviousVersion )
