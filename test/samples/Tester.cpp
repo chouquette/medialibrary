@@ -479,6 +479,17 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
                 {
                     ASSERT_EQ( expectedPlaylist["items"][i]["title"].GetString(), items[i]->title() );
                 }
+                if ( expectedPlaylist["items"][i].HasMember( "mrl" ) )
+                {
+                    auto files = items[i]->files();
+                    auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+                        [](const FilePtr& f ) {
+                            return f->isMain() == true;
+                    });
+                    ASSERT_NE( mainFileIt, cend( files ) );
+                    ASSERT_EQ( expectedPlaylist["items"][i]["mrl"].GetString(),
+                            (*mainFileIt)->mrl() );
+                }
             }
         }
     }
