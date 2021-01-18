@@ -2344,6 +2344,7 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
 
 parser::Parser *MediaLibrary::tryGetParser()
 {
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
     return m_parser.get();
 }
 
