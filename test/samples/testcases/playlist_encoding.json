@@ -1,0 +1,18 @@
+{
+    "input": [
+        "playlist/encoding"
+    ],
+    "expected": {
+        "nbPlaylists": 1,
+        "playlists": [{
+            "name": "playlist.m3u",
+            "nbItems": 1,
+            "items": [
+                {
+                    "mrl": "http://172.18.0.2:8080/?action=stream",
+                    "index": 0
+                }
+            ]
+        }]
+    }
+}
