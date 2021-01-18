@@ -763,7 +763,7 @@ Task::createMediaRefreshTask( MediaLibraryPtr ml, std::shared_ptr<Media> media )
     }
     catch ( const fs::errors::Exception& ex )
     {
-        LOG_INFO( "Failed to create a media restore task: ", ex.what() );
+        LOG_INFO( "Failed to create a media refresh task: ", ex.what() );
         return nullptr;
     }
     assert( fileFs != nullptr );
