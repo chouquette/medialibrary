@@ -2708,7 +2708,7 @@ bool MediaLibrary::forceRescanLocked()
     {
         /*
          * Implicitely create & start the parser, which will invoke restore()
-         * as its first operation, which will start the reseted tasks parsing.
+         * as its first operation, which will start the reset tasks parsing.
          */
         getParserLocked();
     }
