@@ -350,7 +350,7 @@ bool Folder::checkDbModel( MediaLibraryPtr ml )
 }
 
 std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& mrl,
-                                        int64_t parentId, Device& device,
+                                        int64_t parentId, const Device& device,
                                         fs::IDevice& deviceFs )
 {
     std::string path;

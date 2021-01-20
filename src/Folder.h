@@ -91,7 +91,7 @@ public:
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl,
-                                           int64_t parentId, Device& device,
+                                           int64_t parentId, const Device& device,
                                            fs::IDevice& deviceFs );
     static bool excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool ban( MediaLibraryPtr ml, const std::string& mrl );
