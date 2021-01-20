@@ -627,8 +627,7 @@ Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t dev
     if ( deviceId == 0 )
         return make_query<Folder, IFolder>( ml, "*", req, "", banned );
     req += " AND device_id = ?";
-    return make_query<Folder, IFolder>( ml, "*", req, "", banned,
-                                        sqlite::ForeignKey{ deviceId } );
+    return make_query<Folder, IFolder>( ml, "*", req, "", banned, deviceId );
 }
 
 int64_t Folder::id() const
