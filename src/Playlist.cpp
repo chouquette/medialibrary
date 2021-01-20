@@ -33,6 +33,7 @@
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 #include "utils/Url.h"
+#include "utils/Xml.h"
 #include "database/SqliteQuery.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "medialibrary/filesystem/IDirectory.h"
@@ -819,9 +820,11 @@ bool Playlist::writeBackup( const std::string& name,
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<playlist version=\"1\" xmlns=\"http://xspf.org/ns/0/\">\n"
     };
-    doc += "<title>" + name + "</title>\n<trackList>\n";
+    doc += "<title>" + utils::xml::encode( name ) + "</title>\n<trackList>\n";
     for ( const auto& mrl : mrls )
-        doc += "<track><location>" + mrl + "</location></track>\n";
+        doc += "<track><location>" +
+                    utils::xml::encode( mrl ) +
+                "</location></track>\n";
     doc += "</trackList>\n</playlist>";
 
     auto buff = doc.c_str();

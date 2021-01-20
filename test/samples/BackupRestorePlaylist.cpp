@@ -103,12 +103,12 @@ TEST_F( MiscTests, ExportRestorePlaylist )
     auto pl1 = std::static_pointer_cast<Playlist>( m_ml->createPlaylist( "Exported Playlist 1" ) );
     auto m1 = media[0];
     auto m2 = media[1];
-    auto m3 = m_ml->addExternalMedia( "http://example.org/sea&otter.avi", -1 );
+    auto m3 = m_ml->addExternalMedia( "http://example.org/sea&ottér.avi", -1 );
     pl1->append( *m1 );
     pl1->append( *m2 );
     pl1->append( *m3 );
 
-    auto pl2 = std::static_pointer_cast<Playlist>( m_ml->createPlaylist( "Exported Playlist 2" ) );
+    auto pl2 = std::static_pointer_cast<Playlist>( m_ml->createPlaylist( "Exported Playlist <2>" ) );
     pl2->append( *m3 );
     pl2->append( *m2 );
     pl2->append( *m1 );
@@ -138,5 +138,5 @@ TEST_F( MiscTests, ExportRestorePlaylist )
     ASSERT_EQ( m3->title(), media[0]->title() );
     ASSERT_EQ( m2->title(), media[1]->title() );
     ASSERT_EQ( m1->title(), media[2]->title() );
-    ASSERT_EQ( "Exported Playlist 2", playlist2->name() );
+    ASSERT_EQ( "Exported Playlist <2>", playlist2->name() );
 }
