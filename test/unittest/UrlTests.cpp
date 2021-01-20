@@ -75,7 +75,7 @@ TEST( UrlUtils, schemeIs )
   ASSERT_FALSE( utils::url::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
 }
 
-TEST( FsUtils, toLocalPath )
+TEST( Urlutils, toLocalPath )
 {
 #ifndef _WIN32
     ASSERT_EQ( "/a/b/c/movie.avi", utils::url::toLocalPath( "file:///a/b/c/movie.avi" ) );
@@ -94,7 +94,7 @@ TEST( FsUtils, toLocalPath )
 #endif
 }
 
-TEST( FsUtils, Path )
+TEST( Urlutils, Path )
 {
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://host/path/to/file.mkv" ) );
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://///host/path/to/file.mkv" ) );
