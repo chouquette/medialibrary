@@ -283,7 +283,7 @@ void Thumbnail::setHash( std::string hash, uint64_t fileSize )
     assert( m_id == 0 );
     /* We also don't care about thumbnail hash for anything not embedded in a media */
     assert( m_origin == Origin::Media );
-    m_hash = hash;
+    m_hash = std::move( hash );
     m_fileSize = fileSize;
 }
 
