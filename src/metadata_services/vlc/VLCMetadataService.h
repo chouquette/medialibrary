@@ -37,7 +37,7 @@ namespace parser
 class VLCEmbeddedThumbnail4_0 : public IEmbeddedThumbnail
 {
 public:
-    VLCEmbeddedThumbnail4_0( VLC::Picture pic );
+    explicit VLCEmbeddedThumbnail4_0( VLC::Picture pic );
     bool save( const std::string& path ) override;
     virtual size_t size() const override;
     virtual std::string hash() const override;
@@ -52,7 +52,7 @@ private:
 class VLCEmbeddedThumbnailForced : public IEmbeddedThumbnail
 {
 public:
-    VLCEmbeddedThumbnailForced( libvlc_picture_t* pic );
+    explicit VLCEmbeddedThumbnailForced( libvlc_picture_t* pic );
     virtual ~VLCEmbeddedThumbnailForced();
     bool save( const std::string& path ) override;
     virtual size_t size() const override;
@@ -68,7 +68,7 @@ private:
 class VLCEmbeddedThumbnail3_0 : public IEmbeddedThumbnail
 {
 public:
-    VLCEmbeddedThumbnail3_0( std::string path );
+    explicit VLCEmbeddedThumbnail3_0( std::string path );
     bool save( const std::string& path ) override;
     virtual size_t size() const override;
     virtual std::string hash() const override;
