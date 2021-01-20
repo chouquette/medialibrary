@@ -156,7 +156,7 @@ Query<IMedia> Artist::searchTracks( const std::string& pattern, const QueryParam
     return Media::searchArtistTracks( m_ml, pattern, m_id, params );
 }
 
-bool Artist::addMedia( Media& media )
+bool Artist::addMedia( const Media& media )
 {
     static const std::string req = "INSERT INTO " + MediaRelationTable::Name +
             " VALUES(?, ?)";
