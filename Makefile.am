@@ -116,6 +116,7 @@ libmedialibrary_la_SOURCES = \
 	src/utils/File.cpp \
 	src/utils/TitleAnalyzer.cpp \
 	src/utils/Md5.cpp \
+	src/utils/Xml.cpp \
 	src/Bookmark.cpp \
 	src/MediaGroup.cpp \
 	$(NULL)
@@ -181,6 +182,7 @@ noinst_HEADERS = \
 	src/utils/TitleAnalyzer.h \
 	src/utils/Defer.h \
 	src/utils/Md5.h \
+	src/utils/Xml.h \
 	src/VideoTrack.h \
 	src/Metadata.h \
 	src/compat/Thread.h \

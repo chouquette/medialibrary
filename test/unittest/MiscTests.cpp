@@ -32,6 +32,7 @@
 #include "utils/Strings.h"
 #include "utils/Defer.h"
 #include "utils/Md5.h"
+#include "utils/Xml.h"
 
 #include "Artist.h"
 #include "Media.h"
@@ -245,6 +246,14 @@ TEST_F( Misc, Utf8NbBytes )
 
     ASSERT_EQ( 0u, utils::str::utf8::nbBytes( "INVALID\xC3", 5, 3 ) );
     ASSERT_EQ( 0u, utils::str::utf8::nbBytes( "\xEC\xEC", 5, 3 ) );
+}
+
+TEST_F( Misc, XmlEncode )
+{
+    ASSERT_EQ( "1 &lt; 2", utils::xml::encode( "1 < 2" ) );
+    ASSERT_EQ( "2 &gt; 1", utils::xml::encode( "2 > 1" ) );
+    ASSERT_EQ( "&apos;test&apos; &amp; &quot;double test&quot;",
+               utils::xml::encode( "'test' & \"double test\"" ) );
 }
 
 TEST_F( Misc, Defer )
