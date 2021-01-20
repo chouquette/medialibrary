@@ -61,7 +61,7 @@ public:
     bool seekAhead( Task& task, float position );
     void setupVout( Task& task );
     bool takeThumbnail( Task& task, const std::string& dest );
-    bool compress( Task& task, const std::string& dest );
+    bool compress( const Task& task, const std::string& dest );
 
 private:
     std::unique_ptr<uint8_t[]> m_buff;

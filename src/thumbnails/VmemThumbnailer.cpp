@@ -208,7 +208,7 @@ bool VmemThumbnailer::takeThumbnail( Task& task, const std::string& dest )
     return compress( task, dest );
 }
 
-bool VmemThumbnailer::compress( Task& task, const std::string& dest )
+bool VmemThumbnailer::compress( const Task& task, const std::string& dest )
 {
     auto hOffset = task.width > task.desiredWidth ? ( task.width - task.desiredWidth ) / 2 : 0;
     auto vOffset = task.height > task.desiredHeight ? ( task.height - task.desiredHeight ) / 2 : 0;
