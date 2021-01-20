@@ -510,7 +510,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
     auto mrl = item.mrl();
     const auto& tracks = item.tracks();
 
-    auto mediaType = IMedia::Type::Unknown;
+    IMedia::Type mediaType;
     if ( tracks.empty() == false )
     {
         if ( std::find_if( begin( tracks ), end( tracks ), [](const IItem::Track& t) {
