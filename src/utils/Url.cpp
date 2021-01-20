@@ -79,6 +79,88 @@ namespace utils
 namespace url
 {
 
+parts split( const std::string& url )
+{
+    parts res{};
+    auto schemePos = url.find( "://" );
+    if ( schemePos == std::string::npos )
+    {
+        res.path = url;
+        return res;
+    }
+    std::copy( url.cbegin(), url.cbegin() + schemePos,
+               std::back_inserter( res.scheme ) );
+
+
+    if ( res.scheme == "file" )
+    {
+        std::copy( url.cbegin() + schemePos + 3, url.cend(),
+                   std::back_inserter( res.path ) );
+        return res;
+    }
+
+    const auto authorityBegin = url.cbegin() + schemePos + 3;
+    auto authorityEnd = std::find( authorityBegin, url.cend(), '/' );
+    const auto queryBegin = std::find( authorityBegin, url.cend(), '?' );
+    const auto fragmentBegin = std::find( authorityBegin, url.cend(), '#' );
+
+    if ( authorityEnd == url.cend() )
+    {
+        if ( queryBegin != url.cend() )
+            authorityEnd = queryBegin;
+        else
+            authorityEnd = fragmentBegin;
+    }
+
+    {
+        /* Split the authority into its actual components */
+        auto userInfoEnd = std::find( authorityBegin, authorityEnd, '@' );
+        if ( userInfoEnd != authorityEnd )
+        {
+            std::copy( authorityBegin, userInfoEnd,
+                       std::back_inserter( res.userInfo ) );
+            /* Skip the '@' when copying the host */
+            ++userInfoEnd;
+            res.hostMarker = true;
+        }
+        else
+            userInfoEnd = authorityBegin;
+
+        auto portBegin = std::find( userInfoEnd, authorityEnd, ':' );
+        if ( portBegin != authorityEnd )
+            std::copy( portBegin + 1, authorityEnd, std::back_inserter( res.port ) );
+        else
+            portBegin = authorityEnd;
+        std::copy( userInfoEnd, portBegin, std::back_inserter( res.host ) );
+
+    }
+    if ( authorityEnd == url.cend() )
+    {
+        /*
+         * If we don't have a clear end for the authority segment, it means the
+         * end is the url end, so we don't have anything else to split
+         */
+        return res;
+    }
+
+    auto pathEnd = queryBegin != url.cend() ? queryBegin : fragmentBegin;
+    std::copy( authorityEnd, pathEnd,
+               std::back_inserter( res.path ) );
+    if ( queryBegin != url.cend() )
+    {
+        std::copy( queryBegin + 1,
+                   fragmentBegin != url.cend() ? fragmentBegin : url.cend(),
+                   std::back_inserter( res.query ) );
+    }
+    if ( fragmentBegin != url.cend() )
+    {
+        std::copy( fragmentBegin + 1, url.cend(),
+                   std::back_inserter( res.fragments ) );
+    }
+    return res;
+}
+
+
 std::string decode( const std::string& str )
 {
     std::string res;
@@ -106,39 +188,65 @@ std::string decode( const std::string& str )
 
 std::string encode( const std::string& str )
 {
-    std::string res;
-
-    res.reserve( str.size() );
-    auto schemePos = str.find( "://" );
-    auto i = str.cbegin();
-    if ( schemePos != std::string::npos )
+    auto parts = split( str );
+    std::string res{};
+    res.reserve( str.length() );
+    /*
+     * If the file is a local path, we need to encode everything as the
+     * characters won't have any URL related meaning
+     */
+    if ( parts.scheme == "file" || parts.scheme.empty() == true )
     {
-        i += schemePos + 3;
-        std::copy( str.cbegin(), i, std::back_inserter( res ) );
-        if ( str.compare( 0, schemePos, "file" ) != 0 )
-        {
-            /* We need to allow some special characters in the host segment */
-            auto endHost = str.find( '/', schemePos + 3 );
-            if ( endHost != std::string::npos )
-                i = encodeSegment( res, i, str.cbegin() + endHost, "@:" );
-            else
-            {
-                encodeSegment( res, i, str.cend(), "@:" );
-                return res;
-            }
-        }
-    }
+        if ( parts.scheme.empty() == false )
+            res += "file://";
+        auto pathBegin = parts.path.cbegin();
 #ifdef _WIN32
-    if ( *i == '/' && isalpha( *(i + 1) ) && *(i + 2) == ':' )
-    {
-        // Don't encode the ':' after the drive letter.
-        // All other ':' need to be encoded, there are not allowed in a file path
-        // on windows, but they might appear in urls
-        std::copy( i, i + 3, std::back_inserter( res ) );
-        i += 3;
-    }
+        if ( *pathBegin == '/' && isalpha( *(pathBegin + 1) ) && *(pathBegin + 2) == ':' )
+        {
+            // Don't encode the ':' after the drive letter.
+            // All other ':' need to be encoded, there are not allowed in a file path
+            // on windows, but they might appear in urls
+            std::copy( pathBegin, pathBegin + 3, std::back_inserter( res ) );
+            pathBegin += 3;
+        }
 #endif
-    encodeSegment( res, i, str.end(), nullptr );
+        encodeSegment( res, pathBegin, parts.path.cend(), nullptr );
+        return res;
+    }
+    /*
+     * We already accept any character in ".-_~/" through isSafe(), but we need
+     * to accept more depending on the URL segments:
+     */
+    encodeSegment( res, parts.scheme.cbegin(), parts.scheme.cend(), "+" );
+    res += "://";
+    if ( parts.userInfo.empty() == false )
+    {
+        encodeSegment( res, parts.userInfo.cbegin(), parts.userInfo.cend(),
+                       "!$&'()*+,;=:" );
+    }
+    if ( parts.hostMarker == true )
+        res += '@';
+    encodeSegment( res, parts.host.cbegin(), parts.host.cend(), "[]" );
+    if ( parts.port.empty() == false )
+    {
+        res += ':';
+        res += parts.port;
+    }
+
+    encodeSegment( res, parts.path.cbegin(), parts.path.cend(), "!$&'()*+,;=:@" );
+
+    if ( parts.query.empty() == false )
+    {
+        res += '?';
+        encodeSegment( res, parts.query.cbegin(), parts.query.cend(),
+                       "!$&'()*+,;=:@?" );
+    }
+    if ( parts.fragments.empty() == false )
+    {
+        res += '#';
+        encodeSegment( res, parts.query.cbegin(), parts.query.cend(),
+                       "!$&'()*+,;=:@?" );
+    }
     return res;
 }
 

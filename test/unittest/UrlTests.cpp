@@ -39,15 +39,18 @@ TEST( UrlUtils, encode )
     ASSERT_EQ( "/file/with%23sharp", utils::url::encode( "/file/with#sharp" ) );
     ASSERT_EQ( "file:///file%20with%20spaces/test.mp4",
                utils::url::encode( "file:///file with spaces/test.mp4" ) );
-    ASSERT_EQ( "http://foo:bar@examples.com:1234/h%40ck3rz%3A%20episode2.avi",
+    ASSERT_EQ( "http://foo:bar@examples.com:1234/h@ck3rz:%20episode2.avi",
                utils::url::encode( "http://foo:bar@examples.com:1234/h@ck3rz: episode2.avi" ) );
     ASSERT_EQ( "http://justhost", utils::url::encode( "http://justhost" ) );
     ASSERT_EQ( "http://@1.2.3.4", utils::url::encode( "http://@1.2.3.4" ) );
     ASSERT_EQ( "http:///invalid.url", utils::url::encode( "http:///invalid.url" ) );
     ASSERT_EQ( "file://%40encodeme%3A/file.mkv", utils::url::encode( "file://@encodeme:/file.mkv" ) );
+    ASSERT_EQ( "http://host/path/to?/file.mkv?param=value", utils::url::encode( "http://host/path/to?/file.mkv?param=value" ) );
+    ASSERT_EQ( "file:///path/to%3F/file.mkv%3Fparam%3Dvalue", utils::url::encode( "file:///path/to?/file.mkv?param=value" ) );
 #ifdef _WIN32
     ASSERT_EQ( "file:///C:/file%3Atest.mkv", utils::url::encode( "file:///C:/file:test.mkv" ) );
     ASSERT_EQ( "file://", utils::url::encode( "file://" ) );
+    ASSERT_EQ( "file:///C", utils::url::encode( "file:///C" ) );
 #endif
 }
 
@@ -75,7 +78,39 @@ TEST( UrlUtils, schemeIs )
   ASSERT_FALSE( utils::url::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
 }
 
-TEST( Urlutils, toLocalPath )
+TEST( UrlUtils, Split )
+{
+    auto test = [](const std::string& url, const std::string& scheme,
+                   const std::string& userInfo, const std::string& host,
+                   const std::string& port, const std::string& path,
+                   const std::string& query, const std::string& fragments) {
+        auto p = utils::url::split( url );
+        ASSERT_EQ( scheme, p.scheme );
+        ASSERT_EQ( userInfo, p.userInfo );
+        ASSERT_EQ( host, p.host );
+        ASSERT_EQ( port, p.port );
+        ASSERT_EQ( path, p.path );
+        ASSERT_EQ( query, p.query );
+        ASSERT_EQ( fragments, p.fragments );
+    };
+    test( "file:///path/to/file", "file", "", "", "",  "/path/to/file", "", "" );
+    test( "/path/to/file", "", "", "", "", "/path/to/file", "", "" );
+    test( "foo://example.com:8042/over/there?name=ferret#nose", "foo",
+          "", "example.com", "8042", "/over/there", "name=ferret", "nose" );
+    test( "otter:///?#foo", "otter", "", "", "", "/", "", "foo" );
+    test( "otter:///?#", "otter", "", "", "", "/", "", "" );
+    test( "otter:///path/to/file#anchor", "otter", "", "", "", "/path/to/file", "", "anchor" );
+    test( "", "", "", "", "", "", "", "" );
+    test( "scheme://", "scheme", "", "", "", "", "", "" );
+    test( "p://u:p@host:123/a/b/c?o=v", "p", "u:p", "host", "123", "/a/b/c", "o=v", "" );
+    test( "protocol://john:doe@1.2.3.4:567", "protocol", "john:doe",
+          "1.2.3.4", "567", "", "", "" );
+    test( "scheme://host:80#foo", "scheme", "", "host", "80", "", "", "foo" );
+    test( "scheme://@host:80#foo", "scheme", "", "host", "80", "", "", "foo" );
+    test( "scheme://@host:#foo", "scheme", "", "host", "", "", "", "foo" );
+}
+
+TEST( UrlUtils, toLocalPath )
 {
 #ifndef _WIN32
     ASSERT_EQ( "/a/b/c/movie.avi", utils::url::toLocalPath( "file:///a/b/c/movie.avi" ) );
@@ -94,7 +129,7 @@ TEST( Urlutils, toLocalPath )
 #endif
 }
 
-TEST( Urlutils, Path )
+TEST( UrlUtils, Path )
 {
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://host/path/to/file.mkv" ) );
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://///host/path/to/file.mkv" ) );

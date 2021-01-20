@@ -66,6 +66,27 @@ std::string  toLocalPath( const std::string& mrl );
  */
 bool schemeIs( const std::string& scheme, const std::string& mrl );
 
+struct parts
+{
+    std::string scheme;
+    std::string userInfo;
+    bool hostMarker;
+    std::string host;
+    std::string port;
+    std::string path;
+    std::string query;
+    std::string fragments;
+};
+
+/**
+ * @brief split Splits an URL as per RFC 3986
+ * @param url The URL to split
+ * @return A parts struct representing the different URL segments
+ *
+ * See https://tools.ietf.org/html/rfc3986#section-3
+ */
+parts split( const std::string& url );
+
 }
 }
 }
