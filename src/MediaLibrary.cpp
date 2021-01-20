@@ -2187,7 +2187,6 @@ void MediaLibrary::migrateModel28to29()
     sqlite::Statement stmt{ dbConn->handle(), req };
     stmt.execute( IFile::Type::Main );
     sqlite::Row row;
-    bool needParserStart = false;
     while ( ( row = stmt.row() ) != nullptr )
     {
         int64_t fileId;
@@ -2201,9 +2200,6 @@ void MediaLibrary::migrateModel28to29()
 
     m_settings.setDbModelVersion( 29 );
     t->commit();
-
-    if ( needParserStart == true )
-        getParserLocked();
 }
 
 void MediaLibrary::migrationEpilogue( uint32_t originalPreviousVersion )
