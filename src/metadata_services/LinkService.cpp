@@ -188,10 +188,10 @@ Status LinkService::linkToMedia( IItem &item )
             item.setFile( std::move( file ) );
         }
         auto tracks = item.tracks();
-        for ( const auto& t : tracks )
+        for ( const auto& tr : tracks )
         {
-            media->addAudioTrack( t.codec, t.bitrate, t.a.rate, t.a.nbChannels,
-                                  t.language, t.description, item.fileId() );
+            media->addAudioTrack( tr.codec, tr.bitrate, tr.a.rate, tr.a.nbChannels,
+                                  tr.language, tr.description, item.fileId() );
         }
         t->commit();
     }
