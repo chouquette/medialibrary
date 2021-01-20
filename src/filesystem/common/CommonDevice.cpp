@@ -41,7 +41,7 @@ CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoi
                             std::string scheme, bool isRemovable, bool isNetwork )
     : m_uuid( uuid )
     , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
-    , m_scheme( scheme )
+    , m_scheme( std::move( scheme ) )
     , m_removable( isRemovable )
     , m_isNetwork( isNetwork )
 {
