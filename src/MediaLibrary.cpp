@@ -2521,7 +2521,6 @@ bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
             if ( fsFactory->start( &m_fsFactoryCb ) == true )
             {
                 fsFactory->refreshDevices();
-                m_fsFactories.push_back( std::move( fsFactory ) );
                 affected = true;
             }
         }
