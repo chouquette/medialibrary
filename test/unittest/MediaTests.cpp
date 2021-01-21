@@ -60,6 +60,7 @@ TEST_F( Medias, Create )
     ASSERT_EQ( -1, m->progress() );
     ASSERT_NE( 0u, m->insertionDate() );
     ASSERT_TRUE( m->isDiscoveredMedia() );
+    ASSERT_TRUE( m->isPresent() );
 
     auto files = m->files();
     ASSERT_EQ( 1u, files.size() );

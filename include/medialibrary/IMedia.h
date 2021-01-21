@@ -393,6 +393,15 @@ public:
     /// with groups that may have been organized manually by the user.
     ///
     virtual bool regroup() = 0;
+    ///
+    /// \brief isPresent Returns true if the media is present
+    ///
+    /// The media is considered present if the device containing its main file
+    /// is present (ie. if a removable drive is mounted, or a network drive
+    /// connected)
+    /// This is only relevent when the media is not external
+    ///
+    virtual bool isPresent() const = 0;
 };
 
 }

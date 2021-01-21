@@ -81,7 +81,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_title( row.load<decltype(m_title)>( 10 ) )
     , m_filename( row.load<decltype(m_filename)>( 11 ) )
     , m_isFavorite( row.load<decltype(m_isFavorite)>( 12 ) )
-    // Skip is_present
+    , m_isPresent( row.load<decltype(m_isPresent)>( 13 ) )
     , m_deviceId( row.load<decltype(m_deviceId)>( 14 ) )
     , m_nbPlaylists( row.load<unsigned int>( 15 ) )
     , m_folderId( row.load<decltype(m_folderId)>( 16 ) )
@@ -112,6 +112,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     // When creating a Media, meta aren't parsed, and therefor, the title is the filename
     , m_filename( title )
     , m_isFavorite( false )
+    , m_isPresent( true )
     , m_deviceId( deviceId )
     , m_nbPlaylists( 0 )
     , m_folderId( folderId )
@@ -138,6 +139,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_title( fileName )
     , m_filename( fileName )
     , m_isFavorite( false )
+    , m_isPresent( true )
     , m_deviceId( 0 )
     , m_nbPlaylists( 0 )
     , m_folderId( 0 )
@@ -908,6 +910,11 @@ bool Media::removeBookmark( int64_t time )
 bool Media::removeAllBookmarks()
 {
     return Bookmark::removeAll( m_ml, m_id );
+}
+
+bool Media::isPresent() const
+{
+    return m_isPresent;
 }
 
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,

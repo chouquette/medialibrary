@@ -346,6 +346,7 @@ TEST_F( DeviceFs, UnmountDisk )
 
     auto media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
+    auto mediaId = media->id();
 
     fsMock->unmountDevice( RemovableDeviceUuid );
 
@@ -357,6 +358,10 @@ TEST_F( DeviceFs, UnmountDisk )
     media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_EQ( nullptr, media );
 
+    media = ml->media( mediaId );
+    ASSERT_NE( nullptr, media );
+    ASSERT_FALSE( media->isPresent() );
+
     fsMock->remountDevice( RemovableDeviceUuid );
 
     Reload();
@@ -366,6 +371,10 @@ TEST_F( DeviceFs, UnmountDisk )
 
     media = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
+
+    media = ml->media( mediaId );
+    ASSERT_NE( nullptr, media );
+    ASSERT_TRUE( media->isPresent() );
 }
 
 TEST_F( DeviceFs, ReplugDisk )

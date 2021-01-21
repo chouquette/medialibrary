@@ -266,6 +266,8 @@ class Media : public IMedia,
         virtual bool removeBookmark( int64_t time ) override;
         virtual bool removeAllBookmarks() override;
 
+        virtual bool isPresent() const override;
+
         static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
         static Query<IMedia> listInProgress( MediaLibraryPtr ml, Type type,
                                              const QueryParameters* params );
@@ -354,6 +356,7 @@ private:
         // might be used as a fallback
         std::string m_filename;
         bool m_isFavorite;
+        bool m_isPresent;
         int64_t m_deviceId;
         uint32_t m_nbPlaylists;
         int64_t m_folderId;
