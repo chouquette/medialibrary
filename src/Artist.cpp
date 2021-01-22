@@ -648,6 +648,8 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
     // we can simply filter out based on the number of associated albums
     if ( included == ArtistIncluded::AlbumArtistOnly )
         req += " AND nb_albums > 0";
+    else
+        req += " AND nb_tracks > 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( name ) );
@@ -659,7 +661,8 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
     std::string req = "FROM " + Artist::Table::Name + " WHERE ";
     if ( included == ArtistIncluded::AlbumArtistOnly )
         req += "nb_albums > 0 AND";
-
+    else
+        req += " nb_tracks > 0 AND";
     req += " is_present != 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ) );
