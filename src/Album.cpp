@@ -341,7 +341,9 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
     // counter productive, to maintain a cache that respects all orderings.
     std::string req = "FROM " + Media::Table::Name + " med "
         " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
-        " WHERE att.album_id = ? AND med.is_present != 0";
+        " WHERE att.album_id = ?";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       orderTracksBy( params ), m_id );
 }
@@ -352,8 +354,10 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
         return {};
     std::string req = "FROM " + Media::Table::Name + " med "
             " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
-            " WHERE att.album_id = ? AND med.is_present != 0"
+            " WHERE att.album_id = ?"
             " AND genre_id = ?";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       orderTracksBy( params ), m_id, genre->id() );
 }
@@ -757,8 +761,9 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
     req += addRequestJoin( params, false );
     req += "WHERE id_album IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
-            FtsTable::Name + " MATCH ?)"
-            "AND alb.is_present != 0";
+            FtsTable::Name + " MATCH ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND alb.is_present != 0";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ) );
@@ -772,8 +777,9 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
     req += "WHERE id_album IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)"
-            "AND alb.is_present != 0 "
-            "AND artist_id = ?";
+            " AND artist_id = ?";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND alb.is_present != 0";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -787,9 +793,10 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
                         "ON att.album_id = alb.id_album "
                     "INNER JOIN " + Media::Table::Name + " m "
                         "ON att.media_id = m.id_media "
-                    "WHERE (att.artist_id = ? OR alb.artist_id = ?) "
-                        "AND m.is_present != 0 ";
-    std::string groupAndOrder = "GROUP BY att.album_id ORDER BY ";
+                    "WHERE (att.artist_id = ? OR alb.artist_id = ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    std::string groupAndOrder = " GROUP BY att.album_id ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
@@ -848,11 +855,14 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string countReq = "SELECT COUNT(*) FROM " + Table::Name + " WHERE "
-            "is_present != 0";
+    std::string countReq = "SELECT COUNT(*) FROM " + Table::Name;
     std::string req = "SELECT alb.* FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
-    req += "WHERE alb.is_present != 0 ";
+    if ( params == nullptr || params->includeMissing == false )
+    {
+        countReq += " WHERE is_present != 0";
+        req += "WHERE alb.is_present != 0 ";
+    }
     req += orderBy( params );
     return make_query_with_count<Album, IAlbum>( ml, std::move( countReq ),
                                                  std::move( req ) );
