@@ -75,6 +75,7 @@ public:
      */
     virtual unsigned int nbAlbums() const = 0;
     virtual unsigned int nbTracks() const = 0;
+    virtual bool isPresent() const = 0;
 };
 
 }

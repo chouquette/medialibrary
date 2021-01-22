@@ -272,6 +272,11 @@ unsigned int Artist::nbTracks() const
     return m_nbTracks;
 }
 
+bool Artist::isPresent() const
+{
+    return m_isPresent;
+}
+
 void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {

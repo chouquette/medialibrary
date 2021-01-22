@@ -106,6 +106,7 @@ public:
     bool setMusicBrainzId( const std::string& musicBrainzId );
     virtual unsigned int nbAlbums() const override;
     virtual unsigned int nbTracks() const override;
+    virtual bool isPresent() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
