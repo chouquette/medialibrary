@@ -80,8 +80,8 @@ enum class SortingCriteria
 
 struct QueryParameters
 {
-    SortingCriteria sort;
-    bool desc;
+    SortingCriteria sort = SortingCriteria::Default;
+    bool desc = false;
 };
 
 enum class InitializeResult
