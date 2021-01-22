@@ -324,6 +324,10 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     albums = T->ml->albums( &params )->all();
     ASSERT_EQ( 3u, albums.size() );
 
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+
+
     // Now check that everything appears again when we plug the device back in
 
     T->fsMock->addDevice( device );

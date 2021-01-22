@@ -117,7 +117,8 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     }
     req += "WHERE mar.artist_id = ? ";
 
-    req += "AND med.is_present != 0";
+    if ( params == nullptr || params->includeMissing == false )
+        req += "AND med.is_present != 0";
     std::string orderBy = "ORDER BY ";
     switch ( sort )
     {
@@ -641,8 +642,9 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                ArtistIncluded included, const QueryParameters* params )
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
-            "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)"
-            "AND is_present != 0";
+            "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND is_present != 0";
     // We are searching based on the name, so we're ignoring unknown/various artist
     // This means all artist we find has at least one track associated with it, so
     // we can simply filter out based on the number of associated albums
@@ -660,10 +662,11 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
 {
     std::string req = "FROM " + Artist::Table::Name + " WHERE ";
     if ( included == ArtistIncluded::AlbumArtistOnly )
-        req += "nb_albums > 0 AND";
+        req += "nb_albums > 0";
     else
-        req += " nb_tracks > 0 AND";
-    req += " is_present != 0";
+        req += "nb_tracks > 0";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND is_present != 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ) );
 }
