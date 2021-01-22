@@ -80,8 +80,11 @@ enum class SortingCriteria
 
 struct QueryParameters
 {
+    /* This query sorting parameter. Its actual meaning is query dependent */
     SortingCriteria sort = SortingCriteria::Default;
+    /* Descending order */
     bool desc = false;
+    /* If true, media that are stored on missing devices will still be returned */
     bool includeMissing = false;
 };
 
