@@ -156,9 +156,12 @@ static void UnmountDisk( DeviceFsTests* T )
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
+    T->enforceFakeMediaTypes();
 
     auto files = T->ml->files();
     ASSERT_EQ( 3u + DeviceFsTests::NbRemovableMedia, files.size() );
+    auto allVideos = T->ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 4u, allVideos.size() );
 
     auto media = T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
@@ -177,6 +180,13 @@ static void UnmountDisk( DeviceFsTests* T )
     media = T->ml->media( mediaId );
     ASSERT_NE( nullptr, media );
     ASSERT_FALSE( media->isPresent() );
+
+    allVideos = T->ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 2u, allVideos.size() );
+    QueryParameters params{};
+    params.includeMissing = true;
+    allVideos = T->ml->videoFiles( &params )->all();
+    ASSERT_EQ( 4u, allVideos.size() );
 
     T->fsMock->remountDevice( DeviceFsTests::RemovableDeviceUuid );
 
