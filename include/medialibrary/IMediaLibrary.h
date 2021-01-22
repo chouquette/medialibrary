@@ -82,6 +82,7 @@ struct QueryParameters
 {
     SortingCriteria sort = SortingCriteria::Default;
     bool desc = false;
+    bool includeMissing = false;
 };
 
 enum class InitializeResult
