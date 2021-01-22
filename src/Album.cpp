@@ -375,6 +375,11 @@ Query<IMedia> Album::searchTracks( const std::string& pattern,
     return Media::searchAlbumTracks( m_ml, pattern, m_id, params );
 }
 
+bool Album::isPresent() const
+{
+    return m_isPresent;
+}
+
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                              unsigned int discNumber, int64_t artistId, Genre* genre )
 {

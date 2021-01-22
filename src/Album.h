@@ -119,6 +119,8 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual Query<IMedia> searchTracks( const std::string& pattern,
                                             const QueryParameters* params = nullptr ) const override;
 
+        virtual bool isPresent() const override;
+
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
         static void createIndexes( sqlite::Connection* dbConnection );

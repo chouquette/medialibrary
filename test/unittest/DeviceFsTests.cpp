@@ -276,8 +276,10 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
         artist->addMedia( *media );
     }
     // And an album that will disappear, along with its artist
+    int64_t removableAlbumId;
     {
         auto album = std::static_pointer_cast<Album>( T->ml->createAlbum( "album 2" ) );
+        removableAlbumId = album->id();
         auto album2 = std::static_pointer_cast<Album>( T->ml->createAlbum( "album 3" ) );
         auto media1 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
         auto media2 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" ) );
@@ -309,6 +311,9 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     ASSERT_EQ( 3u, albums.size() );
     auto artists = T->ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
+    auto removableAlbum = T->ml->album( removableAlbumId );
+    ASSERT_NE( nullptr, removableAlbum );
+    ASSERT_TRUE( removableAlbum->isPresent() );
 
     auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
 
@@ -327,6 +332,9 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     artists = T->ml->artists( ArtistIncluded::All, &params )->all();
     ASSERT_EQ( 2u, artists.size() );
 
+    removableAlbum = T->ml->album( removableAlbumId );
+    ASSERT_NE( nullptr, removableAlbum );
+    ASSERT_FALSE( removableAlbum->isPresent() );
 
     // Now check that everything appears again when we plug the device back in
 

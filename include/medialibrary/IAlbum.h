@@ -89,6 +89,10 @@ public:
 
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief isPresent Returns true if at least one track is present
+     */
+    virtual bool isPresent() const = 0;
 };
 
 }
