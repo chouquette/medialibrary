@@ -738,40 +738,40 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                             " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
                    " END";
         }
-    case Triggers::UpdateMediaCountOnPresenceChange:
-    {
-        assert( dbModel >= 26 );
-        return "CREATE TRIGGER " + triggerName( t, dbModel ) +
-               " AFTER UPDATE OF is_present ON " + Media::Table::Name +
-               " WHEN old.is_present != new.is_present"
-                   " AND new.group_id IS NOT NULL"
-               " BEGIN"
-               " UPDATE " + Table::Name + " SET"
-                    /* Compute the increment in 2 steps: first set it to 1 if the
-                     * media type matches the targeted field, then negate it if
-                     * the media went missing
-                     */
-                    " nb_video = nb_video + "
-                        " (CASE new.type WHEN " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Video ) ) +
-                        " THEN 1 ELSE 0 END) *"
-                        " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
-                    " nb_audio = nb_audio + "
-                        " (CASE new.type WHEN " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Audio ) ) +
-                        " THEN 1 ELSE 0 END) *"
-                        " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
-                    " nb_unknown = nb_unknown + "
-                        " (CASE new.type WHEN " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Unknown ) ) +
-                        " THEN 1 ELSE 0 END) *"
-                        " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                    " WHERE id_group = new.group_id;"
-               " END";
-    }
+        case Triggers::UpdateMediaCountOnPresenceChange:
+        {
+            assert( dbModel >= 26 );
+            return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+                   " AFTER UPDATE OF is_present ON " + Media::Table::Name +
+                   " WHEN old.is_present != new.is_present"
+                       " AND new.group_id IS NOT NULL"
+                   " BEGIN"
+                   " UPDATE " + Table::Name + " SET"
+                        /* Compute the increment in 2 steps: first set it to 1 if the
+                         * media type matches the targeted field, then negate it if
+                         * the media went missing
+                         */
+                        " nb_video = nb_video + "
+                            " (CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                IMedia::Type::Video ) ) +
+                            " THEN 1 ELSE 0 END) *"
+                            " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
+                        " nb_audio = nb_audio + "
+                            " (CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                IMedia::Type::Audio ) ) +
+                            " THEN 1 ELSE 0 END) *"
+                            " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
+                        " nb_unknown = nb_unknown + "
+                            " (CASE new.type WHEN " +
+                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                IMedia::Type::Unknown ) ) +
+                            " THEN 1 ELSE 0 END) *"
+                            " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                        " WHERE id_group = new.group_id;"
+                   " END";
+        }
         default:
             assert( !"Invalid trigger" );
     }
