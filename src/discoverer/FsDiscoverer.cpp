@@ -216,8 +216,13 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
     {
         if ( interruptProbe.isInterrupted() == true )
             break;
-        // fetchRootFolders only returns present folders
-        assert( f->isPresent() == true );
+        /*
+         * We only fetch present folders, but during the reload (or even between
+         * the fetch from database & the time we actually use the results)
+         * another thread may have set the containing device to missing
+         */
+        if ( f->isPresent() == false )
+            continue;
         std::string mrl;
         try
         {
