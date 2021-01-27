@@ -174,7 +174,7 @@ bool FsDiscoverer::reload()
     resetInterrupt();
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
-    for ( const auto& f : rootFolders )
+    for ( auto& f : rootFolders )
     {
         if ( isInterrupted() == true )
             break;
@@ -214,7 +214,7 @@ bool FsDiscoverer::reload()
             continue;
 
         m_cb->onDiscoveryStarted( mrl );
-        auto res = reloadFolder( f, *fsFactory );
+        auto res = reloadFolder( std::move( f ), *fsFactory );
         m_cb->onDiscoveryCompleted( mrl, res );
     }
     return true;
