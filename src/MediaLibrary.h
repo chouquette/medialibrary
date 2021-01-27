@@ -367,8 +367,10 @@ protected:
     IMediaLibraryCb* m_callback;
 
     // External device lister
-    std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
+    // Device lister will invoke fs factories through IDeviceListerCb so
+    // the device lister must be destroyed before the fs factories
+    std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
 
     // User provided parser services
     std::vector<std::shared_ptr<parser::IParserService>> m_services;
