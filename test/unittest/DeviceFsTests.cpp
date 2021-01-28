@@ -33,6 +33,7 @@
 #include "Artist.h"
 #include "Show.h"
 #include "MediaGroup.h"
+#include "Genre.h"
 
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
@@ -727,6 +728,59 @@ static void MediaGroupPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, groups.size() );
 }
 
+static void GenrePresence( DeviceFsTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto genre = T->ml->createGenre( "test genre" );
+    // Create an album with removable and non removable tracks
+    auto album = std::static_pointer_cast<Album>( T->ml->createAlbum( "album" ) );
+    auto media1 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
+    auto media2 = std::static_pointer_cast<Media>(
+                T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
+    auto media3 = std::static_pointer_cast<Media>(
+                T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" ) );
+    album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, 0, genre.get() );
+    album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, 0, genre.get() );
+    album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, 0, genre.get() );
+    media1->save();
+    media2->save();
+    media3->save();
+
+    /* We should now have 3 tracks in the genre. 1 non-removable and 2 removable */
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 3u, genre->nbTracks() );
+    ASSERT_TRUE( genre->isPresent() );
+
+    /*
+     * Remove the device, the genre is still present and nb_tracks isn't changed
+     * since the tracks still exist
+     */
+    auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
+    T->Reload();
+
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 3u, genre->nbTracks() );
+    ASSERT_TRUE( genre->isPresent() );
+
+    /* Remove the present track */
+    T->ml->deleteMedia( media1->id() );
+
+    /* The genre shouldn't have any remaining media and should now be missing */
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 2u, genre->nbTracks() );
+    ASSERT_FALSE( genre->isPresent() );
+
+    T->fsMock->addDevice( device );
+    T->Reload();
+
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 2u, genre->nbTracks() );
+    ASSERT_TRUE( genre->isPresent() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -744,6 +798,7 @@ int main( int ac, char** av )
     ADD_TEST( RemoveShowEpisodes );
     ADD_TEST( PartialRemoveShowEpisodes );
     ADD_TEST( MediaGroupPresence );
+    ADD_TEST( GenrePresence );
 
     END_TESTS
 }

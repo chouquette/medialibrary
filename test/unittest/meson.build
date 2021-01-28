@@ -85,6 +85,7 @@ device_fs_tests = [
   'RemoveShowEpisodes',
   'PartialRemoveShowEpisodes',
   'MediaGroupPresence',
+  'GenrePresence',
 ]
 
 foreach t : device_fs_tests

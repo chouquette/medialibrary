@@ -59,6 +59,7 @@ namespace
         "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
         "delete_media_fts", "delete_playlist_fts", "delete_playlist_linking_tasks",
         "delete_show_fts", "delete_unused_thumbnail",
+        "genre_update_is_present",
         "incr_thumbnail_refcount",
         "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",
         "insert_folder_fts", "insert_genre_fts", "insert_media_fts",

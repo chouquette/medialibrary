@@ -42,6 +42,7 @@ public:
     virtual int64_t id() const = 0;
     virtual const std::string& name() const = 0;
     virtual uint32_t nbTracks() const = 0;
+    virtual bool isPresent() const = 0;
     virtual Query<IArtist> artists( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IArtist> searchArtists( const std::string& pattern,
                                          const QueryParameters* params = nullptr ) const = 0;
