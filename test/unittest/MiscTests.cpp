@@ -764,3 +764,8 @@ TEST_F( DbModel, Upgrade27to28 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v27.sql" );
 }
+
+TEST_F( DbModel, Upgrade29to30 )
+{
+    CommonMigrationTest( SRC_DIR "/test/unittest/db_v29.sql" );
+}
