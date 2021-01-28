@@ -297,7 +297,7 @@ bool Genre::checkDbModel(MediaLibraryPtr ml)
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
 {
-    static const std::string req = "INSERT INTO " + Genre::Table::Name + "(name)"
+    static const std::string req = "INSERT INTO " + Table::Name + "(name)"
             "VALUES(?)";
     auto self = std::make_shared<Genre>( ml, name );
     if ( insert( ml, self, req, name ) == false )
@@ -307,15 +307,15 @@ std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& nam
 
 std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& name )
 {
-    static const std::string req = "SELECT * FROM " + Genre::Table::Name + " WHERE name = ?";
+    static const std::string req = "SELECT * FROM " + Table::Name + " WHERE name = ?";
     return fetch( ml, req, name );
 }
 
 Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
                              const QueryParameters* params )
 {
-    std::string req = "FROM " + Genre::Table::Name + " WHERE id_genre IN "
-            "(SELECT rowid FROM " + Genre::FtsTable::Name + " "
+    std::string req = "FROM " + Table::Name + " WHERE id_genre IN "
+            "(SELECT rowid FROM " + FtsTable::Name + " "
             "WHERE name MATCH ?)";
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr )
@@ -332,7 +332,7 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + Genre::Table::Name;
+    std::string req = "FROM " + Table::Name;
     std::string orderBy = " ORDER BY name";
     if ( params != nullptr )
     {
