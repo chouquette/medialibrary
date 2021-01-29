@@ -671,19 +671,19 @@ static void MediaGroupPresence( DeviceFsTests* T )
     addToGroup( *rmg, DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" );
     addToGroup( *rmg, DeviceFsTests::RemovableDeviceMountpoint + "removablevideo2.mkv" );
 
-    ASSERT_EQ( 4u, rmg->nbAudio() );
-    ASSERT_EQ( 2u, rmg->nbVideo() );
-    ASSERT_EQ( 0u, rmg->nbUnknown() );
-    ASSERT_EQ( 6u, rmg->nbMedia() );
+    ASSERT_EQ( 4u, rmg->nbPresentAudio() );
+    ASSERT_EQ( 2u, rmg->nbPresentVideo() );
+    ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
+    ASSERT_EQ( 6u, rmg->nbPresentMedia() );
 
     auto groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     rmg = T->ml->mediaGroup( rmg->id() );
 
-    ASSERT_EQ( 4u, rmg->nbAudio() );
-    ASSERT_EQ( 2u, rmg->nbVideo() );
-    ASSERT_EQ( 0u, rmg->nbUnknown() );
-    ASSERT_EQ( 6u, rmg->nbMedia() );
+    ASSERT_EQ( 4u, rmg->nbPresentAudio() );
+    ASSERT_EQ( 2u, rmg->nbPresentVideo() );
+    ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
+    ASSERT_EQ( 6u, rmg->nbPresentMedia() );
     ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
     auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
@@ -691,10 +691,10 @@ static void MediaGroupPresence( DeviceFsTests* T )
 
     rmg = T->ml->mediaGroup( rmg->id() );
 
-    ASSERT_EQ( 0u, rmg->nbAudio() );
-    ASSERT_EQ( 0u, rmg->nbVideo() );
-    ASSERT_EQ( 0u, rmg->nbUnknown() );
-    ASSERT_EQ( 0u, rmg->nbMedia() );
+    ASSERT_EQ( 0u, rmg->nbPresentAudio() );
+    ASSERT_EQ( 0u, rmg->nbPresentVideo() );
+    ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
+    ASSERT_EQ( 0u, rmg->nbPresentMedia() );
     ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
@@ -708,10 +708,11 @@ static void MediaGroupPresence( DeviceFsTests* T )
 
     rmg = T->ml->mediaGroup( rmg->id() );
 
-    ASSERT_EQ( 4u, rmg->nbAudio() );
-    ASSERT_EQ( 2u, rmg->nbVideo() );
-    ASSERT_EQ( 0u, rmg->nbUnknown() );
-    ASSERT_EQ( 6u, rmg->nbMedia() );
+    ASSERT_EQ( 4u, rmg->nbPresentAudio() );
+    ASSERT_EQ( 2u, rmg->nbPresentVideo() );
+    ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
+    ASSERT_EQ( 6u, rmg->nbPresentMedia() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
     auto videos = rmg->media( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 2u, videos.size() );

@@ -56,19 +56,19 @@ public:
     /**
      * @brief nbMedia Returns the number of present media in this group
      */
-    virtual uint32_t nbMedia() const = 0;
+    virtual uint32_t nbPresentMedia() const = 0;
     /**
      * @brief nbVideo returns the number of video media in this group
      */
-    virtual uint32_t nbVideo() const = 0;
+    virtual uint32_t nbPresentVideo() const = 0;
     /**
      * @brief nbAudio Returns the number of audio media in this group
      */
-    virtual uint32_t nbAudio() const = 0;
+    virtual uint32_t nbPresentAudio() const = 0;
     /**
      * @brief nbUnknown Returns the number of media of unknown type in this group
      */
-    virtual uint32_t nbUnknown() const = 0;
+    virtual uint32_t nbPresentUnknown() const = 0;
     /**
      * @brief duration Returns this group duration
      *

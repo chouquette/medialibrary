@@ -776,15 +776,15 @@ void Tests::checkMediaGroups( const rapidjson::Value &expectedMediaGroups,
         auto group = *it;
         if ( expectedGroup.HasMember( "nbAudio" ) )
         {
-            ASSERT_EQ( expectedGroup["nbAudio"].GetUint(), group->nbAudio() );
+            ASSERT_EQ( expectedGroup["nbAudio"].GetUint(), group->nbPresentAudio() );
         }
         if ( expectedGroup.HasMember( "nbVideo" ) )
         {
-            ASSERT_EQ( expectedGroup["nbVideo"].GetUint(), group->nbVideo() );
+            ASSERT_EQ( expectedGroup["nbVideo"].GetUint(), group->nbPresentVideo() );
         }
         if ( expectedGroup.HasMember( "nbUnknown" ) )
         {
-            ASSERT_EQ( expectedGroup["nbUnknown"].GetUint(), group->nbUnknown() );
+            ASSERT_EQ( expectedGroup["nbUnknown"].GetUint(), group->nbPresentUnknown() );
         }
     }
 }

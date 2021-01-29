@@ -599,10 +599,10 @@ static void Upgrade25to26( DbModel* T )
 
     auto mg = T->ml->mediaGroup( 1 );
     ASSERT_EQ( "test-group", mg->name() );
-    ASSERT_EQ( 1u, mg->nbAudio() );
-    ASSERT_EQ( 0u, mg->nbVideo() );
-    ASSERT_EQ( 0u, mg->nbUnknown() );
-    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentAudio() );
+    ASSERT_EQ( 0u, mg->nbPresentVideo() );
+    ASSERT_EQ( 0u, mg->nbPresentUnknown() );
+    ASSERT_EQ( 1u, mg->nbPresentMedia() );
     ASSERT_EQ( 2u, mg->nbTotalMedia() );
 
     auto encodedFile = File::fetch( T->ml.get(), 6 );
@@ -639,6 +639,11 @@ static void Upgrade29to30( DbModel* T )
     ASSERT_EQ( 2u, plMedia.size() );
     ASSERT_EQ( 1u, plMedia[0]->id() );
     ASSERT_EQ( 2u, plMedia[1]->id() );
+
+    auto mediaGroups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 2u, mediaGroups.size() );
+    ASSERT_EQ( 2u, mediaGroups[0]->nbTotalMedia() );
+    ASSERT_EQ( 2u, mediaGroups[1]->nbTotalMedia() );
 }
 
 int main( int ac, char** av )

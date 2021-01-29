@@ -228,5 +228,3 @@ int main( int ac, char** av )
 
     END_TESTS
 }
-
-

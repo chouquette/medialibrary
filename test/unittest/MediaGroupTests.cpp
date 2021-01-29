@@ -35,10 +35,10 @@ static void Create( Tests* T )
     auto mg = T->ml->createMediaGroup( name );
     ASSERT_NE( nullptr, mg );
     ASSERT_EQ( "group", mg->name() );
-    ASSERT_EQ( 0u, mg->nbVideo() );
-    ASSERT_EQ( 0u, mg->nbAudio() );
-    ASSERT_EQ( 0u, mg->nbMedia() );
-    ASSERT_EQ( 0u, mg->nbUnknown() );
+    ASSERT_EQ( 0u, mg->nbPresentVideo() );
+    ASSERT_EQ( 0u, mg->nbPresentAudio() );
+    ASSERT_EQ( 0u, mg->nbPresentMedia() );
+    ASSERT_EQ( 0u, mg->nbPresentUnknown() );
     ASSERT_EQ( true, mg->userInteracted() );
 
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
@@ -160,10 +160,10 @@ static void FetchMedia( Tests* T )
     media = mg->media( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
     // Check for the cached value
-    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentMedia() );
     // And check that the DB was updated
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
-    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentMedia() );
 
     // Don't remove more, since the media group would be deleted.
     // This is checked by the DeleteEmpty test
@@ -212,12 +212,12 @@ static void UpdateNbMediaTypeChange( Tests* T )
     auto group2 = T->ml->createMediaGroup( "group2" );
     ASSERT_NE( nullptr, group1 );
     ASSERT_NE( nullptr, group2 );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 0u, group2->nbUnknown() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 0u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 0u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 0u, group2->nbPresentUnknown() );
 
     auto m = T->ml->addMedia( "media.mkv", IMedia::Type::Unknown );
     auto m2 = T->ml->addMedia( "media2.avi", IMedia::Type::Video );
@@ -228,39 +228,39 @@ static void UpdateNbMediaTypeChange( Tests* T )
 
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group2->id() ) );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 1u, group1->nbVideo() );
-    ASSERT_EQ( 1u, group1->nbUnknown() );
-    ASSERT_EQ( 2u, group1->nbMedia() );
-    ASSERT_EQ( 1u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 0u, group2->nbUnknown() );
-    ASSERT_EQ( 1u, group2->nbMedia() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 1u, group1->nbPresentVideo() );
+    ASSERT_EQ( 1u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 2u, group1->nbPresentMedia() );
+    ASSERT_EQ( 1u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 0u, group2->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group2->nbPresentMedia() );
 
     // Move that media to another group
     group2->add( *m );
 
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group2->id() ) );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 1u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group1->nbMedia() );
-    ASSERT_EQ( 1u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 1u, group2->nbUnknown() );
-    ASSERT_EQ( 2u, group2->nbMedia() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 1u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group1->nbPresentMedia() );
+    ASSERT_EQ( 1u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 1u, group2->nbPresentUnknown() );
+    ASSERT_EQ( 2u, group2->nbPresentMedia() );
 
     // Now change the media type
     m->setType( IMedia::Type::Audio );
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group2->id() ) );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 1u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 2u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 0u, group2->nbUnknown() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 1u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 2u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 0u, group2->nbPresentUnknown() );
 
     // Manually change both group & type to check if we properly support it
     std::string req = "UPDATE " + Media::Table::Name +
@@ -271,50 +271,50 @@ static void UpdateNbMediaTypeChange( Tests* T )
 
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group2->id() ) );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 2u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 0u, group2->nbUnknown() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 2u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 0u, group2->nbPresentUnknown() );
 
     // Now remove the media from the group:
     group1->remove( m->id() );
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
     group2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group2->id() ) );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 1u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group2->nbAudio() );
-    ASSERT_EQ( 0u, group2->nbVideo() );
-    ASSERT_EQ( 0u, group2->nbUnknown() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 1u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group2->nbPresentAudio() );
+    ASSERT_EQ( 0u, group2->nbPresentVideo() );
+    ASSERT_EQ( 0u, group2->nbPresentUnknown() );
 }
 
 static void UpdateNbMediaNoDelete( Tests* T )
 {
     auto group1 = T->ml->createMediaGroup( "group" );
     ASSERT_NE( nullptr, group1 );
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 0u, group1->nbMedia() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 0u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 0u, group1->nbPresentMedia() );
 
     auto m = T->ml->addMedia( "media.mkv", IMedia::Type::Unknown );
     group1->add( *m );
 
-    ASSERT_EQ( 0u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
-    ASSERT_EQ( 1u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group1->nbMedia() );
+    ASSERT_EQ( 0u, group1->nbPresentAudio() );
+    ASSERT_EQ( 0u, group1->nbPresentVideo() );
+    ASSERT_EQ( 1u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group1->nbPresentMedia() );
 
     // Now change the media type
     m->setType( IMedia::Type::Audio );
 
     group1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( group1->id() ) );
-    ASSERT_EQ( 1u, group1->nbAudio() );
-    ASSERT_EQ( 0u, group1->nbVideo() );
-    ASSERT_EQ( 0u, group1->nbUnknown() );
-    ASSERT_EQ( 1u, group1->nbMedia() );
+    ASSERT_EQ( 1u, group1->nbPresentAudio() );
+    ASSERT_EQ( 0u, group1->nbPresentVideo() );
+    ASSERT_EQ( 0u, group1->nbPresentUnknown() );
+    ASSERT_EQ( 1u, group1->nbPresentMedia() );
 }
 
 static void SortByNbMedia( Tests* T )
@@ -473,27 +473,27 @@ static void DeleteMedia( Tests* T )
     res = mg->add( *m3 );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 3u, mg->nbMedia() );
-    ASSERT_EQ( 1u, mg->nbAudio() );
-    ASSERT_EQ( 1u, mg->nbVideo() );
-    ASSERT_EQ( 1u, mg->nbUnknown() );
+    ASSERT_EQ( 3u, mg->nbPresentMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentAudio() );
+    ASSERT_EQ( 1u, mg->nbPresentVideo() );
+    ASSERT_EQ( 1u, mg->nbPresentUnknown() );
     // Ensure the value in DB is correct
     mg = T->ml->mediaGroup( mg->id() );
-    ASSERT_EQ( 3u, mg->nbMedia() );
-    ASSERT_EQ( 1u, mg->nbAudio() );
-    ASSERT_EQ( 1u, mg->nbVideo() );
-    ASSERT_EQ( 1u, mg->nbUnknown() );
+    ASSERT_EQ( 3u, mg->nbPresentMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentAudio() );
+    ASSERT_EQ( 1u, mg->nbPresentVideo() );
+    ASSERT_EQ( 1u, mg->nbPresentUnknown() );
 
     // Delete media and ensure the group media count is updated
     T->ml->deleteMedia( m1->id() );
     mg = T->ml->mediaGroup( mg->id() );
-    ASSERT_EQ( 2u, mg->nbMedia() );
-    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 2u, mg->nbPresentMedia() );
+    ASSERT_EQ( 0u, mg->nbPresentVideo() );
 
     T->ml->deleteMedia( m2->id() );
     mg = T->ml->mediaGroup( mg->id() );
-    ASSERT_EQ( 1u, mg->nbMedia() );
-    ASSERT_EQ( 0u, mg->nbAudio() );
+    ASSERT_EQ( 1u, mg->nbPresentMedia() );
+    ASSERT_EQ( 0u, mg->nbPresentAudio() );
 
     T->ml->deleteMedia( m3->id() );
     mg = T->ml->mediaGroup( mg->id() );
@@ -637,7 +637,7 @@ static void AssignToGroups( Tests* T )
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
-    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( 1u, groups[0]->nbPresentVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are fluffy.mkv" );
     ASSERT_EQ( m4->groupId(), groups[1]->id() );
     ASSERT_TRUE( static_cast<MediaGroup*>( groups[1].get() )->isForcedSingleton() );
@@ -647,16 +647,16 @@ static void AssignToGroups( Tests* T )
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
-    ASSERT_EQ( 2u, groups[0]->nbVideo() );
+    ASSERT_EQ( 2u, groups[0]->nbPresentVideo() );
     ASSERT_EQ( groups[0]->name(), "otters are " );
 
     res = MediaGroup::assignToGroup( T->ml.get(), *m3 );
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
-    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( 1u, groups[0]->nbPresentVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
-    ASSERT_EQ( 2u, groups[1]->nbVideo() );
+    ASSERT_EQ( 2u, groups[1]->nbPresentVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are " );
 
     /*
@@ -690,21 +690,21 @@ static void AssignToGroups( Tests* T )
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, groups.size() );
-    ASSERT_EQ( 1u, groups[0]->nbVideo() );
+    ASSERT_EQ( 1u, groups[0]->nbPresentVideo() );
     ASSERT_EQ( groups[0]->name(), "otter" );
 
     res = MediaGroup::assignToGroup( T->ml.get(), *m2 );
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
-    ASSERT_EQ( 1u, groups[1]->nbVideo() );
+    ASSERT_EQ( 1u, groups[1]->nbPresentVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are cute.mkv" );
 
     res = MediaGroup::assignToGroup( T->ml.get(), *m1 );
     ASSERT_TRUE( res );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 3u, groups.size() );
-    ASSERT_EQ( 2u, groups[1]->nbVideo() );
+    ASSERT_EQ( 2u, groups[1]->nbPresentVideo() );
     ASSERT_EQ( groups[1]->name(), "otters are " );
 }
 
@@ -718,9 +718,9 @@ static void CreateFromMedia( Tests* T )
     ASSERT_NE( nullptr, mg );
     ASSERT_TRUE( mg->userInteracted() );
 
-    ASSERT_EQ( 2u, mg->nbVideo() );
-    ASSERT_EQ( 0u, mg->nbAudio() );
-    ASSERT_EQ( 2u, mg->nbMedia() );
+    ASSERT_EQ( 2u, mg->nbPresentVideo() );
+    ASSERT_EQ( 0u, mg->nbPresentAudio() );
+    ASSERT_EQ( 2u, mg->nbPresentMedia() );
 
     auto mediaQuery = mg->media( IMedia::Type::Video, nullptr );
     ASSERT_EQ( 2u, mediaQuery->count() );
@@ -732,9 +732,9 @@ static void CreateFromMedia( Tests* T )
     auto mg2 = T->ml->createMediaGroup( std::vector<int64_t>{ m3->id(), m2->id() } );
     ASSERT_NE( nullptr, mg2 );
 
-    ASSERT_EQ( 2u, mg2->nbVideo() );
-    ASSERT_EQ( 0u, mg2->nbAudio() );
-    ASSERT_EQ( 2u, mg2->nbMedia() );
+    ASSERT_EQ( 2u, mg2->nbPresentVideo() );
+    ASSERT_EQ( 0u, mg2->nbPresentAudio() );
+    ASSERT_EQ( 2u, mg2->nbPresentMedia() );
 
     mediaQuery = mg2->media( IMedia::Type::Video, nullptr );
     ASSERT_EQ( 2u, mediaQuery->count() );
@@ -760,7 +760,7 @@ static void CreateWithUnknownMedia( Tests* T )
     ASSERT_NE( nullptr, m );
     mg = T->ml->createMediaGroup( std::vector<int64_t>{ m->id(), 13, 12 } );
     ASSERT_NE( nullptr, mg );
-    ASSERT_EQ( 1u, mg->nbMedia() );
+    ASSERT_EQ( 1u, mg->nbPresentMedia() );
 }
 
 static void CheckFromMediaName( Tests* T )
@@ -815,9 +815,9 @@ static void RemoveMedia( Tests* T )
     auto lockedGroup = std::static_pointer_cast<MediaGroup>( groups[0] );
     ASSERT_TRUE( lockedGroup->isForcedSingleton() );
     ASSERT_EQ( lockedGroup->name(), m->title() );
-    ASSERT_EQ( 1u, lockedGroup->nbVideo() );
-    ASSERT_EQ( 0u, lockedGroup->nbAudio() );
-    ASSERT_EQ( 0u, lockedGroup->nbUnknown() );
+    ASSERT_EQ( 1u, lockedGroup->nbPresentVideo() );
+    ASSERT_EQ( 0u, lockedGroup->nbPresentAudio() );
+    ASSERT_EQ( 0u, lockedGroup->nbPresentUnknown() );
 
     T->ml->deleteMedia( m->id() );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
@@ -845,9 +845,9 @@ static void RemoveMedia( Tests* T )
     lockedGroup = std::static_pointer_cast<MediaGroup>( groups[0] );
     ASSERT_TRUE( lockedGroup->isForcedSingleton() );
     ASSERT_EQ( lockedGroup->name(), m->title() );
-    ASSERT_EQ( 1u, lockedGroup->nbVideo() );
-    ASSERT_EQ( 0u, lockedGroup->nbAudio() );
-    ASSERT_EQ( 0u, lockedGroup->nbUnknown() );
+    ASSERT_EQ( 1u, lockedGroup->nbPresentVideo() );
+    ASSERT_EQ( 0u, lockedGroup->nbPresentAudio() );
+    ASSERT_EQ( 0u, lockedGroup->nbPresentUnknown() );
 
     T->ml->deleteMedia( m->id() );
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
@@ -900,7 +900,7 @@ static void RegroupLocked( Tests* T )
     ASSERT_NE( m5->groupId(), m1->groupId() );
 
     auto newGroup = m1->group();
-    ASSERT_EQ( 3u, newGroup->nbVideo() );
+    ASSERT_EQ( 3u, newGroup->nbPresentVideo() );
     ASSERT_EQ( "matching t", newGroup->name() );
 
     // Ensure we refuse to regroup an already grouped media
@@ -956,11 +956,11 @@ static void AddToForcedSingleton( Tests* T )
     auto res = g1->add( *media[0] );
     ASSERT_TRUE( res );
     ASSERT_FALSE( g1->isForcedSingleton() );
-    ASSERT_EQ( 2u, g1->nbMedia() );
+    ASSERT_EQ( 2u, g1->nbPresentMedia() );
 
     g1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g1->id() ) );
     ASSERT_FALSE( g1->isForcedSingleton() );
-    ASSERT_EQ( 2u, g1->nbMedia() );
+    ASSERT_EQ( 2u, g1->nbPresentMedia() );
 
     g2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g2->id() ) );
     ASSERT_EQ( nullptr, g2 );
@@ -1257,13 +1257,13 @@ static void Destroy( Tests* T )
     mg->add( *m1 );
     mg->add( *m2 );
 
-    ASSERT_EQ( 2u, mg->nbMedia() );
+    ASSERT_EQ( 2u, mg->nbPresentMedia() );
 
     mg = T->ml->mediaGroup( mg->id() );
 
     auto res = mg->destroy();
     ASSERT_TRUE( res );
-    ASSERT_EQ( 0u, mg->nbMedia() );
+    ASSERT_EQ( 0u, mg->nbPresentMedia() );
 
     mg = T->ml->mediaGroup( mg->id() );
     ASSERT_EQ( nullptr, mg );
@@ -1328,8 +1328,8 @@ static void MergeAutoCreated( Tests* T )
     ASSERT_EQ( 2u, groups.size() );
     auto group1 = groups[0];
     auto group2 = groups[1];
-    ASSERT_EQ( 1u, group1->nbMedia() );
-    ASSERT_EQ( 1u, group2->nbMedia() );
+    ASSERT_EQ( 1u, group1->nbPresentMedia() );
+    ASSERT_EQ( 1u, group2->nbPresentMedia() );
 
     auto group2Media = group2->media( IMedia::Type::Unknown )->all();
     ASSERT_EQ( 1u, group2Media.size() );
@@ -1339,10 +1339,10 @@ static void MergeAutoCreated( Tests* T )
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
 
-    ASSERT_EQ( 2u, group1->nbMedia() );
+    ASSERT_EQ( 2u, group1->nbPresentMedia() );
 
     group1 = T->ml->mediaGroup( group1->id() );
-    ASSERT_EQ( 2u, group1->nbMedia() );
+    ASSERT_EQ( 2u, group1->nbPresentMedia() );
 }
 
 static void KoreanTitles( Tests* T )
