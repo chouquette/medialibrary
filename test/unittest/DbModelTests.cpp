@@ -75,7 +75,6 @@ namespace
         "media_group_update_duration_on_media_deletion",
         "media_group_update_nb_media_types",
         "media_group_update_nb_media_types_presence",
-        "media_group_update_total_nb_media",
         "media_update_device_presence",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
@@ -642,8 +641,14 @@ static void Upgrade29to30( DbModel* T )
 
     auto mediaGroups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, mediaGroups.size() );
-    ASSERT_EQ( 2u, mediaGroups[0]->nbTotalMedia() );
+
+    ASSERT_EQ( "A group", mediaGroups[0]->name() );
+    ASSERT_EQ( 3u, mediaGroups[0]->nbTotalMedia() );
+    ASSERT_EQ( 2u, mediaGroups[0]->nbPresentMedia() );
+
+    ASSERT_EQ( "Z group", mediaGroups[1]->name() );
     ASSERT_EQ( 2u, mediaGroups[1]->nbTotalMedia() );
+    ASSERT_EQ( 2u, mediaGroups[1]->nbPresentMedia() );
 }
 
 int main( int ac, char** av )

@@ -43,7 +43,6 @@ Genre::trigger( Genre::Triggers::UpdateIsPresent, 30 ),
     "nb_video UNSIGNED INTEGER DEFAULT 0,"
     "nb_audio UNSIGNED INTEGER DEFAULT 0,"
     "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
-    "nb_media UNSIGNED INTEGER DEFAULT 0,"
     "duration INTEGER DEFAULT 0,"
     "creation_date INTEGER NOT NULL,"
     "last_modification_date INTEGER NOT NULL,"
@@ -52,14 +51,28 @@ Genre::trigger( Genre::Triggers::UpdateIsPresent, 30 ),
 ")",
 
 "INSERT INTO " + MediaGroup::Table::Name + "_backup "
-    "SELECT * FROM " + MediaGroup::Table::Name,
+    "SELECT id_group, name, nb_video, nb_audio, nb_unknown, duration, creation_date, "
+    "last_modification_date, user_interacted, forced_singleton "
+    "FROM " + MediaGroup::Table::Name,
 
 "DROP TABLE " + MediaGroup::Table::Name,
 
 MediaGroup::schema( MediaGroup::Table::Name, 30 ),
 
 "INSERT INTO " + MediaGroup::Table::Name +
-    " SELECT * FROM " + MediaGroup::Table::Name + "_backup",
+    " SELECT id_group, name, "
+    " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
+        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Video ) ) + "),"
+    " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
+        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Audio ) ) + "),"
+    " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
+        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Unknown) ) + "),"
+    " nb_video, nb_audio, nb_unknown, duration, creation_date,"
+    " last_modification_date, user_interacted, forced_singleton "
+    " FROM " + MediaGroup::Table::Name + "_backup",
 
 "DROP TABLE " + MediaGroup::Table::Name + "_backup",
 
@@ -70,6 +83,8 @@ MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 30 ),
 MediaGroup::index( MediaGroup::Indexes::Duration, 30 ),
 MediaGroup::index( MediaGroup::Indexes::CreationDate, 30 ),
 MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 30 ),
+
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::UpdateTotalNbMedia, 29 ),
 
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::UpdateNbMediaPerType, 29 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 30 ),

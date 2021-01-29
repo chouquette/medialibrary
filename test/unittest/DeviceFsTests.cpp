@@ -676,6 +676,11 @@ static void MediaGroupPresence( DeviceFsTests* T )
     ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
     ASSERT_EQ( 6u, rmg->nbPresentMedia() );
 
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
+
     auto groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, groups.size() );
     rmg = T->ml->mediaGroup( rmg->id() );
@@ -697,6 +702,11 @@ static void MediaGroupPresence( DeviceFsTests* T )
     ASSERT_EQ( 0u, rmg->nbPresentMedia() );
     ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
+
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
@@ -712,6 +722,10 @@ static void MediaGroupPresence( DeviceFsTests* T )
     ASSERT_EQ( 2u, rmg->nbPresentVideo() );
     ASSERT_EQ( 0u, rmg->nbPresentUnknown() );
     ASSERT_EQ( 6u, rmg->nbPresentMedia() );
+    ASSERT_EQ( 6u, rmg->nbTotalMedia() );
+    ASSERT_EQ( 4u, rmg->nbAudio() );
+    ASSERT_EQ( 2u, rmg->nbVideo() );
+    ASSERT_EQ( 0u, rmg->nbUnknown() );
     ASSERT_EQ( 6u, rmg->nbTotalMedia() );
 
     auto videos = rmg->media( IMedia::Type::Video, nullptr )->all();

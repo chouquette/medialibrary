@@ -37,8 +37,12 @@ static void Create( Tests* T )
     ASSERT_EQ( "group", mg->name() );
     ASSERT_EQ( 0u, mg->nbPresentVideo() );
     ASSERT_EQ( 0u, mg->nbPresentAudio() );
-    ASSERT_EQ( 0u, mg->nbPresentMedia() );
     ASSERT_EQ( 0u, mg->nbPresentUnknown() );
+    ASSERT_EQ( 0u, mg->nbPresentMedia() );
+    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbAudio() );
+    ASSERT_EQ( 0u, mg->nbUnknown() );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
     ASSERT_EQ( true, mg->userInteracted() );
 
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );

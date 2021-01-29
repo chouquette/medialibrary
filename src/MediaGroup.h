@@ -79,6 +79,9 @@ public:
     virtual uint32_t nbPresentVideo() const override;
     virtual uint32_t nbPresentAudio() const override;
     virtual uint32_t nbPresentUnknown() const override;
+    virtual uint32_t nbVideo() const override;
+    virtual uint32_t nbAudio() const override;
+    virtual uint32_t nbUnknown() const override;
     virtual int64_t duration() const override;
     virtual time_t creationDate() const override;
     virtual time_t lastModificationDate() const override;
@@ -144,10 +147,12 @@ private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
     std::string m_name;
+    uint32_t m_nbVideo;
+    uint32_t m_nbAudio;
+    uint32_t m_nbUnknown;
     uint32_t m_nbPresentVideo;
     uint32_t m_nbPresentAudio;
     uint32_t m_nbPresentUnknown;
-    uint32_t m_nbMedia;
     int64_t m_duration;
     time_t m_creationDate;
     time_t m_lastModificationDate;
