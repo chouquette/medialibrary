@@ -710,6 +710,19 @@ static void MediaGroupPresence( DeviceFsTests* T )
     groups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, groups.size() );
 
+    QueryParameters params{};
+    params.includeMissing = true;
+    groups = T->ml->mediaGroups( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 1u, groups.size() );
+    auto media = groups[0]->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
+    media = groups[0]->media( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 6u, media.size() );
+    media = groups[0]->media( IMedia::Type::Video, &params )->all();
+    ASSERT_EQ( 2u, media.size() );
+    media = groups[0]->media( IMedia::Type::Audio, &params )->all();
+    ASSERT_EQ( 4u, media.size() );
+
     T->fsMock->addDevice( device );
     T->Reload();
 

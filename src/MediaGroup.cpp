@@ -424,14 +424,29 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
     switch ( mediaType )
     {
         case IMedia::Type::Unknown:
-            req += "WHERE nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+        {
+            if ( params == nullptr || params->includeMissing == false )
+                req += "WHERE nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+            else
+                req += "WHERE nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
             break;
+        }
         case IMedia::Type::Audio:
-            req += "WHERE nb_present_audio > 0";
+        {
+            if ( params == nullptr || params->includeMissing == false )
+                req += "WHERE nb_present_audio > 0";
+            else
+                req += "WHERE nb_audio > 0";
             break;
+        }
         case IMedia::Type::Video:
-            req += "WHERE nb_present_video > 0";
+        {
+            if ( params == nullptr || params->includeMissing == false )
+                req += "WHERE nb_present_video > 0";
+            else
+                req += "WHERE nb_video > 0";
             break;
+        }
     }
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
 }
@@ -439,10 +454,13 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
 Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pattern,
                                        const QueryParameters* params )
 {
-    const std::string req = "FROM " + Table::Name + " mg"
+    std::string req = "FROM " + Table::Name + " mg"
             " WHERE id_group IN (SELECT rowid FROM " + FtsTable::Name +
-                " WHERE " + FtsTable::Name + " MATCH ?)"
-            " AND nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+                " WHERE " + FtsTable::Name + " MATCH ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+    else
+        req += " AND nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
                                                 sqlite::Tools::sanitizePattern( pattern ) );
 }
