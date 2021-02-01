@@ -176,6 +176,21 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
     }
 }
 
+int64_t Playlist::mediaAt( uint32_t position )
+{
+    const std::string fetchReq = "SELECT media_id FROM " +
+            Playlist::MediaRelationTable::Name +
+            " WHERE playlist_id = ? AND position = ?";
+    auto dbConn = m_ml->getConn();
+
+    sqlite::Statement stmt( dbConn->handle(), fetchReq );
+    stmt.execute( m_id, position );
+    auto row = stmt.row();
+    if ( row == nullptr )
+        return false;
+    return row.extract<int64_t>();
+}
+
 bool Playlist::append( const IMedia& media )
 {
     return add( media, UINT32_MAX );
@@ -255,20 +270,11 @@ bool Playlist::move( uint32_t from, uint32_t position )
      * However to do so, we need to fetch the media ID at the previous location.
      */
     auto t = dbConn->newTransaction();
-    const std::string fetchReq = "SELECT media_id FROM " +
-            Playlist::MediaRelationTable::Name +
-            " WHERE playlist_id = ? AND position = ?";
-    sqlite::Statement stmt( dbConn->handle(), fetchReq );
-    int64_t mediaId;
-    stmt.execute( m_id, from );
+    auto mediaId = mediaAt( from );
+    if ( mediaId == 0 )
     {
-        auto row = stmt.row();
-        if ( row == nullptr )
-        {
-            LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
-            return false;
-        }
-        row >> mediaId;
+        LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
+        return false;
     }
     if ( remove( from ) == false )
     {

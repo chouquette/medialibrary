@@ -132,6 +132,11 @@ private:
     static bool writeBackup( const std::string& name,
                              const std::vector<std::string>& mrls,
                              const std::string& destFile );
+    /**
+     * @brief mediaAt Returns the ID of the media at <position> or 0 if the
+     * position is out of range
+     */
+    int64_t mediaAt( uint32_t position );
 
 private:
     MediaLibraryPtr m_ml;
