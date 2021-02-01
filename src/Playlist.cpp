@@ -208,6 +208,16 @@ bool Playlist::add( const IMedia& media, uint32_t position )
         LOG_ERROR( "Can't add a media without any files to a playlist" );
         return false;
     }
+    std::string mrl;
+    try
+    {
+        mrl = (*mainFile)->mrl();
+    }
+    catch ( const fs::errors::DeviceRemoved& )
+    {
+        return false;
+    }
+
     if ( position == UINT32_MAX )
     {
         static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
@@ -215,14 +225,14 @@ bool Playlist::add( const IMedia& media, uint32_t position )
                 "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
                 " WHERE playlist_id = ?3))";
         return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                             (*mainFile)->mrl(), m_id );
+                                             std::move( mrl ), m_id );
     }
     static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
             "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
             "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ?3)))";
     return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                       (*mainFile)->mrl(), m_id, position );
+                                       std::move( mrl ), m_id, position );
 }
 
 bool Playlist::append( int64_t mediaId )
