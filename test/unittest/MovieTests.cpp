@@ -103,3 +103,19 @@ TEST_F( Movies, CheckDbModel )
     auto res = Movie::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( Movies, DeleteByMediaId )
+{
+    auto media1 = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "movie2.mkv", IMedia::Type::Video ) );
+    auto movie1 = ml->createMovie( *media1 );
+    auto movie2 = ml->createMovie( *media2 );
+    ASSERT_NE( movie1, nullptr );
+    ASSERT_NE( movie2, nullptr );
+
+    Movie::deleteByMediaId( ml.get(), media1->id() );
+    movie1 = std::static_pointer_cast<Movie>( ml->movie( movie1->id() ) );
+    ASSERT_EQ( nullptr, movie1 );
+    movie2 = std::static_pointer_cast<Movie>( ml->movie( movie2->id() ) );
+    ASSERT_NE( nullptr, movie2 );
+}

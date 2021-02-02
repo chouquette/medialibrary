@@ -60,6 +60,7 @@ class Movie : public IMovie, public DatabaseHelpers<Movie>
         static bool checkDbModel( MediaLibraryPtr ml );
         static std::shared_ptr<Movie> create( MediaLibraryPtr ml, int64_t mediaId );
         static MoviePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+        static bool deleteByMediaId( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;
