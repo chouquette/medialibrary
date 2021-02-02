@@ -252,6 +252,8 @@ class Media : public IMedia,
         int64_t folderId() const; // Used for unit tests purposes only
         void setFolderId( int64_t folderId );
         void markAsInternal();
+        bool convertToExternal();
+
         bool save();
 
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,

@@ -240,6 +240,13 @@ bool File::update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable )
         false, fileFs.isNetwork(), m_id );
 }
 
+bool File::convertToExternal()
+{
+    const std::string req = "UPDATE " + Table::Name + " SET "
+        "mrl = ?, folder_id = NULL, is_removable = 0, is_external = 1 WHERE id_file = ?";
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl(), m_id );
+}
+
 void File::createTable( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,

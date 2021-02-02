@@ -79,6 +79,7 @@ public:
     int64_t folderId();
 
     bool update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable );
+    bool convertToExternal();
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createIndexes( sqlite::Connection* dbConnection );

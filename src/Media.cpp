@@ -759,6 +759,47 @@ void Media::markAsInternal()
     m_changed = true;
 }
 
+bool Media::convertToExternal()
+{
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    for ( const auto& fptr : files() )
+    {
+        auto f = static_cast<File*>( fptr.get() );
+        if ( f->convertToExternal() == false )
+            return false;
+    }
+    switch ( m_subType )
+    {
+    case IMedia::SubType::Unknown:
+        break;
+    case IMedia::SubType::ShowEpisode:
+        if ( ShowEpisode::deleteByMediaId( m_ml, m_id ) == false )
+            return false;
+        break;
+    case IMedia::SubType::AlbumTrack:
+        if ( AlbumTrack::deleteByMediaId( m_ml, m_id ) == false )
+            return false;
+        if ( Artist::dropMediaArtistRelation( m_ml, m_id ) == false )
+            return false;
+        break;
+    case IMedia::SubType::Movie:
+        if ( Movie::deleteByMediaId( m_ml, m_id ) == false )
+            return false;
+        break;
+    }
+
+    const std::string req = "UPDATE " + Table::Name + " SET subtype = ?, "
+        "device_id = NULL, folder_id = NULL, import_type = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, IMedia::SubType::Unknown,
+                                       Media::ImportType::External, m_id ) == false )
+        return false;
+    if ( t != nullptr )
+        t->commit();
+    return true;
+}
+
 bool Media::shouldUpdateThumbnail( const Thumbnail& currentThumbnail )
 {
     /*

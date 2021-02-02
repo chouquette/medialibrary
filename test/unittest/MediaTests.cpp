@@ -1338,6 +1338,42 @@ TEST_F( Medias, FetchInProgress )
     ASSERT_EQ( 1u, m1->playCount() );
 }
 
+
+TEST_F( Medias, ConvertToExternal )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto movie = ml->createMovie( *m1 );
+    m1->save();
+
+    auto videos = ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 2u, videos.size() );
+
+    auto res = m1->convertToExternal();
+    ASSERT_TRUE( res );
+
+    videos = ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 1u, videos.size() );
+
+    m1 = ml->media( m1->id() );
+    ASSERT_TRUE( m1->isExternalMedia() );
+    ASSERT_EQ( 0, m1->deviceId() );
+
+    auto files = m1->files();
+    for ( const auto& f : files )
+    {
+        ASSERT_TRUE( f->isExternal() );
+        ASSERT_FALSE( f->isRemovable() );
+        ASSERT_EQ( 0u, static_cast<File*>( f.get() )->folderId() );
+    }
+
+    m2 = ml->media( m2->id() );
+    ASSERT_NE( nullptr, m2 );
+    ASSERT_FALSE( m2->isExternalMedia() );
+}
+
 class FetchMedia : public Tests
 {
 protected:
