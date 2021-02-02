@@ -218,4 +218,10 @@ ShowEpisodePtr ShowEpisode::fromMedia( MediaLibraryPtr ml, int64_t mediaId )
     return fetch( ml, req, mediaId );
 }
 
+bool ShowEpisode::deleteByMediaId( MediaLibraryPtr ml, int64_t mediaId )
+{
+    const std::string req = "DELETE FROM " + Table::Name + " WHERE media_id = ?";
+    return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+}
+
 }

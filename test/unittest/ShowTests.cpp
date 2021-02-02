@@ -375,3 +375,38 @@ TEST_F( Shows, NbEpisodes )
     show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
     ASSERT_EQ( 0u, show->nbEpisodes() );
 }
+
+TEST_F( Shows, DeleteEpisodeByMediaId )
+{
+    auto show = ml->createShow( "The Otters Gambit" );
+    ASSERT_NE( nullptr, show );
+    auto media = std::static_pointer_cast<Media>(
+                ml->addMedia( "Openings.mkv", IMedia::Type::Video ) );
+    auto media2 = std::static_pointer_cast<Media>(
+                ml->addMedia( "End game.mkv", IMedia::Type::Video ) );
+    ASSERT_NE( nullptr, media );
+
+    auto showEpisode = show->addEpisode( *media, 1, 1, "Openings" );
+    ASSERT_NE( nullptr, showEpisode );
+    auto showEpisode2 = show->addEpisode( *media2, 1, 6, "End game" );
+    ASSERT_NE( nullptr, showEpisode2 );
+
+    auto episodes = show->episodes( nullptr )->all();
+    ASSERT_EQ( 2u, episodes.size() );
+
+    auto res = ShowEpisode::deleteByMediaId( ml.get(), media->id() );
+    ASSERT_TRUE( res );
+
+    episodes = show->episodes( nullptr )->all();
+    ASSERT_EQ( 1u, episodes.size() );
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
+    ASSERT_EQ( 1u, show->nbEpisodes() );
+
+    res = ShowEpisode::deleteByMediaId( ml.get(), media2->id() );
+    ASSERT_TRUE( res );
+
+    episodes = show->episodes( nullptr )->all();
+    ASSERT_EQ( 0u, episodes.size() );
+    show = std::static_pointer_cast<Show>( ml->show( show->id() ) );
+    ASSERT_EQ( 0u, show->nbEpisodes() );
+}

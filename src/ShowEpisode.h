@@ -69,6 +69,7 @@ public:
                                                 uint32_t episodeId, std::string title,
                                                 int64_t showId );
     static ShowEpisodePtr fromMedia( MediaLibraryPtr ml, int64_t mediaId );
+    static bool deleteByMediaId( MediaLibraryPtr ml, int64_t mediaId );
 
 private:
     MediaLibraryPtr m_ml;
