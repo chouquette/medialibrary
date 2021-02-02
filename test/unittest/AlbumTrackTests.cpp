@@ -79,3 +79,29 @@ TEST_F( AlbumTracks, CheckDbModel )
     auto res = AlbumTrack::checkDbModel( ml.get() );
     ASSERT_TRUE( res );
 }
+
+TEST_F( AlbumTracks, DeleteByMediaId )
+{
+    auto album = ml->createAlbum( "album" );
+    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto track = album->addTrack( m, 1, 1, 0, nullptr );
+    auto track2 = album->addTrack( m2, 2, 1, 0, nullptr );
+    m->save();
+    m2->save();
+
+    auto tracks = album->tracks( nullptr )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+
+    auto res = AlbumTrack::deleteByMediaId( ml.get(), m->id() );
+    ASSERT_TRUE( res );
+
+    tracks = album->tracks( nullptr )->all();
+    ASSERT_EQ( 1u, tracks.size() );
+
+    res = AlbumTrack::deleteByMediaId( ml.get(), m2->id() );
+    ASSERT_TRUE( res );
+
+    tracks = album->tracks( nullptr )->all();
+    ASSERT_EQ( 0u, tracks.size() );
+}

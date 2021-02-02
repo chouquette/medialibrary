@@ -82,6 +82,7 @@ class AlbumTrack : public IAlbumTrack, public DatabaseHelpers<AlbumTrack>
         static Query<IMedia> fromGenre( MediaLibraryPtr ml, int64_t genreId,
                                         IGenre::TracksIncluded included,
                                         const QueryParameters* params );
+        static bool deleteByMediaId( MediaLibraryPtr ml, int64_t mediaId );
 
     private:
         MediaLibraryPtr m_ml;

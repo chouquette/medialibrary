@@ -237,6 +237,12 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
                                       std::move( orderBy ), genreId );
 }
 
+bool AlbumTrack::deleteByMediaId( MediaLibraryPtr ml, int64_t mediaId )
+{
+    const std::string req = "DELETE FROM " + Table::Name + " WHERE media_id = ?";
+    return sqlite::Tools::executeDelete( ml->getConn(), req, mediaId );
+}
+
 GenrePtr AlbumTrack::genre()
 {
     if ( m_genre == nullptr && m_genreId != 0 )
