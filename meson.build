@@ -117,6 +117,13 @@ if get_option('force_attachment_api')
   endif
 endif
 
+if get_option('fuzz')
+  if not cxx.has_argument('-fsanitize=fuzzer-no-link')
+    error('Selected compiler doesn\'t support libfuzzer')
+  endif
+  add_project_arguments('-fsanitize=fuzzer-no-link,address,undefined', language: 'cpp')
+endif
+
 config_h = configure_file(input: 'config.h.in', output: 'config.h', configuration: cdata)
 add_project_arguments('-DHAVE_CONFIG_H=1', language: ['cpp'])
 
