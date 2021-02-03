@@ -125,13 +125,13 @@ public:
         backupPlaylists( MediaLibrary *ml, uint32_t dbModel );
 
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
+    static void recoverNullMediaID( MediaLibraryPtr ptr );
 
 private:
     static std::string sortRequest( const QueryParameters* params );
     static bool writeBackup( const std::string& name,
                              const std::vector<std::string>& mrls,
                              const std::string& destFile );
-    void curateNullMediaID() const;
 
 private:
     MediaLibraryPtr m_ml;

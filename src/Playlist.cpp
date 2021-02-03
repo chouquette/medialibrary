@@ -120,7 +120,6 @@ Query<IMedia> Playlist::media() const
         "WHERE pmr.playlist_id = ? AND m.is_present != 0";
     static const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
     static const std::string countReq = "SELECT COUNT(*) " + base;
-    curateNullMediaID();
     return make_query_with_count<Media, IMedia>( m_ml, countReq, req, m_id );
 }
 
@@ -129,59 +128,52 @@ Query<IMedia> Playlist::searchMedia( const std::string& pattern,
 {
     if ( pattern.size() < 3 )
         return {};
-    curateNullMediaID();
     return Media::searchInPlaylist( m_ml, pattern, m_id, params );
 }
 
-void Playlist::curateNullMediaID() const
+void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
 {
-    auto dbConn = m_ml->getConn();
-    auto t = dbConn->newTransaction();
-    std::string req = "SELECT rowid, mrl FROM " + Playlist::MediaRelationTable::Name + " "
-            "WHERE media_id IS NULL "
-            "AND playlist_id = ?";
+    auto dbConn = ml->getConn();
+    assert( sqlite::Transaction::transactionInProgress() == true );
+    std::string req = "SELECT rowid, mrl, playlist_id FROM " + Playlist::MediaRelationTable::Name + " "
+            "WHERE media_id IS NULL";
     sqlite::Statement stmt{ dbConn->handle(), req };
-    stmt.execute( m_id );
+    stmt.execute();
     std::string updateReq = "UPDATE " + Playlist::MediaRelationTable::Name +
             " SET media_id = ? WHERE rowid = ?";
-    auto mediaNotFound = false;
 
     for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
     {
         int64_t rowId;
         std::string mrl;
-        row >> rowId >> mrl;
-        auto media = m_ml->media( mrl );
-        if ( media != nullptr )
+        int64_t playlistId;
+        row >> rowId >> mrl >> playlistId;
+        assert( row.hasRemainingColumns() == false );
+        auto media = ml->media( mrl );
+        if ( media == nullptr )
         {
-            LOG_INFO( "Updating playlist item mediaId (playlist: ", m_id,
-                      "; mrl: ", mrl, ')' );
-            if ( sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(),
-                                               rowId ) == false )
+            media = Media::createExternal( ml, mrl, -1 );
+            if ( media == nullptr )
             {
-                LOG_WARN( "Failed to currate NULL media_id from playlist" );
-                return;
+                const std::string deleteReq = "DELETE FROM " + Playlist::MediaRelationTable::Name +
+                        " WHERE rowid = ?";
+                if ( sqlite::Tools::executeDelete( dbConn, req, rowId ) == false )
+                {
+                    LOG_ERROR( "Failed to recover and delete playlist record with "
+                               "a NULL media_id" );
+                }
+                continue;
             }
         }
-        else
+        LOG_INFO( "Updating playlist item mediaId (playlist: ", playlistId,
+                  "; mrl: ", mrl, ')' );
+        if ( sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(),
+                                           rowId ) == false )
         {
-            LOG_INFO( "Can't restore media association for media ", mrl,
-                      " in playlist ", m_id, ". Media will be removed from the playlist" );
-            mediaNotFound = true;
-        }
-    }
-    if ( mediaNotFound )
-    {
-        // Batch all deletion at once instead of doing it during the loop
-        std::string deleteReq = "DELETE FROM " + Playlist::MediaRelationTable::Name + " "
-                "WHERE playlist_id = ? AND media_id IS NULL";
-        if ( sqlite::Tools::executeDelete( dbConn, deleteReq, m_id ) == false )
-        {
-            LOG_WARN( "Failed to remove remaining NULL media_id from playlist" );
+            LOG_WARN( "Failed to currate NULL media_id from playlist" );
             return;
         }
     }
-    t->commit();
 }
 
 bool Playlist::append( const IMedia& media )
@@ -359,7 +351,7 @@ void Playlist::createIndexes( sqlite::Connection* dbConn )
                                                   Settings::DbModelVersion ) );
 }
 
-std::string Playlist::schema( const std::string& tableName, uint32_t )
+std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
 {
     if ( tableName == FtsTable::Name )
     {
@@ -380,6 +372,20 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
         ")";
     }
     assert( tableName == MediaRelationTable::Name );
+    if ( dbModel < 30 )
+    {
+        return "CREATE TABLE " + MediaRelationTable::Name +
+        "("
+            "media_id INTEGER,"
+            "mrl STRING,"
+            "playlist_id INTEGER,"
+            "position INTEGER,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
+                + Media::Table::PrimaryKeyColumn + ") ON DELETE SET NULL,"
+            "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
+                + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + MediaRelationTable::Name +
     "("
         "media_id INTEGER,"
@@ -387,10 +393,10 @@ std::string Playlist::schema( const std::string& tableName, uint32_t )
         "playlist_id INTEGER,"
         "position INTEGER,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
-            + Media::Table::PrimaryKeyColumn + ") ON DELETE SET NULL,"
+            + Media::Table::PrimaryKeyColumn + ") ON DELETE CASCADE,"
         "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
             + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
-                                                  ")";
+    ")";
 }
 
 std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )

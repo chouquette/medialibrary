@@ -768,4 +768,12 @@ TEST_F( DbModel, Upgrade27to28 )
 TEST_F( DbModel, Upgrade29to30 )
 {
     CommonMigrationTest( SRC_DIR "/test/unittest/db_v29.sql" );
+
+    auto playlists = ml->playlists( nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    auto pl = playlists[0];
+    auto plMedia = pl->media()->all();
+    ASSERT_EQ( 2u, plMedia.size() );
+    ASSERT_EQ( 1u, plMedia[0]->id() );
+    ASSERT_EQ( 2u, plMedia[1]->id() );
 }

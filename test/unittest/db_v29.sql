@@ -163,4 +163,7 @@ INSERT INTO Task VALUES(1,3,2,0,'file:///home/chouquette/dev/medialibrary/test/s
 INSERT INTO Task VALUES(2,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track2.mp3',1,2,1,0,0,0,'');
 INSERT INTO Task VALUES(3,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track3.mp3',1,3,1,0,0,0,'');
 INSERT INTO Task VALUES(4,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track4.mp3',1,4,1,0,0,0,'');
+INSERT INTO Playlist VALUES(1,'test playlist',NULL,1612368643,'');
+INSERT INTO PlaylistMediaRelation VALUES(1,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track.mp3',1,0);
+INSERT INTO PlaylistMediaRelation VALUES(NULL,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation/track2.mp3',1,1);
 COMMIT;

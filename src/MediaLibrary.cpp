@@ -2205,6 +2205,8 @@ void MediaLibrary::migrateModel29to30()
 #       include "database/migrations/migration29-30.sql"
     };
 
+    Playlist::recoverNullMediaID( this );
+
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
