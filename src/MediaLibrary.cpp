@@ -877,12 +877,6 @@ void MediaLibrary::onUpdatedFile( std::shared_ptr<File> file,
     }
 }
 
-bool MediaLibrary::deleteFolder( const Folder& folder )
-{
-    LOG_DEBUG( "deleting folder ", folder.mrl() );
-    return Folder::destroy( this, folder.id() );
-}
-
 LabelPtr MediaLibrary::createLabel( const std::string& label )
 {
     try

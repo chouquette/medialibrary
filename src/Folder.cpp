@@ -38,6 +38,8 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 
+#include <queue>
+
 namespace medialibrary
 {
 
@@ -377,19 +379,16 @@ bool Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
     return sqlite::Tools::executeInsert( ml->getConn(), req, folderId ) != 0;
 }
 
-bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
+bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl,
+                  RemovalBehavior behavior )
 {
-    // Ensure we delete the existing folder if any & ban the folder in an "atomic" way
-    auto t = ml->getConn()->newTransaction();
-
     auto f = fromMrl( ml, mrl, BannedType::Any );
     if ( f != nullptr )
     {
         // No need to ban a folder twice
         if ( f->m_isBanned == true )
             return true;
-        // Let the foreign key destroy everything beneath this folder
-        destroy( ml, f->id() );
+        return remove( ml, std::move( f ), behavior );
     }
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
@@ -427,7 +426,6 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
     auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
                                              nullptr, true, device->id(),
                                              deviceFs->isRemovable() ) != 0;
-    t->commit();
     return res;
 }
 
@@ -594,6 +592,13 @@ std::shared_ptr<Device> Folder::device() const
     return m_device;
 }
 
+bool Folder::ban()
+{
+    const std::string req = "UPDATE " + Table::Name +
+            " SET is_banned = 1 WHERE id_folder = ?";
+    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id );
+}
+
 Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
                                   const QueryParameters* params )
 {
@@ -628,6 +633,54 @@ Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t dev
         return make_query<Folder, IFolder>( ml, "*", req, "", banned );
     req += " AND device_id = ?";
     return make_query<Folder, IFolder>( ml, "*", req, "", banned, deviceId );
+}
+
+bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
+                     RemovalBehavior behavior )
+{
+    if ( behavior == RemovalBehavior::RemovedFromDisk )
+    {
+        /* We expect a banned folder to no have any media linked with it */
+        assert( folder->isBanned() == false || folder->nbMedia() == 0 );
+        /*
+         * If we want to delete the media as well, we can just let the foreign
+         * keys delete everything
+         */
+        return DatabaseHelpers<Folder>::destroy( ml, folder->id() );
+    }
+    std::queue<std::shared_ptr<IFolder>> queue;
+    queue.push( folder );
+
+    /**
+     * Crawl through all the sub folders & convert the media to external
+     * Afterward, delete the folder, which will propagate to all subfolders
+     * through foreign keys
+     */
+    while ( queue.empty() == false )
+    {
+        auto f = std::move( queue.front() );
+        queue.pop();
+        auto subFolders = f->subfolders( nullptr )->all();
+        while ( subFolders.empty() == false )
+        {
+            queue.push( std::move( subFolders.back() ) );
+            subFolders.pop_back();
+        }
+        auto t = ml->getConn()->newTransaction();
+        auto subMedia = f->media( IMedia::Type::Unknown, nullptr )->all();
+        for ( const auto& media : subMedia )
+        {
+            auto m = static_cast<Media*>( media.get() );
+            if ( m->convertToExternal() == false )
+                return false;
+        }
+        t->commit();
+    }
+    /* If we're banning an entry point, we just need to delete if from the database */
+    if ( folder->isRootFolder() == true )
+        return DatabaseHelpers<Folder>::destroy( ml, folder->id() );
+    /* Otherwise we need to flag that it was banned so that it's not discovered again */
+    return folder->ban();
 }
 
 int64_t Folder::id() const

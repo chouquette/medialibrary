@@ -460,26 +460,15 @@ void DiscovererWorker::runRemove( const std::string& ep )
         m_ml->getCb()->onEntryPointRemoved( ep, false );
         return;
     }
-    // The easy case is that this folder was directly discovered. In which case, we just
-    // have to delete it and it won't be discovered again.
-    // If it isn't, we also have to ban it to prevent it from reappearing. The Folder::banFolder
-    // method already handles the prior deletion
-    bool res;
-    if ( folder->isRootFolder() == false )
-        res = Folder::ban( m_ml, entryPoint );
-    else
-        res = m_ml->deleteFolder( *folder );
-    if ( res == false )
-    {
-        m_ml->getCb()->onEntryPointRemoved( ep, false );
-        return;
-    }
-    m_ml->getCb()->onEntryPointRemoved( ep, true );
+    auto res = Folder::remove( m_ml, std::move( folder ),
+                               Folder::RemovalBehavior::EntrypointRemoved );
+    m_ml->getCb()->onEntryPointRemoved( ep, res );
 }
 
 void DiscovererWorker::runBan( const std::string& entryPoint )
 {
-    auto res = Folder::ban( m_ml, entryPoint );
+    auto res = Folder::ban( m_ml, entryPoint,
+                            Folder::RemovalBehavior::RemovedFromDisk );
     m_ml->getCb()->onEntryPointBanned( entryPoint, res );
 }
 
@@ -492,7 +481,8 @@ void DiscovererWorker::runUnban( const std::string& entryPoint )
         m_ml->getCb()->onEntryPointUnbanned( entryPoint, false );
         return;
     }
-    auto res = m_ml->deleteFolder( *folder );
+    auto res = Folder::remove( m_ml, std::move( folder ),
+                                Folder::RemovalBehavior::RemovedFromDisk );
     m_ml->getCb()->onEntryPointUnbanned( entryPoint, res );
 
     auto parentPath = utils::file::parentDirectory( entryPoint );

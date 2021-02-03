@@ -79,6 +79,24 @@ class Folders : public FoldersNoDiscover
         }
 };
 
+static void enforceFakeMediaTypes( MediaLibraryTester* ml )
+{
+    auto media = std::static_pointer_cast<Media>( ml->media(
+                                mock::FileSystemFactory::Root + "video.avi" ) );
+    media->setType( IMedia::Type::Video );
+    media->save();
+
+    media = std::static_pointer_cast<Media>( ml->media(
+                                    mock::FileSystemFactory::Root + "audio.mp3" ) );
+    media->setType( IMedia::Type::Audio );
+    media->save();
+
+    media = std::static_pointer_cast<Media>( ml->media(
+                                    mock::FileSystemFactory::SubFolder + "subfile.mp4" ) );
+    media->setType( IMedia::Type::Video );
+    media->save();
+}
+
 TEST_F( Folders, Add )
 {
     auto files = ml->files();
@@ -398,15 +416,41 @@ TEST_F( Folders, FetchEntryPoints )
 
 TEST_F( Folders, RemoveRootEntryPoint )
 {
+    enforceFakeMediaTypes( ml.get() );
     auto media = ml->files();
-    ASSERT_NE( 0u, media.size() );
+    ASSERT_EQ( 3u, media.size() );
+    auto video = ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 2u, video.size() );
+    auto audio = ml->audioFiles( nullptr )->all();
+    ASSERT_EQ( 1u, audio.size() );
+
+    auto m = ml->media( mock::FileSystemFactory::Root + "video.avi" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_FALSE( m->isExternalMedia() );
+    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_FALSE( m->isExternalMedia() );
 
     ml->removeEntryPoint( mock::FileSystemFactory::Root );
     auto res = cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 
     media = ml->files();
-    ASSERT_EQ( 0u, media.size() );
+    ASSERT_EQ( 3u, media.size() );
+
+    video = ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( 0u, video.size() );
+    audio = ml->audioFiles( nullptr )->all();
+    ASSERT_EQ( 0u, audio.size() );
+
+    /* The media should now be converted to an external media */
+    m = ml->media( mock::FileSystemFactory::Root + "video.avi" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_TRUE( m->isExternalMedia() );
+
+    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_TRUE( m->isExternalMedia() );
 
     auto eps = ml->entryPoints()->all();
     ASSERT_EQ( 0u, eps.size() );
@@ -417,6 +461,10 @@ TEST_F( Folders, RemoveEntryPoint )
     auto media = ml->files();
     ASSERT_NE( 0u, media.size() );
 
+    auto m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_FALSE( m->isExternalMedia() );
+
     ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
     auto res = cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
@@ -426,6 +474,10 @@ TEST_F( Folders, RemoveEntryPoint )
 
     auto eps = ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
+
+    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_NE( nullptr, m );
+    ASSERT_TRUE( m->isExternalMedia() );
 
     ml->reload();
 
@@ -450,24 +502,6 @@ TEST_F( Folders, RemoveRootFolder )
     Reload();
 
     ASSERT_EQ( 0u, ml->files().size() );
-}
-
-static void enforceFakeMediaTypes( MediaLibraryTester* ml )
-{
-    auto media = std::static_pointer_cast<Media>( ml->media(
-                                mock::FileSystemFactory::Root + "video.avi" ) );
-    media->setType( IMedia::Type::Video );
-    media->save();
-
-    media = std::static_pointer_cast<Media>( ml->media(
-                                    mock::FileSystemFactory::Root + "audio.mp3" ) );
-    media->setType( IMedia::Type::Audio );
-    media->save();
-
-    media = std::static_pointer_cast<Media>( ml->media(
-                                    mock::FileSystemFactory::SubFolder + "subfile.mp4" ) );
-    media->setType( IMedia::Type::Video );
-    media->save();
 }
 
 TEST_F( Folders, NbMedia )

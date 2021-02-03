@@ -62,10 +62,9 @@ private:
                     fs::IFileSystemFactory& fsFactory ) const;
     bool reloadFolder( std::shared_ptr<Folder> folder,
                        const IInterruptProbe& probe, fs::IFileSystemFactory& fsFactory );
-    void checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
+    void checkRemovedDevices(fs::IDirectory& fsFolder, std::shared_ptr<Folder> folder,
                               fs::IFileSystemFactory& fsFactory, bool newFolder,
                               bool rootFolder ) const;
-
 
 private:
     MediaLibrary* m_ml;

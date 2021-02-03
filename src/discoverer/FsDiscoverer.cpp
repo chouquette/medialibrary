@@ -136,7 +136,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
         {
             LOG_DEBUG( "Failed to find folder matching entrypoint ", mrl, ". "
                       "Removing that folder" );
-            m_ml->deleteFolder( *f );
+            Folder::remove( m_ml, std::move( f ), Folder::RemovalBehavior::RemovedFromDisk );
             return false;
         }
     }
@@ -153,10 +153,12 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     return true;
 }
 
-void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder,
+void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
+                                        std::shared_ptr<Folder> folder,
                                         fs::IFileSystemFactory& fsFactory,
                                         bool newFolder, bool rootFolder ) const
 {
+    assert( folder != nullptr );
     // Even when we're discovering a new folder, we want to rule out device removal as the cause of
     // an IO error. If this is the cause, simply abort the discovery. All the folder we have
     // discovered so far will be marked as non-present through sqlite hooks, and we'll resume the
@@ -204,7 +206,8 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder, Folder& folder
     if ( newFolder == false )
     {
         // If we ever came across this folder, its content is now unaccessible: let's remove it.
-        m_ml->deleteFolder( folder );
+        Folder::remove( m_ml, std::move( folder ),
+                        Folder::RemovalBehavior::RemovedFromDisk );
     }
 }
 
@@ -296,7 +299,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             {
                 LOG_INFO( "A .nomedia file was added into a known folder, "
                           "removing it." );
-                m_ml->deleteFolder( *currentFolder );
+                Folder::remove( m_ml, std::move( currentFolder ),
+                                 Folder::RemovalBehavior::RemovedFromDisk );
             }
             return;
         }
@@ -362,7 +366,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             for ( const auto& f : subFoldersInDB )
             {
                 LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
-                m_ml->deleteFolder( *f );
+                Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
             }
         }
         checkFiles( currentFolderFs, currentFolder, interruptProbe );
@@ -372,8 +376,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
     catch ( const fs::errors::System& ex )
     {
         LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
-        checkRemovedDevices( *currentFolderFs, *currentFolder, fsFactory,
-                             newFolder, rootFolder );
+        checkRemovedDevices( *currentFolderFs, std::move( currentFolder ),
+                             fsFactory, newFolder, rootFolder );
         // If the device has indeed been removed, fs::errors::DeviceRemoved will
         // be thrown, otherwise, we just failed to browse that folder and will
         // have to try again later.

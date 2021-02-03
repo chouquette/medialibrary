@@ -103,8 +103,6 @@ public:
                         std::shared_ptr<Folder> parentFolder,
                         std::shared_ptr<fs::IDirectory> parentFolderFs );
 
-    bool deleteFolder(const Folder& folder );
-
     virtual LabelPtr createLabel( const std::string& label ) override;
     virtual bool deleteLabel( LabelPtr label ) override;
 

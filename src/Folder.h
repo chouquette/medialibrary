@@ -77,6 +77,20 @@ public:
         Any,    //< Well... any of the above.
     };
 
+    enum class RemovalBehavior
+    {
+        /*
+         * The folder was removed from disk: remove it from the db and delete
+         * the media it contained
+         */
+        RemovedFromDisk,
+        /*
+         * The entry point was explicitely removed. Flag it as such in database
+         * but keep its media on disk
+         */
+        EntrypointRemoved,
+    };
+
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
     Folder( MediaLibraryPtr ml, const std::string& path, int64_t parent,
             int64_t deviceId , bool isRemovable );
@@ -94,7 +108,8 @@ public:
                                            int64_t parentId, const Device& device,
                                            fs::IDevice& deviceFs );
     static bool excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
-    static bool ban( MediaLibraryPtr ml, const std::string& mrl );
+    static bool ban( MediaLibraryPtr ml, const std::string& mrl,
+                     RemovalBehavior behavior );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 
     static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,
@@ -109,6 +124,24 @@ public:
                                            const QueryParameters* params );
     static Query<IFolder> entryPoints( MediaLibraryPtr ml, bool banned,
                                        int64_t deviceId );
+    /**
+     * @brief deleteFolder Mark a folder in database as removed
+     * @param ml The media library instance
+     * @param folder The folder to remove
+     * @param behavior An enum member to drive the removal behavior
+     * @return true in case of success, false otherwise.
+     *
+     * This will mark the folder as removed. If the folder was an entry point,
+     * it will simply be removed from the database. If it was a sub folder of an
+     * entry point, the folder will be marked as banned in order to not be
+     * discovered again.
+     * If the behavior passed is RemovedFromDisk, all the media that belonged to
+     * that folder will be removed from the database. This also means that the
+     * media will be removed from any media group or playlist they belonged to.
+     * Otherwise, when behavior is EntrypointRemoved, the media will be converted
+     * to external media, and will be kept in database.
+     */
+    static bool remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder, RemovalBehavior behavior );
 
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
@@ -145,6 +178,7 @@ private:
     static std::string filterByMediaType( IMedia::Type type );
 
     std::shared_ptr<Device> device() const;
+    bool ban();
 
 private:
     MediaLibraryPtr m_ml;
