@@ -122,7 +122,6 @@ public:
     std::shared_ptr<Folder> parent();
     int64_t deviceId() const;
     virtual bool isRemovable() const override;
-    bool forceNonRemovable( const std::string& fullMrl );
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
     bool isRootFolder() const;

@@ -49,11 +49,6 @@ public:
     int64_t id() const;
     const std::string& uuid() const;
     bool isRemovable() const;
-    ///
-    /// \brief forceNonRemovable This is used only to fix an invalid DB state
-    /// \return
-    ///
-    bool forceNonRemovable();
     bool isPresent() const;
     void setPresent( bool value );
     bool isNetwork() const;
