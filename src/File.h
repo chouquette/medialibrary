@@ -141,10 +141,10 @@ private:
     const Type m_type;
     time_t m_lastModificationDate;
     int64_t m_size;
-    const int64_t m_folderId;
-    const bool m_isRemovable;
-    const bool m_isExternal;
-    const bool m_isNetwork;
+    int64_t m_folderId;
+    bool m_isRemovable;
+    bool m_isExternal;
+    bool m_isNetwork;
 
     // Contains the full path as a MRL
     mutable std::string m_fullPath;

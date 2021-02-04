@@ -234,10 +234,20 @@ bool File::update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable )
     const std::string req = "UPDATE " + Table::Name + " SET "
         "mrl = ?, last_modification_date = ?, size = ?, folder_id = ?, "
         "is_removable = ?, is_external = ?, is_network = ? WHERE id_file = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req,
-        isRemovable == true ? fileFs.name() : fileFs.mrl(),
-        fileFs.lastModificationDate(), fileFs.size(), folderId, isRemovable,
-        false, fileFs.isNetwork(), m_id );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+            isRemovable == true ? fileFs.name() : fileFs.mrl(),
+            fileFs.lastModificationDate(), fileFs.size(), folderId, isRemovable,
+            false, fileFs.isNetwork(), m_id ) == false )
+        return false;
+    m_mrl = isRemovable == true ? fileFs.name() : fileFs.mrl();
+    m_fullPath = fileFs.mrl();
+    m_lastModificationDate = fileFs.lastModificationDate();
+    m_size = fileFs.size();
+    m_folderId = folderId;
+    m_isRemovable = isRemovable;
+    m_isExternal = false;
+    m_isNetwork = fileFs.isNetwork();
+    return true;
 }
 
 bool File::convertToExternal()
