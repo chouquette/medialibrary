@@ -91,6 +91,7 @@ TEST_F( Thumbnails, Update )
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
+    ASSERT_EQ( id, t->id() );
 
     // Now update the origin + mrl (we don't support updating the origin only
     // anymore)
@@ -106,6 +107,7 @@ TEST_F( Thumbnails, Update )
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
+    ASSERT_EQ( id, t->id() );
 }
 
 TEST_F( Thumbnails, MarkFailure )
