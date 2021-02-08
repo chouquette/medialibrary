@@ -57,6 +57,8 @@ public:
         InsertFts,
         UpdateFts,
         DeleteFts,
+        UpdateNbMediaOnMediaDeletion,
+        UpdateNbPresentMediaOnPresenceChange,
 
         // Deprecated since model 16
         Append,
@@ -81,6 +83,8 @@ public:
     virtual bool setName( const std::string& name ) override;
     virtual unsigned int creationDate() const override;
     virtual const std::string& artworkMrl() const override;
+    virtual uint32_t nbMedia() const override;
+    virtual uint32_t nbPresentMedia() const override;
     virtual Query<IMedia> media() const override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params ) const override;
@@ -137,6 +141,9 @@ private:
      * position is out of range
      */
     int64_t mediaAt( uint32_t position );
+    bool addInternal( int64_t mediaId, uint32_t position, bool updateCount );
+    bool addInternal( const IMedia& media, uint32_t position, bool updateCount );
+    bool removeInternal( uint32_t position, int64_t mediaId, bool updateCount );
 
 private:
     MediaLibraryPtr m_ml;
@@ -146,6 +153,8 @@ private:
     int64_t m_fileId;
     const unsigned int m_creationDate;
     std::string m_artworkMrl;
+    uint32_t m_nbMedia;
+    uint32_t m_nbPresentMedia;
 
     friend Playlist::Table;
 };

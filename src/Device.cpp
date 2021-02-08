@@ -289,7 +289,9 @@ Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
         "INNER JOIN " + Device::Table::Name + " d ON mt.device_id = d.id_device "
         "WHERE d.scheme = ? ORDER BY mt.last_seen DESC";
     auto dbConn = ml->getConn();
-    auto ctx = dbConn->acquireReadContext();
+    sqlite::Connection::ReadContext ctx;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        ctx = dbConn->acquireReadContext();
     sqlite::Statement stmt{ dbConn->handle(), req };
     stmt.execute( utils::url::scheme( mrl ) );
     for ( auto row = stmt.row(); row != nullptr; row = stmt.row() )

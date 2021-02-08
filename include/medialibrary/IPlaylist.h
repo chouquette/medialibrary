@@ -60,6 +60,17 @@ public:
     ///
     virtual const std::string& artworkMrl() const = 0;
     ///
+    /// \brief nbMedia Return the number of media in this playlist
+    ///
+    /// This number doesn't reflect media presence. For the count of present
+    /// media, use nbPresentMedia
+    ///
+    virtual uint32_t nbMedia() const = 0;
+    ///
+    /// \brief nbPresentMedia Returns the number of present media in this playlist
+    ///
+    virtual uint32_t nbPresentMedia() const = 0;
+    ///
     /// \brief media Returns the media contained in this playlist
     /// \return A query object representing the media in this playlist
     ///

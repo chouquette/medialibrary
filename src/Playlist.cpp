@@ -59,6 +59,8 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_fileId( row.extract<decltype(m_fileId)>() )
     , m_creationDate( row.extract<decltype(m_creationDate)>() )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
+    , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
+    , m_nbPresentMedia( row.extract<decltype(m_nbPresentMedia)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -69,6 +71,8 @@ Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
     , m_name( name )
     , m_fileId( 0 )
     , m_creationDate( time( nullptr ) )
+    , m_nbMedia( 0 )
+    , m_nbPresentMedia( 0 )
 {
 }
 
@@ -111,6 +115,16 @@ unsigned int Playlist::creationDate() const
 const std::string& Playlist::artworkMrl() const
 {
     return m_artworkMrl;
+}
+
+uint32_t Playlist::nbMedia() const
+{
+    return m_nbMedia;
+}
+
+uint32_t Playlist::nbPresentMedia() const
+{
+    return m_nbPresentMedia;
 }
 
 Query<IMedia> Playlist::media() const
@@ -191,12 +205,15 @@ int64_t Playlist::mediaAt( uint32_t position )
     return row.extract<int64_t>();
 }
 
-bool Playlist::append( const IMedia& media )
+bool Playlist::addInternal(int64_t mediaId, uint32_t position, bool updateCount)
 {
-    return add( media, UINT32_MAX );
+    auto media = m_ml->media( mediaId );
+    if ( media == nullptr )
+        return false;
+    return addInternal( *media, position, updateCount );
 }
 
-bool Playlist::add( const IMedia& media, uint32_t position )
+bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCount )
 {
     auto files = media.files();
     assert( files.size() > 0 );
@@ -218,21 +235,87 @@ bool Playlist::add( const IMedia& media, uint32_t position )
         return false;
     }
 
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+
+    bool res;
     if ( position == UINT32_MAX )
     {
         static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
                 "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
                 "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
                 " WHERE playlist_id = ?3))";
-        return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+        res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
                                              std::move( mrl ), m_id );
     }
-    static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
-            "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
-            "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-            " WHERE playlist_id = ?3)))";
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                       std::move( mrl ), m_id, position );
+    else
+    {
+        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
+                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
+                "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                " WHERE playlist_id = ?3)))";
+        res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
+                                           std::move( mrl ), m_id, position );
+    }
+    if ( res == false )
+        return false;
+    if ( updateCount == true )
+    {
+        const std::string updateCountReq = "UPDATE " + Table::Name +
+                " SET nb_media = nb_media + 1, nb_present_media = nb_present_media + ?"
+                " WHERE id_playlist = ?";
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
+                                           media.isPresent() ? 1 : 0, m_id ) == false )
+            return false;
+        ++m_nbMedia;
+        if ( media.isPresent() )
+            ++m_nbPresentMedia;
+    }
+    if ( t != nullptr )
+        t->commit();
+    return true;
+}
+
+bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateCount )
+{
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( updateCount == true && sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+    static const std::string req = "DELETE FROM " + MediaRelationTable::Name +
+            " WHERE playlist_id = ? AND position = ?";
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
+        return false;
+
+    if ( updateCount == false )
+        return true;
+
+    const std::string updateCountReq = "UPDATE " + Table::Name +
+            " SET nb_media = nb_media - 1, nb_present_media = nb_present_media - ?"
+            " WHERE id_playlist = ?";
+    auto media = m_ml->media( mediaId );
+    auto isPresent = media != nullptr && media->isPresent();
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
+                                       isPresent ? 1 : 0, m_id ) == false )
+        return false;
+    if ( t != nullptr )
+        t->commit();
+
+    --m_nbMedia;
+    if ( isPresent == true )
+        --m_nbPresentMedia;
+
+    return true;
+}
+
+bool Playlist::append( const IMedia& media )
+{
+    return addInternal( media, UINT32_MAX, true );
+}
+
+bool Playlist::add( const IMedia& media, uint32_t position )
+{
+    return addInternal( media, position, true );
 }
 
 bool Playlist::append( int64_t mediaId )
@@ -286,12 +369,12 @@ bool Playlist::move( uint32_t from, uint32_t position )
         LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
         return false;
     }
-    if ( remove( from ) == false )
+    if ( removeInternal( from, mediaId, false ) == false )
     {
         LOG_ERROR( "Failed to remove element ", from, " from playlist" );
         return false;
     }
-    if ( add( mediaId, position ) == false )
+    if ( addInternal( mediaId, position, false ) == false )
     {
         LOG_ERROR( "Failed to re-add element in playlist" );
         return false;
@@ -303,10 +386,10 @@ bool Playlist::move( uint32_t from, uint32_t position )
 
 bool Playlist::remove( uint32_t position )
 {
-    static const std::string req = "DELETE FROM " +
-            Playlist::MediaRelationTable::Name +
-            " WHERE playlist_id = ? AND position = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position );
+    auto mediaId = mediaAt( position );
+    if ( mediaId == 0 )
+        return false;
+    return removeInternal( position, mediaId, true );
 }
 
 bool Playlist::isReadOnly() const
@@ -357,6 +440,12 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::DeleteFts,
                                             Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateNbMediaOnMediaDeletion,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateNbPresentMediaOnPresenceChange,
+                                            Settings::DbModelVersion ) );
 }
 
 void Playlist::createIndexes( sqlite::Connection* dbConn )
@@ -376,6 +465,19 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
     }
     else if ( tableName == Table::Name )
     {
+        if ( dbModel < 30 )
+        {
+            return "CREATE TABLE " + Table::Name +
+            "("
+                + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "name TEXT COLLATE NOCASE,"
+                "file_id UNSIGNED INT DEFAULT NULL,"
+                "creation_date UNSIGNED INT NOT NULL,"
+                "artwork_mrl TEXT,"
+                "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+            ")";
+        }
         return "CREATE TABLE " + Table::Name +
         "("
             + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -383,6 +485,9 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
             "file_id UNSIGNED INT DEFAULT NULL,"
             "creation_date UNSIGNED INT NOT NULL,"
             "artwork_mrl TEXT,"
+            "nb_media UNSIGNED INT NOT NULL DEFAULT 0,"
+            "nb_present_media UNSIGNED INT NOT NULL DEFAULT 0 "
+                "CHECK(nb_present_media <= nb_media),"
             "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
             + "(id_file) ON DELETE CASCADE"
         ")";
@@ -409,7 +514,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
         "playlist_id INTEGER,"
         "position INTEGER,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
-            + Media::Table::PrimaryKeyColumn + ") ON DELETE CASCADE,"
+            + Media::Table::PrimaryKeyColumn + ") ON DELETE NO ACTION,"
         "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
             + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
     ")";
@@ -506,6 +611,41 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                        " AND media_id != new.media_id;"
                    " END";
         }
+        case Triggers::UpdateNbMediaOnMediaDeletion:
+        {
+            assert( dbModel >= 30 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER DELETE ON " + Media::Table::Name +
+                       " BEGIN"
+                           " UPDATE " + Table::Name + " SET"
+                               " nb_present_media = nb_present_media -"
+                                   " (CASE old.is_present WHEN 0 THEN 0 ELSE pl_cnt.cnt END),"
+                               " nb_media = nb_media - pl_cnt.cnt"
+                               " FROM (SELECT COUNT(media_id) AS cnt, playlist_id"
+                                    " FROM " + MediaRelationTable::Name +
+                                        " WHERE media_id = old.id_media"
+                                        " GROUP BY playlist_id"
+                                ") AS pl_cnt"
+                               " WHERE id_playlist = pl_cnt.playlist_id;"
+                           "DELETE FROM " + MediaRelationTable::Name +
+                                " WHERE media_id = old.id_media;"
+                       " END";
+        }
+        case Triggers::UpdateNbPresentMediaOnPresenceChange:
+        {
+            assert( dbModel >= 30 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF is_present ON " + Media::Table::Name +
+                   " WHEN old.is_present != new.is_present"
+                   " BEGIN"
+                       " UPDATE " + Table::Name +
+                            " SET nb_present_media = nb_present_media +"
+                            " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                            " WHERE " + Table::PrimaryKeyColumn + " IN"
+                            " (SELECT DISTINCT playlist_id FROM " + MediaRelationTable::Name +
+                                " WHERE media_id = new.id_media);"
+                   " END";
+        }
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -539,6 +679,12 @@ std::string Playlist::triggerName(Playlist::Triggers trigger, uint32_t dbModel)
             assert( dbModel <= 15 );
             return "update_playlist_order";
         }
+        case Triggers::UpdateNbMediaOnMediaDeletion:
+            assert( dbModel >= 30 );
+            return "playlist_update_nb_media_on_media_deletion";
+        case Triggers::UpdateNbPresentMediaOnPresenceChange:
+            assert( dbModel >= 30 );
+            return "playlist_update_nb_present_media";
         default:
             assert( !"Invalid trigger provided" );
     }

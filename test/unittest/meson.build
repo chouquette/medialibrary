@@ -86,6 +86,7 @@ device_fs_tests = [
   'PartialRemoveShowEpisodes',
   'MediaGroupPresence',
   'GenrePresence',
+  'PlaylistPresence',
 ]
 
 foreach t : device_fs_tests
@@ -686,6 +687,7 @@ playlist_tests = [
   'CheckDbModel',
   'IsReadOnly',
   'SortByCreationDate',
+  'NbMedia',
 ]
 
 foreach t : playlist_tests

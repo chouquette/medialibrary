@@ -417,8 +417,43 @@ static void AddDuplicate( PlaylistTests* T )
     ASSERT_EQ( m->id(), media[1]->id() );
     T->CheckContiguity();
 
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
     auto count = T->pl->media()->count();
     ASSERT_EQ( count, media.size() );
+
+    res = T->pl->remove( 1 );
+    ASSERT_TRUE( res );
+
+    media = T->pl->media()->all();
+    ASSERT_EQ( 1u, media.size() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbMedia() );
+    ASSERT_EQ( 1u, T->pl->nbPresentMedia() );
+
+    /*
+     * Re-add the duplicated media and check that the count is properly updated
+     * on deletion
+     */
+    T->pl->append( m->id() );
+    media = T->pl->media()->all();
+    ASSERT_EQ( 2u, media.size() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
+    T->ml->deleteMedia( m->id() );
+
+    media = T->pl->media()->all();
+    ASSERT_EQ( 0u, media.size() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 0u, T->pl->nbMedia() );
+    ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
 }
 
 static void SearchMedia( PlaylistTests* T )
@@ -630,6 +665,58 @@ static void SortByCreationDate( PlaylistTests* T )
     ASSERT_EQ( pl2->id(), playlists[2]->id() );
 }
 
+static void NbMedia( PlaylistTests* T )
+{
+    ASSERT_EQ( 0u, T->pl->nbMedia() );
+    ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
+    auto media = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto media2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto res = T->pl->append( *media );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, T->pl->nbMedia() );
+    ASSERT_EQ( 1u, T->pl->nbPresentMedia() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbMedia() );
+    ASSERT_EQ( 1u, T->pl->nbPresentMedia() );
+
+    res = T->pl->add( *media2, 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
+    res = T->pl->move( 0, 999 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2u, T->pl->nbMedia() );
+    ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
+
+    res = T->pl->remove( 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, T->pl->nbMedia() );
+    ASSERT_EQ( 1u, T->pl->nbPresentMedia() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 1u, T->pl->nbMedia() );
+    ASSERT_EQ( 1u, T->pl->nbPresentMedia() );
+
+    res = T->pl->remove( 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0u, T->pl->nbMedia() );
+    ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 0u, T->pl->nbMedia() );
+    ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -661,6 +748,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( IsReadOnly );
     ADD_TEST( SortByCreationDate );
+    ADD_TEST( NbMedia );
 
     END_TESTS
 }

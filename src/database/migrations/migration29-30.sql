@@ -94,3 +94,37 @@ MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 30 ),
 
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::UpdateMediaCountOnPresenceChange, 29 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateMediaCountOnPresenceChange, 30 ),
+
+"CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
+"("
+    "id_playlist PRIMARY KEY,"
+    "name TEXT,"
+    "file_id UNSIGNED INT,"
+    "creation_date UNSIGNED INT,"
+    "artwork_mrl TEXT"
+")",
+
+"INSERT INTO " + Playlist::Table::Name + "_backup "
+    " SELECT * FROM " + Playlist::Table::Name,
+
+"DROP TABLE " + Playlist::Table::Name,
+Playlist::schema( Playlist::Table::Name, 30 ),
+
+"INSERT INTO " + Playlist::Table::Name + " SELECT *,"
+    " (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+        " WHERE playlist_id = id_playlist),"
+    " (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name + " mrt"
+        " INNER JOIN " + Media::Table::Name + " m ON m.id_media = mrt.media_id "
+        " WHERE m.is_present != 0 AND playlist_id = id_playlist)"
+    " FROM " + Playlist::Table::Name + "_backup",
+
+"DROP TABLE " + Playlist::Table::Name + "_backup",
+
+Playlist::trigger( Playlist::Triggers::UpdateNbMediaOnMediaDeletion, 30 ),
+Playlist::trigger( Playlist::Triggers::InsertFts, 30 ),
+Playlist::trigger( Playlist::Triggers::DeleteFts, 30 ),
+Playlist::trigger( Playlist::Triggers::UpdateFts, 30 ),
+Playlist::trigger( Playlist::Triggers::UpdateNbPresentMediaOnPresenceChange, 30 ),
+parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 30 ),
+
+Playlist::index( Playlist::Indexes::FileId, 30 ),

@@ -34,6 +34,7 @@
 #include "Show.h"
 #include "MediaGroup.h"
 #include "Genre.h"
+#include "Playlist.h"
 
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
@@ -809,6 +810,103 @@ static void GenrePresence( DeviceFsTests* T )
     ASSERT_TRUE( genre->isPresent() );
 }
 
+static void PlaylistPresence( DeviceFsTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto pl = T->ml->createPlaylist( "test playlist" );
+    auto pl2 = T->ml->createPlaylist( "test playlist 2" );
+    auto media1 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
+    auto media2 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
+
+    auto res = pl->append( *media1 );
+    ASSERT_TRUE( res );
+    res = pl->append( *media2 );
+    ASSERT_TRUE( res );
+
+    res = pl2->append( *media1 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
+    T->Reload();
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentMedia() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    T->fsMock->addDevice( device );
+    T->Reload();
+
+    /*
+     * Moving a playlist item is implemented by removing/adding, so check that
+     * it doesn't wreck the counters
+     */
+    res = pl->move( 1, 999 );
+    ASSERT_TRUE( res );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 2u, pl->nbPresentMedia() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
+    T->Reload();
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 2u, pl->nbMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentMedia() );
+
+    T->ml->deleteMedia( media2->id() );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 1u, pl->nbMedia() );
+    ASSERT_EQ( 1u, pl->nbPresentMedia() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 1u, pl2->nbMedia() );
+    ASSERT_EQ( 1u, pl2->nbPresentMedia() );
+
+    T->ml->deleteMedia( media1->id() );
+
+    pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
+    ASSERT_EQ( 0u, pl->nbMedia() );
+    ASSERT_EQ( 0u, pl->nbPresentMedia() );
+
+    pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    ASSERT_EQ( 0u, pl2->nbMedia() );
+    ASSERT_EQ( 0u, pl2->nbPresentMedia() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -827,6 +925,7 @@ int main( int ac, char** av )
     ADD_TEST( PartialRemoveShowEpisodes );
     ADD_TEST( MediaGroupPresence );
     ADD_TEST( GenrePresence );
+    ADD_TEST( PlaylistPresence );
 
     END_TESTS
 }

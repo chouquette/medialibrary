@@ -76,6 +76,8 @@ namespace
         "media_group_update_nb_media_types",
         "media_group_update_nb_media_types_presence",
         "media_update_device_presence",
+        "playlist_update_nb_media_on_media_deletion",
+        "playlist_update_nb_present_media",
         "show_decrement_nb_episode",
         "show_increment_nb_episode",
         "show_update_is_present",
@@ -638,6 +640,9 @@ static void Upgrade29to30( DbModel* T )
     ASSERT_EQ( 2u, plMedia.size() );
     ASSERT_EQ( 1u, plMedia[0]->id() );
     ASSERT_EQ( 2u, plMedia[1]->id() );
+
+    ASSERT_EQ( 3u, playlists[0]->nbMedia() );
+    ASSERT_EQ( 2u, playlists[0]->nbPresentMedia() );
 
     auto mediaGroups = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, mediaGroups.size() );
