@@ -134,6 +134,57 @@ TEST_P( Tests, Parse )
     runChecks( doc );
 }
 
+TEST_P( ParseTwice, Parse )
+{
+    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
+    auto casePath = testDir + "testcases/" + std::get<0>( GetParam() ) + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536]; // That's how ugly I am!
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    rapidjson::Document doc;
+    doc.Parse( buff );
+
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    const auto& input = doc["input"];
+    auto lock = m_cb->lock();
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
+    }
+
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
+
+    runChecks( doc );
+
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+        m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
+    }
+
+    ASSERT_TRUE( m_cb->waitForRemovalComplete( lock ) );
+
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
+    }
+
+    ASSERT_TRUE( m_cb->waitForParsingComplete( lock ) );
+
+    runChecks( doc );
+}
+
 TEST_P( ResumeTests, Parse )
 {
     auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
@@ -343,6 +394,10 @@ static std::string ParamToName( const ::testing::TestParamInfo<std::tuple<std::s
 }
 
 INSTANTIATE_TEST_SUITE_P(SamplesTests, Tests,
+                        ::testing::ValuesIn(testCases),
+                        &ParamToName );
+
+INSTANTIATE_TEST_SUITE_P(SamplesTests, ParseTwice,
                         ::testing::ValuesIn(testCases),
                         &ParamToName );
 

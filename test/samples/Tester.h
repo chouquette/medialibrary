@@ -51,6 +51,7 @@ public:
     MockCallback();
     virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock );
     virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& ) { return true; }
+    virtual bool waitForRemovalComplete( std::unique_lock<compat::Mutex>& );
     virtual void reinit() {}
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
@@ -60,6 +61,7 @@ protected:
     virtual void onParsingStatsUpdated(uint32_t percent) override;
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
+    virtual void onEntryPointRemoved( const std::string& entryPoint, bool res ) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;
@@ -70,6 +72,7 @@ protected:
     bool m_thumbnailSuccess;
     bool m_done;
     bool m_discoveryCompleted;
+    bool m_removalCompleted;
 };
 
 class ForceRemovableStorareDeviceLister : public IDeviceLister, public IDeviceListerCb
@@ -135,6 +138,10 @@ protected:
     void checkMediaGroups( const rapidjson::Value& expectedMediaGroups,
                            std::vector<MediaGroupPtr> mediaGroups );
     void checkMediaFiles( const IMedia* media, const rapidjson::Value &expectedFiles );
+};
+
+class ParseTwice : public Tests
+{
 };
 
 class ReducedTests : public Tests

@@ -48,6 +48,7 @@ MockCallback::MockCallback()
     , m_thumbnailSuccess( false )
     , m_done( false )
     , m_discoveryCompleted( false )
+    , m_removalCompleted( false )
 {
 
 }
@@ -64,6 +65,14 @@ bool MockCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
+    });
+}
+
+bool MockCallback::waitForRemovalComplete( std::unique_lock<compat::Mutex>& lock )
+{
+    m_removalCompleted = false;
+    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+        return m_removalCompleted;
     });
 }
 
@@ -115,6 +124,14 @@ void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
     m_thumbnailDone = true;
     m_thumbnailSuccess = success;
     m_thumbnailCond.notify_all();
+}
+
+void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
+{
+    assert( entryPoint.empty() == false );
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
+    m_removalCompleted = true;
+    m_parsingCompleteVar.notify_all();
 }
 
 MockResumeCallback::MockResumeCallback()
