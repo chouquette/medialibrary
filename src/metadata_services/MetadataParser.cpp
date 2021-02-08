@@ -1360,6 +1360,19 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
 {
     std::shared_ptr<Thumbnail> thumbnail;
 
+    if ( item.media()->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
+         ThumbnailStatus::Available )
+    {
+        /*
+         * If this media had a thumbnail because it was analyzed previously we
+         * want to reuse it.
+         * This can happen if the media was internal, then converted to external,
+         * and re-converted to an internal media.
+         */
+        auto media = static_cast<Media*>( item.media().get() );
+        return media->thumbnail( ThumbnailSizeType::Thumbnail );
+    }
+
     /* First, probe the media for an embedded thumbnail */
     const auto& embeddedThumbnails = item.embeddedThumbnails();
     if ( embeddedThumbnails.empty() == false )
