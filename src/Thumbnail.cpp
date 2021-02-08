@@ -139,6 +139,20 @@ const std::string& Thumbnail::mrl() const
     return m_mrl;
 }
 
+bool Thumbnail::update( std::shared_ptr<Thumbnail> newThumbnail )
+{
+    /*
+     * If we are to use an embedded thumbnail we need to store it in database
+     * and in disk before we're able to manipulate its mrl
+     */
+    if ( newThumbnail->m_embeddedThumbnail != nullptr )
+    {
+        if ( newThumbnail->insert() == 0 )
+            return false;
+    }
+    return update( newThumbnail->mrl(), newThumbnail->isOwned() );
+}
+
 bool Thumbnail::update( std::string mrl, bool isOwned )
 {
     if ( m_mrl == mrl && isOwned == m_isOwned &&
@@ -376,10 +390,10 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          * thumbnailer. In that case, we just need to ensure that the status
          * is set accordingly, since the thumbnail was overriden on disk
          */
-        if ( oldThumbnail->status() != ThumbnailStatus::Available ||
-             oldThumbnail->mrl() == newThumbnail->mrl() )
+        if ( oldThumbnail->status() != ThumbnailStatus::Available )/*||
+             oldThumbnail->mrl() == newThumbnail->mrl() )*/
         {
-            oldThumbnail->update( newThumbnail->mrl(), newThumbnail->isOwned() );
+            oldThumbnail->update( std::move( newThumbnail ) );
             res = std::move( oldThumbnail );
         }
         else if ( shouldUpdateCb( *oldThumbnail ) == true )
@@ -440,7 +454,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
                  * If the thumbnail was not inserted, we just have to update the
                  * mrl in database
                  */
-                oldThumbnail->update( newThumbnail->mrl(), newThumbnail->isOwned() );
+                oldThumbnail->update( newThumbnail );
                 /*
                  * We update this linking record since we're updating a specific
                  * entity's thumbnail.

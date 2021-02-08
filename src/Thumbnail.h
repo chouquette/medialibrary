@@ -279,6 +279,7 @@ private:
      */
     bool insertLinkRecord( int64_t entityId, EntityType type, Origin origin );
 
+    bool update( std::shared_ptr<Thumbnail> newThumbnail );
     bool update( std::string mrl, bool isOwned );
 
     /**
