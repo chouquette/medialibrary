@@ -1,9 +1,7 @@
 /*****************************************************************************
  * Media Library
  *****************************************************************************
- * Copyright (C) 2015-2019 Hugo Beauzée-Luyssen, Videolabs, VideoLAN
- *
- * Authors: Hugo Beauzée-Luyssen <hugo@beauzee.fr>
+ * Copyright (C) 2021 Videolabs, VideoLAN
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -20,25 +18,40 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#if HAVE_CONFIG_H
-# include "config.h"
+#ifndef LOCKFILE_H
+#define LOCKFILE_H
+
+#ifdef _WIN32
+# include <windows.h>
 #endif
 
-#include "MediaLibrary.h"
-#include "logging/Logger.h"
+#include <memory>
+#include <string>
 
-extern "C" medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath, const char* mlFolderPath, bool lockFile )
+namespace medialibrary
 {
-    try
-    {
-        auto ml = medialibrary::MediaLibrary::create( dbPath, mlFolderPath, lockFile );
-        if ( ml )
-            return ml.release();
-        return nullptr;
-    }
-    catch ( const std::exception& ex )
-    {
-        LOG_ERROR( "Failed to instantiate medialibrary: ", ex.what() );
-    }
-    return nullptr;
+
+class LockFile
+{
+#ifdef _WIN32
+    using Handle = HANDLE;
+# define NO_HANDLE INVALID_HANDLE_VALUE
+#else
+    using Handle = int;
+# define NO_HANDLE -1
+#endif
+
+public:
+    static std::unique_ptr<LockFile> lock( const std::string& mlFolderPath );
+    ~LockFile();
+
+private:
+    LockFile( Handle handle );
+    void unlock();
+
+    Handle m_handle;
+};
+
 }
+
+#endif

@@ -10,6 +10,7 @@ medialib_src = [
 	'Folder.cpp',
 	'Genre.cpp',
 	'Label.cpp',
+	'LockFile.cpp',
 	'Media.cpp',
 	'MediaLibrary.cpp',
 	'Movie.cpp',

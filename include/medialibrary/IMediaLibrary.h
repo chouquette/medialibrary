@@ -880,5 +880,6 @@ public:
 extern "C"
 {
     medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath,
-                                                  const char* mlFolderPath );
+                                                  const char* mlFolderPath,
+                                                  bool lockFile );
 }

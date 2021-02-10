@@ -30,6 +30,7 @@
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IMedia.h"
 #include "compat/Mutex.h"
+#include "LockFile.h"
 
 #include <atomic>
 
@@ -67,7 +68,12 @@ class Worker;
 class MediaLibrary : public IMediaLibrary
 {
 public:
-    MediaLibrary( const std::string& dbPath, const std::string& mlFolderPath );
+    static std::unique_ptr<MediaLibrary> create( const std::string &dbPath,
+                                                 const std::string &mlFolderPath,
+                                                 bool lockFile );
+
+    MediaLibrary( const std::string& dbPath, const std::string& mlFolderPath, std::unique_ptr<LockFile> lockFile = {} );
+
     virtual ~MediaLibrary();
     virtual InitializeResult initialize( IMediaLibraryCb* mlCallback ) override;
     virtual void setVerbosity( LogLevel v ) override;
@@ -360,6 +366,8 @@ protected:
 
     std::string m_dbPath;
     std::string m_mlFolderPath;
+
+    std::unique_ptr<LockFile> m_lockFile;
 
     std::string m_thumbnailPath;
     std::string m_playlistPath;

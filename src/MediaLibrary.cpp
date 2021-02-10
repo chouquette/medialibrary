@@ -42,6 +42,7 @@
 #include "File.h"
 #include "Folder.h"
 #include "Genre.h"
+#include "LockFile.h"
 #include "Media.h"
 #include "MediaLibrary.h"
 #include "Label.h"
@@ -56,6 +57,7 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
 #include "database/SqliteQuery.h"
+#include "utils/Charsets.h"
 #include "utils/Filename.h"
 #include "utils/Directory.h"
 #include "utils/Url.h"
@@ -278,8 +280,25 @@ const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
     "webvtt"
 };
 
+std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
+                                                    const std::string& mlFolderPath,
+                                                    bool lockFile )
+{
+    std::unique_ptr<LockFile> lock;
+
+    if ( lockFile )
+    {
+        lock = LockFile::lock( mlFolderPath );
+        if ( !lock )
+            return {};
+    }
+
+    return std::unique_ptr<MediaLibrary>( new MediaLibrary( dbPath, mlFolderPath, std::move( lock ) ) );
+}
+
 MediaLibrary::MediaLibrary( const std::string& dbPath,
-                            const std::string& mlFolderPath )
+                            const std::string& mlFolderPath,
+                            std::unique_ptr<LockFile> lockFile )
     : m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
@@ -289,6 +308,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_fsFactoryCb( this )
     , m_dbPath( dbPath )
     , m_mlFolderPath( mlFolderPath )
+    , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
 {
     Log::setLogLevel( m_verbosity );
