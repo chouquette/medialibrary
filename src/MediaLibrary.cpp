@@ -617,12 +617,6 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     return res;
 }
 
-bool MediaLibrary::isInitialized() const
-{
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    return m_initialized;
-}
-
 void MediaLibrary::setVerbosity( LogLevel v )
 {
     m_verbosity = v;

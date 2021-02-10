@@ -366,13 +366,6 @@ public:
     virtual InitializeResult initialize( const std::string& dbPath,
                                          const std::string& mlFolderPath,
                                          IMediaLibraryCb* mlCallback ) = 0;
-    /**
-     * @brief isInitialized Convenience helper to know if the media library is
-     *                      already initialized.
-     *
-     * @return true is the media library is already initialized, false otherwise.
-     */
-    virtual bool isInitialized() const = 0;
 
     virtual void setVerbosity( LogLevel v ) = 0;
 

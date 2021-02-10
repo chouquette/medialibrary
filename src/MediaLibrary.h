@@ -72,7 +72,6 @@ public:
     virtual InitializeResult initialize( const std::string& dbPath,
                                          const std::string& thumbnailPath,
                                          IMediaLibraryCb* mlCallback ) override;
-    virtual bool isInitialized() const override;
     virtual void setVerbosity( LogLevel v ) override;
 
     virtual MediaPtr media( int64_t mediaId ) const override;
