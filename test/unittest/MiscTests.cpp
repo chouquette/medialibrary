@@ -55,7 +55,7 @@ struct MiscTests : public Tests
     {
         // No need to setup anything more than the media library instance,
         // those tests are not using the DB
-        ml.reset( new MediaLibraryTester );
+        ml.reset( new MediaLibraryTester( "test.db", "/tmp/ml_folder" ) );
     }
 };
 

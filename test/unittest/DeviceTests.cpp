@@ -33,6 +33,7 @@ namespace
 
 class MediaLibraryTesterDevices : public MediaLibraryTester
 {
+    using MediaLibraryTester::MediaLibraryTester;
     virtual bool setupDummyFolder() override { return true; }
 };
 
@@ -40,9 +41,10 @@ class MediaLibraryTesterDevices : public MediaLibraryTester
 
 class DeviceTests : public Tests
 {
-    virtual void InstantiateMediaLibrary() override
+    virtual void InstantiateMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlFolderDir ) override
     {
-        ml.reset( new MediaLibraryTesterDevices );
+        ml.reset( new MediaLibraryTesterDevices( dbPath, mlFolderDir ) );
     }
 };
 

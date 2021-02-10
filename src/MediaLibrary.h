@@ -67,11 +67,9 @@ class Worker;
 class MediaLibrary : public IMediaLibrary
 {
 public:
-    MediaLibrary();
+    MediaLibrary( const std::string& dbPath, const std::string& mlFolderPath );
     virtual ~MediaLibrary();
-    virtual InitializeResult initialize( const std::string& dbPath,
-                                         const std::string& thumbnailPath,
-                                         IMediaLibraryCb* mlCallback ) override;
+    virtual InitializeResult initialize( IMediaLibraryCb* mlCallback ) override;
     virtual void setVerbosity( LogLevel v ) override;
 
     virtual MediaPtr media( int64_t mediaId ) const override;
@@ -359,6 +357,9 @@ protected:
      * it might invoke some of the callback interface methods during teardown
      */
     mutable FsFactoryCb m_fsFactoryCb;
+
+    std::string m_dbPath;
+    std::string m_mlFolderPath;
 
     std::string m_thumbnailPath;
     std::string m_playlistPath;

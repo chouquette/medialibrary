@@ -42,7 +42,8 @@ struct Tests
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
     virtual void SetUp();
-    virtual void InstantiateMediaLibrary();
+    virtual void InstantiateMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlFolderDir );
     virtual void TearDown();
 };
 

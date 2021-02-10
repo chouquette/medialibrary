@@ -171,6 +171,8 @@ namespace
 class MediaLibraryTesterNoForceRescan : public MediaLibraryTester
 {
 public:
+    using MediaLibraryTester::MediaLibraryTester;
+
     /*
      * Override forceRescanLocked to avoid removing all entities after the migration.
      * This allows more testing
@@ -194,7 +196,7 @@ struct DbModel : public Tests
 
     virtual void SetUp() override
     {
-        ml.reset( new MediaLibraryTesterNoForceRescan );
+        ml.reset( new MediaLibraryTesterNoForceRescan( "test.db", "/tmp/ml_folder/" ) );
         cbMock.reset( new mock::NoopCallback );
     }
 
@@ -304,7 +306,7 @@ struct DbModel : public Tests
     void CommonMigrationTest( const char* mockDb )
     {
         LoadFakeDB( mockDb );
-        auto res = ml->initialize( "test.db", "/tmp/ml_folder/", cbMock.get() );
+        auto res = ml->initialize( cbMock.get() );
         ASSERT_EQ( InitializeResult::Success, res );
 
         CheckTriggers( expectedTriggers );
@@ -316,7 +318,7 @@ struct DbModel : public Tests
 static void NbTriggers( DbModel* T )
 {
     // Test the expected number of triggers on a freshly created database
-    auto res = T->ml->initialize( "test.db", "/tmp/ml_folder/", T->cbMock.get() );
+    auto res = T->ml->initialize( T->cbMock.get() );
     ASSERT_EQ( InitializeResult::Success, res );
     T->CheckTriggers( expectedTriggers );
     T->CheckIndexes( expectedIndexes );
@@ -331,7 +333,7 @@ static void Upgrade3to5( DbModel* T )
 static void Upgrade4to5( DbModel* T )
 {
     T->LoadFakeDB( SRC_DIR "/test/unittest/db_v4.sql" );
-    auto res = T->ml->initialize( "test.db", "/tmp/ml_folder/", T->cbMock.get() );
+    auto res = T->ml->initialize( T->cbMock.get() );
     ASSERT_EQ( InitializeResult::DbReset, res );
 
     // The culprit  with V4 was an invalid migration, leading to missing fields

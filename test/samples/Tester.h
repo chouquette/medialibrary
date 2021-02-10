@@ -100,7 +100,8 @@ struct Tests
     std::unique_ptr<IMediaLibrary> m_ml;
 
     virtual void InitializeCallback();
-    virtual void InitializeMediaLibrary();
+    virtual void InitializeMediaLibrary( const std::string& dbPath,
+                                         const std::string& mlFolderDir );
 
     void runChecks( const rapidjson::Document& doc );
 
@@ -122,6 +123,7 @@ struct Tests
 class MediaLibraryResumeTest : public MediaLibrary
 {
 public:
+    using MediaLibrary::MediaLibrary;
     void forceParserStart();
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
 protected:
@@ -130,7 +132,8 @@ protected:
 
 struct ResumeTests : public Tests
 {
-    virtual void InitializeMediaLibrary() override;
+    virtual void InitializeMediaLibrary( const std::string& dbPath,
+                                         const std::string& mlFolderDir ) override;
     virtual void InitializeCallback() override;
 };
 

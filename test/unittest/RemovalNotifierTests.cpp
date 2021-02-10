@@ -92,9 +92,10 @@ struct RemovalNotifierTests : public Tests
         Tests::SetUp();
     }
 
-    virtual void InstantiateMediaLibrary() override
+    virtual void InstantiateMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlFolderDir ) override
     {
-        ml.reset( new MediaLibraryWithNotifier );
+        ml.reset( new MediaLibraryWithNotifier ( dbPath, mlFolderDir ) );
     }
 };
 

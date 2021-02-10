@@ -39,8 +39,10 @@
 #include "parser/Task.h"
 
 
-MediaLibraryTester::MediaLibraryTester()
-    : dummyDevice( new mock::NoopDevice )
+MediaLibraryTester::MediaLibraryTester( const std::string& dbPath,
+                                        const std::string& mlFolderPath )
+    : MediaLibrary( dbPath, mlFolderPath )
+    , dummyDevice( new mock::NoopDevice )
     , dummyDirectory( new mock::NoopDirectory )
 {
 }

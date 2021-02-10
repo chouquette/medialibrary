@@ -278,7 +278,8 @@ const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
     "webvtt"
 };
 
-MediaLibrary::MediaLibrary()
+MediaLibrary::MediaLibrary( const std::string& dbPath,
+                            const std::string& mlFolderPath )
     : m_verbosity( LogLevel::Error )
     , m_settings( this )
     , m_initialized( false )
@@ -286,6 +287,8 @@ MediaLibrary::MediaLibrary()
     , m_discovererIdle( true )
     , m_parserIdle( true )
     , m_fsFactoryCb( this )
+    , m_dbPath( dbPath )
+    , m_mlFolderPath( mlFolderPath )
     , m_callback( nullptr )
 {
     Log::setLogLevel( m_verbosity );
@@ -514,17 +517,17 @@ void MediaLibrary::removeThumbnails()
     }
 }
 
-InitializeResult MediaLibrary::initialize( const std::string& dbPath,
-                                           const std::string& mlFolderPath,
-                                           IMediaLibraryCb* mlCallback )
+InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
 {
+    assert( !m_dbPath.empty() );
+    assert( !m_mlFolderPath.empty() );
     std::lock_guard<compat::Mutex> lock( m_mutex );
     if ( m_initialized == true )
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
 
-    auto mlFolder = utils::file::toFolderPath( mlFolderPath );
+    auto mlFolder = utils::file::toFolderPath( m_mlFolderPath );
     m_thumbnailPath = mlFolder + "thumbnails/";
     if ( utils::fs::mkdir( m_thumbnailPath ) == false )
     {
@@ -541,7 +544,7 @@ InitializeResult MediaLibrary::initialize( const std::string& dbPath,
     }
 
     m_callback = mlCallback;
-    m_dbConnection = sqlite::Connection::connect( dbPath );
+    m_dbConnection = sqlite::Connection::connect( m_dbPath );
 
     onDbConnectionReady( m_dbConnection.get() );
 

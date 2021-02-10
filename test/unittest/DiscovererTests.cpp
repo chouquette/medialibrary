@@ -62,7 +62,7 @@ struct DiscovererTests : public Tests
 
     virtual void SetUp() override
     {
-        InstantiateMediaLibrary();
+        InstantiateMediaLibrary( "test.db", "/tmp/ml_folder/" );
         discoverer.reset( new DiscovererWorkerTest() );
     }
 };

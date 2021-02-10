@@ -343,8 +343,6 @@ public:
      * must be properly initialized and ready to return a list of all known
      * devices before calling this method.
      *
-     * \param dbPath        Path to the database file
-     * \param mlFolderPath Path to a folder that will contain medialibrary's files.
      * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked
      *                      with various events during the medialibrary lifetime.
      * \return An \see{InitializeResult} code.
@@ -356,16 +354,11 @@ public:
      * In case DbReset is returned, it is up to application to decide what
      * to do to repopulate the database.
      *
-     * The ml folder path is assumed to be a folder dedicated to store the
-     * various media library files. It might be emptied or modified at any time.
-     *
      * This method is thread safe. If multiple initialization start simultaneously
      * only the first one will return Success, the later ones will return
      * AlreadyInitialized
      */
-    virtual InitializeResult initialize( const std::string& dbPath,
-                                         const std::string& mlFolderPath,
-                                         IMediaLibraryCb* mlCallback ) = 0;
+    virtual InitializeResult initialize( IMediaLibraryCb* mlCallback ) = 0;
 
     virtual void setVerbosity( LogLevel v ) = 0;
 
@@ -886,5 +879,6 @@ public:
 
 extern "C"
 {
-    medialibrary::IMediaLibrary* NewMediaLibrary();
+    medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath,
+                                                  const char* mlFolderPath );
 }

@@ -41,7 +41,8 @@ void Tests::TearDown()
 
 void Tests::SetUp()
 {
-    InstantiateMediaLibrary();
+    auto mlDir = getTempPath( "ml_folder" );
+    InstantiateMediaLibrary( "test.db", mlDir );
     if ( fsFactory == nullptr )
     {
         fsFactory = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
@@ -56,18 +57,17 @@ void Tests::SetUp()
     if ( mockDeviceLister == nullptr )
         mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
-    auto mlDir = getTempPath( "ml_folder" );
-
     ml->setFsFactory( fsFactory );
     ml->registerDeviceLister( mockDeviceLister, "file://" );
     ml->setVerbosity( LogLevel::Error );
-    auto res = ml->initialize( "test.db", mlDir, mlCb );
+    auto res = ml->initialize( mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
     auto setupRes = ml->setupDummyFolder();
     ASSERT_TRUE( setupRes );
 }
 
-void Tests::InstantiateMediaLibrary()
+void Tests::InstantiateMediaLibrary( const std::string& dbPath,
+                                     const std::string& mlDir)
 {
-    ml.reset( new MediaLibraryTester );
+    ml.reset( new MediaLibraryTester( dbPath, mlDir ) );
 }

@@ -27,11 +27,11 @@
 #include "MediaLibrary.h"
 #include "logging/Logger.h"
 
-extern "C" medialibrary::IMediaLibrary* NewMediaLibrary()
+extern "C" medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath, const char* mlFolderPath )
 {
     try
     {
-        return new medialibrary::MediaLibrary();
+        return new medialibrary::MediaLibrary( dbPath, mlFolderPath );
     }
     catch ( const std::exception& ex )
     {

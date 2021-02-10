@@ -179,7 +179,8 @@ bool MockResumeCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>
 void Tests::SetUp()
 {
     InitializeCallback();
-    InitializeMediaLibrary();
+    auto mlDir = getTempPath( "ml_folder" );
+    InitializeMediaLibrary( "test.db", mlDir );
     if ( ExtraVerbose == true )
         m_ml->setVerbosity( LogLevel::Debug );
     else if ( Verbose == true )
@@ -187,9 +188,7 @@ void Tests::SetUp()
     else if ( DebugVerbose == true )
         m_ml->setVerbosity( LogLevel::Verbose );
 
-    auto mlDir = getTempPath( "ml_folder" );
-
-    auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
+    auto res = m_ml->initialize( m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
 }
 
@@ -202,6 +201,7 @@ namespace
 {
 class MediaLibraryTester : public MediaLibrary
 {
+    using MediaLibrary::MediaLibrary;
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override
     {
         deleteAllTables( dbConn );
@@ -209,9 +209,11 @@ class MediaLibraryTester : public MediaLibrary
 };
 }
 
-void Tests::InitializeMediaLibrary()
+void Tests::InitializeMediaLibrary( const std::string& dbPath,
+                                    const std::string& mlFolderDir )
+
 {
-    m_ml.reset( new MediaLibraryTester{} );
+    m_ml.reset( new MediaLibraryTester{ dbPath, mlFolderDir } );
 }
 
 void Tests::runChecks(const rapidjson::Document& doc)
@@ -787,9 +789,10 @@ void Tests::checkMediaGroups( const rapidjson::Value &expectedMediaGroups,
     }
 }
 
-void ResumeTests::InitializeMediaLibrary()
+void ResumeTests::InitializeMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlFolderDir )
 {
-    m_ml.reset( new MediaLibraryResumeTest );
+    m_ml.reset( new MediaLibraryResumeTest( dbPath, mlFolderDir ) );
 }
 
 void ResumeTests::InitializeCallback()

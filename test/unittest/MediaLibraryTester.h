@@ -37,7 +37,8 @@ namespace medialibrary
 class MediaLibraryTester : public MediaLibrary
 {
 public:
-    MediaLibraryTester();
+    MediaLibraryTester( const std::string& dbPath,
+                        const std::string& mlFolderPath );
     virtual void startParser() override { return; }
     virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
@@ -98,6 +99,8 @@ private:
 
 class MediaLibraryWithDiscoverer : public MediaLibraryTester
 {
+    using MediaLibraryTester::MediaLibraryTester;
+
     virtual bool setupDummyFolder() override
     {
         return true;
@@ -112,6 +115,7 @@ class MediaLibraryWithDiscoverer : public MediaLibraryTester
 
 class MediaLibraryWithNotifier : public MediaLibraryTester
 {
+    using MediaLibraryTester::MediaLibraryTester;
     virtual void startDeletionNotifier() override
     {
         // Fall back to the default variant which actually starts the notifier

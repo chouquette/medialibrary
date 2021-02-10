@@ -62,9 +62,10 @@ struct DeviceFsTests : public Tests
         Tests::SetUp();
     }
 
-    virtual void InstantiateMediaLibrary() override
+    virtual void InstantiateMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlFolderDir ) override
     {
-        ml.reset( new MediaLibraryWithDiscoverer );
+        ml.reset( new MediaLibraryWithDiscoverer( dbPath, mlFolderDir ) );
     }
 
     bool Reload()
