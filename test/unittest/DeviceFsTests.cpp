@@ -853,8 +853,40 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, pl2->nbMedia() );
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
 
+    QueryParameters params{};
+    auto plMedia = pl->media( &params )->all();
+    ASSERT_EQ( 1u, plMedia.size() );
+    auto nbMedia = pl->media( &params )->count();
+    ASSERT_EQ( 1u, nbMedia );
+
+    plMedia = pl2->media( &params )->all();
+    ASSERT_EQ( 1u, plMedia.size() );
+    nbMedia = pl2->media( &params )->count();
+    ASSERT_EQ( 1u, nbMedia );
+
+    params.includeMissing = true;
+    plMedia = pl->media( &params )->all();
+    ASSERT_EQ( 2u, plMedia.size() );
+    nbMedia = pl->media( &params )->count();
+    ASSERT_EQ( 2u, nbMedia );
+
+    plMedia = pl2->media( &params )->all();
+    ASSERT_EQ( 1u, plMedia.size() );
+    nbMedia = pl2->media( &params )->count();
+    ASSERT_EQ( 1u, nbMedia );
+
     T->fsMock->addDevice( device );
     T->Reload();
+
+    plMedia = pl->media( &params )->all();
+    ASSERT_EQ( 2u, plMedia.size() );
+    nbMedia = pl->media( &params )->count();
+    ASSERT_EQ( 2u, nbMedia );
+
+    plMedia = pl2->media( &params )->all();
+    ASSERT_EQ( 1u, plMedia.size() );
+    nbMedia = pl2->media( &params )->count();
+    ASSERT_EQ( 1u, nbMedia );
 
     /*
      * Moving a playlist item is implemented by removing/adding, so check that

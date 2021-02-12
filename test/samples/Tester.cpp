@@ -467,7 +467,7 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
 
         const auto playlist = *it;
         playlists.erase( it );
-        const auto& items = playlist->media()->all();
+        const auto& items = playlist->media( nullptr )->all();
 
         ASSERT_TRUE( playlist->isReadOnly() );
         ASSERT_FALSE( playlist->mrl().empty() );

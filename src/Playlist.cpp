@@ -127,13 +127,15 @@ uint32_t Playlist::nbPresentMedia() const
     return m_nbPresentMedia;
 }
 
-Query<IMedia> Playlist::media() const
+Query<IMedia> Playlist::media( const QueryParameters* params ) const
 {
-    static const std::string base = "FROM " + Media::Table::Name + " m "
+    std::string base = "FROM " + Media::Table::Name + " m "
         "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr ON pmr.media_id = m.id_media "
-        "WHERE pmr.playlist_id = ? AND m.is_present != 0";
-    static const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
-    static const std::string countReq = "SELECT COUNT(*) " + base;
+        "WHERE pmr.playlist_id = ?";
+    if ( params == nullptr || params->includeMissing == false )
+         base += " AND m.is_present != 0";
+    const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
+    const std::string countReq = "SELECT COUNT(*) " + base;
     return make_query_with_count<Media, IMedia>( m_ml, countReq, req, m_id );
 }
 
@@ -781,6 +783,8 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
 {
     std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND nb_present_media > 0";
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ),
                                             sqlite::Tools::sanitizePattern( name ) );

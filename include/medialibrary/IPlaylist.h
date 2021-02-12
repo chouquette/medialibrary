@@ -72,11 +72,16 @@ public:
     virtual uint32_t nbPresentMedia() const = 0;
     ///
     /// \brief media Returns the media contained in this playlist
+    /// \param params A QueryParameters object or nullptr for the default params
     /// \return A query object representing the media in this playlist
     ///
-    /// The media will always be sorted by their ascending position in the playlist.
+    /// The media will always be sorted by their ascending position in the
+    /// playlist, meaning QueryParameters::sort & QueryParameters::desc will be
+    /// ignored.
+    /// QueryParameters::includeMissing will be used however, so the called can
+    /// get the missing media for the playlist
     ///
-    virtual Query<IMedia> media() const = 0;
+    virtual Query<IMedia> media( const QueryParameters* params ) const = 0;
     ///
     /// \brief searchMedia Search some media in a playlist
     /// \param pattern The search pattern. Minimal length is 3 characters

@@ -268,7 +268,7 @@ static void RunBackupRestorePlaylist( Tests* T, const std::string& )
     auto playlists = T->m_ml->playlists( nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
     auto playlist1 = playlists[0];
-    media = playlist1->media()->all();
+    media = playlist1->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->title(), media[0]->title() );
     ASSERT_EQ( m2->title(), media[1]->title() );
@@ -276,7 +276,7 @@ static void RunBackupRestorePlaylist( Tests* T, const std::string& )
     ASSERT_EQ( "Exported Playlist 1", playlist1->name() );
 
     auto playlist2 = playlists[1];
-    media = playlist2->media()->all();
+    media = playlist2->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m3->title(), media[0]->title() );
     ASSERT_EQ( m2->title(), media[1]->title() );

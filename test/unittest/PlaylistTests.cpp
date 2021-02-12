@@ -132,7 +132,7 @@ static void Add( PlaylistTests* T )
     T->CheckContiguity();
 
     ASSERT_TRUE( res );
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
 }
@@ -145,7 +145,7 @@ static void Append( PlaylistTests* T )
         ASSERT_NE( nullptr, m );
         T->pl->append( *m );
     }
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
     for ( auto i = 0u; i < media.size(); ++i )
     {
@@ -175,7 +175,7 @@ static void Insert( PlaylistTests* T )
     T->pl->add( *middleMedia, 2 );
     T->CheckContiguity();
     // [<4,0>,<1,1>,<5,2>,<2,3>,<3,4>]
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 4u, media[0]->id() );
@@ -201,7 +201,7 @@ static void Move( PlaylistTests* T )
     ASSERT_TRUE( res );
     T->CheckContiguity();
     // [<5,0>,<1,1>,<2,2>,<3,3>,<4,4>]
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 5u, media[0]->id() );
@@ -213,7 +213,7 @@ static void Move( PlaylistTests* T )
     // Now move some item forward
     T->pl->move( 1, 4 );
     // [<5,0>,<2,1>,<3,2>,<4,3>,<1,4>]
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 5u, media[0]->id() );
@@ -226,7 +226,7 @@ static void Move( PlaylistTests* T )
     // Move an item past the theorical last element
     T->pl->move( 1, 10 );
     // [<5,0>,<3,1>,<4,2>,<1,3>,<2,10/4>]
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 5u, media[0]->id() );
@@ -240,7 +240,7 @@ static void Move( PlaylistTests* T )
     // to position 9, it should still be the last element in the playlist
     T->pl->move( 1, 9 );
     // [<5,0>,<4,1>,<1,2>,<2,3>,<3,9/4>]
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
 
     ASSERT_EQ( 5u, media[0]->id() );
@@ -264,14 +264,14 @@ static void Remove( PlaylistTests* T )
         ASSERT_TRUE( res );
     }
     // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
     T->CheckContiguity();
 
     T->pl->remove( 2 );
     // [<1,0>,<2,1>,<4,2>,<5,3>]
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 4u, media.size() );
 
     ASSERT_EQ( 1u, media[0]->id() );
@@ -291,7 +291,7 @@ static void DeleteFile( PlaylistTests* T )
         ASSERT_TRUE( res );
     }
     // [<1,1>,<2,2>,<3,3>,<4,4>,<5,5>]
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 5u, media.size() );
     auto m = std::static_pointer_cast<Media>( media[2] );
     auto fs = m->files();
@@ -302,7 +302,7 @@ static void DeleteFile( PlaylistTests* T )
     // So we should now have
     // [<1,1>,<2,2>,<4,4>,<5,5>]
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 4u, media.size() );
 
     ASSERT_EQ( 1u, media[0]->id() );
@@ -320,7 +320,7 @@ static void DeleteFile( PlaylistTests* T )
         ASSERT_EQ( 1u, fs.size() );
         m->removeFile( static_cast<File&>( *fs[0] ) );
     }
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
     auto pl2 = T->ml->playlist( T->pl->id() );
     ASSERT_NE( nullptr, pl2 );
@@ -331,23 +331,37 @@ static void Search( PlaylistTests* T )
     T->ml->createPlaylist( "playlist 2" );
     T->ml->createPlaylist( "laylist 3" );
 
-    auto query = T->ml->searchPlaylists( "", nullptr );
+    QueryParameters params{};
+    params.includeMissing = true;
+    auto query = T->ml->searchPlaylists( "", &params );
     ASSERT_EQ( nullptr, query );
 
-    auto playlists = T->ml->searchPlaylists( "play", nullptr )->all();
+    auto playlists = T->ml->searchPlaylists( "play", &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
+
+    params.includeMissing = false;
+    playlists = T->ml->searchPlaylists( "play", &params )->all();
+    ASSERT_EQ( 0u, playlists.size() );
 }
 
 static void SearchAndSort( PlaylistTests* T )
 {
     auto pl2 = T->ml->createPlaylist( "playlist 2" );
 
-    auto playlists = T->ml->searchPlaylists( "play", nullptr )->all();
+    QueryParameters params{};
+    params.includeMissing = true;
+    auto playlists = T->ml->searchPlaylists( "play", &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl2->id(), playlists[0]->id() );
     ASSERT_EQ( T->pl->id(), playlists[1]->id() );
 
-    QueryParameters params = { SortingCriteria::Default, true };
+    params.includeMissing = false;
+    playlists = T->ml->searchPlaylists( "play", &params )->all();
+    ASSERT_EQ( 0u, playlists.size() );
+
+    params.sort = SortingCriteria::Default;
+    params.desc = true;
+    params.includeMissing = true;
     playlists = T->ml->searchPlaylists( "play", &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
@@ -356,28 +370,32 @@ static void SearchAndSort( PlaylistTests* T )
 
 static void SearchAfterDelete( PlaylistTests* T )
 {
+    QueryParameters params{};
+    params.includeMissing = true;
     auto pl = T->ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = T->ml->searchPlaylists( "sea otters", nullptr )->all();
+    auto pls = T->ml->searchPlaylists( "sea otters", &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     T->ml->deletePlaylist( pl->id() );
 
-    pls = T->ml->searchPlaylists( "sea otters", nullptr )->all();
+    pls = T->ml->searchPlaylists( "sea otters", &params )->all();
     ASSERT_EQ( 0u, pls.size() );
 }
 
 static void SearchAfterUpdate( PlaylistTests* T )
 {
+    QueryParameters params{};
+    params.includeMissing = true;
     auto pl = T->ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = T->ml->searchPlaylists( "sea otters", nullptr )->all();
+    auto pls = T->ml->searchPlaylists( "sea otters", &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     pl->setName( "pangolins are cool too" );
 
-    pls = T->ml->searchPlaylists( "sea otters", nullptr )->all();
+    pls = T->ml->searchPlaylists( "sea otters", &params )->all();
     ASSERT_EQ( 0u, pls.size() );
 
-    pls = T->ml->searchPlaylists( "pangolins", nullptr )->all();
+    pls = T->ml->searchPlaylists( "pangolins", &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 }
 
@@ -411,7 +429,7 @@ static void AddDuplicate( PlaylistTests* T )
     ASSERT_TRUE( res );
     res = T->pl->append( *m );
     ASSERT_TRUE( res );
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m->id(), media[0]->id() );
     ASSERT_EQ( m->id(), media[1]->id() );
@@ -421,13 +439,13 @@ static void AddDuplicate( PlaylistTests* T )
     ASSERT_EQ( 2u, T->pl->nbMedia() );
     ASSERT_EQ( 2u, T->pl->nbPresentMedia() );
 
-    auto count = T->pl->media()->count();
+    auto count = T->pl->media( nullptr )->count();
     ASSERT_EQ( count, media.size() );
 
     res = T->pl->remove( 1 );
     ASSERT_TRUE( res );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
@@ -439,7 +457,7 @@ static void AddDuplicate( PlaylistTests* T )
      * on deletion
      */
     T->pl->append( m->id() );
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
@@ -448,7 +466,7 @@ static void AddDuplicate( PlaylistTests* T )
 
     T->ml->deleteMedia( m->id() );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
@@ -491,7 +509,7 @@ static void RemoveMedia( PlaylistTests* T )
     T->pl->append( *m2 );
     T->pl->append( *m3 );
 
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
@@ -503,7 +521,7 @@ static void RemoveMedia( PlaylistTests* T )
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
     ASSERT_EQ( m3->id(), media[0]->id() );
     T->CheckContiguity();
@@ -518,13 +536,13 @@ static void ClearContent( PlaylistTests* T )
     T->pl->append( *m1 );
     pl2->append( *m2 );
 
-    ASSERT_EQ( 1u, T->pl->media()->count() );
-    ASSERT_EQ( 1u, pl2->media()->count() );
+    ASSERT_EQ( 1u, T->pl->media( nullptr )->count() );
+    ASSERT_EQ( 1u, pl2->media( nullptr )->count() );
 
     T->pl->clearContent();
 
-    ASSERT_EQ( 0u, T->pl->media()->count() );
-    ASSERT_EQ( 1u, pl2->media()->count() );
+    ASSERT_EQ( 0u, T->pl->media( nullptr )->count() );
+    ASSERT_EQ( 1u, pl2->media( nullptr )->count() );
 }
 
 static void RemoveReAddMedia( PlaylistTests* T )
@@ -536,7 +554,7 @@ static void RemoveReAddMedia( PlaylistTests* T )
     T->pl->append( *m2 );
     T->pl->append( *m3 );
 
-    auto media = T->pl->media()->all();
+    auto media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
@@ -546,7 +564,7 @@ static void RemoveReAddMedia( PlaylistTests* T )
     // Remove the middle element
     T->pl->remove( 1 );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
@@ -554,7 +572,7 @@ static void RemoveReAddMedia( PlaylistTests* T )
 
     T->pl->add( *m2, 1 );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
@@ -563,7 +581,7 @@ static void RemoveReAddMedia( PlaylistTests* T )
 
     T->pl->remove( 0 );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
@@ -571,7 +589,7 @@ static void RemoveReAddMedia( PlaylistTests* T )
 
     T->pl->add( *m1, 0 );
 
-    media = T->pl->media()->all();
+    media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m2->id(), media[1]->id() );
@@ -589,7 +607,7 @@ static void InsertRemoveDuplicateMedia( PlaylistTests* T )
     }
     T->pl->append( *m );
 
-    auto items = T->pl->media()->all();
+    auto items = T->pl->media( nullptr )->all();
     ASSERT_EQ( 6u, items.size() );
     ASSERT_EQ( 1u, items[0]->id() );
     ASSERT_EQ( 2u, items[1]->id() );
@@ -602,7 +620,7 @@ static void InsertRemoveDuplicateMedia( PlaylistTests* T )
     auto res = T->pl->remove( 4 );
 
     ASSERT_TRUE( res );
-    items = T->pl->media()->all();
+    items = T->pl->media( nullptr )->all();
 
     ASSERT_EQ( 5u, items.size() );
     ASSERT_EQ( 1u, items[0]->id() );

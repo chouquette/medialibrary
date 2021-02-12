@@ -85,7 +85,7 @@ public:
     virtual const std::string& artworkMrl() const override;
     virtual uint32_t nbMedia() const override;
     virtual uint32_t nbPresentMedia() const override;
-    virtual Query<IMedia> media() const override;
+    virtual Query<IMedia> media( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params ) const override;
     virtual bool append( const IMedia& media ) override;

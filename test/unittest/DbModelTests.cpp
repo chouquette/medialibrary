@@ -390,7 +390,7 @@ static void Upgrade13to14( DbModel* T )
 
     auto playlists = T->ml->playlists( nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
-    auto playlistMedia = playlists[0]->media()->all();
+    auto playlistMedia = playlists[0]->media( nullptr )->all();
     ASSERT_EQ( 3u, playlistMedia.size() );
     ASSERT_EQ( media[0]->id(), playlistMedia[0]->id() );
     ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[0] )->nbPlaylists() );
@@ -636,10 +636,15 @@ static void Upgrade29to30( DbModel* T )
     auto playlists = T->ml->playlists( nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     auto pl = playlists[0];
-    auto plMedia = pl->media()->all();
+    QueryParameters params{};
+    auto plMedia = pl->media( &params )->all();
     ASSERT_EQ( 2u, plMedia.size() );
     ASSERT_EQ( 1u, plMedia[0]->id() );
     ASSERT_EQ( 2u, plMedia[1]->id() );
+
+    params.includeMissing = true;
+    plMedia = pl->media( &params )->all();
+    ASSERT_EQ( 3u, plMedia.size() );
 
     ASSERT_EQ( 3u, playlists[0]->nbMedia() );
     ASSERT_EQ( 2u, playlists[0]->nbPresentMedia() );
