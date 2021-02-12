@@ -87,6 +87,7 @@ device_fs_tests = [
   'MediaGroupPresence',
   'GenrePresence',
   'PlaylistPresence',
+  'FolderPresence',
 ]
 
 foreach t : device_fs_tests

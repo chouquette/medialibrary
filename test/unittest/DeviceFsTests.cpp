@@ -939,6 +939,31 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 0u, pl2->nbPresentMedia() );
 }
 
+static void FolderPresence( DeviceFsTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+    T->enforceFakeMediaTypes();
+
+    QueryParameters params{};
+    auto folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 3u, folders.size() );
+    params.includeMissing = true;
+    folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 3u, folders.size() );
+
+    auto device = T->fsMock->removeDevice( T->RemovableDeviceUuid );
+    T->Reload();
+
+    folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 3u, folders.size() );
+
+    params.includeMissing = false;
+    folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
+    ASSERT_EQ( 2u, folders.size() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -958,6 +983,7 @@ int main( int ac, char** av )
     ADD_TEST( MediaGroupPresence );
     ADD_TEST( GenrePresence );
     ADD_TEST( PlaylistPresence );
+    ADD_TEST( FolderPresence );
 
     END_TESTS
 }

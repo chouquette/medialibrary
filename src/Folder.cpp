@@ -602,11 +602,16 @@ bool Folder::ban()
 Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
                                   const QueryParameters* params )
 {
-    std::string req = "FROM " + Table::Name + " f "
-                      " LEFT JOIN " + Device::Table::Name +
-                            " d ON d.id_device = f.device_id "
-                      " WHERE " + filterByMediaType( type ) +
-                            " AND d.is_present != 0";
+    std::string req = "FROM " + Table::Name + " f ";
+    auto includeMissing = params != nullptr && params->includeMissing;
+    if ( includeMissing == false )
+    {
+        req += " LEFT JOIN " + Device::Table::Name +
+                   " d ON d.id_device = f.device_id ";
+    }
+    req += " WHERE " + filterByMediaType( type );
+    if ( includeMissing == false )
+        req += " AND d.is_present != 0";
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) );
 }
 
@@ -615,12 +620,19 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
                                         IMedia::Type type,
                                         const QueryParameters* params )
 {
-    std::string req = "FROM " + Table::Name + " f "
-            " LEFT JOIN " + Device::Table::Name +
-                " d ON d.id_device = f.device_id "
-            "WHERE f.id_folder IN (SELECT rowid FROM " + FtsTable::Name + " WHERE " +
-                FtsTable::Name + " MATCH ?) "
-            "AND d.is_present != 0 AND " + filterByMediaType( type );
+
+    std::string req = "FROM " + Table::Name + " f ";
+    auto includeMissing = params != nullptr && params->includeMissing;
+    if ( includeMissing == false )
+    {
+        req += " LEFT JOIN " + Device::Table::Name +
+                   " d ON d.id_device = f.device_id ";
+    }
+    req += "WHERE f.id_folder IN (SELECT rowid FROM " + FtsTable::Name + " WHERE " +
+                FtsTable::Name + " MATCH ?) ";
+    if ( includeMissing == false )
+        req += "AND d.is_present != 0 ";
+    req += "AND " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( pattern ) );
 }
