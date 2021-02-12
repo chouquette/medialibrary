@@ -1877,8 +1877,12 @@ Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
                                    int64_t folderId, const QueryParameters* params )
 {
-    // This assumes the folder is present, as folders are not expected to be
-    // manipulated when the device is not present
+    /*
+     * We don't need to filter by presence. If the user is trying to list their
+     * media from a missing folder, they want the missing media to be displayed
+     * Otherwise, the folder containing the missing media will not be returned
+     * to them.
+     */
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params, false, false );
     req += " WHERE m.folder_id = ?";
