@@ -1,0 +1,107 @@
+medialib_src = [
+	'Album.cpp',
+	'AlbumTrack.cpp',
+	'Artist.cpp',
+	'AudioTrack.cpp',
+	'Device.cpp',
+	'Factory.cpp',
+	'File.cpp',
+	'Chapter.cpp',
+	'Folder.cpp',
+	'Genre.cpp',
+	'Label.cpp',
+	'Media.cpp',
+	'MediaLibrary.cpp',
+	'Movie.cpp',
+	'Playlist.cpp',
+	'Settings.cpp',
+	'Show.cpp',
+	'Thumbnail.cpp',
+	'ShowEpisode.cpp',
+	'VideoTrack.cpp',
+	'Metadata.cpp',
+	'SubtitleTrack.cpp',
+	'database/SqliteConnection.cpp',
+	'database/SqliteTools.cpp',
+	'database/SqliteTransaction.cpp',
+	'discoverer/DiscovererWorker.cpp',
+	'discoverer/FsDiscoverer.cpp',
+	'discoverer/probe/PathProbe.cpp',
+	'factory/DeviceListerFactory.cpp',
+	'filesystem/common/CommonDevice.cpp',
+	'filesystem/common/CommonDeviceLister.cpp',
+	'filesystem/common/CommonFile.cpp',
+	'filesystem/common/CommonDirectory.cpp',
+	'logging/IostreamLogger.cpp',
+	'logging/Logger.cpp',
+	'metadata_services/MetadataParser.cpp',
+	'metadata_services/LinkService.cpp',
+	'thumbnails/ThumbnailerWorker.cpp',
+	'parser/Parser.cpp',
+	'parser/ParserWorker.cpp',
+	'parser/Task.cpp',
+	'utils/Directory.cpp',
+	'utils/Filename.cpp',
+	'utils/ModificationsNotifier.cpp',
+	'utils/Strings.cpp',
+	'utils/Url.cpp',
+	'utils/File.cpp',
+	'utils/TitleAnalyzer.cpp',
+    'utils/Xml.cpp',
+    'utils/Md5.cpp',
+	'Bookmark.cpp',
+	'MediaGroup.cpp',
+]
+
+if libvlc_dep.found()
+  if libvlc_dep.version().version_compare('>=4.0')
+    medialib_src += [
+        'thumbnails/CoreThumbnailer.cpp',
+        'thumbnails/CoreThumbnailer.h',
+    ]
+  else
+    medialib_src += [
+        'thumbnails/VmemThumbnailer.cpp',
+        'thumbnails/VmemThumbnailer.h',
+        'thumbnails/imagecompressors/JpegCompressor.cpp',
+    ]
+  endif
+  medialib_src += [
+    'metadata_services/vlc/VLCMetadataService.cpp',
+    'metadata_services/vlc/Common.cpp',
+    'utils/VLCInstance.cpp',
+    'filesystem/libvlc/FileSystemFactory.cpp',
+    'filesystem/libvlc/Directory.cpp',
+    'filesystem/libvlc/File.cpp',
+    'filesystem/libvlc/Device.cpp',
+    'filesystem/libvlc/DeviceLister.cpp',
+  ]
+endif
+
+if host_machine.system() == 'linux'
+    medialib_src += 'filesystem/unix/DeviceLister.cpp'
+elif host_machine.system() == 'darwin'
+	medialib_src += 'filesystem/darwin/DeviceLister.mm'
+elif host_machine.system() == 'windows'
+	medialib_src += 'filesystem/win32/DeviceLister.cpp'
+endif
+
+if host_machine.system() == 'windows'
+    medialib_soversion = ''
+else
+    medialib_soversion = medialib_major_version
+endif
+
+medialib = library('medialibrary', medialib_src,
+    dependencies: [
+        sqlite_dep, 
+        libjpeg_dep, 
+        libvlc_dep, 
+        libvlcpp_dep,
+        threads_dep,
+    ],
+    install: true,
+    soversion: medialib_soversion,
+    version: medialib_soname_version,
+    include_directories: includes
+)

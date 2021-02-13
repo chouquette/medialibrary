@@ -1,0 +1,1 @@
+option('libvlc', type: 'feature', value: 'enabled')
