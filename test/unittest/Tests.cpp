@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "mocks/FileSystem.h"
 

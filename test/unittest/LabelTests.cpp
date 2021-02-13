@@ -24,22 +24,18 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "medialibrary/IMediaLibrary.h"
 #include "Media.h"
 #include "medialibrary/ILabel.h"
 #include "Label.h"
 
-class Labels : public Tests
+static void Add( Tests* T )
 {
-};
-
-TEST_F( Labels, Add )
-{
-    auto f = ml->addMedia( "media.avi", IMedia::Type::Video );
-    auto l1 = ml->createLabel( "sea otter" );
-    auto l2 = ml->createLabel( "cony the cone" );
+    auto f = T->ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto l1 = T->ml->createLabel( "sea otter" );
+    auto l2 = T->ml->createLabel( "cony the cone" );
 
     ASSERT_NE( l1, nullptr);
     ASSERT_NE( l2, nullptr);
@@ -57,11 +53,11 @@ TEST_F( Labels, Add )
     ASSERT_EQ( labels[1]->name(), "cony the cone" );
 }
 
-TEST_F( Labels, Remove )
+static void Remove( Tests* T )
 {
-    auto m = ml->addMedia( "media.avi", IMedia::Type::Video );
-    auto l1 = ml->createLabel( "sea otter" );
-    auto l2 = ml->createLabel( "cony the cone" );
+    auto m = T->ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto l1 = T->ml->createLabel( "sea otter" );
+    auto l2 = T->ml->createLabel( "cony the cone" );
 
     m->addLabel( l1 );
     m->addLabel( l2 );
@@ -78,7 +74,7 @@ TEST_F( Labels, Remove )
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
 
     // And now clean fetch another instance of the media & check again for DB replication
-    auto media = ml->media( m->id() );
+    auto media = T->ml->media( m->id() );
     labels = media->labels()->all();
     ASSERT_EQ( labels.size(), 1u );
     ASSERT_EQ( labels[0]->name(), "cony the cone" );
@@ -95,19 +91,19 @@ TEST_F( Labels, Remove )
     ASSERT_EQ( labels.size(), 0u );
 
     // Check again for DB replication
-    media = ml->media( m->id() );
+    media = T->ml->media( m->id() );
     labels = media->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 }
 
-TEST_F( Labels, Files )
+static void Files( Tests* T )
 {
-    auto f = ml->addMedia( "media.avi", IMedia::Type::Video );
-    auto f2 = ml->addMedia( "file.mp3", IMedia::Type::Audio );
-    auto f3 = ml->addMedia( "otter.mkv", IMedia::Type::Video);
+    auto f = T->ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto f2 = T->ml->addMedia( "file.mp3", IMedia::Type::Audio );
+    auto f3 = T->ml->addMedia( "otter.mkv", IMedia::Type::Video);
 
-    auto l1 = ml->createLabel( "label1" );
-    auto l2 = ml->createLabel( "label2" );
+    auto l1 = T->ml->createLabel( "label1" );
+    auto l2 = T->ml->createLabel( "label2" );
 
     f->addLabel( l1 );
     f2->addLabel( l2 );
@@ -128,11 +124,11 @@ TEST_F( Labels, Files )
     }
 }
 
-TEST_F( Labels, Delete )
+static void Delete( Tests* T )
 {
-    auto f = ml->addMedia( "media.avi", IMedia::Type::Video );
-    auto l1 = ml->createLabel( "sea otter" );
-    auto l2 = ml->createLabel( "cony the cone" );
+    auto f = T->ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto l1 = T->ml->createLabel( "sea otter" );
+    auto l2 = T->ml->createLabel( "cony the cone" );
 
     f->addLabel( l1 );
     f->addLabel( l2 );
@@ -140,21 +136,34 @@ TEST_F( Labels, Delete )
     auto labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 2u );
 
-    ml->deleteLabel( l1 );
+    T->ml->deleteLabel( l1 );
     labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 1u );
 
-    ml->deleteLabel( l2 );
+    T->ml->deleteLabel( l2 );
     labels = f->labels()->all();
     ASSERT_EQ( labels.size(), 0u );
 
     // Nothing to delete anymore, this should just do nothing
-    bool res = ml->deleteLabel( l1 );
+    bool res = T->ml->deleteLabel( l1 );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Labels, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = Label::checkDbModel( ml.get() );
+    auto res = Label::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( Add );
+    ADD_TEST( Remove );
+    ADD_TEST( Files );
+    ADD_TEST( Delete );
+    ADD_TEST( CheckDbModel );
+
+    END_TESTS;
 }

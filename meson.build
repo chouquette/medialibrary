@@ -93,6 +93,10 @@ includes = include_directories('.', 'include', 'src')
 subdir('include')
 subdir('src')
 
+if libvlc_dep.found()
+  subdir('test')
+endif
+
 pkg = import('pkgconfig')
 pkg.generate(libraries: medialib,
     version: meson.project_version(),

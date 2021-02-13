@@ -24,14 +24,13 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Media.h"
 #include "File.h"
 
-class Files : public Tests
+struct FileTests : public Tests
 {
-protected:
     std::shared_ptr<File> f;
     std::shared_ptr<Media> m;
     virtual void SetUp() override
@@ -44,111 +43,128 @@ protected:
     }
 };
 
-TEST_F( Files, Create )
+static void Create( FileTests* T )
 {
-    ASSERT_NE( 0u, f->id() );
-    ASSERT_EQ( "media.mkv", f->mrl() );
-    ASSERT_NE( 0u, f->lastModificationDate() );
-    ASSERT_NE( 0u, f->size() );
-    ASSERT_EQ( File::Type::Main, f->type() );
+    ASSERT_NE( 0u, T->f->id() );
+    ASSERT_EQ( "media.mkv", T->f->mrl() );
+    ASSERT_NE( 0u, T->f->lastModificationDate() );
+    ASSERT_NE( 0u, T->f->size() );
+    ASSERT_EQ( File::Type::Main, T->f->type() );
 }
 
-TEST_F( Files, Remove )
+static void Remove( FileTests* T )
 {
-    m->removeFile( *f );
+    T->m->removeFile( *T->f );
     // The instance should now have 0 files listed:
-    auto files = m->files();
+    auto files = T->m->files();
     ASSERT_EQ( 0u, files.size() );
-    auto media = ml->media( m->id() );
+    auto media = T->ml->media( T->m->id() );
     // This media should now be removed from the DB
     ASSERT_EQ( nullptr, media );
 }
 
-TEST_F( Files, Media )
+static void GetMedia( FileTests* T )
 {
-    ASSERT_EQ( m->id(), f->media()->id() );
+    ASSERT_EQ( T->m->id(), T->f->media()->id() );
 
-    m = ml->media( m->id() );
-    auto files = m->files();
+    T->m = T->ml->media( T->m->id() );
+    auto files = T->m->files();
     ASSERT_EQ( 1u, files.size() );
-    f = std::static_pointer_cast<File>( files[0] );
-    ASSERT_EQ( m->id(), f->media()->id() );
+    T->f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( T->m->id(), T->f->media()->id() );
 }
 
-TEST_F( Files, SetMrl )
+static void SetMrl( FileTests* T )
 {
     const std::string newMrl = "/sea/otters/rules.mkv";
-    f->setMrl( newMrl );
-    ASSERT_EQ( newMrl, f->mrl() );
+    T->f->setMrl( newMrl );
+    ASSERT_EQ( newMrl, T->f->mrl() );
 
-    auto files = m->files();
+    auto files = T->m->files();
     ASSERT_EQ( 1u, files.size() );
-    f = std::static_pointer_cast<File>( files[0] );
-    ASSERT_EQ( f->mrl(), newMrl );
+    T->f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( T->f->mrl(), newMrl );
 }
 
-TEST_F( Files, UpdateFsInfo )
+static void UpdateFsInfo( FileTests* T )
 {
-    auto res = f->updateFsInfo( 0, 0 );
+    auto res = T->f->updateFsInfo( 0, 0 );
     ASSERT_TRUE( res );
 
-    f->updateFsInfo( 123, 456 );
-    ASSERT_EQ( 123u, f->lastModificationDate() );
-    ASSERT_EQ( 456u, f->size() );
+    T->f->updateFsInfo( 123, 456 );
+    ASSERT_EQ( 123u, T->f->lastModificationDate() );
+    ASSERT_EQ( 456u, T->f->size() );
 
-    auto files = m->files();
+    auto files = T->m->files();
     ASSERT_EQ( 1u, files.size() );
-    f = std::static_pointer_cast<File>( files[0] );
-    ASSERT_EQ( 123u, f->lastModificationDate() );
-    ASSERT_EQ( 456u, f->size() );
+    T->f = std::static_pointer_cast<File>( files[0] );
+    ASSERT_EQ( 123u, T->f->lastModificationDate() );
+    ASSERT_EQ( 456u, T->f->size() );
 }
 
-TEST_F( Files, Exists )
+static void Exists( FileTests* T )
 {
-    ASSERT_TRUE( File::exists( ml.get(), "media.mkv" ) );
-    ASSERT_FALSE( File::exists( ml.get(), "another%20file.avi" ) );
+    ASSERT_TRUE( File::exists( T->ml.get(), "media.mkv" ) );
+    ASSERT_FALSE( File::exists( T->ml.get(), "another%20file.avi" ) );
 }
 
-TEST_F( Files, CheckDbModel )
+static void CheckDbModel( FileTests* T )
 {
-    auto res = File::checkDbModel( ml.get() );
+    auto res = File::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Files, SetMediaId )
+static void SetMediaId( FileTests* T )
 {
     // First media is automatically added by the test SetUp()
-    auto media2 = ml->addMedia( "media.ac3", IMedia::Type::Audio );
+    auto media2 = T->ml->addMedia( "media.ac3", IMedia::Type::Audio );
 
-    auto files = m->files();
+    auto files = T->m->files();
     ASSERT_EQ( 1u, files.size() );
 
     files = media2->files();
     ASSERT_EQ( 1u, files.size() );
     auto file2 = std::static_pointer_cast<File>( files[0] );
-    auto res = file2->setMediaId( m->id() );
+    auto res = file2->setMediaId( T->m->id() );
     ASSERT_TRUE( res );
 
-    media2 = ml->media( media2->id() );
+    media2 = T->ml->media( media2->id() );
     ASSERT_EQ( nullptr, media2 );
 
     // Reload media to avoid failing because of an outdated cache
-    m = ml->media( m->id() );
-    files = m->files();
+    T->m = T->ml->media( T->m->id() );
+    files = T->m->files();
     ASSERT_EQ( 2u, files.size() );
 }
 
-TEST_F( Files, ByMrlNetwork )
+static void ByMrlNetwork( FileTests* T )
 {
-    auto m1 = Media::createExternal( ml.get(), "smb://1.2.3.4/path/to/file.mkv", -1 );
+    auto m1 = Media::createExternal( T->ml.get(), "smb://1.2.3.4/path/to/file.mkv", -1 );
     ASSERT_NE( nullptr, m1 );
-    auto f1 = File::fromExternalMrl( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    auto f1 = File::fromExternalMrl( T->ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
     ASSERT_NE( nullptr, f1 );
 
-    auto f2 = File::fromExternalMrl( ml.get(), "https://1.2.3.4/path/to/file.mkv" );
+    auto f2 = File::fromExternalMrl( T->ml.get(), "https://1.2.3.4/path/to/file.mkv" );
     ASSERT_EQ( nullptr, f2 );
 
-    f2 = File::fromExternalMrl( ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
+    f2 = File::fromExternalMrl( T->ml.get(), "smb://1.2.3.4/path/to/file.mkv" );
     ASSERT_NE( nullptr, f2 );
     ASSERT_EQ( f1->id(), f2->id() );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( FileTests );
+
+    ADD_TEST( Create );
+    ADD_TEST( Remove );
+    ADD_TEST( GetMedia );
+    ADD_TEST( SetMrl );
+    ADD_TEST( UpdateFsInfo );
+    ADD_TEST( Exists );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( SetMediaId );
+    ADD_TEST( ByMrlNetwork );
+
+    END_TESTS
 }

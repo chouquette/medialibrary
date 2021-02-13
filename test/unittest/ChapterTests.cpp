@@ -24,14 +24,13 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Chapter.h"
 #include "Media.h"
 
-class ChapterTests : public Tests
+struct ChapterTests : public Tests
 {
-protected:
     std::shared_ptr<Media> m;
 
     virtual void SetUp() override
@@ -41,12 +40,12 @@ protected:
     }
 };
 
-TEST_F( ChapterTests, Create )
+static void Create( ChapterTests* T )
 {
-    auto res = m->addChapter( 0, 10, "chapter 1" );
+    auto res = T->m->addChapter( 0, 10, "chapter 1" );
     ASSERT_TRUE( res );
 
-    auto chapters = m->chapters( nullptr )->all();
+    auto chapters = T->m->chapters( nullptr )->all();
     ASSERT_EQ( 1u, chapters.size() );
     auto chapter = chapters[0];
     ASSERT_EQ( 0, chapter->offset() );
@@ -54,13 +53,13 @@ TEST_F( ChapterTests, Create )
     ASSERT_EQ( "chapter 1", chapter->name() );
 }
 
-TEST_F( ChapterTests, Fetch )
+static void Fetch( ChapterTests* T )
 {
-    m->addChapter( 0, 10, "chapter 1" );
-    m->addChapter( 11, 100, "chapter 2" );
-    m->addChapter( 111, 1, "A different chapter" );
+    T->m->addChapter( 0, 10, "chapter 1" );
+    T->m->addChapter( 11, 100, "chapter 2" );
+    T->m->addChapter( 111, 1, "A different chapter" );
 
-    auto query = m->chapters( nullptr );
+    auto query = T->m->chapters( nullptr );
     ASSERT_EQ( 3u, query->count() );
     auto chapters = query->all();
     ASSERT_EQ( 3u, chapters.size() );
@@ -71,7 +70,7 @@ TEST_F( ChapterTests, Fetch )
     QueryParameters params;
     params.desc = false;
     params.sort = SortingCriteria::Duration;
-    query = m->chapters( &params );
+    query = T->m->chapters( &params );
     ASSERT_EQ( 3u, query->count() );
     chapters = query->all();
     ASSERT_EQ( 100, chapters[0]->duration() );
@@ -79,7 +78,7 @@ TEST_F( ChapterTests, Fetch )
     ASSERT_EQ( 1, chapters[2]->duration() );
 
     params.desc = true;
-    query = m->chapters( &params );
+    query = T->m->chapters( &params );
     chapters = query->all();
     ASSERT_EQ( 3u, chapters.size() );
     ASSERT_EQ( 1, chapters[0]->duration() );
@@ -88,7 +87,7 @@ TEST_F( ChapterTests, Fetch )
 
     params.sort = SortingCriteria::Alpha;
     params.desc = false;
-    query = m->chapters( &params );
+    query = T->m->chapters( &params );
     chapters = query->all();
     ASSERT_EQ( 3u, chapters.size() );
     ASSERT_EQ( "A different chapter", chapters[0]->name() );
@@ -99,8 +98,19 @@ TEST_F( ChapterTests, Fetch )
     ASSERT_EQ( 11, chapters[2]->offset() );
 }
 
-TEST_F( ChapterTests, CheckDbModel )
+static void CheckDbModel( ChapterTests* T )
 {
-    auto res = Chapter::checkDbModel( ml.get() );
+    auto res = Chapter::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( ChapterTests );
+
+    ADD_TEST( Create );
+    ADD_TEST( Fetch );
+    ADD_TEST( CheckDbModel );
+
+    END_TESTS
 }

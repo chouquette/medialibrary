@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Media.h"
 #include "AudioTrack.h"
@@ -34,16 +34,16 @@ class AudioTracks : public Tests
 {
 };
 
-TEST_F( AudioTracks, AddTrack )
+static void AddTrack( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     bool res = f->addAudioTrack( "PCM", 128, 44100, 2, "fr", "test", 0 );
     ASSERT_TRUE( res );
 }
 
-TEST_F( AudioTracks, GetSetProperties )
+static void GetSetProperties( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     ASSERT_NE( f, nullptr );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc", 0 );
     auto tracks = f->audioTracks()->all();
@@ -57,7 +57,7 @@ TEST_F( AudioTracks, GetSetProperties )
     ASSERT_EQ( t->language(), "en" );
     ASSERT_EQ( t->description(), "test desc" );
 
-    auto f2 = ml->media( f->id() );
+    auto f2 = T->ml->media( f->id() );
     tracks = f2->audioTracks()->all();
     ASSERT_EQ( tracks.size(), 1u );
     t = tracks[0];
@@ -69,9 +69,9 @@ TEST_F( AudioTracks, GetSetProperties )
     ASSERT_EQ( t->description(), "test desc" );
 }
 
-TEST_F( AudioTracks, FetchTracks )
+static void FetchTracks( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     f->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc", 0 );
     f->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc 2", 0 );
 
@@ -79,32 +79,32 @@ TEST_F( AudioTracks, FetchTracks )
     ASSERT_EQ( ts.size(), 2u );
 }
 
-TEST_F( AudioTracks, RemoveTracks )
+static void RemoveTracks( Tests* T )
 {
-    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto f1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto f2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     f1->addAudioTrack( "PCM", 128, 44100, 2, "en", "test desc", 0 );
     f2->addAudioTrack( "WMA", 128, 48000, 2, "fr", "test desc", 0 );
 
     ASSERT_EQ( 1u, f1->audioTracks()->count() );
     ASSERT_EQ( 1u, f2->audioTracks()->count() );
 
-    AudioTrack::removeFromMedia( ml.get(), f1->id(), false );
+    AudioTrack::removeFromMedia( T->ml.get(), f1->id(), false );
 
     ASSERT_EQ( 0u, f1->audioTracks()->count() );
     ASSERT_EQ( 1u, f2->audioTracks()->count() );
 }
 
-TEST_F( AudioTracks, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = AudioTrack::checkDbModel( ml.get() );
+    auto res = AudioTrack::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( AudioTracks, UnlinkExternalTrack )
+static void UnlinkExternalTrack( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "mainmedia.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "mainmedia.mkv", IMedia::Type::Video ) );
     ASSERT_NE( nullptr, m );
     auto f = std::static_pointer_cast<File>(
                 m->addExternalMrl( "externaltrack.mp3", IFile::Type::Soundtrack ) );
@@ -120,4 +120,18 @@ TEST_F( AudioTracks, UnlinkExternalTrack )
 
     tracks = m->audioTracks()->all();
     ASSERT_EQ( 0u, tracks.size() );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS
+
+    ADD_TEST( AddTrack );
+    ADD_TEST( GetSetProperties );
+    ADD_TEST( FetchTracks );
+    ADD_TEST( RemoveTracks );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( UnlinkExternalTrack );
+
+    END_TESTS
 }

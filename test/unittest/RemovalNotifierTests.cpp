@@ -24,7 +24,8 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
+
 #include "Media.h"
 #include "File.h"
 #include "common/NoopCallback.h"
@@ -81,9 +82,8 @@ private:
     uint32_t m_nbTotalMedia;
 };
 
-class ModificationsNotifierTests : public Tests
+struct RemovalNotifierTests : public Tests
 {
-protected:
     std::unique_ptr<MockCallback> cbMock;
     virtual void SetUp() override
     {
@@ -98,79 +98,90 @@ protected:
     }
 };
 
-TEST_F( ModificationsNotifierTests, DeleteOne )
+static void DeleteOne( RemovalNotifierTests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
-    auto lock = cbMock->prepareWait();
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.avi", IMedia::Type::Video ) );
+    auto lock = T->cbMock->prepareWait();
     bool hasTimedout;
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
-    auto res = cbMock->waitForNotif( lock,
+    auto res = T->cbMock->waitForNotif( lock,
         std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
         hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
 
     // Re-run a notification after the queues have been used before
-    cbMock->resetCount();
+    T->cbMock->resetCount();
 
-    m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
+    m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.avi", IMedia::Type::Video ) );
     m->removeFile( static_cast<File&>( *m->files()[0] ) );
 
     // Wait for a notification for 500ms. It shouldn't arrive, and we should timeout
-    res = cbMock->waitForNotif( lock,
+    res = T->cbMock->waitForNotif( lock,
         std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 500 } ),
         hasTimedout );
     ASSERT_TRUE( hasTimedout );
     ASSERT_EQ( 0u, res );
 
     // Wait again, now it should arrive.
-    res = cbMock->waitForNotif( lock,
+    res = T->cbMock->waitForNotif( lock,
         std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1000 } ),
         hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
 }
 
-TEST_F( ModificationsNotifierTests, DeleteBatch )
+static void DeleteBatch( RemovalNotifierTests* T )
 {
     for ( auto i = 0u; i < 10; ++i )
-        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        T->ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
 
-    auto lock = cbMock->prepareWait();
+    auto lock = T->cbMock->prepareWait();
     bool hasTimedout;
 
     for ( auto i = 0u; i < 10; ++i )
-        ml->deleteMedia( i + 1 );
+        T->ml->deleteMedia( i + 1 );
 
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
     uint32_t nbTotalNotified = 0;
     while ( nbTotalNotified != 10 )
     {
-        auto nbNotified = cbMock->waitForNotif( lock,
+        auto nbNotified = T->cbMock->waitForNotif( lock,
             std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
             hasTimedout );
         ASSERT_NE( 0u, nbNotified );
         ASSERT_FALSE( hasTimedout );
         ASSERT_TRUE( nbNotified != 1 || nbNotified + nbTotalNotified == 10 );
         nbTotalNotified += nbNotified;
-        cbMock->resetCount();
+        T->cbMock->resetCount();
     }
     ASSERT_EQ( 10u, nbTotalNotified );
 }
 
-TEST_F( ModificationsNotifierTests, Flush )
+static void Flush( RemovalNotifierTests* T )
 {
     for ( auto i = 0u; i < 10; ++i )
-        ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        T->ml->addMedia( std::string{ "media" } + std::to_string( i ) + ".mkv", IMedia::Type::Video );
 
     for ( auto i = 0u; i < 10; ++i )
-        ml->deleteMedia( i + 1 );
+        T->ml->deleteMedia( i + 1 );
 
     // We can't lock here since flush is blocking until the callbacks have been called
-    ml->getNotifier()->flush();
-    auto nbMediaSignaled = cbMock->getNbTotalMediaDeleted();
+    T->ml->getNotifier()->flush();
+    auto nbMediaSignaled = T->cbMock->getNbTotalMediaDeleted();
     ASSERT_EQ( 10u, nbMediaSignaled );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( RemovalNotifierTests );
+
+    ADD_TEST( DeleteOne );
+    ADD_TEST( DeleteBatch );
+    ADD_TEST( Flush );
+
+    END_TESTS
 }

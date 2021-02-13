@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Media.h"
 #include "File.h"
@@ -38,9 +38,8 @@
 #include <memory>
 
 
-class FoldersNoDiscover : public Tests
+struct FolderTests : public Tests
 {
-protected:
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
 
@@ -67,18 +66,6 @@ public:
     }
 };
 
-class Folders : public FoldersNoDiscover
-{
-    protected:
-        virtual void SetUp() override
-        {
-            FoldersNoDiscover::SetUp();
-            ml->discover( mock::FileSystemFactory::Root );
-            bool discovered = cbMock->waitDiscovery();
-            ASSERT_TRUE( discovered );
-        }
-};
-
 static void enforceFakeMediaTypes( MediaLibraryTester* ml )
 {
     auto media = std::static_pointer_cast<Media>( ml->media(
@@ -97,48 +84,64 @@ static void enforceFakeMediaTypes( MediaLibraryTester* ml )
     media->save();
 }
 
-TEST_F( Folders, Add )
+static void Add( FolderTests* T )
 {
-    auto files = ml->files();
-
-    ASSERT_EQ( files.size(), 3u );
-}
-
-TEST_F( Folders, Load )
-{
-    Reload();
-
-    auto files = ml->files();
-    ASSERT_EQ( files.size(), 3u );
-}
-
-TEST_F( FoldersNoDiscover, InvalidPath )
-{
-    ml->discover( "/invalid/path" );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto files = ml->files();
+    auto files = T->ml->files();
+
+    ASSERT_EQ( files.size(), 3u );
+}
+
+static void Load( FolderTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    T->Reload();
+
+    auto files = T->ml->files();
+    ASSERT_EQ( files.size(), 3u );
+}
+
+static void InvalidPath( FolderTests* T )
+{
+    T->ml->discover( "/invalid/path" );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto files = T->ml->files();
     ASSERT_EQ( files.size(), 0u );
 }
 
-TEST_F( Folders, List )
+static void List( FolderTests* T )
 {
-    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::Root ) );
     ASSERT_NE( f, nullptr );
     auto files = f->files();
     ASSERT_EQ( files.size(), 2u );
 
-    Reload();
+    T->Reload();
 
-    f = std::static_pointer_cast<Folder>( ml->folder( f->mrl() ) );
+    f = std::static_pointer_cast<Folder>( T->ml->folder( f->mrl() ) );
     files = f->files();
     ASSERT_EQ( files.size(), 2u );
 }
 
-TEST_F( Folders, ListFolders )
+static void ListFolders( FolderTests* T )
 {
-    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::Root ) );
     ASSERT_NE( f, nullptr );
     auto subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
@@ -150,9 +153,9 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", subFiles[0]->mrl() );
 
     // Now again, without cache. No need to wait for fs discovery reload here
-    Reload();
+    T->Reload();
 
-    f = std::static_pointer_cast<Folder>( ml->folder( f->mrl() ) );
+    f = std::static_pointer_cast<Folder>( T->ml->folder( f->mrl() ) );
     subFolders = f->folders();
     ASSERT_EQ( 1u, subFolders.size() );
 
@@ -163,364 +166,423 @@ TEST_F( Folders, ListFolders )
     ASSERT_EQ( mock::FileSystemFactory::SubFolder + "subfile.mp4", subFiles[0]->mrl() );
 }
 
-TEST_F( Folders, NewFolderWithFile )
+static void NewFolderWithFile( FolderTests* T )
 {
-    ASSERT_EQ( 3u, ml->files().size() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    ASSERT_EQ( 3u, T->ml->files().size() );
 
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
-    fsMock->addFolder( newFolder );
-    fsMock->addFile( newFolder + "newfile.avi" );
+    T->fsMock->addFolder( newFolder );
+    T->fsMock->addFile( newFolder + "newfile.avi" );
 
     // This will trigger a reload
-    Reload();
+    T->Reload();
 
-    ASSERT_EQ( 4u, ml->files().size() );
-    auto f = ml->media( newFolder + "newfile.avi" );
+    ASSERT_EQ( 4u, T->ml->files().size() );
+    auto f = T->ml->media( newFolder + "newfile.avi" );
     ASSERT_NE( nullptr, f );
 }
 
-// This is expected to fail until we fix the file system modifications detection
-TEST_F( Folders, NewFileInSubFolder )
+static void NewFileInSubFolder( FolderTests* T )
 {
-    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::Root ) );
-    ASSERT_EQ( 3u, ml->files().size() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
+    auto f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::Root ) );
+    ASSERT_EQ( 3u, T->ml->files().size() );
 
-    fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
+    f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::SubFolder ) );
 
-    Reload();
+    T->fsMock->addFile( mock::FileSystemFactory::SubFolder + "newfile.avi" );
 
-    ASSERT_EQ( 4u, ml->files().size() );
-    auto media = ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
-    f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
+    T->Reload();
+
+    ASSERT_EQ( 4u, T->ml->files().size() );
+    auto media = T->ml->media( mock::FileSystemFactory::SubFolder + "newfile.avi" );
+    f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_EQ( 2u, f->files().size() );
     ASSERT_NE( nullptr, media );
 }
 
-TEST_F( Folders, RemoveFileFromDirectory )
+static void RemoveFileFromDirectory( FolderTests* T )
 {
-    ASSERT_EQ( 3u, ml->files().size() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    ASSERT_EQ( 3u, T->ml->files().size() );
 
-    Reload();
+    T->fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
 
-    ASSERT_EQ( 2u, ml->files().size() );
-    auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
+    T->Reload();
+
+    ASSERT_EQ( 2u, T->ml->files().size() );
+    auto media = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_EQ( 0u, f->files().size() );
     ASSERT_EQ( nullptr, media );
 }
 
-TEST_F( Folders, RemoveDirectory )
+static void RemoveDirectory( FolderTests* T )
 {
-    ASSERT_EQ( 3u, ml->files().size() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    fsMock->removeFolder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( 3u, T->ml->files().size() );
 
-    Reload();
+    T->fsMock->removeFolder( mock::FileSystemFactory::SubFolder );
 
-    ASSERT_EQ( 2u, ml->files().size() );
-    auto media = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    T->Reload();
+
+    ASSERT_EQ( 2u, T->ml->files().size() );
+    auto media = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto f = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
     ASSERT_EQ( nullptr, media );
 }
 
-TEST_F( Folders, UpdateFile )
+static void UpdateFile( FolderTests* T )
 {
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
     auto filePath = mock::FileSystemFactory::SubFolder + "subfile.mp4";
-    auto f = ml->media( filePath );
+    auto f = T->ml->media( filePath );
     ASSERT_NE( f, nullptr );
     auto id = f->id();
 
-    auto fsFile = std::static_pointer_cast<mock::File>( fsMock->file( filePath ) );
+    auto fsFile = std::static_pointer_cast<mock::File>( T->fsMock->file( filePath ) );
     fsFile->markAsModified();
 
-    Reload();
+    T->Reload();
 
-    f = ml->media( filePath );
+    f = T->ml->media( filePath );
     ASSERT_NE( nullptr, f );
     // File won't be refreshed since unittests don't have parsers (and the file
     // doesn't actually exist) but let's check it's not deleted/re-added anymore
     ASSERT_EQ( id, f->id() );
 }
 
-TEST_F( FoldersNoDiscover, Ban )
+static void Ban( FolderTests* T )
 {
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    auto f = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
 }
 
-TEST_F( FoldersNoDiscover, DiscoverBanned )
+static void DiscoverBanned( FolderTests* T )
 {
-    ml->banFolder( mock::FileSystemFactory::Root );
-    cbMock->waitBanFolder();
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->banFolder( mock::FileSystemFactory::Root );
+    T->cbMock->waitBanFolder();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto f = ml->folder( mock::FileSystemFactory::Root );
+    auto f = T->ml->folder( mock::FileSystemFactory::Root );
     ASSERT_EQ( nullptr, f );
 }
 
-TEST_F( Folders, BanAfterDiscovery )
+static void BanAfterDiscovery( FolderTests* T )
 {
-    auto f = std::static_pointer_cast<Folder>( ml->folder( mock::FileSystemFactory::SubFolder ) );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto f = std::static_pointer_cast<Folder>( T->ml->folder( mock::FileSystemFactory::SubFolder ) );
     ASSERT_NE( nullptr, f );
     auto files = f->files();
     ASSERT_NE( 0u, files.size() );
 
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
-    auto f2 = ml->folder( mock::FileSystemFactory::SubFolder );
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+    auto f2 = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f2 );
 }
 
-TEST_F( FoldersNoDiscover, RemoveFromBannedList )
+static void RemoveFromBannedList( FolderTests* T )
 {
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
-    auto files = ml->files();
+    auto files = T->ml->files();
     ASSERT_EQ( 2u, files.size() );
 
-    auto f = ml->folder( mock::FileSystemFactory::SubFolder );
+    auto f = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
 
-    ml->unbanFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitUnbanFolder();
-    cbMock->waitReload();
-    files = ml->files();
+    T->ml->unbanFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitUnbanFolder();
+    T->cbMock->waitReload();
+    files = T->ml->files();
     ASSERT_EQ( 3u, files.size() );
-    f = ml->folder( mock::FileSystemFactory::SubFolder );
+    f = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_NE( nullptr, f );
 }
 
-TEST_F( FoldersNoDiscover, BanTwice )
+static void BanTwice( FolderTests* T )
 {
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
 }
 
-TEST_F( FoldersNoDiscover, BanNonExistant )
+static void BanNonExistant( FolderTests* T )
 {
     // Unhandled scheme
-    ml->banFolder( "foo://bar/otters" );
-    cbMock->waitBanFolder();
+    T->ml->banFolder( "foo://bar/otters" );
+    T->cbMock->waitBanFolder();
     // valid scheme, unknown root folder
-    ml->banFolder( "file:///foo/bar/otters" );
-    cbMock->waitBanFolder();
+    T->ml->banFolder( "file:///foo/bar/otters" );
+    T->cbMock->waitBanFolder();
     // Ban with an existing base
-    ml->banFolder( mock::FileSystemFactory::Root + "grouik/" );
-    cbMock->waitBanFolder();
+    T->ml->banFolder( mock::FileSystemFactory::Root + "grouik/" );
+    T->cbMock->waitBanFolder();
 }
 
-TEST_F( FoldersNoDiscover, UnbanNonExistant )
+static void UnbanNonExistant( FolderTests* T )
 {
-    ml->unbanFolder( "foo/bar/otters" );
-    cbMock->waitUnbanFolder();
-    ml->unbanFolder( "/foo/bar/otters" );
-    cbMock->waitUnbanFolder();
+    T->ml->unbanFolder( "foo/bar/otters" );
+    T->cbMock->waitUnbanFolder();
+    T->ml->unbanFolder( "/foo/bar/otters" );
+    T->cbMock->waitUnbanFolder();
     // Ban with an existing base
-    ml->unbanFolder( mock::FileSystemFactory::Root + "grouik/" );
-    cbMock->waitUnbanFolder();
+    T->ml->unbanFolder( mock::FileSystemFactory::Root + "grouik/" );
+    T->cbMock->waitUnbanFolder();
     // Ban existing but unbanned folder
-    ml->unbanFolder( mock::FileSystemFactory::Root );
-    cbMock->waitUnbanFolder();
+    T->ml->unbanFolder( mock::FileSystemFactory::Root );
+    T->cbMock->waitUnbanFolder();
 }
 
-TEST_F( FoldersNoDiscover, NoMediaBeforeDiscovery )
+static void NoMediaBeforeDiscovery( FolderTests* T )
 {
     auto newFolder = mock::FileSystemFactory::Root + "newfolder/";
-    fsMock->addFolder( newFolder );
-    fsMock->addFile( newFolder + "newfile.avi" );
-    fsMock->addFile( newFolder + ".nomedia" );
+    T->fsMock->addFolder( newFolder );
+    T->fsMock->addFile( newFolder + "newfile.avi" );
+    T->fsMock->addFile( newFolder + ".nomedia" );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto files = ml->files();
+    auto files = T->ml->files();
     // We add 3 files before, and the new one shouldn't be account for since there is a .nomedia file
     ASSERT_EQ( 3u, files.size() );
 }
 
-TEST_F( Folders, InsertNoMedia )
+static void InsertNoMedia( FolderTests* T )
 {
-    auto files = ml->files();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto files = T->ml->files();
     ASSERT_EQ( 3u, files.size() );
-    fsMock->addFile( mock::FileSystemFactory::SubFolder + ".nomedia" );
+    T->fsMock->addFile( mock::FileSystemFactory::SubFolder + ".nomedia" );
 
-    Reload();
+    T->Reload();
 
-    files = ml->files();
+    files = T->ml->files();
     ASSERT_EQ( 2u, files.size() );
 }
 
-TEST_F( Folders, InsertNoMediaInRoot )
+static void InsertNoMediaInRoot( FolderTests* T )
 {
-    fsMock->addFile( mock::FileSystemFactory::Root + ".nomedia" );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    Reload();
+    T->fsMock->addFile( mock::FileSystemFactory::Root + ".nomedia" );
 
-    auto files = ml->files();
+    T->Reload();
+
+    auto files = T->ml->files();
     ASSERT_EQ( 0u, files.size() );
 }
 
-TEST_F( Folders, ReloadSubDir )
+static void ReloadSubDir( FolderTests* T )
 {
-    auto files = ml->files();
-    ASSERT_EQ( 3u, files.size() );
-    fsMock->addFile( mock::FileSystemFactory::Root + "newmedia.mkv" );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    ml->reload( mock::FileSystemFactory::SubFolder );
-    auto res = cbMock->waitReload();
+    auto files = T->ml->files();
+    ASSERT_EQ( 3u, files.size() );
+    T->fsMock->addFile( mock::FileSystemFactory::Root + "newmedia.mkv" );
+
+    T->ml->reload( mock::FileSystemFactory::SubFolder );
+    auto res = T->cbMock->waitReload();
     ASSERT_TRUE( res );
 
-    files = ml->files();
+    files = T->ml->files();
     ASSERT_EQ( 3u, files.size() );
 
-    ml->reload();
-    res = cbMock->waitReload();
+    T->ml->reload();
+    res = T->cbMock->waitReload();
     ASSERT_TRUE( res );
 
-    files = ml->files();
+    files = T->ml->files();
     ASSERT_EQ( 4u, files.size() );
 }
 
-TEST_F( Folders, FetchEntryPoints )
+static void FetchEntryPoints( FolderTests* T )
 {
-    auto eps = ml->entryPoints()->all();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto eps = T->ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
     ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->mrl() );
 
     // Check that banned folders don't appear in the results:
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    auto res = cbMock->waitBanFolder();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    auto res = T->cbMock->waitBanFolder();
     ASSERT_TRUE( res );
-    eps = ml->entryPoints()->all();
+    eps = T->ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
 }
 
-TEST_F( Folders, RemoveRootEntryPoint )
+static void RemoveRootEntryPoint( FolderTests* T )
 {
-    enforceFakeMediaTypes( ml.get() );
-    auto media = ml->files();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    enforceFakeMediaTypes( T->ml.get() );
+    auto media = T->ml->files();
     ASSERT_EQ( 3u, media.size() );
-    auto video = ml->videoFiles( nullptr )->all();
+    auto video = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 2u, video.size() );
-    auto audio = ml->audioFiles( nullptr )->all();
+    auto audio = T->ml->audioFiles( nullptr )->all();
     ASSERT_EQ( 1u, audio.size() );
 
-    auto m = ml->media( mock::FileSystemFactory::Root + "video.avi" );
+    auto m = T->ml->media( mock::FileSystemFactory::Root + "video.avi" );
     ASSERT_NE( nullptr, m );
     ASSERT_FALSE( m->isExternalMedia() );
-    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     ASSERT_NE( nullptr, m );
     ASSERT_FALSE( m->isExternalMedia() );
 
-    ml->removeEntryPoint( mock::FileSystemFactory::Root );
-    auto res = cbMock->waitEntryPointRemoved();
+    T->ml->removeEntryPoint( mock::FileSystemFactory::Root );
+    auto res = T->cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 
-    media = ml->files();
+    media = T->ml->files();
     ASSERT_EQ( 3u, media.size() );
 
-    video = ml->videoFiles( nullptr )->all();
+    video = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 0u, video.size() );
-    audio = ml->audioFiles( nullptr )->all();
+    audio = T->ml->audioFiles( nullptr )->all();
     ASSERT_EQ( 0u, audio.size() );
 
     /* The media should now be converted to an external media */
-    m = ml->media( mock::FileSystemFactory::Root + "video.avi" );
+    m = T->ml->media( mock::FileSystemFactory::Root + "video.avi" );
     ASSERT_NE( nullptr, m );
     ASSERT_TRUE( m->isExternalMedia() );
 
-    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     ASSERT_NE( nullptr, m );
     ASSERT_TRUE( m->isExternalMedia() );
 
-    auto eps = ml->entryPoints()->all();
+    auto eps = T->ml->entryPoints()->all();
     ASSERT_EQ( 0u, eps.size() );
 }
 
-TEST_F( Folders, RemoveEntryPoint )
+static void RemoveEntryPoint( FolderTests* T )
 {
-    auto media = ml->files();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto media = T->ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    auto m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     ASSERT_NE( nullptr, m );
     ASSERT_FALSE( m->isExternalMedia() );
 
-    ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
-    auto res = cbMock->waitEntryPointRemoved();
+    T->ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
+    auto res = T->cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 
-    media = ml->files();
+    media = T->ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto eps = ml->entryPoints()->all();
+    auto eps = T->ml->entryPoints()->all();
     ASSERT_EQ( 1u, eps.size() );
 
-    m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
     ASSERT_NE( nullptr, m );
     ASSERT_TRUE( m->isExternalMedia() );
 
-    ml->reload();
+    T->ml->reload();
 
     // Ensure it wasn't re-discovered, ie. that it was properly banned
-    auto media2 = ml->files();
+    auto media2 = T->ml->files();
     ASSERT_EQ( media.size(), media2.size() );
 }
 
-TEST_F( Folders, RemoveNonExistantEntryPoint )
+static void RemoveNonExistantEntryPoint( FolderTests* T )
 {
-    ml->removeEntryPoint( "/sea/otter" );
-    auto res = cbMock->waitEntryPointRemoved();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    T->ml->removeEntryPoint( "/sea/otter" );
+    auto res = T->cbMock->waitEntryPointRemoved();
     ASSERT_TRUE( res );
 }
 
-TEST_F( Folders, RemoveRootFolder )
+static void RemoveRootFolder( FolderTests* T )
 {
-    ASSERT_EQ( 3u, ml->files().size() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    fsMock->removeFolder( mock::FileSystemFactory::Root );
+    ASSERT_EQ( 3u, T->ml->files().size() );
 
-    Reload();
+    T->fsMock->removeFolder( mock::FileSystemFactory::Root );
 
-    ASSERT_EQ( 0u, ml->files().size() );
+    T->Reload();
+
+    ASSERT_EQ( 0u, T->ml->files().size() );
 }
 
-TEST_F( Folders, NbMedia )
+static void NbMedia( FolderTests* T )
 {
-    enforceFakeMediaTypes( ml.get() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    auto root = ml->folder( 1 );
-    auto subFolder = ml->folder( 2 );
+    enforceFakeMediaTypes( T->ml.get() );
+
+    auto root = T->ml->folder( 1 );
+    auto subFolder = T->ml->folder( 2 );
     ASSERT_EQ( "file:///a/", root->mrl() );
     ASSERT_EQ( "file:///a/folder/", subFolder->mrl() );
     ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( 1u, subFolder->media( IMedia::Type::Unknown, nullptr )->count() );
 
-    fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
+    T->fsMock->removeFile( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
 
-    Reload();
+    T->Reload();
 
-    root = ml->folder( 1 );
-    subFolder = ml->folder( 2 );
+    root = T->ml->folder( 1 );
+    subFolder = T->ml->folder( 2 );
 
     ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
     ASSERT_EQ( 1u, root->media( IMedia::Type::Video, nullptr )->count() );
@@ -553,59 +615,67 @@ TEST_F( Folders, NbMedia )
     ASSERT_EQ( 1u, root->media( IMedia::Type::Audio, nullptr )->count() );
 }
 
-TEST_F( Folders, NbMediaDeletionTrigger )
+static void NbMediaDeletionTrigger( FolderTests* T )
 {
-    enforceFakeMediaTypes( ml.get() );
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
 
-    auto root = ml->folder( 1 );
+    enforceFakeMediaTypes( T->ml.get() );
+
+    auto root = T->ml->folder( 1 );
     ASSERT_EQ( "file:///a/", root->mrl() );
     ASSERT_EQ( 2u, root->media( IMedia::Type::Unknown, nullptr )->count() );
-    ASSERT_EQ( 1u, ml->folders( IMedia::Type::Audio, nullptr )->count() );
-    auto folders = ml->folders( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 1u, T->ml->folders( IMedia::Type::Audio, nullptr )->count() );
+    auto folders = T->ml->folders( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 1u, folders.size() );
 
     auto media = root->media( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
-    ml->deleteMedia( media[0]->id() );
+    T->ml->deleteMedia( media[0]->id() );
     media = root->media( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    ASSERT_EQ( 0u, ml->folders( IMedia::Type::Audio, nullptr )->count() );
-    folders = ml->folders( IMedia::Type::Audio, nullptr )->all();
+    ASSERT_EQ( 0u, T->ml->folders( IMedia::Type::Audio, nullptr )->count() );
+    folders = T->ml->folders( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 0u, folders.size() );
 }
 
-TEST_F( Folders, IsIndexed )
+static void IsIndexedDiscovered( FolderTests* T )
 {
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
     // Check with a couple of indexed folders
-    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    auto res = T->ml->isIndexed( mock::FileSystemFactory::Root );
     ASSERT_TRUE( res );
-    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    res = T->ml->isIndexed( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( res );
     // Check with a random non-indexed folder
-    res = ml->isIndexed( "file:///path/to/another/folder" );
+    res = T->ml->isIndexed( "file:///path/to/another/folder" );
     ASSERT_FALSE( res );
     // Check with a file
-    res = ml->isIndexed( mock::FileSystemFactory::Root + "video.avi" );
+    res = T->ml->isIndexed( mock::FileSystemFactory::Root + "video.avi" );
     ASSERT_TRUE( res );
 }
 
-TEST_F( FoldersNoDiscover, IsIndexed )
+static void IsIndexedNonDiscovered( FolderTests* T )
 {
     // The previous test checks for a non-existing folder. This time, try with
     // an existing folder that wasn't indexed
-    ml->discover( mock::FileSystemFactory::SubFolder );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::SubFolder );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
-    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    auto res = T->ml->isIndexed( mock::FileSystemFactory::Root );
     ASSERT_FALSE( res );
-    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    res = T->ml->isIndexed( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( res );
 }
 
-TEST_F( FoldersNoDiscover, IsIndexedMultipleMountpoint )
+static void IsIndexedMultipleMountpoint( FolderTests* T )
 {
-    auto device = fsMock->device( mock::FileSystemFactory::Root );
+    auto device = T->fsMock->device( mock::FileSystemFactory::Root );
     ASSERT_NE( nullptr, device );
     device->setRemovable( true );
     auto mp1 = std::string{ "file:///grouik/test/" };
@@ -613,59 +683,59 @@ TEST_F( FoldersNoDiscover, IsIndexedMultipleMountpoint )
     auto mp2 = std::string{ "file:///sea/otter/" };
     device->addMountpoint( mp2 );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    auto res = T->ml->isIndexed( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( res );
 
     // Ensure we have the correct assumption for path manipulations
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, mock::FileSystemFactory::Root + "folder/" );
 
-    res = ml->isIndexed( mp1 + "folder/" );
+    res = T->ml->isIndexed( mp1 + "folder/" );
     ASSERT_TRUE( res );
 
-    res = ml->isIndexed( mp2 + "folder/" );
+    res = T->ml->isIndexed( mp2 + "folder/" );
     ASSERT_TRUE( res );
 
-    res = ml->isIndexed( "file:///this/path/is/not/valid/folder/" );
+    res = T->ml->isIndexed( "file:///this/path/is/not/valid/folder/" );
     ASSERT_FALSE( res );
 }
 
-TEST_F( FoldersNoDiscover, IsBannedFolderIndexed )
+static void IsBannedFolderIndexed( FolderTests* T )
 {
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
-    auto res = ml->isIndexed( mock::FileSystemFactory::Root );
+    auto res = T->ml->isIndexed( mock::FileSystemFactory::Root );
     ASSERT_TRUE( res );
-    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    res = T->ml->isIndexed( mock::FileSystemFactory::SubFolder );
     ASSERT_FALSE( res );
 
-    ml->unbanFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitUnbanFolder();
-    cbMock->waitReload();
-    res = ml->isIndexed( mock::FileSystemFactory::SubFolder );
+    T->ml->unbanFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitUnbanFolder();
+    T->cbMock->waitReload();
+    res = T->ml->isIndexed( mock::FileSystemFactory::SubFolder );
     ASSERT_TRUE( res );
 }
 
-TEST_F( FoldersNoDiscover, ListWithMedia )
+static void ListWithMedia( FolderTests* T )
 {
     auto newFolder = mock::FileSystemFactory::Root + "empty/";
-    fsMock->addFolder( newFolder );
+    T->fsMock->addFolder( newFolder );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    enforceFakeMediaTypes( ml.get() );
+    enforceFakeMediaTypes( T->ml.get() );
 
     QueryParameters params{};
     params.sort = SortingCriteria::NbMedia;
-    auto folders = ml->folders( IMedia::Type::Video, &params )->all();
+    auto folders = T->ml->folders( IMedia::Type::Video, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
     ASSERT_EQ( 2u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
@@ -682,7 +752,7 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     // ie. you'd expect the folder with the most media/video/audio first, so
     // desc = true will invert this.
     params.desc = true;
-    folders = ml->folders( IMedia::Type::Video, &params )->all();
+    folders = T->ml->folders( IMedia::Type::Video, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::Root );
     ASSERT_EQ( 2u, folders[1]->media( IMedia::Type::Unknown, nullptr )->count() );
@@ -690,19 +760,19 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 1u, folders[0]->media( IMedia::Type::Unknown, nullptr )->count() );
 
     params.sort = SortingCriteria::NbAudio;
-    folders = ml->folders( IMedia::Type::Unknown, &params )->all();
+    folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::Root );
 
     params.desc = false;
-    folders = ml->folders( IMedia::Type::Unknown, &params )->all();
+    folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( folders[0]->mrl(), mock::FileSystemFactory::Root );
     ASSERT_EQ( folders[1]->mrl(), mock::FileSystemFactory::SubFolder );
 
     // List folders with audio media only
-    auto query = ml->folders( IMedia::Type::Audio, &params );
+    auto query = T->ml->folders( IMedia::Type::Audio, &params );
     folders = query->all();
     ASSERT_EQ( 1u, query->count() );
     ASSERT_EQ( 1u, folders.size() );
@@ -736,18 +806,18 @@ TEST_F( FoldersNoDiscover, ListWithMedia )
     ASSERT_EQ( 1u, mediaQuery->all().size() );
 }
 
-TEST_F( FoldersNoDiscover, SearchMedia )
+static void SearchMedia( FolderTests* T )
 {
     auto newFolder = mock::FileSystemFactory::Root + "empty/";
-    fsMock->addFolder( newFolder );
+    T->fsMock->addFolder( newFolder );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    enforceFakeMediaTypes( ml.get() );
+    enforceFakeMediaTypes( T->ml.get() );
 
-    auto folder = ml->folder( mock::FileSystemFactory::Root );
+    auto folder = T->ml->folder( mock::FileSystemFactory::Root );
     ASSERT_NE( nullptr, folder );
 
     auto videosQuery = folder->searchMedia( "video", IMedia::Type::Video, nullptr );
@@ -769,18 +839,18 @@ TEST_F( FoldersNoDiscover, SearchMedia )
     ASSERT_EQ( 1u, all.size() );
 }
 
-TEST_F( FoldersNoDiscover, ListSubFolders )
+static void ListSubFolders( FolderTests* T )
 {
     auto newFolder = mock::FileSystemFactory::Root + "empty/";
-    fsMock->addFolder( newFolder );
+    T->fsMock->addFolder( newFolder );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    enforceFakeMediaTypes( ml.get() );
+    enforceFakeMediaTypes( T->ml.get() );
 
-    auto entryPoints = ml->entryPoints()->all();
+    auto entryPoints = T->ml->entryPoints()->all();
     ASSERT_EQ( 1u, entryPoints.size() );
 
     auto root = entryPoints[0];
@@ -807,106 +877,154 @@ TEST_F( FoldersNoDiscover, ListSubFolders )
     ASSERT_EQ( media->id(), allMedia[0]->id() );
 }
 
-TEST_F( FoldersNoDiscover, SearchFolders )
+static void SearchFolders( FolderTests* T )
 {
     // Add an empty folder matching the search pattern
     auto newFolder = mock::FileSystemFactory::Root + "empty/folder/";
-    fsMock->addFolder( newFolder );
+    T->fsMock->addFolder( newFolder );
     // Add a non empty sub folder also matching the pattern
     auto newSubFolder = mock::FileSystemFactory::Root + "empty/folder/fold/";
-    fsMock->addFolder( newSubFolder );
-    fsMock->addFile( newSubFolder + "some file.avi" );
-    fsMock->addFile( newSubFolder + "some other file.avi" );
+    T->fsMock->addFolder( newSubFolder );
+    T->fsMock->addFile( newSubFolder + "some file.avi" );
+    T->fsMock->addFile( newSubFolder + "some other file.avi" );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    enforceFakeMediaTypes( ml.get() );
+    enforceFakeMediaTypes( T->ml.get() );
     auto media = std::static_pointer_cast<Media>(
-                                ml->media( newSubFolder + "some file.avi" ) );
+                                T->ml->media( newSubFolder + "some file.avi" ) );
     media->setType( IMedia::Type::Video );
     media->save();
 
     media = std::static_pointer_cast<Media>(
-                        ml->media( newSubFolder + "some other file.avi" ) );
+                        T->ml->media( newSubFolder + "some other file.avi" ) );
     media->setType( IMedia::Type::Video );
     media->save();
 
     QueryParameters params{};
     params.sort = SortingCriteria::NbMedia;
-    auto folders = ml->searchFolders( "fold", IMedia::Type::Unknown, &params )->all();
+    auto folders = T->ml->searchFolders( "fold", IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 2u, folders.size() );
     ASSERT_EQ( newSubFolder, folders[0]->mrl() );
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, folders[1]->mrl() );
 }
 
-TEST_F( FoldersNoDiscover, Name )
+static void Name( FolderTests* T )
 {
     auto newFolder = mock::FileSystemFactory::SubFolder + "folder%20with%20spaces/";
-    fsMock->addFolder( newFolder );
+    T->fsMock->addFolder( newFolder );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto root = ml->folder( 1 );
-    auto subFolder = ml->folder( 2 );
-    auto spacesFolder = ml->folder( 3 );
+    auto root = T->ml->folder( 1 );
+    auto subFolder = T->ml->folder( 2 );
+    auto spacesFolder = T->ml->folder( 3 );
     ASSERT_EQ( "a", root->name() );
     ASSERT_EQ( "folder", subFolder->name() );
     ASSERT_EQ( "folder with spaces", spacesFolder->name() );
     ASSERT_EQ( newFolder, spacesFolder->mrl() );
 }
 
-TEST_F( FoldersNoDiscover, IsBanned )
+static void IsBanned( FolderTests* T )
 {
-    auto res = ml->isBanned( mock::FileSystemFactory::Root );
+    auto res = T->ml->isBanned( mock::FileSystemFactory::Root );
     ASSERT_FALSE( res );
-    ml->banFolder( mock::FileSystemFactory::Root );
-    cbMock->waitBanFolder();
-    res = ml->isBanned( mock::FileSystemFactory::Root );
+    T->ml->banFolder( mock::FileSystemFactory::Root );
+    T->cbMock->waitBanFolder();
+    res = T->ml->isBanned( mock::FileSystemFactory::Root );
     ASSERT_TRUE( res );
 
-    res = ml->isBanned( "not even an mrl" );
+    res = T->ml->isBanned( "not even an mrl" );
     ASSERT_FALSE( res );
 }
 
-TEST_F( FoldersNoDiscover, BannedEntryPoints )
+static void BannedEntryPoints( FolderTests* T )
 {
-    auto res = ml->bannedEntryPoints();
+    auto res = T->ml->bannedEntryPoints();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 0u, res->all().size() );
     ASSERT_EQ( 0u, res->count() );
 
-    ml->banFolder( mock::FileSystemFactory::SubFolder );
-    cbMock->waitBanFolder();
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
 
-    res = ml->bannedEntryPoints();
+    res = T->ml->bannedEntryPoints();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
 
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    res = ml->bannedEntryPoints();
+    res = T->ml->bannedEntryPoints();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
 
-    res = ml->entryPoints();
+    res = T->ml->entryPoints();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::Root, res->all()[0]->mrl() );
 }
 
-TEST_F( FoldersNoDiscover, CheckDbModel )
+static void CheckDbModel( FolderTests* T )
 {
-    auto res = Folder::checkDbModel( ml.get() );
+    auto res = Folder::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( FolderTests );
+
+    ADD_TEST( Add );
+    ADD_TEST( Load );
+    ADD_TEST( InvalidPath );
+    ADD_TEST( List );
+    ADD_TEST( ListFolders );
+    ADD_TEST( NewFolderWithFile );
+    ADD_TEST( NewFileInSubFolder );
+    ADD_TEST( RemoveFileFromDirectory );
+    ADD_TEST( RemoveDirectory );
+    ADD_TEST( UpdateFile );
+    ADD_TEST( Ban );
+    ADD_TEST( DiscoverBanned );
+    ADD_TEST( BanAfterDiscovery );
+    ADD_TEST( RemoveFromBannedList );
+    ADD_TEST( BanTwice );
+    ADD_TEST( BanNonExistant );
+    ADD_TEST( UnbanNonExistant );
+    ADD_TEST( NoMediaBeforeDiscovery );
+    ADD_TEST( InsertNoMedia );
+    ADD_TEST( InsertNoMediaInRoot );
+    ADD_TEST( ReloadSubDir );
+    ADD_TEST( FetchEntryPoints );
+    ADD_TEST( RemoveRootEntryPoint );
+    ADD_TEST( RemoveEntryPoint );
+    ADD_TEST( RemoveNonExistantEntryPoint );
+    ADD_TEST( RemoveRootFolder );
+    ADD_TEST( NbMedia );
+    ADD_TEST( NbMediaDeletionTrigger );
+    ADD_TEST( IsIndexedDiscovered );
+    ADD_TEST( IsIndexedNonDiscovered );
+    ADD_TEST( IsIndexedMultipleMountpoint );
+    ADD_TEST( IsBannedFolderIndexed );
+    ADD_TEST( ListWithMedia );
+    ADD_TEST( SearchMedia );
+    ADD_TEST( ListSubFolders );
+    ADD_TEST( SearchFolders );
+    ADD_TEST( Name );
+    ADD_TEST( IsBanned );
+    ADD_TEST( BannedEntryPoints );
+    ADD_TEST( CheckDbModel );
+
+    END_TESTS
 }

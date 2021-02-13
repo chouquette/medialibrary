@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "discoverer/DiscovererWorker.h"
 
@@ -56,9 +56,8 @@ private:
     Task m_fakeRunningTask;
 };
 
-class DiscovererTests : public Tests
+struct DiscovererTests : public Tests
 {
-public:
     std::unique_ptr<DiscovererWorkerTest> discoverer;
 
     virtual void SetUp() override
@@ -68,73 +67,86 @@ public:
     }
 };
 
-
-TEST_F( DiscovererTests, SimpleEnqueue )
+static void SimpleEnqueue( DiscovererTests* T )
 {
-    discoverer->discover( "file:///test/" );
-    const auto& tasks = discoverer->tasks();
+    T->discoverer->discover( "file:///test/" );
+    const auto& tasks = T->discoverer->tasks();
     ASSERT_EQ( 1u, tasks.size() );
 }
 
-TEST_F( DiscovererTests, FilterDoubleEnqueue )
+static void FilterDoubleEnqueue( DiscovererTests* T )
 {
-    discoverer->discover( "file:///test/" );
-    discoverer->discover( "file:///test/" );
-    discoverer->discover( "file:///test/" );
-    const auto& tasks = discoverer->tasks();
+    T->discoverer->discover( "file:///test/" );
+    T->discoverer->discover( "file:///test/" );
+    T->discoverer->discover( "file:///test/" );
+    const auto& tasks = T->discoverer->tasks();
     ASSERT_EQ( 1u, tasks.size() );
 }
 
-TEST_F( DiscovererTests, DontFilterUnrelatedDoubleEnqueue )
+static void DontFilterUnrelatedDoubleEnqueue( DiscovererTests* T )
 {
-    discoverer->discover( "file:///sea/" );
-    discoverer->discover( "file:///otter/" );
-    const auto& tasks = discoverer->tasks();
+    T->discoverer->discover( "file:///sea/" );
+    T->discoverer->discover( "file:///otter/" );
+    const auto& tasks = T->discoverer->tasks();
     ASSERT_EQ( 2u, tasks.size() );
 }
 
-TEST_F( DiscovererTests, ReduceDiscoverRemove )
+static void ReduceDiscoverRemove( DiscovererTests* T )
 {
-    discoverer->discover( "file:///test/" );
-    discoverer->remove( "file:///test/" );
-    auto tasks = discoverer->tasks();
+    T->discoverer->discover( "file:///test/" );
+    T->discoverer->remove( "file:///test/" );
+    auto tasks = T->discoverer->tasks();
     ASSERT_EQ( 0u, tasks.size() );
 
-    discoverer->remove( "file:///test/" );
-    discoverer->discover( "file:///test/" );
+    T->discoverer->remove( "file:///test/" );
+    T->discoverer->discover( "file:///test/" );
 
-    tasks = discoverer->tasks();
+    tasks = T->discoverer->tasks();
     ASSERT_EQ( 1u, tasks.size() );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Discover, tasks[0].type );
 }
 
-TEST_F( DiscovererTests, ReduceBanUnban )
+static void ReduceBanUnban( DiscovererTests* T )
 {
-   discoverer->ban( "file:///test/" );
-   discoverer->unban( "file:///test/" );
-   const auto& tasks = discoverer->tasks();
+   T->discoverer->ban( "file:///test/" );
+   T->discoverer->unban( "file:///test/" );
+   const auto& tasks = T->discoverer->tasks();
    ASSERT_EQ( 0u, tasks.size() );
 }
 
-TEST_F( DiscovererTests, InterruptDiscover )
+static void InterruptDiscover( DiscovererTests* T )
 {
-    discoverer->discover( "file:///path/" );
-    discoverer->simulateWorkerProcessing();
-    discoverer->ban( "file:///path/" );
-    auto tasks = discoverer->tasks();
+    T->discoverer->discover( "file:///path/" );
+    T->discoverer->simulateWorkerProcessing();
+    T->discoverer->ban( "file:///path/" );
+    auto tasks = T->discoverer->tasks();
     ASSERT_EQ( 1u, tasks.size() );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Ban, tasks[0].type );
 }
 
-TEST_F( DiscovererTests, InterruptReload )
+static void InterruptReload( DiscovererTests* T )
 {
-    discoverer->reload();
-    discoverer->simulateWorkerProcessing();
-    discoverer->remove( "file:///path/to/otters/" );
-    auto tasks = discoverer->tasks();
+    T->discoverer->reload();
+    T->discoverer->simulateWorkerProcessing();
+    T->discoverer->remove( "file:///path/to/otters/" );
+    auto tasks = T->discoverer->tasks();
     ASSERT_EQ( 2u, tasks.size() );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Remove, tasks[0].type );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
     ASSERT_EQ( "", tasks[1].entryPoint );
+}
 
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( DiscovererTests );
+
+    ADD_TEST( SimpleEnqueue );
+    ADD_TEST( FilterDoubleEnqueue );
+    ADD_TEST( DontFilterUnrelatedDoubleEnqueue );
+    ADD_TEST( ReduceDiscoverRemove );
+    ADD_TEST( ReduceBanUnban );
+    ADD_TEST( InterruptDiscover );
+    ADD_TEST( InterruptReload );
+
+    END_TESTS
 }

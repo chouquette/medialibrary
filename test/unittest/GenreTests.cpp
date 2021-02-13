@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Genre.h"
 #include "Album.h"
@@ -32,9 +32,8 @@
 #include "Media.h"
 #include "Artist.h"
 
-class Genres : public Tests
+struct GenreTests : public Tests
 {
-protected:
     std::shared_ptr<Genre> g;
 
     virtual void SetUp() override
@@ -44,95 +43,95 @@ protected:
     }
 };
 
-TEST_F( Genres, Create )
+static void Create( GenreTests* T )
 {
-    ASSERT_NE( nullptr, g );
-    ASSERT_EQ( "genre", g->name() );
-    auto tracks = g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
+    ASSERT_NE( nullptr, T->g );
+    ASSERT_EQ( "genre", T->g->name() );
+    auto tracks = T->g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
-TEST_F( Genres, List )
+static void List( GenreTests* T )
 {
-    auto g2 = ml->createGenre( "genre 2" );
+    auto g2 = T->ml->createGenre( "genre 2" );
     ASSERT_NE( nullptr, g2 );
-    auto genres = ml->genres( nullptr )->all();
+    auto genres = T->ml->genres( nullptr )->all();
     ASSERT_EQ( 2u, genres.size() );
 }
 
-TEST_F( Genres, ListAlbumTracks )
+static void ListAlbumTracks( GenreTests* T )
 {
-    auto a = ml->createAlbum( "album" );
+    auto a = T->ml->createAlbum( "album" );
 
     for ( auto i = 1u; i <= 3; i++ )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        auto t = a->addTrack( m, i, 1, 0, i != 1 ? g.get() : nullptr );
+                    T->ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        auto t = a->addTrack( m, i, 1, 0, i != 1 ? T->g.get() : nullptr );
     }
-    auto tracks = g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
+    auto tracks = T->g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 }
 
-TEST_F( Genres, ListArtists )
+static void ListArtists( GenreTests* T )
 {
-    auto artists = g->artists( nullptr )->all();
+    auto artists = T->g->artists( nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
-    auto a = ml->createArtist( "artist" );
-    auto a2 = ml->createArtist( "artist 2" );
+    auto a = T->ml->createArtist( "artist" );
+    auto a2 = T->ml->createArtist( "artist 2" );
     // Ensure we're not just returning all the artists:
-    auto a3 = ml->createArtist( "artist 3" );
-    auto album = ml->createAlbum( "album" );
-    auto album2 = ml->createAlbum( "album2" );
+    auto a3 = T->ml->createArtist( "artist 3" );
+    auto album = T->ml->createAlbum( "album" );
+    auto album2 = T->ml->createAlbum( "album2" );
 
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        auto track = album->addTrack( m, i, 1, a->id(), g.get() );
+                    T->ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        auto track = album->addTrack( m, i, 1, a->id(), T->g.get() );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
-        auto track = album2->addTrack( m, i, 1, a2->id(), g.get() );
+                    T->ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
+        auto track = album2->addTrack( m, i, 1, a2->id(), T->g.get() );
     }
-    auto query = g->artists( nullptr );
+    auto query = T->g->artists( nullptr );
     ASSERT_EQ( 2u, query->count() );
     artists = query->all();
     ASSERT_EQ( 2u, artists.size() );
 }
 
-TEST_F( Genres, ListAlbums )
+static void ListAlbums( GenreTests* T )
 {
-    auto album = ml->createAlbum( "album" );
+    auto album = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "some track.mp3", IMedia::Type::Audio ) );
-    auto t = album->addTrack( m, 10, 1, 0, g.get() );
+                T->ml->addMedia( "some track.mp3", IMedia::Type::Audio ) );
+    auto t = album->addTrack( m, 10, 1, 0, T->g.get() );
 
-    auto album2 = ml->createAlbum( "album2" );
+    auto album2 = T->ml->createAlbum( "album2" );
     m = std::static_pointer_cast<Media>(
-                ml->addMedia( "some other track.mp3", IMedia::Type::Audio ) );
-    t = album2->addTrack( m, 10, 1, 0, g.get() );
+                T->ml->addMedia( "some other track.mp3", IMedia::Type::Audio ) );
+    t = album2->addTrack( m, 10, 1, 0, T->g.get() );
 
-    // We have 2 albums with at least a song with genre "g" (as defined in SetUp)
+    // We have 2 albums with at least a song with genre "T->g" (as defined in SetUp)
     // Now we create more albums with "random" genre, all of them should have 1 album
     for ( auto i = 1u; i <= 5u; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        auto g = ml->createGenre( std::to_string( i ) );
+                    T->ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        auto g = T->ml->createGenre( std::to_string( i ) );
         auto track = album->addTrack( m, i, 1, 0, g.get() );
     }
 
-    auto genres = ml->genres( nullptr )->all();
+    auto genres = T->ml->genres( nullptr )->all();
     for ( auto& genre : genres )
     {
         auto query = genre->albums( nullptr );
         auto albums = query->all();
 
-        if ( genre->id() == g->id() )
+        if ( genre->id() == T->g->id() )
         {
             // Initial genre with 2 albums:
             ASSERT_EQ( 2u, query->count() );
@@ -147,255 +146,280 @@ TEST_F( Genres, ListAlbums )
     }
 }
 
-TEST_F( Genres, Search )
+static void Search( GenreTests* T )
 {
-    ml->createGenre( "something" );
-    ml->createGenre( "blork" );
+    T->ml->createGenre( "something" );
+    T->ml->createGenre( "blork" );
 
-    auto query = ml->searchGenre( "", nullptr );
+    auto query = T->ml->searchGenre( "", nullptr );
     ASSERT_EQ( nullptr, query );
 
-    auto genres = ml->searchGenre( "genr", nullptr )->all();
+    auto genres = T->ml->searchGenre( "genr", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 }
 
-TEST_F( Genres, SearchAfterDelete )
+static void SearchAfterDelete( GenreTests* T )
 {
-    auto genres = ml->searchGenre( "genre", nullptr )->all();
+    auto genres = T->ml->searchGenre( "genre", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 
-    ml->deleteGenre( g->id() );
+    T->ml->deleteGenre( T->g->id() );
 
-    genres = ml->searchGenre( "genre", nullptr )->all();
+    genres = T->ml->searchGenre( "genre", nullptr )->all();
     ASSERT_EQ( 0u, genres.size() );
 }
 
-TEST_F( Genres, SortTracks )
+static void SortTracks( GenreTests* T )
 {
-    auto a = ml->createAlbum( "album" );
+    auto a = T->ml->createAlbum( "album" );
 
     for ( auto i = 1u; i <= 2; i++ )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        auto t = a->addTrack( m, i, 1, 0, g.get() );
+                    T->ml->addMedia( "track" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        auto t = a->addTrack( m, i, 1, 0, T->g.get() );
         m->setDuration( i );
         m->setReleaseDate( 10 - i );
         m->save();
     }
     QueryParameters params { SortingCriteria::Duration, false };
-    auto tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    auto tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
 
     params.desc = true;
-    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 1u, tracks[1]->albumTrack()->trackNumber() );
     ASSERT_EQ( 2u, tracks[0]->albumTrack()->trackNumber() );
 
     params.sort = SortingCriteria::ReleaseDate;
-    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 9u, tracks[0]->releaseDate() );
     ASSERT_EQ( 8u, tracks[1]->releaseDate() );
 
     params.desc = false;
-    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( 8u, tracks[0]->releaseDate() );
     ASSERT_EQ( 9u, tracks[1]->releaseDate() );
 
     params.sort = SortingCriteria::Alpha;
-    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( "track1.mp3", tracks[0]->title() );
     ASSERT_EQ( "track2.mp3", tracks[1]->title() );
 
     params.desc = true;
-    tracks = g->tracks( IGenre::TracksIncluded::All, &params )->all();
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, &params )->all();
     ASSERT_EQ( 2u, tracks.size() );
     ASSERT_EQ( "track2.mp3", tracks[0]->title() );
     ASSERT_EQ( "track1.mp3", tracks[1]->title() );
 }
 
-TEST_F( Genres, Sort )
+static void Sort( GenreTests* T )
 {
-    auto g2 = ml->createGenre( "metal" );
+    auto g2 = T->ml->createGenre( "metal" );
 
-    auto genres = ml->genres( nullptr )->all();
+    auto genres = T->ml->genres( nullptr )->all();
     ASSERT_EQ( 2u, genres.size() );
-    ASSERT_EQ( g->id(), genres[0]->id() );
+    ASSERT_EQ( T->g->id(), genres[0]->id() );
     ASSERT_EQ( g2->id(), genres[1]->id() );
 
     QueryParameters params { SortingCriteria::Default, true };
-    genres = ml->genres( &params )->all();
+    genres = T->ml->genres( &params )->all();
     ASSERT_EQ( 2u, genres.size() );
-    ASSERT_EQ( g->id(), genres[1]->id() );
+    ASSERT_EQ( T->g->id(), genres[1]->id() );
     ASSERT_EQ( g2->id(), genres[0]->id() );
 }
 
-TEST_F( Genres, NbTracks )
+static void NbTracks( GenreTests* T )
 {
-    ASSERT_EQ( 0u, g->nbTracks() );
+    ASSERT_EQ( 0u, T->g->nbTracks() );
 
-    auto a = ml->createAlbum( "album" );
+    auto a = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
-    auto t = a->addTrack( m, 1, 1, g->id(), g.get() );
+                T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    auto t = a->addTrack( m, 1, 1, T->g->id(), T->g.get() );
 
-    ASSERT_EQ( 1u, g->nbTracks() );
-    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
-    ASSERT_EQ( 1u, g->nbTracks() );
+    ASSERT_EQ( 1u, T->g->nbTracks() );
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 1u, T->g->nbTracks() );
 
-    ml->deleteMedia( m->id() );
+    T->ml->deleteMedia( m->id() );
 
-    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
-    ASSERT_EQ( nullptr, g );
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( nullptr, T->g );
 }
 
-TEST_F( Genres, CaseInsensitive )
+static void CaseInsensitive( GenreTests* T )
 {
-    auto g2 = Genre::fromName( ml.get(), "GENRE" );
-    ASSERT_EQ( g->id(), g2->id() );
+    auto g2 = Genre::fromName( T->ml.get(), "GENRE" );
+    ASSERT_EQ( T->g->id(), g2->id() );
 }
 
-TEST_F( Genres, SearchArtists )
+static void SearchArtists( GenreTests* T )
 {
-    auto artists = g->artists( nullptr )->all();
+    auto artists = T->g->artists( nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
-    auto a = ml->createArtist( "loutre 1" );
-    auto a2 = ml->createArtist( "loutre 2" );
-    auto album = ml->createAlbum( "album" );
-    auto album2 = ml->createAlbum( "album2" );
+    auto a = T->ml->createArtist( "loutre 1" );
+    auto a2 = T->ml->createArtist( "loutre 2" );
+    auto album = T->ml->createAlbum( "album" );
+    auto album2 = T->ml->createAlbum( "album2" );
 
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        auto track = album->addTrack( m, i, 1, a->id(), g.get() );
+                    T->ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        auto track = album->addTrack( m, i, 1, a->id(), T->g.get() );
         a->addMedia( *m );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
+                    T->ml->addMedia( std::to_string( i ) + "_2.mp3", IMedia::Type::Audio ) );
         auto track = album2->addTrack( m, i, 1, a2->id(), nullptr );
         a2->addMedia( *m );
     }
-    artists = ml->searchArtists( "loutre", ArtistIncluded::All, nullptr )->all();
+    artists = T->ml->searchArtists( "loutre", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
 
-    artists = g->searchArtists( "loutre" )->all();
+    artists = T->g->searchArtists( "loutre" )->all();
     ASSERT_EQ( 1u, artists.size() );
     ASSERT_EQ( a->id(), artists[0]->id() );
 }
 
-TEST_F( Genres, SearchTracks )
+static void SearchTracks( GenreTests* T )
 {
-    auto a = ml->createAlbum( "album" );
+    auto a = T->ml->createAlbum( "album" );
 
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "Hell's Kitchen.mp3", IMedia::Type::Audio ) );
-    auto t = a->addTrack( m, 1, 1, 0, g.get() );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "Hell's Kitchen.mp3", IMedia::Type::Audio ) );
+    auto t = a->addTrack( m, 1, 1, 0, T->g.get() );
     m->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
     auto t2 = a->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
-    auto tracks = ml->searchAudio( "kitchen", nullptr )->all();
+    auto tracks = T->ml->searchAudio( "kitchen", nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 
-    tracks = g->searchTracks( "kitchen", nullptr )->all();
+    tracks = T->g->searchTracks( "kitchen", nullptr )->all();
     ASSERT_EQ( 1u, tracks.size() );
     ASSERT_EQ( m->id(), tracks[0]->id() );
 }
 
-TEST_F( Genres, SearchAlbums )
+static void SearchAlbums( GenreTests* T )
 {
-    auto a1 = ml->createAlbum( "an album" );
+    auto a1 = T->ml->createAlbum( "an album" );
 
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    auto t = a1->addTrack( m, 1, 1, 0, g.get() );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto t = a1->addTrack( m, 1, 1, 0, T->g.get() );
     m->save();
 
-    auto a2 = ml->createAlbum( "another album" );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
+    auto a2 = T->ml->createAlbum( "another album" );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "Different genre Hell's Kitchen.mp3", IMedia::Type::Audio ) );
     auto t2 = a2->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
-    auto a3 = ml->createAlbum( "another album" );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "track3.mp3", IMedia::Type::Audio ) );
-    auto t3 = a3->addTrack( m3, 1, 1, 0, g.get() );
+    auto a3 = T->ml->createAlbum( "another album" );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "track3.mp3", IMedia::Type::Audio ) );
+    auto t3 = a3->addTrack( m3, 1, 1, 0, T->g.get() );
     m3->save();
 
-    auto query = ml->searchAlbums( "album", nullptr);
+    auto query = T->ml->searchAlbums( "album", nullptr);
     ASSERT_EQ( 3u, query->count() );
     auto albums = query->all();
     ASSERT_EQ( 3u, albums.size() );
 
-    query = g->searchAlbums( "album", nullptr );
+    query = T->g->searchAlbums( "album", nullptr );
     ASSERT_EQ( 2u, query->count() );
     albums = query->all();
     ASSERT_EQ( 2u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
 }
 
-TEST_F( Genres, WithThumbnail )
+static void WithThumbnail( GenreTests* T )
 {
-    auto a1 = ml->createAlbum( "an album" );
+    auto a1 = T->ml->createAlbum( "an album" );
 
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    auto t = a1->addTrack( m, 1, 1, 0, g.get() );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto t = a1->addTrack( m, 1, 1, 0, T->g.get() );
     m->save();
     m->setThumbnail( "file:///path/to/thumbnail.png", ThumbnailSizeType::Thumbnail );
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
-    auto t2 = a1->addTrack( m2, 1, 1, 0, g.get() );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto t2 = a1->addTrack( m2, 1, 1, 0, T->g.get() );
     m2->save();
 
-    auto tracks = g->tracks( IGenre::TracksIncluded::WithThumbnailOnly, nullptr );
+    auto tracks = T->g->tracks( IGenre::TracksIncluded::WithThumbnailOnly, nullptr );
     ASSERT_EQ( 1u, tracks->count() );
     ASSERT_EQ( 1u, tracks->all().size() );
 
-    tracks = g->tracks( IGenre::TracksIncluded::All, nullptr );
+    tracks = T->g->tracks( IGenre::TracksIncluded::All, nullptr );
     ASSERT_EQ( 2u, tracks->count() );
     ASSERT_EQ( 2u, tracks->all().size() );
 }
 
-TEST_F( Genres, CheckDbModel )
+static void CheckDbModel( GenreTests* T )
 {
-    auto res = Genre::checkDbModel( ml.get() );
+    auto res = Genre::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Genres, Thumbnails )
+static void GetThumbnails( GenreTests* T )
 {
-    ASSERT_FALSE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
-    ASSERT_FALSE( g->hasThumbnail( ThumbnailSizeType::Banner ) );
+    ASSERT_FALSE( T->g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_FALSE( T->g->hasThumbnail( ThumbnailSizeType::Banner ) );
 
     auto mrl = std::string{ "file:///path/to/thumbnail.jpg" };
-    auto res = g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
+    auto res = T->g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
-    ASSERT_TRUE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_TRUE( T->g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
 
-    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( mrl, T->g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
-    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
-    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
-    ASSERT_TRUE( g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( mrl, T->g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_TRUE( T->g->hasThumbnail( ThumbnailSizeType::Thumbnail ) );
 
     // Update it, and expect the thumbnail to be updated, ie. no new thumbnail
     // should be created
     mrl = "file:///path/to/new/thumbnail.png";
-    res = g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
+    res = T->g->setThumbnail( mrl, ThumbnailSizeType::Thumbnail, false );
     ASSERT_TRUE( res );
-    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+    ASSERT_EQ( mrl, T->g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
-    g = std::static_pointer_cast<Genre>( ml->genre( g->id() ) );
-    ASSERT_EQ( mrl, g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( mrl, T->g->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( GenreTests );
+
+    ADD_TEST( Create );
+    ADD_TEST( List );
+    ADD_TEST( ListAlbumTracks );
+    ADD_TEST( ListArtists );
+    ADD_TEST( ListAlbums );
+    ADD_TEST( Search );
+    ADD_TEST( SearchAfterDelete );
+    ADD_TEST( SortTracks );
+    ADD_TEST( Sort );
+    ADD_TEST( NbTracks );
+    ADD_TEST( CaseInsensitive );
+    ADD_TEST( SearchArtists );
+    ADD_TEST( SearchTracks );
+    ADD_TEST( SearchAlbums );
+    ADD_TEST( WithThumbnail );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( GetThumbnails );
+
+    END_TESTS
 }

@@ -24,14 +24,20 @@
 # include "config.h"
 #endif
 
-#include "gtest/gtest.h"
+#include "UnitTests.h"
 
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/Errors.h"
 
 using namespace medialibrary;
 
-TEST( FsUtils, extension )
+struct FsUtilsTests
+{
+    void SetUp() {}
+    void TearDown() {}
+};
+
+static void extension( FsUtilsTests* )
 {
     ASSERT_EQ( "ext", utils::file::extension( "file.ext" ) );
     ASSERT_EQ( "", utils::file::extension( "file." ) );
@@ -40,7 +46,7 @@ TEST( FsUtils, extension )
     ASSERT_EQ( "", utils::file::extension( "file.ext." ) );
 }
 
-TEST( FsUtils, directory )
+static void directory( FsUtilsTests* )
 {
     ASSERT_EQ( "/a/b/c/", utils::file::directory( "/a/b/c/d.e" ) );
     ASSERT_EQ( "/a/b/c/", utils::file::directory( "/a/b/c/" ) );
@@ -49,7 +55,7 @@ TEST( FsUtils, directory )
     ASSERT_EQ( "", utils::file::directory( "file.test" ) );
 }
 
-TEST( FsUtils, directoryName )
+static void directoryName( FsUtilsTests* )
 {
     ASSERT_EQ( "dé", utils::file::directoryName( "/a/b/c/dé/" ) );
     ASSERT_EQ( ".cache", utils::file::directoryName( "/a/b/c/.cache/" ) );
@@ -64,14 +70,14 @@ TEST( FsUtils, directoryName )
     ASSERT_EQ( "bill", utils::file::directoryName( "bill/" ) );
 }
 
-TEST( FsUtils, fileName )
+static void fileName( FsUtilsTests* )
 {
     ASSERT_EQ( "d.e", utils::file::fileName( "/a/b/c/d.e" ) );
     ASSERT_EQ( "noextfile", utils::file::fileName( "/a/b/noextfile" ) );
     ASSERT_EQ( "file.test", utils::file::fileName( "file.test" ) );
 }
 
-TEST( FsUtils, firstFolder )
+static void firstFolder( FsUtilsTests* )
 {
     ASSERT_EQ( "f00", utils::file::firstFolder( "f00/bar/" ) );
     ASSERT_EQ( "f00", utils::file::firstFolder( "/f00/bar" ) );
@@ -84,7 +90,7 @@ TEST( FsUtils, firstFolder )
     ASSERT_EQ( "", utils::file::firstFolder( "/foo.bar" ) );
 }
 
-TEST( FsUtils, removePath )
+static void removePath( FsUtilsTests* )
 {
     ASSERT_EQ( "bar/", utils::file::removePath( "f00/bar/", "f00" ) );
     ASSERT_EQ( "bar/", utils::file::removePath( "/f00/bar/", "/f00" ) );
@@ -102,7 +108,7 @@ TEST( FsUtils, removePath )
     ASSERT_EQ( "/f00", utils::file::removePath( "/f00", "/loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongstring/" ) );
 }
 
-TEST( FsUtils, parentFolder )
+static void parentFolder( FsUtilsTests* )
 {
     ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c/" ) );
     ASSERT_EQ( "/a/b/", utils::file::parentDirectory( "/a/b/c" ) );
@@ -117,7 +123,7 @@ TEST( FsUtils, parentFolder )
 #endif
 }
 
-TEST( FsUtils, toMrl )
+static void toMrl( FsUtilsTests* )
 {
 #ifndef _WIN32
     ASSERT_EQ( "file:///media/file.mkv", utils::file::toMrl( "/media/file.mkv" ) );
@@ -130,7 +136,7 @@ TEST( FsUtils, toMrl )
 #endif
 }
 
-TEST( FsUtils, splitPath )
+static void splitPath( FsUtilsTests* )
 {
   std::stack<std::string> st_file;
 
@@ -151,7 +157,7 @@ TEST( FsUtils, splitPath )
   ASSERT_TRUE( st_folder == split );
 }
 
-TEST( FsUtils, stripExtension )
+static void stripExtension( FsUtilsTests* )
 {
     ASSERT_EQ( "seaOtter", utils::file::stripExtension( "seaOtter.mkv" ) );
     ASSERT_EQ( "", utils::file::stripExtension( "" ) );
@@ -159,7 +165,7 @@ TEST( FsUtils, stripExtension )
     ASSERT_EQ( "test.with.dot", utils::file::stripExtension( "test.with.dot.ext" ) );
 }
 
-TEST( FsUtils, ToFolderPath )
+static void ToFolderPath( FsUtilsTests* )
 {
     const std::string i1{ "/path/to/folder" };
     auto res = utils::file::toFolderPath( i1 );
@@ -178,4 +184,23 @@ TEST( FsUtils, ToFolderPath )
     utils::file::toFolderPath( i4 );
     ASSERT_EQ( "/path/to/folder/", i4 );
 #endif
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS_C( FsUtilsTests );
+
+    ADD_TEST( extension );
+    ADD_TEST( directory );
+    ADD_TEST( directoryName );
+    ADD_TEST( fileName );
+    ADD_TEST( firstFolder );
+    ADD_TEST( removePath );
+    ADD_TEST( parentFolder );
+    ADD_TEST( toMrl );
+    ADD_TEST( splitPath );
+    ADD_TEST( stripExtension );
+    ADD_TEST( ToFolderPath );
+
+    END_TESTS
 }

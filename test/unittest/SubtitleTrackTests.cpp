@@ -24,26 +24,22 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "SubtitleTrack.h"
 #include "Media.h"
 #include "File.h"
 
-class SubtitleTracks : public Tests
+static void AddTrack( Tests* T )
 {
-};
-
-TEST_F( SubtitleTracks, AddTrack )
-{
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto res = media->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
 }
 
-TEST_F( SubtitleTracks, FetchTracks )
+static void FetchTracks( Tests* T )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     media->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     media->addSubtitleTrack( "best", "time", "of", "year", 0 );
 
@@ -59,7 +55,7 @@ TEST_F( SubtitleTracks, FetchTracks )
     ASSERT_EQ( "of",        tracks[1]->description() );
     ASSERT_EQ( "year",      tracks[1]->encoding() );
 
-    media = ml->media( media->id() );
+    media = T->ml->media( media->id() );
     tracks = media->subtitleTracks()->all();
 
     ASSERT_EQ( 2u, tracks.size() );
@@ -74,34 +70,34 @@ TEST_F( SubtitleTracks, FetchTracks )
     ASSERT_EQ( "year",      tracks[1]->encoding() );
 }
 
-TEST_F( SubtitleTracks, RemoveTrack )
+static void RemoveTrack( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto res = m1->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
-    auto m2 =  std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m2 =  std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     res = m2->addSubtitleTrack( "sea", "otter", "awareness", "week", 0 );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 1u, m1->subtitleTracks()->count() );
     ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
 
-    SubtitleTrack::removeFromMedia( ml.get(), m1->id(), false );
+    SubtitleTrack::removeFromMedia( T->ml.get(), m1->id(), false );
 
     ASSERT_EQ( 0u, m1->subtitleTracks()->count() );
     ASSERT_EQ( 1u, m2->subtitleTracks()->count() );
 }
 
-TEST_F( SubtitleTracks, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = SubtitleTrack::checkDbModel( ml.get() );
+    auto res = SubtitleTrack::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( SubtitleTracks, UnlinkExternalTrack )
+static void UnlinkExternalTrack( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "mainmedia.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "mainmedia.mkv", IMedia::Type::Video ) );
     ASSERT_NE( nullptr, m );
     auto f = std::static_pointer_cast<File>(
                 m->addExternalMrl( "subs.srt", IFile::Type::Subtitles ) );
@@ -117,4 +113,17 @@ TEST_F( SubtitleTracks, UnlinkExternalTrack )
 
     tracks = m->subtitleTracks()->all();
     ASSERT_EQ( 0u, tracks.size() );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( AddTrack );
+    ADD_TEST( FetchTracks );
+    ADD_TEST( RemoveTrack );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( UnlinkExternalTrack );
+
+    END_TESTS;
 }

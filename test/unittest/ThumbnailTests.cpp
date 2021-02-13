@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Thumbnail.h"
 #include "Media.h"
@@ -32,14 +32,10 @@
 #include "Album.h"
 #include "utils/Filename.h"
 
-class Thumbnails : public Tests
-{
-};
-
-TEST_F( Thumbnails, Create )
+static void Create( Tests* T )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), mrl, Thumbnail::Origin::UserProvided,
                                           ThumbnailSizeType::Thumbnail, false );
     auto id = t->insert();
     ASSERT_NE( 0, id );
@@ -47,39 +43,39 @@ TEST_F( Thumbnails, Create )
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 }
 
-TEST_F( Thumbnails, MediaSetThumbnail )
+static void MediaSetThumbnail( Tests* T )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto m = ml->addMedia( "/path/to/media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "/path/to/media.mp3", IMedia::Type::Audio );
     ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     auto res = m->setThumbnail( mrl, ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
     ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), mrl );
     ASSERT_EQ( ThumbnailStatus::Available, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
-TEST_F( Thumbnails, Update )
+static void Update( Tests* T )
 {
     std::string mrl = "file:///path/to/thumbnail.png";
-    auto t = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::Media,
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), mrl, Thumbnail::Origin::Media,
                                           ThumbnailSizeType::Thumbnail, false );
     t->setHash( "f827fcdd93d4e96acab857bd1675888d", 123 );
     auto id = t->insert();
     ASSERT_NE( 0, id );
     ASSERT_EQ( "f827fcdd93d4e96acab857bd1675888d", t->hash() );
     ASSERT_EQ( 123u, t->fileSize() );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "test.mkv", IMedia::Type::Video ) );
     m->setThumbnail( t );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
     // Just update the mrl first
     mrl = "file:///better/thumbnail.gif";
-    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::Media,
+    auto thumbnail = std::make_shared<Thumbnail>( T->ml.get(), mrl, Thumbnail::Origin::Media,
                                                   ThumbnailSizeType::Thumbnail, false );
     auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
@@ -87,7 +83,7 @@ TEST_F( Thumbnails, Update )
 
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::Media );
@@ -96,26 +92,26 @@ TEST_F( Thumbnails, Update )
     // Now update the origin + mrl (we don't support updating the origin only
     // anymore)
     mrl = "file://user/provided/mrl.jpg";
-    thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl, Thumbnail::Origin::UserProvided,
+    thumbnail = std::make_shared<Thumbnail>( T->ml.get(), mrl, Thumbnail::Origin::UserProvided,
                                              ThumbnailSizeType::Thumbnail, false );
     res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     t = m->thumbnail( t->sizeType() );
     ASSERT_EQ( t->mrl(), mrl );
     ASSERT_EQ( t->origin(), Thumbnail::Origin::UserProvided );
     ASSERT_EQ( id, t->id() );
 }
 
-TEST_F( Thumbnails, MarkFailure )
+static void MarkFailure( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
     ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
-    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+    auto thumbnail = std::make_shared<Thumbnail>( T->ml.get(), ThumbnailStatus::Failure,
                                                   Thumbnail::Origin::Media,
                                                   ThumbnailSizeType::Thumbnail );
     thumbnail->setHash( "f00", 123 );
@@ -124,29 +120,29 @@ TEST_F( Thumbnails, MarkFailure )
 
     ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
-    m = std::static_pointer_cast<Media>( ml->media( m->id() ) );
+    m = std::static_pointer_cast<Media>( T->ml->media( m->id() ) );
     ASSERT_EQ( ThumbnailStatus::Failure, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
     auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( t->status() == ThumbnailStatus::Failure );
 }
 
-TEST_F( Thumbnails, UnshareMedia )
+static void UnshareMedia( Tests* T )
 {
     // Check that all thumbnails are shared, until we want to update the
     // shared version, in which case it should be duplicated
 
-    auto t = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/thumb.jpg",
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), "file:///tmp/thumb.jpg",
                                           Thumbnail::Origin::CoverFile,
                                           ThumbnailSizeType::Thumbnail, false );
     auto id = t->insert();
     ASSERT_NE( 0, id );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
-    auto a = ml->createArtist(  "artist" );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
+    auto a = T->ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
     a->setThumbnail( t );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 
     auto artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
     auto mediaThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -157,13 +153,13 @@ TEST_F( Thumbnails, UnshareMedia )
     // media thumbnail, and check that the artist still has the same thumbnail &
     // thumbnail id, while the media has its own thumbnail
 
-    auto newThumbnail = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/newthumb.jpg",
+    auto newThumbnail = std::make_shared<Thumbnail>( T->ml.get(), "file:///tmp/newthumb.jpg",
                                                      Thumbnail::Origin::UserProvided,
                                                      ThumbnailSizeType::Thumbnail, false );
     id = newThumbnail->insert();
     ASSERT_NE( 0, id );
     m->setThumbnail( newThumbnail );
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
     mediaThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -178,36 +174,36 @@ TEST_F( Thumbnails, UnshareMedia )
 
     // Now let's re-update the media thumbnail, and check that it was only updated
     auto newMrl = std::string{ "file:///tmp/super_duper_new_thumbnail.png" };
-    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), newMrl, Thumbnail::Origin::UserProvided,
+    auto thumbnail = std::make_shared<Thumbnail>( T->ml.get(), newMrl, Thumbnail::Origin::UserProvided,
                                             ThumbnailSizeType::Thumbnail, false );
     auto res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     auto newMediaThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( mediaThumbnail->id(), newMediaThumbnail->id() );
     ASSERT_EQ( newMrl, newMediaThumbnail->mrl() );
 }
 
-TEST_F( Thumbnails, UnshareArtist )
+static void UnshareArtist( Tests* T )
 {
     // Check that all thumbnails are shared, until we want to update the
     // shared version, in which case it should be duplicated
 
-    auto t = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/thumb.jpg",
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), "file:///tmp/thumb.jpg",
                                           Thumbnail::Origin::Media,
                                           ThumbnailSizeType::Thumbnail, false );
     t->setHash( "f00", 123 );
     auto id = t->insert();
     ASSERT_NE( 0, id );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
-    auto a = ml->createArtist(  "artist" );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
+    auto a = T->ml->createArtist(  "artist" );
 
     m->setThumbnail( t );
     a->setThumbnail( t );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 
     auto artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
     auto mediaThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -218,13 +214,13 @@ TEST_F( Thumbnails, UnshareArtist )
     // media thumbnail, and check that the artist still has the same thumbnail &
     // thumbnail id, while the media has its own thumbnail
 
-    auto newThumbnail = std::make_shared<Thumbnail>( ml.get(), "file:///tmp/newthumb.jpg",
+    auto newThumbnail = std::make_shared<Thumbnail>( T->ml.get(), "file:///tmp/newthumb.jpg",
                                                      Thumbnail::Origin::UserProvided,
                                                      ThumbnailSizeType::Thumbnail, false );
     // Don't insert the thumbnail from here, check that the common thumbnail code
     // will take care of inserting to db if needed
     a->setThumbnail( newThumbnail );
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     artistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
     mediaThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -242,18 +238,18 @@ TEST_F( Thumbnails, UnshareArtist )
     auto res = a->setThumbnail( newMrl, ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     auto newArtistThumbnail = a->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( artistThumbnail->id(), newArtistThumbnail->id() );
     ASSERT_EQ( newMrl, newArtistThumbnail->mrl() );
 }
 
-TEST_F( Thumbnails, UpdateIsOwned )
+static void UpdateIsOwned( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    auto mrl = utils::file::toMrl( ml->thumbnailPath() + "thumb.jpg" );
-    auto thumbnail = std::make_shared<Thumbnail>( ml.get(), mrl,
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto mrl = utils::file::toMrl( T->ml->thumbnailPath() + "thumb.jpg" );
+    auto thumbnail = std::make_shared<Thumbnail>( T->ml.get(), mrl,
                                             Thumbnail::Origin::Media,
                                             ThumbnailSizeType::Thumbnail, true );
     thumbnail->setHash( "f00", 123 );
@@ -262,20 +258,20 @@ TEST_F( Thumbnails, UpdateIsOwned )
     ASSERT_EQ( mrl, m->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 
     auto newMrl = std::string{ "file://path/to/a/thumbnail.jpg" };
-    thumbnail = std::make_shared<Thumbnail>( ml.get(), newMrl, Thumbnail::Origin::Media,
+    thumbnail = std::make_shared<Thumbnail>( T->ml.get(), newMrl, Thumbnail::Origin::Media,
                                              ThumbnailSizeType::Thumbnail, false );
     thumbnail->setHash( "f00", 123 );
     res = m->setThumbnail( std::move( thumbnail ) );
     ASSERT_TRUE( res );
     ASSERT_EQ( m->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newMrl );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( newMrl, m->thumbnailMrl( ThumbnailSizeType::Thumbnail ) );
 }
 
-TEST_F( Thumbnails, CheckMultipleSizes )
+static void CheckMultipleSizes( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.asf", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.asf", IMedia::Type::Video ) );
     std::string smallMrl = "http://small_thumbnail.png";
     std::string largeMrl = "http://large_thumbnail.png";
     auto res = m->setThumbnail( smallMrl, ThumbnailSizeType::Thumbnail );
@@ -287,13 +283,13 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     auto banner = m->thumbnail( ThumbnailSizeType::Banner );
     ASSERT_NE( nullptr, thumbnail );
     ASSERT_EQ( nullptr, banner );
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 
     res = m->setThumbnail( largeMrl, ThumbnailSizeType::Banner );
     ASSERT_TRUE( res );
     banner = m->thumbnail( ThumbnailSizeType::Banner );
     ASSERT_NE( nullptr, banner );
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     ASSERT_EQ( smallMrl, thumbnail->mrl() );
     ASSERT_EQ( largeMrl, banner->mrl() );
@@ -302,7 +298,7 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     ASSERT_EQ( Thumbnail::Origin::UserProvided, thumbnail->origin() );
     ASSERT_EQ( Thumbnail::Origin::UserProvided, banner->origin() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
     banner = m->thumbnail( ThumbnailSizeType::Banner );
     ASSERT_NE( thumbnail->id(), banner->id() );
@@ -315,7 +311,7 @@ TEST_F( Thumbnails, CheckMultipleSizes )
     ASSERT_EQ( Thumbnail::Origin::UserProvided, banner->origin() );
 }
 
-TEST_F( Thumbnails, AutoDelete )
+static void AutoDelete( Tests* T )
 {
     /*
      * Add 3 media, and share a thumbnail between 2 of them.
@@ -323,9 +319,9 @@ TEST_F( Thumbnails, AutoDelete )
      * stay in db. We then unlink the 2nd media from the shared thumbnail, and
      * expect the thumbnail to be removed afterward.
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
 
     auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
                                 ThumbnailSizeType::Thumbnail );
@@ -338,25 +334,25 @@ TEST_F( Thumbnails, AutoDelete )
     res = m3->setThumbnail( thumbnail );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     m3->removeThumbnail( ThumbnailSizeType::Thumbnail );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     m->removeThumbnail( ThumbnailSizeType::Thumbnail );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 }
 
-TEST_F( Thumbnails, AutoDeleteAfterUpdate )
+static void AutoDeleteAfterUpdate( Tests* T )
 {
     /**
      * Checks that the thumbnail is correctly considered unused and gets deleted
      * when we update an existing linking record (so we're not deleting it)
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
 
     auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
                                 ThumbnailSizeType::Thumbnail );
@@ -365,7 +361,7 @@ TEST_F( Thumbnails, AutoDeleteAfterUpdate )
                             ThumbnailSizeType::Thumbnail );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
     auto thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( nullptr, thumbnail );
@@ -376,77 +372,77 @@ TEST_F( Thumbnails, AutoDeleteAfterUpdate )
 
     ASSERT_EQ( thumbnail->id(), thumbnail2->id() );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 }
 
-TEST_F( Thumbnails, AutoDeleteAfterEntityRemoved )
+static void AutoDeleteAfterEntityRemoved( Tests* T )
 {
     /*
      * Checks that the thumbnail gets removed when the associated entity is removed
      */
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
-    auto alb = std::static_pointer_cast<Album>( ml->createAlbum( "album" ) );
-    auto art = std::static_pointer_cast<Artist>( ml->createArtist( "artist" ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "test.mkv", IMedia::Type::Video ) );
+    auto alb = std::static_pointer_cast<Album>( T->ml->createAlbum( "album" ) );
+    auto art = std::static_pointer_cast<Artist>( T->ml->createArtist( "artist" ) );
     m->setThumbnail( "https://otters.org/fluffy.png", ThumbnailSizeType::Thumbnail );
-    alb->setThumbnail( std::make_shared<Thumbnail>( ml.get(), "https://thumbnail.org",
+    alb->setThumbnail( std::make_shared<Thumbnail>( T->ml.get(), "https://thumbnail.org",
                                                     Thumbnail::Origin::CoverFile,
                                                     ThumbnailSizeType::Thumbnail, false ) );
     art->setThumbnail( "http://thumbnail.org/pangolin.png", ThumbnailSizeType::Thumbnail );
 
-    ASSERT_EQ( 3u, ml->countNbThumbnails() );
+    ASSERT_EQ( 3u, T->ml->countNbThumbnails() );
 
-    Media::destroy( ml.get(), m->id() );
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    Media::destroy( T->ml.get(), m->id() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
 
-    Album::destroy( ml.get(), alb->id() );
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    Album::destroy( T->ml.get(), alb->id() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 
-    Artist::destroy( ml.get(), art->id() );
-    ASSERT_EQ( 0u, ml->countNbThumbnails() );
+    Artist::destroy( T->ml.get(), art->id() );
+    ASSERT_EQ( 0u, T->ml->countNbThumbnails() );
 }
 
-TEST_F( Thumbnails, ShareThumbnail )
+static void ShareThumbnail( Tests* T )
 {
     /**
      * Create 2 media with 2 different thumbnails, then assign the 1st thumbnail
      * to the second media, and check that they are effectively shared
      */
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "test.mkv", IMedia::Type::Video ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "test2.mkv", IMedia::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "test.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "test2.mkv", IMedia::Type::Video ) );
     m1->setThumbnail( "https://fluffy.org/otters.png", ThumbnailSizeType::Thumbnail );
     m2->setThumbnail( "https://cute.org/otters.png", ThumbnailSizeType::Thumbnail );
 
-    ASSERT_EQ( 2u, ml->countNbThumbnails() );
+    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
     auto t1 = m1->thumbnail( ThumbnailSizeType::Thumbnail );
     auto t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( t1->id(), t2->id() );
 
     m2->setThumbnail( t1 );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
     t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( t1->id(), t2->id() );
 }
 
-TEST_F( Thumbnails, AutoDeleteAfterUnlink )
+static void AutoDeleteAfterUnlink( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "test.asf", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "test.asf", IMedia::Type::Video ) );
     m->setThumbnail( "https://otters.org/jugglingotter.png", ThumbnailSizeType::Thumbnail );
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
     auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
     t->unlinkThumbnail( m->id(), Thumbnail::EntityType::Media );
-    ASSERT_EQ( 0u, ml->countNbThumbnails() );
+    ASSERT_EQ( 0u, T->ml->countNbThumbnails() );
 }
 
-TEST_F( Thumbnails, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = Thumbnail::checkDbModel( ml.get() );
+    auto res = Thumbnail::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Thumbnails, NbAttempts )
+static void NbAttempts( Tests* T )
 {
-    auto t = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), ThumbnailStatus::Failure,
                                           Thumbnail::Origin::Media,
                                           ThumbnailSizeType::Thumbnail );
     t->setHash( "f00", 123 );
@@ -470,15 +466,15 @@ TEST_F( Thumbnails, NbAttempts )
     ASSERT_EQ( ThumbnailStatus::PersistentFailure, t->status() );
 }
 
-TEST_F( Thumbnails, OverridePersistentFailure )
+static void OverridePersistentFailure( Tests* T )
 {
-    auto t = std::make_shared<Thumbnail>( ml.get(), ThumbnailStatus::Failure,
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), ThumbnailStatus::Failure,
                                           Thumbnail::Origin::Media,
                                           ThumbnailSizeType::Banner );
     t->setHash( "f00", 123 );
 
     auto media = std::static_pointer_cast<Media>(
-                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     media->setThumbnail( t );
     auto res = t->markFailed();
     ASSERT_TRUE( res );
@@ -499,27 +495,27 @@ TEST_F( Thumbnails, OverridePersistentFailure )
     ASSERT_EQ( ThumbnailStatus::Available, t2->status() );
     ASSERT_EQ( 0u, t2->nbAttempts() );
 
-    t2 = Thumbnail::fetch( ml.get(), Thumbnail::EntityType::Media, media->id(),
+    t2 = Thumbnail::fetch( T->ml.get(), Thumbnail::EntityType::Media, media->id(),
                            ThumbnailSizeType::Banner );
     ASSERT_NE( nullptr, t2 );
     ASSERT_EQ( t->id(), t2->id() );
     ASSERT_EQ( ThumbnailStatus::Available, t2->status() );
     ASSERT_EQ( 0u, t2->nbAttempts() );
 
-    ASSERT_EQ( 1u, ml->countNbThumbnails() );
+    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 }
 
-TEST_F( Thumbnails, UpdateAfterSuccessAndFailure )
+static void UpdateAfterSuccessAndFailure( Tests* T )
 {
     // Generate a thumbnail
     auto mrl = std::string{ "file:///thumbnail.jpg" };
-    auto t = std::make_shared<Thumbnail>( ml.get(), mrl,
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), mrl,
                                           Thumbnail::Origin::Media,
                                           ThumbnailSizeType::Thumbnail, false );
     t->setHash( "f00", 123 );
 
     auto media = std::static_pointer_cast<Media>(
-                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     media->setThumbnail( t );
 
     ASSERT_EQ( ThumbnailStatus::Available, t->status() );
@@ -538,4 +534,29 @@ TEST_F( Thumbnails, UpdateAfterSuccessAndFailure )
     t = media->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( ThumbnailStatus::Available, t->status() );
     ASSERT_EQ( mrl, t->mrl() );
+}
+
+int main( int ac, char **av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( Create );
+    ADD_TEST( MediaSetThumbnail );
+    ADD_TEST( Update );
+    ADD_TEST( MarkFailure );
+    ADD_TEST( UnshareMedia );
+    ADD_TEST( UnshareArtist );
+    ADD_TEST( UpdateIsOwned );
+    ADD_TEST( CheckMultipleSizes );
+    ADD_TEST( AutoDelete );
+    ADD_TEST( AutoDeleteAfterUpdate );
+    ADD_TEST( AutoDeleteAfterEntityRemoved );
+    ADD_TEST( ShareThumbnail );
+    ADD_TEST( AutoDeleteAfterUnlink );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( NbAttempts );
+    ADD_TEST( OverridePersistentFailure );
+    ADD_TEST( UpdateAfterSuccessAndFailure );
+
+    END_TESTS;
 }

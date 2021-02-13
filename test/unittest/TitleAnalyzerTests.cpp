@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "utils/TitleAnalyzer.h"
 
@@ -40,7 +40,7 @@ class TitleAnalyzerTests : public Tests
     } \
     while ( false );
 
-TEST_F( TitleAnalyzerTests, SimpleTests )
+static void SimpleTests( Tests* )
 {
     // Check that we manage to remove patterns
     CHECK( "movie", "720p movie" );
@@ -80,7 +80,7 @@ TEST_F( TitleAnalyzerTests, SimpleTests )
     CHECK( "The dark web", "The dark web" );
 }
 
-TEST_F( TitleAnalyzerTests, RemovePatterns )
+static void RemovePatterns( Tests* )
 {
     CHECK( "Deadly Still 2019",
            "Deadly.Still.2019.BDRip.XviD.AC3-EVO" );
@@ -168,7 +168,7 @@ TEST_F( TitleAnalyzerTests, RemovePatterns )
     } \
     while ( false );
 
-TEST_F( TitleAnalyzerTests, EpisodeNumber )
+static void EpisodeNumber( Tests* )
 {
     // Simple tests for season/episode number extraction
     CHECK( "S02e03", true, 2u, 3u );
@@ -196,7 +196,7 @@ TEST_F( TitleAnalyzerTests, EpisodeNumber )
     } \
     while ( false );
 
-TEST_F( TitleAnalyzerTests, FullExtraction )
+static void FullExtraction( Tests* )
 {
     CHECK( "The.Walking.Dead.S08.E02.1080p.BluRay.x264-ROVERS AMC.mkv",
            8u, 2u, "The Walking Dead", "" );
@@ -210,4 +210,16 @@ TEST_F( TitleAnalyzerTests, FullExtraction )
            12u, 4u, "MasterChef The Professionals", "" );
     CHECK( "American.Horror.Story.1984.S09E09.Final.Girl.HDTV.x264-CRiMSON",
            9u, 9u, "American Horror Story 1984", "Final Girl" );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( SimpleTests );
+    ADD_TEST( RemovePatterns );
+    ADD_TEST( EpisodeNumber );
+    ADD_TEST( FullExtraction );
+
+    END_TESTS;
 }

@@ -24,7 +24,9 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
+
+#include "mocks/FileSystem.h"
 
 #include "medialibrary/IMediaLibrary.h"
 #include "File.h"
@@ -32,25 +34,14 @@
 #include "Artist.h"
 #include "Album.h"
 #include "AlbumTrack.h"
-#include "mocks/FileSystem.h"
-#include "mocks/DiscovererCbMock.h"
+
 #include "compat/Thread.h"
 #include "Playlist.h"
 #include "Device.h"
 
-class Medias : public Tests
+static void Create( Tests* T )
 {
-};
-
-
-TEST_F( Medias, Init )
-{
-    // only test for correct test fixture behavior
-}
-
-TEST_F( Medias, Create )
-{
-    auto m = ml->addFile( "media.avi", IMedia::Type::Video );
+    auto m = T->ml->addFile( "media.avi", IMedia::Type::Video );
     ASSERT_NE( m, nullptr );
 
     ASSERT_EQ( 0u, m->playCount() );
@@ -69,19 +60,19 @@ TEST_F( Medias, Create )
     ASSERT_EQ( File::Type::Main, f->type() );
 }
 
-TEST_F( Medias, Fetch )
+static void Fetch( Tests* T )
 {
-    auto f = ml->addMedia( "media.avi", IMedia::Type::Video );
-    auto f2 = ml->media( f->id() );
+    auto f = T->ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto f2 = T->ml->media( f->id() );
     ASSERT_EQ( f->id(), f2->id() );
 
-    f2 = std::static_pointer_cast<Media>( ml->media( f->id() ) );
+    f2 = std::static_pointer_cast<Media>( T->ml->media( f->id() ) );
     ASSERT_EQ( f->id(), f2->id() );
 }
 
-TEST_F( Medias, Duration )
+static void Duration( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "media.avi", IMedia::Type::Video ) );
     ASSERT_EQ( f->duration(), -1 );
 
     // Use a value that checks we're using a 64bits value
@@ -91,13 +82,13 @@ TEST_F( Medias, Duration )
     f->save();
     ASSERT_EQ( f->duration(), d );
 
-    auto f2 = ml->media( f->id() );
+    auto f2 = T->ml->media( f->id() );
     ASSERT_EQ( f2->duration(), d );
 }
 
-TEST_F( Medias, Thumbnail )
+static void GetThumbnail( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "media.avi", IMedia::Type::Video ) );
     ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), "" );
 
     std::string newThumbnail( "file:///path/to/thumbnail" );
@@ -106,18 +97,18 @@ TEST_F( Medias, Thumbnail )
     f->save();
     ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 
-    auto f2 = ml->media( f->id() );
+    auto f2 = T->ml->media( f->id() );
     ASSERT_EQ( f2->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 }
 
-TEST_F( Medias, SetProgress )
+static void SetProgress( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>(
-                ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
     m1->setDuration( 60 * 30 * 1000 ); // 30min
     m1->save();
     auto m2 = std::static_pointer_cast<Media>(
-                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     m2->setDuration( 5 * 3600 * 1000 ); // 5h
     m2->save();
 
@@ -132,7 +123,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( 0.5, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_EQ( 0.5, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
 
@@ -141,7 +132,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
 
@@ -150,7 +141,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 0u, m1->playCount() );
 
@@ -162,7 +153,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 1u, m1->playCount() );
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 1u, m1->playCount() );
 
@@ -171,7 +162,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( 0.5, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
-    m2 = ml->media( m2->id() );
+    m2 = T->ml->media( m2->id() );
     ASSERT_EQ( 0.5, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
 
@@ -180,7 +171,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( -1.f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
-    m2 = ml->media( m2->id() );
+    m2 = T->ml->media( m2->id() );
     ASSERT_EQ( -1.f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
 
@@ -189,7 +180,7 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( 0.01f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
-    m2 = ml->media( m2->id() );
+    m2 = T->ml->media( m2->id() );
     ASSERT_EQ( 0.01f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
 
@@ -201,449 +192,449 @@ TEST_F( Medias, SetProgress )
     ASSERT_TRUE( res );
     ASSERT_EQ( .98f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
-    m2 = ml->media( m2->id() );
+    m2 = T->ml->media( m2->id() );
     ASSERT_EQ( .98f, m2->progress() );
     ASSERT_EQ( 0u, m2->playCount() );
 }
 
-TEST_F( Medias, Rating )
+static void Rating( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "media.avi", IMedia::Type::Video ) );
     ASSERT_FALSE( f->metadata( Media::MetadataType::Rating ).isSet() );
     f->setMetadata( Media::MetadataType::Rating, 12345 );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
     ASSERT_TRUE( f->metadata( Media::MetadataType::Rating ).isSet() );
 
-    f = ml->media( f->id() );
+    f = T->ml->media( f->id() );
     ASSERT_EQ( 12345, f->metadata( Media::MetadataType::Rating ).asInt() );
 }
 
-TEST_F( Medias, Search )
+static void Search( Tests* T )
 {
     for ( auto i = 1u; i <= 10u; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+                    T->ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         m->save();
     }
 
-    auto query = ml->searchMedia( "", nullptr );
+    auto query = T->ml->searchMedia( "", nullptr );
     ASSERT_EQ( nullptr, query );
 
-    auto media = ml->searchMedia( "tra", nullptr )->all();
+    auto media = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, media.size() );
 
-    media = ml->searchMedia( "track 1", nullptr )->all();
+    media = T->ml->searchMedia( "track 1", nullptr )->all();
     ASSERT_EQ( 2u, media.size() );
 
-    media = ml->searchMedia( "grouik", nullptr )->all();
+    media = T->ml->searchMedia( "grouik", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "rack", nullptr )->all();
+    media = T->ml->searchMedia( "rack", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
-TEST_F( Medias, SearchAndSort )
+static void SearchAndSort( Tests* T )
 {
     for ( auto i = 1u; i <= 3u; ++i )
     {
         auto m = std::static_pointer_cast<Media>(
-                    ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+                    T->ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         m->setDuration( 3 - i );
         m->save();
     }
-    auto m = std::static_pointer_cast<Media>( ml->addMedia(
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia(
                     "this pattern doesn't match.mp3", IMedia::Type::Audio ) );
 
-    auto media = ml->searchMedia( "tra", nullptr )->all();
+    auto media = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( media[0]->title(), "track 1.mp3" );
     ASSERT_EQ( media[1]->title(), "track 2.mp3" );
     ASSERT_EQ( media[2]->title(), "track 3.mp3" );
 
     QueryParameters params { SortingCriteria::Duration, false };
-    media = ml->searchMedia( "tra", &params )->all();
+    media = T->ml->searchMedia( "tra", &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( media[0]->title(), "track 3.mp3" );
     ASSERT_EQ( media[1]->title(), "track 2.mp3" );
     ASSERT_EQ( media[2]->title(), "track 1.mp3" );
 }
 
-TEST_F( Medias, SearchAfterEdit )
+static void SearchAfterEdit( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
 
-    auto media = ml->searchMedia( "media", nullptr )->all();
+    auto media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->setTitleBuffered( "otters are awesome" );
     m->save();
 
-    media = ml->searchMedia( "media", nullptr )->all();
+    media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "otters", nullptr )->all();
+    media = T->ml->searchMedia( "otters", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 }
 
-TEST_F( Medias, SearchAfterDelete )
+static void SearchAfterDelete( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
 
-    auto media = ml->searchMedia( "media", nullptr )->all();
+    auto media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
     auto f = m->files()[0];
     m->removeFile( static_cast<File&>( *f ) );
 
-    media = ml->searchMedia( "media", nullptr )->all();
+    media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
-TEST_F( Medias, SearchByLabel )
+static void SearchByLabel( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    auto media = ml->searchMedia( "otter", nullptr )->all();
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    auto l = ml->createLabel( "otter" );
+    auto l = T->ml->createLabel( "otter" );
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
-    auto l2 = ml->createLabel( "pangolins" );
+    auto l2 = T->ml->createLabel( "pangolins" );
     m->addLabel( l2 );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin", nullptr )->all();
+    media = T->ml->searchMedia( "pangolin", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->removeLabel( l );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin", nullptr )->all();
+    media = T->ml->searchMedia( "pangolin", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
     m->addLabel( l );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
-    media = ml->searchMedia( "pangolin", nullptr )->all();
+    media = T->ml->searchMedia( "pangolin", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
-    ml->deleteLabel( l );
+    T->ml->deleteLabel( l );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
-    media = ml->searchMedia( "pangolin", nullptr )->all();
+    media = T->ml->searchMedia( "pangolin", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 }
 
-TEST_F( Medias, SearchTracks )
+static void SearchTracks( Tests* T )
 {
-    auto a = ml->createAlbum( "album" );
+    auto a = T->ml->createAlbum( "album" );
     for ( auto i = 1u; i <= 10u; ++i )
     {
-       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " +
+       auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track " +
                         std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
        a->addTrack( m, i, 1, 0, 0 );
        m->save();
     }
-    auto tracks = ml->searchMedia( "tra", nullptr )->all();
+    auto tracks = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, tracks.size() );
 
-    tracks = ml->searchMedia( "track 1", nullptr )->all();
+    tracks = T->ml->searchMedia( "track 1", nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 
-    tracks = ml->searchMedia( "grouik", nullptr )->all();
+    tracks = T->ml->searchMedia( "grouik", nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 
-    tracks = ml->searchMedia( "rack", nullptr )->all();
+    tracks = T->ml->searchMedia( "rack", nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
 }
 
-TEST_F( Medias, SearchWeirdPatterns )
+static void SearchWeirdPatterns( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+                T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     m->save();
     // All we care about is this not crashing
     // https://code.videolan.org/videolan/medialibrary/issues/116
-    auto media = ml->searchMedia( "@*\"", nullptr )->all();
+    auto media = T->ml->searchMedia( "@*\"", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
-    media = ml->searchMedia( "'''''% % \"'", nullptr )->all();
+    media = T->ml->searchMedia( "'''''% % \"'", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
-    media = ml->searchMedia( "Robert'); DROP TABLE STUDENTS;--", nullptr )->all();
+    media = T->ml->searchMedia( "Robert'); DROP TABLE STUDENTS;--", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
-TEST_F( Medias, Favorite )
+static void Favorite( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     ASSERT_FALSE( m->isFavorite() );
 
     m->setFavorite( true );
     ASSERT_TRUE( m->isFavorite() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_TRUE( m->isFavorite() );
 }
 
-TEST_F( Medias, History )
+static void History( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    auto history = ml->history()->all();
+    auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setProgress( 0.5f );
     m->save();
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     m2->setProgress( 0.5f );
 
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m2->id(), history[0]->id() );
     ASSERT_EQ( m->id(), history[1]->id() );
 }
 
-TEST_F( Medias, StreamHistory )
+static void StreamHistory( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addStream( "http://media.org/sample.mkv" ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://media.org/sample2.mkv" ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.org/sample.mkv" ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.org/sample2.mkv" ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
 
     m1->setProgress( 0.5f );
     m2->setProgress( 0.5f );
     m3->setProgress( 0.5f );
 
-    auto history = ml->streamHistory()->all();
+    auto history = T->ml->streamHistory()->all();
     ASSERT_EQ( 2u, history.size() );
 
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
 }
 
-TEST_F( Medias, HistoryByType )
+static void HistoryByType( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "video.mkv", IMedia::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "video.mkv", IMedia::Type::Video ) );
     m1->setProgress( 0.5f );
     m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
     m2->save();
     m2->setProgress( 0.5f );
 
-    auto h = ml->history( IMedia::Type::Audio )->all();
+    auto h = T->ml->history( IMedia::Type::Audio )->all();
     ASSERT_EQ( 1u, h.size() );
 
-    h = ml->history( IMedia::Type::Video)->all();
+    h = T->ml->history( IMedia::Type::Video)->all();
     ASSERT_EQ( 1u, h.size() );
 
-    h = ml->history()->all();
+    h = T->ml->history()->all();
     ASSERT_EQ( 2u, h.size() );
 }
 
-TEST_F( Medias, ClearHistory )
+static void ClearHistory( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    auto history = ml->history()->all();
+    auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setProgress( 0.5f );
     m->save();
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
 
-    ASSERT_TRUE( ml->clearHistory() );
+    ASSERT_TRUE( T->ml->clearHistory() );
 
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( -1.f, m->progress() );
 }
 
-TEST_F( Medias, RemoveFromHistory )
+static void RemoveFromHistory( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    auto history = ml->history()->all();
+    auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setProgress( 1.f );
     m->save();
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
     ASSERT_EQ( 1u, m->playCount() );
 
     m->removeFromHistory();
 
-    history = ml->history()->all();
+    history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
     ASSERT_EQ( 0u, m->playCount() );
     ASSERT_EQ( -1.f, m->progress() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 0u, m->playCount() );
     ASSERT_EQ( -1.f, m->progress() );
 }
 
-TEST_F( Medias, SetReleaseDate )
+static void SetReleaseDate( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
 
     ASSERT_EQ( m->releaseDate(), 0u );
     m->setReleaseDate( 1234 );
     m->save();
     ASSERT_EQ( m->releaseDate(), 1234u );
 
-    auto m2 = ml->media( m->id() );
+    auto m2 = T->ml->media( m->id() );
     ASSERT_EQ( m2->releaseDate(), 1234u );
 }
 
-TEST_F( Medias, SortByAlpha )
+static void SortByAlpha( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", Media::Type::Audio ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", Media::Type::Audio ) );
     m1->setTitleBuffered( "Abcd" );
     m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", Media::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", Media::Type::Audio ) );
     m2->setTitleBuffered( "Zyxw" );
     m2->save();
 
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", Media::Type::Audio) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", Media::Type::Audio) );
     m3->setTitleBuffered( "afterA-beforeZ" );
     m3->save();
 
     QueryParameters params { SortingCriteria::Alpha, false };
-    auto media = ml->audioFiles( &params )->all();
+    auto media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
     ASSERT_EQ( m2->id(), media[2]->id() );
 
     params.desc = true;
-    media = ml->audioFiles( &params )->all();
+    media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[2]->id() );
 }
 
-TEST_F( Medias, SortByReleaseDate )
+static void SortByReleaseDate( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", Media::Type::Audio ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", Media::Type::Audio ) );
     m1->setReleaseDate( 1111 );
     m1->save();
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", Media::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", Media::Type::Audio ) );
     m2->setReleaseDate( 3333 );
     m2->save();
 
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", Media::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", Media::Type::Audio ) );
     m3->setReleaseDate( 2222 );
     m3->save();
 
     QueryParameters params { SortingCriteria::ReleaseDate, false };
-    auto media = ml->audioFiles( &params )->all();
+    auto media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m1->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
     ASSERT_EQ( m2->id(), media[2]->id() );
 
     params.desc = true;
-    media = ml->audioFiles( &params )->all();
+    media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m3->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[2]->id() );
 }
 
-TEST_F( Medias, SortByLastModifDate )
+static void SortByLastModifDate( Tests* T )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setLastModificationDate( 666 );
-    auto m1 = ml->addFile( file1, Media::Type::Video );
+    auto m1 = T->ml->addFile( file1, Media::Type::Video );
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setLastModificationDate( 111 );
-    auto m2 = ml->addFile( file2, Media::Type::Video );
+    auto m2 = T->ml->addFile( file2, Media::Type::Video );
 
     QueryParameters params { SortingCriteria::LastModificationDate, false };
-    auto media = ml->videoFiles( &params )->all();
+    auto media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
     params.desc = true;
-    media = ml->videoFiles( &params )->all();
+    media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
-TEST_F( Medias, SortByFileSize )
+static void SortByFileSize( Tests* T )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
     file1->setSize( 666 );
-    auto m1 = ml->addFile( file1, Media::Type::Video );
+    auto m1 = T->ml->addFile( file1, Media::Type::Video );
 
     auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
     file2->setSize( 111 );
-    auto m2 = ml->addFile( file2, Media::Type::Video );
+    auto m2 = T->ml->addFile( file2, Media::Type::Video );
 
     QueryParameters params { SortingCriteria::FileSize, false };
-    auto media = ml->videoFiles( &params )->all();
+    auto media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
     params.desc = true;
-    media = ml->videoFiles( &params )->all();
+    media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
-TEST_F( Medias, SortByFilename )
+static void SortByFilename( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "zzzzz.mp3", Media::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "zzzzz.mp3", Media::Type::Video ) );
     m1->setTitle( "aaaaa", false );
 
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3", Media::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "aaaaa.mp3", Media::Type::Video ) );
     m2->setTitle( "zzzzz", false );
 
     QueryParameters params { SortingCriteria::Filename, false };
-    auto media = ml->videoFiles( &params )->all();
+    auto media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
 
     params.desc = true;
-    media = ml->videoFiles( &params )->all();
+    media = T->ml->videoFiles( &params )->all();
     ASSERT_EQ( 2u, media.size() );
     ASSERT_EQ( m2->id(), media[1]->id() );
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
-TEST_F( Medias, SetType )
+static void SetType( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3", -1 ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media1.mp3", -1 ) );
     ASSERT_TRUE( m1->isExternalMedia() );
 
     auto res = m1->setType( IMedia::Type::Video );
@@ -651,7 +642,7 @@ TEST_F( Medias, SetType )
 
     ASSERT_EQ( IMedia::Type::Video, m1->type() );
 
-    auto m2 = ml->media( m1->id() );
+    auto m2 = T->ml->media( m1->id() );
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 
     // For safety check, just set the type to the current value and ensure it
@@ -660,9 +651,9 @@ TEST_F( Medias, SetType )
     ASSERT_TRUE( res );
 }
 
-TEST_F( Medias, SetTypeBuffered )
+static void SetTypeBuffered( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "media1.mp3", -1 ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media1.mp3", -1 ) );
     ASSERT_TRUE( m1->isExternalMedia() );
 
     m1->setTypeBuffered( IMedia::Type::Video );
@@ -670,13 +661,13 @@ TEST_F( Medias, SetTypeBuffered )
 
     ASSERT_EQ( IMedia::Type::Video, m1->type() );
 
-    auto m2 = ml->media( m1->id() );
+    auto m2 = T->ml->media( m1->id() );
     ASSERT_EQ( IMedia::Type::Video, m2->type() );
 }
 
-TEST_F( Medias, SetSubType )
+static void SetSubType( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Video ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", IMedia::Type::Video ) );
     ASSERT_EQ( IMedia::SubType::Unknown, m1->subType() );
 
     m1->setSubType( IMedia::SubType::Movie );
@@ -684,13 +675,13 @@ TEST_F( Medias, SetSubType )
 
     ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
 
-    auto m2 = ml->media( m1->id() );
+    auto m2 = T->ml->media( m1->id() );
     ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
 }
 
-TEST_F( Medias, Metadata )
+static void GetMetadata( Tests* T )
 {
-    auto m = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
 
     {
         const auto& md = m->metadata( Media::MetadataType::Speed );
@@ -705,14 +696,14 @@ TEST_F( Medias, Metadata )
         ASSERT_EQ( "foo", md.asStr() );
     }
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
     ASSERT_EQ( "foo", md.asStr() );
 }
 
-TEST_F( Medias, MetadataOverride )
+static void MetadataOverride( Tests* T )
 {
-    auto m = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
     auto res = m->setMetadata( Media::MetadataType::Speed, "foo" );
     ASSERT_TRUE( res );
 
@@ -722,14 +713,14 @@ TEST_F( Medias, MetadataOverride )
         ASSERT_EQ( "otter", md.asStr() );
     }
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
     ASSERT_EQ( "otter", md.asStr() );
 }
 
-TEST_F( Medias, MetadataUnset )
+static void MetadataUnset( Tests* T )
 {
-    auto m = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
     auto res = m->unsetMetadata( Media::MetadataType::ApplicationSpecific );
     ASSERT_TRUE( res );
 
@@ -745,14 +736,14 @@ TEST_F( Medias, MetadataUnset )
 
     ASSERT_FALSE( md.isSet() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     auto& md2 = m->metadata( Media::MetadataType::ApplicationSpecific );
     ASSERT_FALSE( md2.isSet() );
 }
 
-TEST_F( Medias, MetadataGetBatch )
+static void MetadataGetBatch( Tests* T )
 {
-    auto m = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
     auto metas = m->metadata();
     ASSERT_EQ( 0u, metas.size() );
 
@@ -766,7 +757,7 @@ TEST_F( Medias, MetadataGetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
     ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     metas = m->metadata();
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
@@ -780,9 +771,9 @@ TEST_F( Medias, MetadataGetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
 }
 
-TEST_F( Medias, SetBatch )
+static void SetBatch( Tests* T )
 {
-    auto m = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
     auto metas = m->metadata();
     ASSERT_EQ( 0u, metas.size() );
 
@@ -799,7 +790,7 @@ TEST_F( Medias, SetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
     ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     metas = m->metadata();
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
@@ -819,15 +810,15 @@ TEST_F( Medias, SetBatch )
     ASSERT_EQ( metas[IMedia::MetadataType::Zoom], "zoom" );
 }
 
-TEST_F( Medias, MetadataCheckDbModel )
+static void MetadataCheckDbModel( Tests* T )
 {
-    auto res = Metadata::checkDbModel( ml.get() );
+    auto res = Metadata::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Medias, ExternalMrl )
+static void ExternalMrl( Tests* T )
 {
-    auto m = ml->addExternalMedia( "https://foo.bar/sea-otters.mkv", 1234 );
+    auto m = T->ml->addExternalMedia( "https://foo.bar/sea-otters.mkv", 1234 );
     ASSERT_NE( nullptr, m );
 
     ASSERT_EQ( m->title(), "sea-otters.mkv" );
@@ -835,13 +826,13 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_TRUE( m->isExternalMedia() );
 
     // External files shouldn't appear in listings
-    auto videos = ml->videoFiles( nullptr )->all();
+    auto videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 0u, videos.size() );
 
-    auto audios = ml->audioFiles( nullptr )->all();
+    auto audios = T->ml->audioFiles( nullptr )->all();
     ASSERT_EQ( 0u, audios.size() );
 
-    auto m2 = ml->media( "https://foo.bar/sea-otters.mkv" );
+    auto m2 = T->ml->media( "https://foo.bar/sea-otters.mkv" );
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
     ASSERT_TRUE( m2->isExternalMedia() );
@@ -867,54 +858,54 @@ TEST_F( Medias, ExternalMrl )
     ASSERT_FALSE( files[1]->isNetwork() );
     ASSERT_EQ( File::Type::Subtitles, files[1]->type() );
 
-    auto m3 = ml->addExternalMedia( "https://foo.bar/media.mkv", -1234 );
+    auto m3 = T->ml->addExternalMedia( "https://foo.bar/media.mkv", -1234 );
     ASSERT_NE( nullptr, m3 );
     ASSERT_EQ( -1, m3->duration() );
 }
 
-TEST_F( Medias, AddStream )
+static void AddStream( Tests* T )
 {
-    auto m = ml->addStream( "https://foo.bar/stream.mkv" );
+    auto m = T->ml->addStream( "https://foo.bar/stream.mkv" );
     ASSERT_EQ( m->title(), "stream.mkv" );
     ASSERT_TRUE( m->isStream() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( m->title(), "stream.mkv" );
     ASSERT_TRUE( m->isStream() );
 }
 
-TEST_F( Medias, DuplicatedExternalMrl )
+static void DuplicatedExternalMrl( Tests* T )
 {
-    auto m = ml->addExternalMedia( "http://foo.bar", 1 );
-    auto m2 = ml->addExternalMedia( "http://foo.bar", 2 );
+    auto m = T->ml->addExternalMedia( "http://foo.bar", 1 );
+    auto m2 = T->ml->addExternalMedia( "http://foo.bar", 2 );
     ASSERT_NE( nullptr, m );
     ASSERT_EQ( nullptr, m2 );
 }
 
-TEST_F( Medias, SetTitle )
+static void SetTitle( Tests* T )
 {
-    auto m = ml->addMedia( "media", IMedia::Type::Video );
+    auto m = T->ml->addMedia( "media", IMedia::Type::Video );
     ASSERT_EQ( "media", m->title() );
     auto res = m->setTitle( "sea otters" );
     ASSERT_TRUE( res );
     ASSERT_EQ( "sea otters", m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( "sea otters", m->title() );
 }
 
-TEST_F( Medias, Pagination )
+static void Pagination( Tests* T )
 {
     for ( auto i = 1u; i <= 9u; ++i )
     {
-       auto m = std::static_pointer_cast<Media>( ml->addMedia( "track " +
+       auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track " +
                         std::to_string( i ) + ".mp3", IMedia::Type::Video ) );
     }
 
-    auto allMedia = ml->videoFiles( nullptr )->all();
+    auto allMedia = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 9u, allMedia.size() );
 
-    auto paginator = ml->videoFiles( nullptr );
+    auto paginator = T->ml->videoFiles( nullptr );
     auto media = paginator->items( 1, 0 );
     int i = 0u;
     while( media.size() > 0 )
@@ -927,57 +918,57 @@ TEST_F( Medias, Pagination )
     }
 }
 
-TEST_F( Medias, SortFilename )
+static void SortFilename( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "AAAAB.mp3", IMedia::Type::Audio ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "aaaaa.mp3", IMedia::Type::Audio ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "BbBbB.mp3", IMedia::Type::Audio ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "AAAAB.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "aaaaa.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "BbBbB.mp3", IMedia::Type::Audio ) );
 
     QueryParameters params { SortingCriteria::Filename, false };
-    auto media = ml->audioFiles( &params )->all();
+    auto media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[0]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[2]->id() );
 
     params.desc = true;
-    media = ml->audioFiles( &params )->all();
+    media = T->ml->audioFiles( &params )->all();
     ASSERT_EQ( 3u, media.size() );
     ASSERT_EQ( m2->id(), media[2]->id() );
     ASSERT_EQ( m1->id(), media[1]->id() );
     ASSERT_EQ( m3->id(), media[0]->id() );
 }
 
-TEST_F( Medias, CreateStream )
+static void CreateStream( Tests* T )
 {
-    auto m1 = ml->addStream( "http://foo.bar/media.mkv" );
+    auto m1 = T->ml->addStream( "http://foo.bar/media.mkv" );
     ASSERT_TRUE( m1->isStream() );
 }
 
-TEST_F( Medias, SearchExternal )
+static void SearchExternal( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addExternalMedia( "localfile.mkv", -1 ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "localfile.mkv", -1 ) );
     m1->setTitle( "local otter", false );
-    auto m2 = std::static_pointer_cast<Media>( ml->addStream( "http://remote.file/media.asf" ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addStream( "http://remote.file/media.asf" ) );
     m2->setTitle( "remote otter", false );
 
-    auto media = ml->searchMedia( "otter", nullptr )->all();
+    auto media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 
     // The type is no longer bound to the internal/external distinction, so
     // updating the type will not yield different results anymore.
-    ml->setMediaType( m1->id(), IMedia::Type::Video );
-    ml->setMediaType( m2->id(), IMedia::Type::Video );
+    T->ml->setMediaType( m1->id(), IMedia::Type::Video );
+    T->ml->setMediaType( m2->id(), IMedia::Type::Video );
 
-    media = ml->searchMedia( "otter", nullptr )->all();
+    media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
 }
 
-TEST_F( Medias, VacuumOldExternal )
+static void VacuumOldExternal( Tests* T )
 {
-    auto m1 = ml->addExternalMedia( "foo.avi", -1 );
-    auto m2 = ml->addExternalMedia( "bar.mp3", -1 );
-    auto s1 = ml->addStream( "http://baz.mkv" );
+    auto m1 = T->ml->addExternalMedia( "foo.avi", -1 );
+    auto m2 = T->ml->addExternalMedia( "bar.mp3", -1 );
+    auto s1 = T->ml->addStream( "http://baz.mkv" );
 
     ASSERT_NE( nullptr, m1 );
     ASSERT_NE( nullptr, m2 );
@@ -985,117 +976,117 @@ TEST_F( Medias, VacuumOldExternal )
 
     // Check that they will not be vacuumed even if they haven't been played yet.
 
-    m1 = ml->media( m1->id() );
-    m2 = ml->media( m2->id() );
-    s1 = ml->media( s1->id() );
+    m1 = T->ml->media( m1->id() );
+    m2 = T->ml->media( m2->id() );
+    s1 = T->ml->media( s1->id() );
 
     ASSERT_NE( nullptr, m1 );
     ASSERT_NE( nullptr, m2 );
     ASSERT_NE( nullptr, s1 );
 
-    auto playlist = ml->createPlaylist( "playlist" );
+    auto playlist = T->ml->createPlaylist( "playlist" );
     playlist->append( *m1 );
 
-    ml->outdateAllExternalMedia();
+    T->ml->outdateAllExternalMedia();
 
-    MediaLibrary::removeOldEntities( ml.get() );
+    MediaLibrary::removeOldEntities( T->ml.get() );
 
-    m1 = ml->media( m1->id() );
-    m2 = ml->media( m2->id() );
-    s1 = ml->media( s1->id() );
+    m1 = T->ml->media( m1->id() );
+    m2 = T->ml->media( m2->id() );
+    s1 = T->ml->media( s1->id() );
 
     ASSERT_NE( nullptr, m1 );
     ASSERT_EQ( nullptr, m2 );
     ASSERT_EQ( nullptr, s1 );
 }
 
-TEST_F( Medias, VacuumNeverPlayedMedia )
+static void VacuumNeverPlayedMedia( Tests* T )
 {
-    auto m1 = ml->addExternalMedia( "foo.avi", -1 );
-    auto m2 = ml->addExternalMedia( "bar.mp3", -1 );
-    auto s1 = ml->addStream( "http://baz.mkv" );
+    auto m1 = T->ml->addExternalMedia( "foo.avi", -1 );
+    auto m2 = T->ml->addExternalMedia( "bar.mp3", -1 );
+    auto s1 = T->ml->addStream( "http://baz.mkv" );
 
     ASSERT_NE( nullptr, m1 );
     ASSERT_NE( nullptr, m2 );
     ASSERT_NE( nullptr, s1 );
 
-    ml->setMediaInsertionDate( m1->id(), 1 );
+    T->ml->setMediaInsertionDate( m1->id(), 1 );
 
-    MediaLibrary::removeOldEntities( ml.get() );
+    MediaLibrary::removeOldEntities( T->ml.get() );
 
-    m1 = ml->media( m1->id() );
-    m2 = ml->media( m2->id() );
-    s1 = ml->media( s1->id() );
+    m1 = T->ml->media( m1->id() );
+    m2 = T->ml->media( m2->id() );
+    s1 = T->ml->media( s1->id() );
 
     ASSERT_EQ( nullptr, m1 );
     ASSERT_NE( nullptr, m2 );
     ASSERT_NE( nullptr, s1 );
 }
 
-TEST_F( Medias, RemoveExternal )
+static void RemoveExternal( Tests* T )
 {
-    auto m = ml->addExternalMedia( "http://extern.al/media.mkv", -1 );
+    auto m = T->ml->addExternalMedia( "http://extern.al/media.mkv", -1 );
     ASSERT_NE( nullptr, m );
 
-    auto res = ml->removeExternalMedia( m );
+    auto res = T->ml->removeExternalMedia( m );
     ASSERT_TRUE( res );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( nullptr, m );
-    m = ml->media( "http://extern.al/media.mkv" );
+    m = T->ml->media( "http://extern.al/media.mkv" );
     ASSERT_EQ( nullptr, m );
 }
 
-TEST_F( Medias, NbPlaylists )
+static void NbPlaylists( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addExternalMedia( "media.mkv", -1 ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media.mkv", -1 ) );
     ASSERT_EQ( 0u, m->nbPlaylists() );
 
-    auto playlist = ml->createPlaylist( "playlisẗ" );
+    auto playlist = T->ml->createPlaylist( "playlisẗ" );
     auto res = playlist->append( *m );
     ASSERT_TRUE( res );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 1u, m->nbPlaylists() );
 
-    playlist = ml->playlist( playlist->id() );
+    playlist = T->ml->playlist( playlist->id() );
     playlist->remove( 0 );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 0u, m->nbPlaylists() );
 
-    playlist = ml->playlist( playlist->id() );
+    playlist = T->ml->playlist( playlist->id() );
     playlist->append( *m );
     playlist->append( *m );
 
-    m = ml->media( m->id() );
-    playlist = ml->playlist( playlist->id() );
+    m = T->ml->media( m->id() );
+    playlist = T->ml->playlist( playlist->id() );
 
     ASSERT_EQ( 2u, m->nbPlaylists() );
 
     playlist->remove( 0 );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     // The media was inserted twice in the playlist and should therefor still have
     // one entry there, causing the number of playlist to be 1
     ASSERT_EQ( 1u, m->nbPlaylists() );
 
-    ml->deletePlaylist( playlist->id() );
+    T->ml->deletePlaylist( playlist->id() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 0u, m->nbPlaylists() );
 }
 
-TEST_F( Medias, SortByAlbum )
+static void SortByAlbum( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
 
     // Create the albums in reversed alphabetical order to ensure id & alpha orders
     // are different
-    auto album1 = ml->createAlbum( "Ziltoid ");
-    auto album2 = ml->createAlbum( "Addicted" );
+    auto album1 = T->ml->createAlbum( "Ziltoid ");
+    auto album2 = T->ml->createAlbum( "Addicted" );
 
     album1->addTrack( m2, 1, 0, 0, nullptr );
     album1->addTrack( m1, 2, 0, 0, nullptr );
@@ -1111,47 +1102,47 @@ TEST_F( Medias, SortByAlbum )
     auto queryParams = QueryParameters{};
     queryParams.desc = false;
     queryParams.sort = SortingCriteria::Album;
-    auto tracks = ml->audioFiles( &queryParams )->all();
+    auto tracks = T->ml->audioFiles( &queryParams )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( m3->id(), tracks[0]->id() );
     ASSERT_EQ( m2->id(), tracks[1]->id() );
     ASSERT_EQ( m1->id(), tracks[2]->id() );
 
     queryParams.desc = true;
-    tracks = ml->audioFiles( &queryParams )->all();
+    tracks = T->ml->audioFiles( &queryParams )->all();
     ASSERT_EQ( 3u, tracks.size() );
     ASSERT_EQ( m2->id(), tracks[0]->id() );
     ASSERT_EQ( m1->id(), tracks[1]->id() );
     ASSERT_EQ( m3->id(), tracks[2]->id() );
 }
 
-TEST_F( Medias, SetFilename )
+static void SetFilename( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     ASSERT_EQ( "media.mkv", m->fileName() );
 
     m->setFileName( "sea_otter.asf" );
     ASSERT_EQ( "sea_otter.asf", m->fileName() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( "sea_otter.asf", m->fileName() );
 }
 
-TEST_F( Medias, SetPlayCount )
+static void SetPlayCount( Tests* T )
 {
-    auto m = ml->addMedia( "media.avi", IMedia::Type::Video );
+    auto m = T->ml->addMedia( "media.avi", IMedia::Type::Video );
     ASSERT_EQ( 0u, m->playCount() );
     auto res = m->setPlayCount( 123 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 123u, m->playCount() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 123u, m->playCount() );
 }
 
-TEST_F( Medias, SetDeviceId )
+static void SetDeviceId( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     // This will be assigned to the mock device
     ASSERT_EQ( 1u, m->deviceId() );
 
@@ -1159,51 +1150,51 @@ TEST_F( Medias, SetDeviceId )
     ASSERT_EQ( 123u, m->deviceId() );
     m->save();
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( 123u, m->deviceId() );
 }
 
-TEST_F( Medias, SetFolderId )
+static void SetFolderId( Tests* T )
 {
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     // The media will be assigned to the mock folder
     ASSERT_EQ( 1u, m->folderId() );
     mock::NoopDevice deviceFs{};
     // The device is automatically created by the MediaLibraryTester
-    auto d = Device::fromUuid( ml.get(), deviceFs.uuid(), "file://" );
-    auto folder = Folder::create( ml.get(), "path/to/folder", 0, *d, deviceFs );
+    auto d = Device::fromUuid( T->ml.get(), deviceFs.uuid(), "file://" );
+    auto folder = Folder::create( T->ml.get(), "path/to/folder", 0, *d, deviceFs );
 
     m->setFolderId( folder->id() );
     m->save();
 
     ASSERT_EQ( folder->id(), m->folderId() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( folder->id(), m->folderId() );
 }
 
-TEST_F( Medias, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = Media::checkDbModel( ml.get() );
+    auto res = Media::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Medias, SortByTrackId )
+static void SortByTrackId( Tests* T )
 {
     // Create 3 albums, each with one track.
     // Aalbum1: track 3
     // Balbum2: track 2
     // Calbum3: track 1
     // To ensure tracks are first grouped by album, and only then by tracks
-    auto m1 = std::static_pointer_cast<Media>( ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
-    auto m3 = std::static_pointer_cast<Media>( ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
 
     // Create the albums in reversed alphabetical order to ensure id & alpha orders
     // are different
-    auto album1 = ml->createAlbum( "Aalbum1");
-    auto album2 = ml->createAlbum( "Balbum2" );
-    auto album3 = ml->createAlbum( "Calbum3" );
+    auto album1 = T->ml->createAlbum( "Aalbum1");
+    auto album2 = T->ml->createAlbum( "Balbum2" );
+    auto album3 = T->ml->createAlbum( "Calbum3" );
 
     album1->addTrack( m1, 3, 0, 0, nullptr );
     album2->addTrack( m2, 2, 0, 0, nullptr );
@@ -1216,7 +1207,7 @@ TEST_F( Medias, SortByTrackId )
     QueryParameters params;
     params.sort = SortingCriteria::TrackId;
     params.desc = false;
-    auto tracksQuery = ml->audioFiles( &params );
+    auto tracksQuery = T->ml->audioFiles( &params );
     ASSERT_EQ( 3u, tracksQuery->count() );
     auto tracks = tracksQuery->all();
     ASSERT_EQ( 3u, tracks.size() );
@@ -1225,7 +1216,7 @@ TEST_F( Medias, SortByTrackId )
     ASSERT_EQ( tracks[2]->id(), m3->id() );
 
     params.desc = true;
-    tracksQuery = ml->audioFiles( &params );
+    tracksQuery = T->ml->audioFiles( &params );
     ASSERT_EQ( 3u, tracksQuery->count() );
     tracks = tracksQuery->all();
     ASSERT_EQ( 3u, tracks.size() );
@@ -1234,10 +1225,10 @@ TEST_F( Medias, SortByTrackId )
     ASSERT_EQ( tracks[2]->id(), m3->id() );
 }
 
-TEST_F( Medias, ForceTitle )
+static void ForceTitle( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
-                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     ASSERT_NE( nullptr, m );
     ASSERT_EQ( "media.mkv", m->title() );
 
@@ -1248,7 +1239,7 @@ TEST_F( Medias, ForceTitle )
     // It should be updated
     ASSERT_EQ( title, m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
 
     // Now force a new title
@@ -1258,7 +1249,7 @@ TEST_F( Medias, ForceTitle )
     // It should still be updated
     ASSERT_EQ( title, m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
 
     // Now set a non forced title, it should be rejected
@@ -1268,7 +1259,7 @@ TEST_F( Medias, ForceTitle )
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
 
@@ -1279,7 +1270,7 @@ TEST_F( Medias, ForceTitle )
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );
 
@@ -1290,74 +1281,73 @@ TEST_F( Medias, ForceTitle )
     // It should still be updated
     ASSERT_EQ( title, m->title() );
 
-    m = ml->media( m->id() );
+    m = T->ml->media( m->id() );
     ASSERT_EQ( title, m->title() );
 }
 
-TEST_F( Medias, FetchInProgress )
+static void FetchInProgress( Tests* T )
 {
-    auto m1 = ml->addMedia( "media.mkv", IMedia::Type::Video );
-    auto m2 = ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m1 = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto m2 = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
 
-    auto m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    auto m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, m.size() );
 
     m1->setProgress( 0.5f );
-    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m1->id(), m[0]->id() );
 
-    m = ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m1->id(), m[0]->id() );
 
-    m = ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 0u, m.size() );
 
     m2->setProgress( 0.8f );
 
-    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, m.size() );
 
-    m = ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m1->id(), m[0]->id() );
 
-    m = ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m2->id(), m[0]->id() );
 
     m1->setProgress( .9999f );
 
-    m = ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
+    m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m2->id(), m[0]->id() );
 
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_EQ( -1.f, m1->progress() );
     ASSERT_EQ( 1u, m1->playCount() );
 }
 
-
-TEST_F( Medias, ConvertToExternal )
+static void ConvertToExternal( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>(
-                ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+                T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     auto m2 = std::static_pointer_cast<Media>(
-                ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    auto movie = ml->createMovie( *m1 );
+                T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto movie = T->ml->createMovie( *m1 );
     m1->save();
 
-    auto videos = ml->videoFiles( nullptr )->all();
+    auto videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 2u, videos.size() );
 
     auto res = m1->convertToExternal();
     ASSERT_TRUE( res );
 
-    videos = ml->videoFiles( nullptr )->all();
+    videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 1u, videos.size() );
 
-    m1 = ml->media( m1->id() );
+    m1 = T->ml->media( m1->id() );
     ASSERT_TRUE( m1->isExternalMedia() );
     ASSERT_EQ( 0, m1->deviceId() );
 
@@ -1369,72 +1359,71 @@ TEST_F( Medias, ConvertToExternal )
         ASSERT_EQ( 0u, static_cast<File*>( f.get() )->folderId() );
     }
 
-    m2 = ml->media( m2->id() );
+    m2 = T->ml->media( m2->id() );
     ASSERT_NE( nullptr, m2 );
     ASSERT_FALSE( m2->isExternalMedia() );
 }
 
-class FetchMedia : public Tests
+int main( int ac, char** av )
 {
-protected:
-    static const std::string RemovableDeviceUuid;
-    static const std::string RemovableDeviceMountpoint;
-    std::shared_ptr<mock::FileSystemFactory> fsMock;
-    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
+    INIT_TESTS;
 
-    virtual void SetUp() override
-    {
-        fsMock.reset( new mock::FileSystemFactory );
-        cbMock.reset( new mock::WaitForDiscoveryComplete );
-        fsMock->addFolder( "file:///a/mnt/" );
-        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid, true );
-        fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
-        fsFactory = fsMock;
-        mlCb = cbMock.get();
-        Tests::SetUp();
-    }
+    ADD_TEST( Create );
+    ADD_TEST( Fetch );
+    ADD_TEST( Duration );
+    ADD_TEST( GetThumbnail );
+    ADD_TEST( SetProgress );
+    ADD_TEST( Rating );
+    ADD_TEST( Search );
+    ADD_TEST( SearchAndSort );
+    ADD_TEST( SearchAfterEdit );
+    ADD_TEST( SearchAfterDelete );
+    ADD_TEST( SearchByLabel );
+    ADD_TEST( SearchTracks );
+    ADD_TEST( SearchWeirdPatterns );
+    ADD_TEST( Favorite );
+    ADD_TEST( History );
+    ADD_TEST( StreamHistory );
+    ADD_TEST( HistoryByType );
+    ADD_TEST( ClearHistory );
+    ADD_TEST( RemoveFromHistory );
+    ADD_TEST( SetReleaseDate );
+    ADD_TEST( SortByAlpha );
+    ADD_TEST( SortByReleaseDate );
+    ADD_TEST( SortByLastModifDate );
+    ADD_TEST( SortByFileSize );
+    ADD_TEST( SortByFilename );
+    ADD_TEST( SetType );
+    ADD_TEST( SetTypeBuffered );
+    ADD_TEST( SetSubType );
+    ADD_TEST( GetMetadata );
+    ADD_TEST( MetadataOverride );
+    ADD_TEST( MetadataUnset );
+    ADD_TEST( MetadataGetBatch );
+    ADD_TEST( SetBatch );
+    ADD_TEST( MetadataCheckDbModel );
+    ADD_TEST( ExternalMrl );
+    ADD_TEST( AddStream );
+    ADD_TEST( DuplicatedExternalMrl );
+    ADD_TEST( SetTitle );
+    ADD_TEST( Pagination );
+    ADD_TEST( SortFilename );
+    ADD_TEST( CreateStream );
+    ADD_TEST( SearchExternal );
+    ADD_TEST( VacuumOldExternal );
+    ADD_TEST( VacuumNeverPlayedMedia );
+    ADD_TEST( RemoveExternal );
+    ADD_TEST( NbPlaylists );
+    ADD_TEST( SortByAlbum );
+    ADD_TEST( SetFilename );
+    ADD_TEST( SetPlayCount );
+    ADD_TEST( SetDeviceId );
+    ADD_TEST( SetFolderId );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( SortByTrackId );
+    ADD_TEST( ForceTitle );
+    ADD_TEST( FetchInProgress );
+    ADD_TEST( ConvertToExternal );
 
-    virtual void InstantiateMediaLibrary() override
-    {
-        ml.reset( new MediaLibraryWithDiscoverer );
-    }
-};
-
-const std::string FetchMedia::RemovableDeviceUuid = "{fake-removable-device}";
-const std::string FetchMedia::RemovableDeviceMountpoint = "file:///a/mnt/fake-device/";
-
-TEST_F( FetchMedia, FetchNonRemovable )
-{
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
-    ASSERT_TRUE( discovered );
-
-    auto m = ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
-    ASSERT_NE( nullptr, m );
-}
-
-TEST_F( FetchMedia, FetchRemovable )
-{
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
-    ASSERT_TRUE( discovered );
-
-    auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
-    ASSERT_NE( nullptr, m );
-}
-
-TEST_F( FetchMedia, FetchRemovableUnplugged )
-{
-    ml->discover( mock::FileSystemFactory::Root );
-    bool discovered = cbMock->waitDiscovery();
-    ASSERT_TRUE( discovered );
-
-    fsMock->unmountDevice( RemovableDeviceUuid );
-
-    ml->reload();
-    bool reloaded = cbMock->waitReload();
-    ASSERT_TRUE( reloaded );
-
-    auto m = ml->media( RemovableDeviceMountpoint + "removablefile.mp3" );
-    ASSERT_EQ( nullptr, m );
+    END_TESTS
 }

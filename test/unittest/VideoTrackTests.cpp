@@ -24,26 +24,22 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Media.h"
 #include "VideoTrack.h"
 
-class VideoTracks : public Tests
+static void AddTrack( Tests* T )
 {
-};
-
-TEST_F( VideoTracks, AddTrack )
-{
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.avi", IMedia::Type::Video ) );
     bool res = f->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
                                  16, 9, "language", "description" );
     ASSERT_TRUE( res );
 }
 
-TEST_F( VideoTracks, FetchTracks )
+static void FetchTracks( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.avi", IMedia::Type::Video ) );
     f->addVideoTrack( "H264", 1920, 1080, 3000, 100, 5678, 16, 10, "l1", "d1" );
     f->addVideoTrack( "VP80", 640, 480, 3000, 100, 9876, 16, 9, "l2", "d2" );
 
@@ -63,7 +59,7 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( t2->language(), "l1" );
     ASSERT_EQ( t2->description(), "d1" );
 
-    auto m = ml->media( f->id() );
+    auto m = T->ml->media( f->id() );
     ASSERT_NE( nullptr, m );
     ts = m->videoTracks()->all();
     ASSERT_EQ( ts.size(), 2u );
@@ -80,10 +76,10 @@ TEST_F( VideoTracks, FetchTracks )
     ASSERT_EQ( t2->description(), "d1" );
 }
 
-TEST_F( VideoTracks, RemoveTrack )
+static void RemoveTrack( Tests* T )
 {
-    auto f1 = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
-    auto f2 = std::static_pointer_cast<Media>( ml->addMedia( "file2.avi", IMedia::Type::Video ) );
+    auto f1 = std::static_pointer_cast<Media>( T->ml->addMedia( "file.avi", IMedia::Type::Video ) );
+    auto f2 = std::static_pointer_cast<Media>( T->ml->addMedia( "file2.avi", IMedia::Type::Video ) );
     bool res = f1->addVideoTrack( "H264", 1920, 1080, 3000, 1001, 1234,
                                  16, 9, "language", "description" );
     ASSERT_TRUE( res );
@@ -94,13 +90,25 @@ TEST_F( VideoTracks, RemoveTrack )
     ASSERT_EQ( 1u, f1->videoTracks()->count() );
     ASSERT_EQ( 1u, f2->videoTracks()->count() );
 
-    VideoTrack::removeFromMedia( ml.get(), f1->id() );
+    VideoTrack::removeFromMedia( T->ml.get(), f1->id() );
     ASSERT_EQ( 0u, f1->videoTracks()->count() );
     ASSERT_EQ( 1u, f2->videoTracks()->count() );
 }
 
-TEST_F( VideoTracks, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = VideoTrack::checkDbModel( ml.get() );
+    auto res = VideoTrack::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS
+
+    ADD_TEST( AddTrack );
+    ADD_TEST( FetchTracks );
+    ADD_TEST( RemoveTrack );
+    ADD_TEST( CheckDbModel );
+
+    END_TESTS
 }

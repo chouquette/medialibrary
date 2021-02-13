@@ -24,7 +24,7 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "Album.h"
 #include "AlbumTrack.h"
@@ -32,14 +32,10 @@
 #include "Media.h"
 #include "Genre.h"
 
-class AlbumTracks : public Tests
+static void Create( Tests *T )
 {
-};
-
-TEST_F( AlbumTracks, Create )
-{
-    auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto album = T->ml->createAlbum( "album" );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( f, 1, 10, 0, nullptr );
     f->save();
     ASSERT_NE( nullptr, track );
@@ -50,23 +46,23 @@ TEST_F( AlbumTracks, Create )
     ASSERT_EQ( 0, track->genreId() );
     ASSERT_EQ( nullptr, track->genre() );
 
-    f = std::static_pointer_cast<Media>( ml->media( f->id() ) );
+    f = std::static_pointer_cast<Media>( T->ml->media( f->id() ) );
     ASSERT_EQ( 10u, f->albumTrack()->discNumber() );
 }
 
-TEST_F( AlbumTracks, Album )
+static void GetAlbum( Tests *T )
 {
-    auto album = ml->createAlbum( "album" );
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto album = T->ml->createAlbum( "album" );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( f, 1, 0, 0, nullptr );
     f->save();
 
     auto albumFromTrack = track->album();
     ASSERT_EQ( album->id(), albumFromTrack->id() );
 
-    track = ml->albumTrack( track->id() );
+    track = T->ml->albumTrack( track->id() );
     albumFromTrack = track->album();
-    auto a2 = ml->album( album->id() );
+    auto a2 = T->ml->album( album->id() );
     // Fetching this value twice seems to be problematic on Android.
     // Ensure it works for other platforms at least
     auto aft2 = track->album();
@@ -74,17 +70,17 @@ TEST_F( AlbumTracks, Album )
     ASSERT_EQ( aft2->id(), a2->id() );
 }
 
-TEST_F( AlbumTracks, CheckDbModel )
+static void CheckDbModel( Tests *T )
 {
-    auto res = AlbumTrack::checkDbModel( ml.get() );
+    auto res = AlbumTrack::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( AlbumTracks, DeleteByMediaId )
+static void DeleteByMediaId( Tests *T )
 {
-    auto album = ml->createAlbum( "album" );
-    auto m = std::static_pointer_cast<Media>( ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    auto m2 = std::static_pointer_cast<Media>( ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto album = T->ml->createAlbum( "album" );
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( m, 1, 1, 0, nullptr );
     auto track2 = album->addTrack( m2, 2, 1, 0, nullptr );
     m->save();
@@ -93,15 +89,25 @@ TEST_F( AlbumTracks, DeleteByMediaId )
     auto tracks = album->tracks( nullptr )->all();
     ASSERT_EQ( 2u, tracks.size() );
 
-    auto res = AlbumTrack::deleteByMediaId( ml.get(), m->id() );
+    auto res = AlbumTrack::deleteByMediaId( T->ml.get(), m->id() );
     ASSERT_TRUE( res );
 
     tracks = album->tracks( nullptr )->all();
     ASSERT_EQ( 1u, tracks.size() );
 
-    res = AlbumTrack::deleteByMediaId( ml.get(), m2->id() );
+    res = AlbumTrack::deleteByMediaId( T->ml.get(), m2->id() );
     ASSERT_TRUE( res );
 
     tracks = album->tracks( nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS
+    ADD_TEST( Create );
+    ADD_TEST( GetAlbum );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( DeleteByMediaId );
+    END_TESTS
 }

@@ -20,7 +20,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "gtest/gtest.h"
+#pragma once
+
+#include "common/Tests.h"
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "common/NoopCallback.h"
@@ -28,17 +30,42 @@
 #include "MediaLibraryTester.h"
 #include "medialibrary/filesystem/IDirectory.h"
 
-class Tests : public testing::Test
+
+struct Tests
 {
-protected:
     Tests();
+    virtual ~Tests() = default;
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<mock::NoopCallback> cbMock;
     IMediaLibraryCb* mlCb;
     std::shared_ptr<fs::IFileSystemFactory> fsFactory;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
-    virtual void SetUp() override;
+    virtual void SetUp();
     virtual void InstantiateMediaLibrary();
-    virtual void TearDown() override;
+    virtual void TearDown();
 };
+
+#define INIT_TESTS_C(TestClass) \
+    if ( ac != 2 ) { fprintf(stderr, "Missing test name\n" ); return 1; } \
+    const char* selectedTest = av[1]; \
+    auto t = std::make_unique<TestClass>();
+
+#define INIT_TESTS INIT_TESTS_C(Tests)
+
+#define ADD_TEST( func ) \
+    do { \
+        if ( strcmp( #func, selectedTest ) == 0 ) { \
+            try { \
+                t->SetUp(); \
+                func( t.get() ); \
+                t->TearDown(); \
+                return 0; \
+            } catch ( const TestFailed& tf ) { \
+                fprintf(stderr, "Test %s failed: \n%s", #func, tf.what() ); \
+            } \
+        } \
+    } while ( 0 )
+
+#define END_TESTS \
+    return 1;

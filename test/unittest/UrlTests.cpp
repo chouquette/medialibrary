@@ -24,14 +24,14 @@
 # include "config.h"
 #endif
 
-#include "gtest/gtest.h"
+#include "UnitTests.h"
 
 #include "utils/Url.h"
 #include "medialibrary/filesystem/Errors.h"
 
 using namespace medialibrary;
 
-TEST( UrlUtils, encode )
+static void encode( Tests* )
 {
     ASSERT_EQ( "meow", utils::url::encode( "meow" ) );
     ASSERT_EQ( "plain%20space", utils::url::encode(  "plain space" ) );
@@ -54,7 +54,7 @@ TEST( UrlUtils, encode )
 #endif
 }
 
-TEST( UrlUtils, stripScheme )
+static void stripScheme( Tests* )
 {
   ASSERT_EQ( "space%20marine", utils::url::stripScheme( "sc2://space%20marine" ) );
   ASSERT_THROW( utils::url::stripScheme( "bl%40bla" ), fs::errors::UnhandledScheme );
@@ -63,7 +63,7 @@ TEST( UrlUtils, stripScheme )
   ASSERT_EQ( "/I", utils::url::stripScheme( "file:///I" ) );
 }
 
-TEST( UrlUtils, scheme )
+static void scheme( Tests* )
 {
   ASSERT_EQ( "scheme://", utils::url::scheme( "scheme://on/them/33.spy" ) );
   ASSERT_EQ( "file://", utils::url::scheme( "file:///l/z/4/" ) );
@@ -71,14 +71,14 @@ TEST( UrlUtils, scheme )
   ASSERT_EQ( "://", utils::url::scheme( ":////\\//" ) );
 }
 
-TEST( UrlUtils, schemeIs )
+static void schemeIs( Tests* )
 {
   ASSERT_TRUE( utils::url::schemeIs( "attachment://", "attachment://" ) );
   ASSERT_TRUE( utils::url::schemeIs( "attachment://", "attachment://picture0.jpg" ) );
   ASSERT_FALSE( utils::url::schemeIs( "boboop://", "/path/to/spaces%20here" ) );
 }
 
-TEST( UrlUtils, Split )
+static void Split( Tests* )
 {
     auto test = [](const std::string& url, const std::string& scheme,
                    const std::string& userInfo, const std::string& host,
@@ -110,7 +110,7 @@ TEST( UrlUtils, Split )
     test( "scheme://@host:#foo", "scheme", "", "host", "", "", "", "foo" );
 }
 
-TEST( UrlUtils, toLocalPath )
+static void toLocalPath( Tests* )
 {
 #ifndef _WIN32
     ASSERT_EQ( "/a/b/c/movie.avi", utils::url::toLocalPath( "file:///a/b/c/movie.avi" ) );
@@ -129,10 +129,25 @@ TEST( UrlUtils, toLocalPath )
 #endif
 }
 
-TEST( UrlUtils, Path )
+static void Path( Tests* )
 {
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://host/path/to/file.mkv" ) );
     ASSERT_EQ( "path/to/file.mkv", utils::url::path( "http://///host/path/to/file.mkv" ) );
     ASSERT_THROW( utils::url::path( "/no/scheme/url" ), fs::errors::UnhandledScheme );
     ASSERT_THROW( utils::url::path( "" ), fs::errors::UnhandledScheme );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( encode );
+    ADD_TEST( stripScheme );
+    ADD_TEST( scheme );
+    ADD_TEST( schemeIs );
+    ADD_TEST( Split );
+    ADD_TEST( toLocalPath );
+    ADD_TEST( Path );
+
+    END_TESTS;
 }

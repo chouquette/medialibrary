@@ -24,98 +24,109 @@
 # include "config.h"
 #endif
 
-#include "Tests.h"
+#include "UnitTests.h"
 
 #include "MediaLibrary.h"
 #include "Movie.h"
 #include "Media.h"
 
-class Movies : public Tests
+static void Create( Tests* T )
 {
-};
-
-TEST_F( Movies, Create )
-{
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
-    auto m = ml->createMovie( *media );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto m = T->ml->createMovie( *media );
     ASSERT_NE( m, nullptr );
 }
 
-TEST_F( Movies, Fetch )
+static void Fetch( Tests* T )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
     media->setTitle( "movie", false );
-    // Setting the movie during ml::createMovie will save the media, thus saving the title.
-    auto m = ml->createMovie( *media );
-    auto m2 = ml->movie( m->id() );
+    // Setting the movie during T->ml::createMovie will save the media, thus saving the title.
+    auto m = T->ml->createMovie( *media );
+    auto m2 = T->ml->movie( m->id() );
 
     ASSERT_NE( nullptr, m2 );
     ASSERT_EQ( m->id(), m2->id() );
 
-    m2 = ml->movie( m->id() );
+    m2 = T->ml->movie( m->id() );
     ASSERT_NE( m2, nullptr );
 }
 
-TEST_F( Movies, SetShortSummary )
+static void SetShortSummary( Tests* T )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
     media->setTitle( "movie", false );
-    auto m = ml->createMovie( *media );
+    auto m = T->ml->createMovie( *media );
 
     ASSERT_EQ( m->shortSummary().length(), 0u );
     m->setShortSummary( "great movie" );
     ASSERT_EQ( m->shortSummary(), "great movie" );
 
-    auto m2 = ml->movie( m->id() );
+    auto m2 = T->ml->movie( m->id() );
     ASSERT_EQ( m2->shortSummary(), "great movie" );
 }
 
-TEST_F( Movies, SetImdbId )
+static void SetImdbId( Tests* T )
 {
-    auto media = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
     media->setTitle( "movie", false );
-    auto m = ml->createMovie( *media );
+    auto m = T->ml->createMovie( *media );
 
     ASSERT_EQ( m->imdbId().length(), 0u );
     m->setImdbId( "id" );
     ASSERT_EQ( m->imdbId(), "id" );
 
-    auto m2 = ml->movie( m->id() );
+    auto m2 = T->ml->movie( m->id() );
     ASSERT_EQ( m2->imdbId(), "id" );
 }
 
-TEST_F( Movies, AssignToFile )
+static void AssignToFile( Tests* T )
 {
-    auto f = std::static_pointer_cast<Media>( ml->addMedia( "file.avi", IMedia::Type::Video ) );
+    auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "file.avi", IMedia::Type::Video ) );
     ASSERT_EQ( f->movie(), nullptr );
 
-    auto m = ml->createMovie( *f );
+    auto m = T->ml->createMovie( *f );
 
     ASSERT_EQ( f->movie(), m );
 
-    auto f2 = ml->media( f->id() );
+    auto f2 = T->ml->media( f->id() );
     auto m2 = f2->movie();
     ASSERT_NE( m2, nullptr );
 }
 
-TEST_F( Movies, CheckDbModel )
+static void CheckDbModel( Tests* T )
 {
-    auto res = Movie::checkDbModel( ml.get() );
+    auto res = Movie::checkDbModel( T->ml.get() );
     ASSERT_TRUE( res );
 }
 
-TEST_F( Movies, DeleteByMediaId )
+static void DeleteByMediaId( Tests* T )
 {
-    auto media1 = std::static_pointer_cast<Media>( ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
-    auto media2 = std::static_pointer_cast<Media>( ml->addMedia( "movie2.mkv", IMedia::Type::Video ) );
-    auto movie1 = ml->createMovie( *media1 );
-    auto movie2 = ml->createMovie( *media2 );
+    auto media1 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto media2 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie2.mkv", IMedia::Type::Video ) );
+    auto movie1 = T->ml->createMovie( *media1 );
+    auto movie2 = T->ml->createMovie( *media2 );
     ASSERT_NE( movie1, nullptr );
     ASSERT_NE( movie2, nullptr );
 
-    Movie::deleteByMediaId( ml.get(), media1->id() );
-    movie1 = std::static_pointer_cast<Movie>( ml->movie( movie1->id() ) );
+    Movie::deleteByMediaId( T->ml.get(), media1->id() );
+    movie1 = std::static_pointer_cast<Movie>( T->ml->movie( movie1->id() ) );
     ASSERT_EQ( nullptr, movie1 );
-    movie2 = std::static_pointer_cast<Movie>( ml->movie( movie2->id() ) );
+    movie2 = std::static_pointer_cast<Movie>( T->ml->movie( movie2->id() ) );
     ASSERT_NE( nullptr, movie2 );
+}
+
+int main( int ac, char** av )
+{
+    INIT_TESTS;
+
+    ADD_TEST( Create );
+    ADD_TEST( Fetch );
+    ADD_TEST( SetShortSummary );
+    ADD_TEST( SetImdbId );
+    ADD_TEST( AssignToFile );
+    ADD_TEST( CheckDbModel );
+    ADD_TEST( DeleteByMediaId );
+
+    END_TESTS
 }
