@@ -1,9 +1,6 @@
 [submodule "test/samples/samples"]
 	path = test/samples/samples
 	url = https://code.videolan.org/videolan/medialibrary-test-samples.git
-[submodule "googletest"]
-	path = googletest
-	url = https://github.com/google/googletest.git
 [submodule "libvlcpp"]
 	path = libvlcpp
 	url = https://code.videolan.org/videolan/libvlcpp.git
