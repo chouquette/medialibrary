@@ -1,8 +1,8 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
-  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20201009131431
-  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20201119101408
-  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20201119103139
+  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20210216210554
+  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20210215200735
+  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20210216181601
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20200529132440
 
 linux:
@@ -16,12 +16,24 @@ linux:
       - docker
       - amd64
     script:
-      - ./bootstrap
-      - ./configure --enable-tests
-      - make -j4
-      - make -j4 check
-      - ./unittest
-      - ./samples --gtest_filter=-\*removable
+      - meson -Db_coverage=true build
+      - cd build && ninja
+      - meson test --print-errorlogs
+      - mkdir html/
+      - >
+        gcovr -r "$CI_PROJECT_DIR/"
+        --exclude-directories "$CI_PROJECT_DIR/libvlcpp"
+        -e "CI_PROJECT_DIR/src/database/SqliteErrors.h"
+        -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
+        -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
+        --xml cobertura.xml --html=html/medialibrary.html --html-details
+        -j 4
+    artifacts:
+      reports:
+        cobertura: build/cobertura.xml
+      name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
+      paths:
+        - build/html/
 
 win32:
     image: $MEDIALIBRARY_WIN32_IMG
@@ -34,17 +46,16 @@ win32:
       - docker
       - amd64
     script:
-      - wineserver -p && wine wineboot
-      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
-      - ./bootstrap
-      - ./configure --enable-tests --host=i686-w64-mingw32 --disable-shared
-      - make -j4
-      - make -j4 check
+      - >
+        meson -Dpkg_config_path=/prefix/lib/pkgconfig
+        --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
+        -Ddefault_library=static
+        build
+      - cd build && ninja
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - wine unittest.exe
-      - wine samples.exe --gtest_filter=-\*removable
+      - meson test --print-errorlogs
 
 win64:
     image: $MEDIALIBRARY_WIN64_IMG
@@ -57,48 +68,16 @@ win64:
       - docker
       - amd64
     script:
-      - wineserver -p && wine wineboot
-      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/prefix/lib/pkgconfig"
-      - ./bootstrap
-      - ./configure --enable-tests --host=x86_64-w64-mingw32 --disable-shared
-      - make -j4
-      - make -j4 check
+      - >
+        PKG_CONFIG_PATH=/prefix/lib/pkgconfig 
+        meson 
+        --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson 
+        build
+      - cd build && ninja
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - wine unittest.exe
-      - wine samples.exe --gtest_filter=\*removable
-
-coverage:
-    image: $MEDIALIBRARY_IMG
-    tags:
-      - docker
-      - amd64
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: on_success
-      - when: never
-    script:
-        - ./bootstrap
-        - CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage -g -O0' ./configure --enable-tests
-        - make -j4 check
-        - ./unittest && ./samples
-        - lcov --capture --directory . -o coverage.info
-        - lcov --remove coverage.info "/usr/*" -o coverage.info
-        - lcov --remove coverage.info "/prefix/*" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/test/*" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/googletest/*" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/src/logging/*" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/libvlcpp/*" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/src/database/SqliteErrors.h" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h" -o coverage.info
-        - lcov --remove coverage.info "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h" -o coverage.info
-        - lcov --summary coverage.info
-        - genhtml coverage.info --output-directory html/
-    artifacts:
-        name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
-        paths:
-            - html/
+      - meson test --print-errorlogs
 
 asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
@@ -118,14 +97,10 @@ asan-ubsan:
       - make install -j8
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
       - cd ..
-      - ./bootstrap
-      - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=address,undefined"
-      - make -j4
-      - make -j4 check
-      - ./unittest
-      - ./samples
-      - ./test_fast_teardown $CI_PROJECT_DIR/test/samples/samples
-      - ./test_fast_discover $CI_PROJECT_DIR/test/samples/samples
+      - meson -Db_sanitize=address,undefined build
+      - cd build && meson test
+      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
+      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
 
 tsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
@@ -145,12 +120,8 @@ tsan:
       - make install -j8
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
       - cd ..
-      - ./bootstrap
-      - ./configure --enable-tests CXXFLAGS="-g -O1 -fsanitize=thread"
-      - make -j8
-      - make -j8 check
-      - ./unittest
-      - ./samples
-      - ./test_fast_teardown $CI_PROJECT_DIR/test/samples/samples
-      - ./test_fast_discover $CI_PROJECT_DIR/test/samples/samples
+      - meson -Db_sanitize=thread build
+      - cd build && meson test
+      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
+      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
 
