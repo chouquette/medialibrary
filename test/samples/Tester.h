@@ -28,6 +28,7 @@
 #include <rapidjson/document.h>
 
 #include "common/Tests.h"
+#include "common/util.h"
 #include "medialibrary/IAlbum.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMedia.h"

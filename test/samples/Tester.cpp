@@ -26,6 +26,7 @@
 
 #include "Tester.h"
 
+#include "common/util.h"
 #include "parser/Parser.h"
 #include "Thumbnail.h"
 #include "File.h"
@@ -186,12 +187,7 @@ void Tests::SetUp()
     else if ( DebugVerbose == true )
         m_ml->setVerbosity( LogLevel::Verbose );
 
-#ifndef _WIN32
-    auto mlDir = "/tmp/ml_folder/";
-#else
-    // This assumes wine for now
-    auto mlDir = "Z:\\tmp\\ml_folder\\";
-#endif
+    auto mlDir = getTempPath( "ml_folder" );
 
     auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );

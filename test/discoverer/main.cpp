@@ -26,6 +26,7 @@
 
 #include "medialibrary/IMediaLibrary.h"
 #include "test/common/NoopCallback.h"
+#include "test/common/util.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
 
@@ -115,13 +116,16 @@ int main( int argc, char** argv )
         return 1;
     }
 
-    unlink( "/tmp/test.db" );
+    auto dbPath = getTempPath( "test.db" );
+    auto mlDir = getTempPath( "ml_folder" );
+
+    unlink( dbPath.c_str() );
 
     auto testCb = std::make_unique<TestCb>();
     std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
 
     ml->setVerbosity( medialibrary::LogLevel::Info );
-    ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
+    ml->initialize( dbPath, mlDir, testCb.get() );
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
     ml->discover( argv[1] );

@@ -26,6 +26,7 @@
 
 #include "MediaLibrary.h"
 #include "common/NoopCallback.h"
+#include "common/util.h"
 #include "utils/Filename.h"
 #include "medialibrary/filesystem/IDirectory.h"
 #include "compat/Mutex.h"
@@ -120,11 +121,14 @@ int main( int argc, char** argv )
     }
     auto entrypoint = utils::file::toMrl( argv[1] );
 
+    auto dbPath = getTempPath( "test.db" );
+    auto mlDir = getTempPath( "ml_folder" );
+
     auto testCb = std::make_unique<FastDiscoverCancelCb>();
     auto ml = std::make_unique<medialibrary::MediaLibrary>();
 //    ml->setVerbosity( LogLevel::Debug );
-    unlink( "/tmp/test.db" );
-    ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
+    unlink( dbPath.c_str() );
+    ml->initialize( dbPath, mlDir, testCb.get() );
 
     ml->discover( entrypoint );
 

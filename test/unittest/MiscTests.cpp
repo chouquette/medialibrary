@@ -26,6 +26,7 @@
 
 #include "UnitTests.h"
 
+#include "common/util.h"
 #include "database/SqliteTools.h"
 #include "database/SqliteConnection.h"
 #include "utils/Strings.h"

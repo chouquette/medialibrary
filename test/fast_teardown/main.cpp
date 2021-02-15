@@ -26,6 +26,7 @@
 
 #include "medialibrary/IMediaLibrary.h"
 #include "common/NoopCallback.h"
+#include "common/util.h"
 #include "utils/Filename.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
@@ -79,11 +80,14 @@ int main( int argc, char** argv )
     }
     auto entryPoint = utils::file::toMrl( argv[1] );
 
+    auto dbPath = getTempPath( "test.db" );
+    auto mlDir = getTempPath( "ml_folder" );
+
     for ( auto i = 0; i < 1000; ++i )
     {
         auto testCb = std::make_unique<FastTearDownCb>();
         std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
-        ml->initialize( "/tmp/test.db", "/tmp/ml_folder", testCb.get() );
+        ml->initialize( dbPath, mlDir, testCb.get() );
         testCb->prepareWait();
         ml->discover( entryPoint );
         ml->reload();

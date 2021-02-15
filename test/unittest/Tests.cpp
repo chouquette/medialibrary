@@ -26,6 +26,7 @@
 
 #include "UnitTests.h"
 
+#include "common/util.h"
 #include "mocks/FileSystem.h"
 
 Tests::Tests()
@@ -55,10 +56,12 @@ void Tests::SetUp()
     if ( mockDeviceLister == nullptr )
         mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
+    auto mlDir = getTempPath( "ml_folder" );
+
     ml->setFsFactory( fsFactory );
     ml->registerDeviceLister( mockDeviceLister, "file://" );
     ml->setVerbosity( LogLevel::Error );
-    auto res = ml->initialize( "test.db", "/tmp/ml_folder/", mlCb );
+    auto res = ml->initialize( "test.db", mlDir, mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
     auto setupRes = ml->setupDummyFolder();
     ASSERT_TRUE( setupRes );
