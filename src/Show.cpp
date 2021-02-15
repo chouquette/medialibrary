@@ -388,7 +388,9 @@ std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name 
 
 Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string req = "FROM " + Show::Table::Name + " WHERE is_present != 0";
+    std::string req = "FROM " + Show::Table::Name;
+    if ( params == nullptr || params->includeMissing == false )
+        req += " WHERE is_present != 0";
     return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) );
 }
 
@@ -418,7 +420,9 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
 {
     std::string req = "FROM " + Show::Table::Name + " WHERE id_show IN"
             "(SELECT rowid FROM " + Show::FtsTable::Name + " WHERE " +
-            Show::FtsTable::Name + " MATCH ?) AND is_present != 0";
+            Show::FtsTable::Name + " MATCH ?)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND is_present != 0";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
                                     orderBy( params ),
                                     sqlite::Tools::sanitizePattern( pattern ) );
