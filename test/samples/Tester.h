@@ -24,10 +24,10 @@
 #define TESTER_H
 
 #include <condition_variable>
-#include "gtest/gtest.h"
 #include <mutex>
 #include <rapidjson/document.h>
 
+#include "common/Tests.h"
 #include "medialibrary/IAlbum.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMedia.h"
@@ -56,6 +56,9 @@ public:
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
     std::unique_lock<compat::Mutex> lock();
+    void prepareForPlaylistReload();
+    bool waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock );
+
 protected:
     virtual void onDiscoveryCompleted( const std::string&, bool ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
@@ -75,24 +78,6 @@ protected:
     bool m_removalCompleted;
 };
 
-class ForceRemovableStorareDeviceLister : public IDeviceLister, public IDeviceListerCb
-{
-public:
-    ForceRemovableStorareDeviceLister();
-    virtual void refresh() override;
-    virtual bool start( IDeviceListerCb* cb ) override;
-    virtual void stop() override;
-
-private:
-    DeviceListerPtr m_lister;
-
-    // IDeviceListerCb interface
-public:
-    virtual void onDeviceMounted( const std::string& uuid, const std::string& mountpoint, bool removable ) override;
-    virtual void onDeviceUnmounted( const std::string& uuid, const std::string& mountpoint ) override;
-    IDeviceListerCb* m_cb;
-};
-
 class MockResumeCallback : public MockCallback
 {
 public:
@@ -106,19 +91,12 @@ private:
     compat::ConditionVariable m_discoveryCompletedVar;
 };
 
-struct TestParams
+struct Tests
 {
-    const char* testCase;
-    bool useRemovableFiles;
-};
-
-class Tests : public ::testing::TestWithParam<std::tuple<std::string, bool>>
-{
-protected:
+    virtual ~Tests() = default;
+    virtual void SetUp();
     std::unique_ptr<MockCallback> m_cb;
     std::unique_ptr<IMediaLibrary> m_ml;
-
-    virtual void SetUp() override;
 
     virtual void InitializeCallback();
     virtual void InitializeMediaLibrary();
@@ -140,33 +118,23 @@ protected:
     void checkMediaFiles( const IMedia* media, const rapidjson::Value &expectedFiles );
 };
 
-class ParseTwice : public Tests
-{
-};
-
-class ReducedTests : public Tests
-{
-};
-
-class ResumeTests : public Tests
+class MediaLibraryResumeTest : public MediaLibrary
 {
 public:
-    class MediaLibraryResumeTest : public MediaLibrary
-    {
-    public:
-        void forceParserStart();
-        virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
-    protected:
-        virtual void startParser() override;
-    };
+    void forceParserStart();
+    virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
+protected:
+    virtual void startParser() override;
+};
 
+struct ResumeTests : public Tests
+{
     virtual void InitializeMediaLibrary() override;
     virtual void InitializeCallback() override;
 };
 
-class RefreshTests : public Tests
+struct RefreshTests : public Tests
 {
-public:
     void forceRefresh();
     virtual void InitializeCallback() override;
 };

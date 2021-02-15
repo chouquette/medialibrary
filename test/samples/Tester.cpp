@@ -193,12 +193,6 @@ void Tests::SetUp()
     auto mlDir = "Z:\\tmp\\ml_folder\\";
 #endif
 
-    if ( std::get<1>( GetParam() ) == true )
-    {
-        auto devLister = std::make_shared<ForceRemovableStorareDeviceLister>();
-        m_ml->registerDeviceLister( std::move( devLister ), "file://" );
-    }
-
     auto res = m_ml->initialize( "test.db", mlDir, m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
 }
@@ -298,7 +292,8 @@ void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std:
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+            ASSERT_EQ( strcasecmp( expectedTrack["codec"].GetString(),
+                                   track->codec().c_str() ), 0 );
         }
         if ( expectedTrack.HasMember( "width" ) )
         {
@@ -326,7 +321,8 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+            ASSERT_EQ( strcasecmp( expectedTrack["codec"].GetString(),
+                                   track->codec().c_str() ), 0 );
         }
         if ( expectedTrack.HasMember( "sampleRate" ) )
         {
@@ -355,11 +351,13 @@ void Tests::checkSubtitleTracks( const rapidjson::Value& expectedTracks,
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["codec"].GetString(), track->codec().c_str() );
+            ASSERT_EQ( strcasecmp( expectedTrack["codec"].GetString(),
+                                   track->codec().c_str() ), 0 );
         }
         if ( expectedTrack.HasMember( "encoding" ) )
         {
-            ASSERT_STRCASEEQ( expectedTrack["encoding"].GetString(), track->encoding().c_str() );
+            ASSERT_EQ( strcasecmp( expectedTrack["encoding"].GetString(),
+                                   track->encoding().c_str() ), 0 );
         }
     }
 }
@@ -376,7 +374,7 @@ void Tests::checkMediaFiles( const IMedia *media, const rapidjson::Value& expect
         auto it = std::find_if( begin( files ), end( files ), [&expectedFile]( FilePtr f ) {
             return utils::file::fileName( f->mrl() ) == expectedFile["filename"].GetString();
         });
-        ASSERT_NE( it, end( files ) );
+        ASSERT_TRUE( it != end( files ) );
 
         if ( expectedFile.HasMember( "type" ) )
         {
@@ -402,7 +400,7 @@ void Tests::checkMedias(const rapidjson::Value& expectedMedias)
         auto it = std::find_if( begin( medias ), end( medias ), [expectedTitle](const MediaPtr& m) {
             return strcasecmp( expectedTitle, m->title().c_str() ) == 0;
         });
-        ASSERT_NE( end( medias ), it );
+        ASSERT_TRUE( end( medias ) != it );
         const auto media = *it;
         medias.erase( it );
         if ( expectedMedia.HasMember( "nbVideoTracks" ) || expectedMedia.HasMember( "videoTracks" ) )
@@ -467,7 +465,7 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
         auto it = std::find_if( begin( playlists ), end( playlists ), [expectedName](const PlaylistPtr& p) {
             return strcasecmp( expectedName, p->name().c_str() ) == 0;
         });
-        ASSERT_NE( end( playlists ), it );
+        ASSERT_TRUE( end( playlists ) != it );
 
         const auto playlist = *it;
         playlists.erase( it );
@@ -502,7 +500,7 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
                         [](const FilePtr& f ) {
                             return f->isMain() == true;
                     });
-                    ASSERT_NE( mainFileIt, cend( files ) );
+                    ASSERT_TRUE( mainFileIt != cend( files ) );
                     ASSERT_EQ( expectedPlaylist["items"][i]["mrl"].GetString(),
                             (*mainFileIt)->mrl() );
                 }
@@ -585,7 +583,7 @@ void Tests::checkAlbums( const rapidjson::Value& expectedAlbums, std::vector<Alb
             }
             return true;
         });
-        ASSERT_NE( end( albums ), it );
+        ASSERT_TRUE( end( albums ) != it );
         albums.erase( it );
     }
 }
@@ -636,7 +634,7 @@ void Tests::checkArtists(const rapidjson::Value& expectedArtists, std::vector<Ar
             }
             return true;
         });
-        ASSERT_NE( it, end( artists ) );
+        ASSERT_TRUE( it != end( artists ) );
     }
 }
 
@@ -718,7 +716,7 @@ void Tests::checkShows(const rapidjson::Value& expectedShows, std::vector<ShowPt
                 return s->id() == UnknownShowID;
             return s->title() == showName;
         });
-        ASSERT_NE( showIt, cend( shows ) );
+        ASSERT_TRUE( showIt != cend( shows ) );
         auto show = *showIt;
         if ( expectedShow.HasMember( "nbEpisodes" ) == true )
         {
@@ -750,7 +748,7 @@ void Tests::checkShowEpisodes( const rapidjson::Value& expectedEpisodes,
                 return false;
             return showEp->seasonId() == seasonId && showEp->episodeId() == episodeId;
         });
-        ASSERT_NE( episodeIt, cend( episodes ) );
+        ASSERT_TRUE( episodeIt != cend( episodes ) );
         auto media = *episodeIt;
         auto showEp = media->showEpisode();
         if ( expectedEpisode.HasMember( "title" ) == true )
@@ -776,7 +774,7 @@ void Tests::checkMediaGroups( const rapidjson::Value &expectedMediaGroups,
                                 [&expectedGroup]( const MediaGroupPtr grp ) {
             return strcasecmp( grp->name().c_str(), expectedGroup["name"].GetString() ) == 0;
         });
-        ASSERT_NE( cend( mediaGroups ), it );
+        ASSERT_TRUE( cend( mediaGroups ) != it );
         auto group = *it;
         if ( expectedGroup.HasMember( "nbAudio" ) )
         {
@@ -803,18 +801,18 @@ void ResumeTests::InitializeCallback()
     m_cb.reset( new MockResumeCallback );
 }
 
-void ResumeTests::MediaLibraryResumeTest::forceParserStart()
+void MediaLibraryResumeTest::forceParserStart()
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     MediaLibrary::startParser();
 }
 
-void ResumeTests::MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
+void MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
 {
     deleteAllTables( dbConn );
 }
 
-void ResumeTests::MediaLibraryResumeTest::startParser()
+void MediaLibraryResumeTest::startParser()
 {
 }
 
@@ -847,39 +845,19 @@ void RefreshTests::InitializeCallback()
     m_cb.reset( new MockResumeCallback );
 }
 
-ForceRemovableStorareDeviceLister::ForceRemovableStorareDeviceLister()
+void MockCallback::prepareForPlaylistReload()
 {
-    m_lister = factory::createDeviceLister();
-    assert( m_lister != nullptr );
+    // We need to force the discover to appear as complete, as we won't do any
+    // discovery for this test. Otherwise, we'd receive the parsing completed
+    // event and just ignore it.
+    m_discoveryCompleted = true;
 }
 
-void ForceRemovableStorareDeviceLister::refresh()
+bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock )
 {
-    m_lister->refresh();
-}
-
-bool ForceRemovableStorareDeviceLister::start( IDeviceListerCb* cb )
-{
-    m_cb = cb;
-    m_lister->start( this );
-    return true;
-}
-
-void ForceRemovableStorareDeviceLister::stop()
-{
-    m_lister->stop();
-}
-
-
-void ForceRemovableStorareDeviceLister::onDeviceMounted( const std::string& uuid,
-                                                         const std::string& mountpoint,
-                                                         bool )
-{
-    m_cb->onDeviceMounted( uuid, mountpoint, true );
-}
-
-void ForceRemovableStorareDeviceLister::onDeviceUnmounted( const std::string& uuid,
-                                                           const std::string& mountpoint )
-{
-    m_cb->onDeviceUnmounted( uuid, mountpoint );
+    m_done = false;
+    // Wait for a while, generating snapshots can be heavy...
+    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+        return m_done;
+    });
 }
