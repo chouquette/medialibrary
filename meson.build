@@ -56,7 +56,7 @@ else
     threads_dep = dependency('threads')
 endif
 
-sqlite_dep = dependency('sqlite3', version: '>= 3.25.0',
+sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
                         required: true)
 
 libvlc_dep = dependency('libvlc', version: '>= 3.0', required: get_option('libvlc'))
