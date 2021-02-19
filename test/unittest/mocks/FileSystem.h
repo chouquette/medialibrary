@@ -470,58 +470,6 @@ class NoopDirectory : public fs::IDirectory
     }
 };
 
-class NoopFsFactory : public fs::IFileSystemFactory
-{
-public:
-    virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& ) override
-    {
-        throw fs::errors::System{ ENOENT, "Mock directory" };
-    }
-
-    virtual std::shared_ptr<fs::IFile> createFile( const std::string& ) override
-    {
-        throw fs::errors::System{ ENOENT, "Mock directory" };
-    }
-
-    virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override
-    {
-        if ( uuid == mock::FileSystemFactory::NoopDeviceUuid )
-            return std::make_shared<mock::NoopDevice>();
-        return nullptr;
-    }
-
-    virtual std::shared_ptr<fs::IDevice> createDeviceFromMrl( const std::string& ) override
-    {
-        return std::make_shared<NoopDevice>();
-    }
-
-    virtual void refreshDevices() override
-    {
-    }
-
-    virtual bool isMrlSupported( const std::string& mrl ) const override
-    {
-        auto it = mrl.find( "://" );
-        if ( it == std::string::npos )
-            return true;
-        return mrl.compare( 0, 7, "file://" ) == 0;
-    }
-
-    virtual const std::string& scheme() const override
-    {
-        static const std::string s = "file://";
-        return s;
-    }
-
-    virtual bool isNetworkFileSystem() const override
-    {
-        return false;
-    }
-    virtual bool start( fs::IFileSystemFactoryCb* ) override { return true; }
-    virtual void stop() override {}
-    virtual bool isStarted() const override { return true; }
-};
-
 }
 
 

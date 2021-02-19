@@ -38,7 +38,7 @@ struct UnitTests
 {
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<CB> cbMock;
-    std::shared_ptr<fs::IFileSystemFactory> fsFactory;
+    std::shared_ptr<mock::FileSystemFactory> fsFactory;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
     UnitTests() = default;
@@ -50,7 +50,7 @@ struct UnitTests
         InstantiateMediaLibrary( "test.db", mlDir );
         if ( fsFactory == nullptr )
         {
-            fsFactory = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
+            fsFactory = std::make_shared<mock::FileSystemFactory>();
         }
         cbMock.reset( new CB );
 
