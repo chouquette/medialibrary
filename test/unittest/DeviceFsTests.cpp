@@ -708,4 +708,6 @@ int main( int ac, char** av )
     ADD_TEST( RemoveShowEpisodes );
     ADD_TEST( PartialRemoveShowEpisodes );
     ADD_TEST( MediaGroupPresence );
+
+    END_TESTS
 }
