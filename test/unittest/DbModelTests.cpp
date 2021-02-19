@@ -158,7 +158,7 @@ namespace
         "VideoTrack",
     };
 
-    bool checkAlphaOrderedVector( const std::vector<const char*> in )
+    bool checkAlphaOrderedVector( const std::vector<const char*>& in )
     {
         for ( auto i = 0u; i < in.size() - 1; i++ )
         {
