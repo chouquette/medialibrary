@@ -65,11 +65,23 @@ if libvlc_dep.found()
 endif
 
 # We only require libjpeg when using the 3.0 thumbnailer, using vmem
-libjpeg_dep = dependency('libjpeg', 
-    required: libvlc_dep.found() and libvlc_dep.version().version_compare('< 4.0'))
-if libjpeg_dep.found()
-    cdata.set('HAVE_JPEG', 1)
+if libvlc_dep.found() and libvlc_dep.version().version_compare('< 4.0')
+  libjpeg_dep = dependency('libjpeg', required: false)
+  if not libjpeg_dep.found()
+    jpegprefix = get_option('libjpeg_prefix')
+    if not cxx.has_header('jpeglib.h', args: '-I' + jpegprefix / 'include')
+      error('libjpeg was not found')
+    endif
+    libjpeg_dep = declare_dependency(
+      include_directories: include_directories(jpegprefix / 'include'),
+      link_args: ['-L' + jpegprefix / 'lib', '-ljpeg']
+    )
+  endif
+  cdata.set('HAVE_JPEG', 1)
+else
+  libjpeg_dep = []
 endif
+
 
 if libvlc_dep.found()
     libvlcpp_dep = dependency('libvlcpp', required: false)

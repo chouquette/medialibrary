@@ -1,1 +1,2 @@
 option('libvlc', type: 'feature', value: 'enabled')
+option('libjpeg_prefix', type: 'string')
