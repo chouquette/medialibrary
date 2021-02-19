@@ -197,7 +197,6 @@ struct DbModel : public Tests
     virtual void SetUp() override
     {
         ml.reset( new MediaLibraryTesterNoForceRescan( "test.db", "/tmp/ml_folder/" ) );
-        cbMock.reset( new mock::NoopCallback );
     }
 
     void LoadFakeDB( const char* dbPath )
