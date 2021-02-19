@@ -99,6 +99,7 @@ asan-ubsan:
       - cd ..
       - meson -Db_sanitize=address,undefined build
       - cd build && meson test
+      - meson compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
 
@@ -122,6 +123,7 @@ tsan:
       - cd ..
       - meson -Db_sanitize=thread build
       - cd build && meson test
+      - meson compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
 
