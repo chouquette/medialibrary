@@ -98,6 +98,16 @@ else
     libvlcpp_dep = []
 endif
 
+if get_option('force_attachment_api')
+  if not libvlc_dep.found()
+    warning('Invalid option \'force_attachment_api\' provided without libvlc enabled')
+  elif libvlc_dep.version().version_compare('>=4.0')
+    warning('Invalid option \'force_attachment_api\' provided with libvlc >=4.x')
+  else
+    cdata.set('FORCE_ATTACHMENTS_API', 1)
+  endif
+endif
+
 config_h = configure_file(output: 'config.h', configuration: cdata)
 add_project_arguments('-DHAVE_CONFIG_H=1', language: ['cpp'])
 

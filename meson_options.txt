@@ -1,3 +1,4 @@
 option('libvlc', type: 'feature', value: 'enabled')
 option('libjpeg_prefix', type: 'string')
 option('tests', type: 'feature', value: 'auto')
+option('force_attachment_api', type: 'boolean', value: false)
