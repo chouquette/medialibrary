@@ -118,7 +118,7 @@ subdir('src')
 # Ideally we shouldn't need an option to build tests, but we need
 # https://github.com/mesonbuild/meson/issues/2518
 # to be fixed first
-if libvlc_dep.found() and get_option('tests').enabled()
+if libvlc_dep.found() and not get_option('tests').disabled()
   subdir('test')
 endif
 
