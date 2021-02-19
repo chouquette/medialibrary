@@ -287,8 +287,7 @@ public:
 
     virtual PriorityAccess acquirePriorityAccess() override;
 
-protected:
-    // Allow access to unit test MediaLibrary implementations
+private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;
     static const std::vector<const char*> SupportedSubtitleExtensions;
