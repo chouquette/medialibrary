@@ -125,10 +125,10 @@ int main( int argc, char** argv )
     auto mlDir = getTempPath( "ml_folder" );
 
     auto testCb = std::make_unique<FastDiscoverCancelCb>();
-    auto ml = std::make_unique<medialibrary::MediaLibrary>();
+    auto ml = std::make_unique<medialibrary::MediaLibrary>( dbPath, mlDir, nullptr );
 //    ml->setVerbosity( LogLevel::Debug );
     unlink( dbPath.c_str() );
-    ml->initialize( dbPath, mlDir, testCb.get() );
+    ml->initialize( testCb.get() );
 
     ml->discover( entrypoint );
 
