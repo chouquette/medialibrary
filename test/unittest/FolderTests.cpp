@@ -39,16 +39,7 @@
 
 struct FolderTests : public UnitTests<mock::WaitForDiscoveryComplete>
 {
-    std::shared_ptr<mock::FileSystemFactory> fsMock;
-
 public:
-    virtual void SetUp() override
-    {
-        fsMock.reset( new mock::FileSystemFactory );
-        fsFactory = fsMock;
-        UnitTests<mock::WaitForDiscoveryComplete>::SetUp();
-    }
-
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
                                           const std::string& mlFolderDir ) override
     {

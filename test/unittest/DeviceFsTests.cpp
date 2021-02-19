@@ -43,22 +43,19 @@ struct DeviceFsTests : public UnitTests<mock::WaitForDiscoveryComplete>
 {
     static const std::string RemovableDeviceUuid;
     static const std::string RemovableDeviceMountpoint;
-    std::shared_ptr<mock::FileSystemFactory> fsMock;
     static constexpr auto NbRemovableMedia = 6u;
 
-    virtual void SetUp() override
+    virtual void SetupMockFileSystem() override
     {
         fsMock.reset( new mock::FileSystemFactory );
         fsMock->addFolder( "file:///a/mnt/" );
-        auto device = fsMock->addDevice( DeviceFsTests::RemovableDeviceMountpoint, DeviceFsTests::RemovableDeviceUuid, true );
+        fsMock->addDevice( DeviceFsTests::RemovableDeviceMountpoint, DeviceFsTests::RemovableDeviceUuid, true );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablefile3.mp3" );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablefile4.mp3" );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" );
         fsMock->addFile( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo2.mkv" );
-        fsFactory = fsMock;
-        UnitTests<mock::WaitForDiscoveryComplete>::SetUp();
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,

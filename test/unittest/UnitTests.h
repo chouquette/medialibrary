@@ -38,7 +38,7 @@ struct UnitTests
 {
     std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<CB> cbMock;
-    std::shared_ptr<mock::FileSystemFactory> fsFactory;
+    std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
     UnitTests() = default;
@@ -48,17 +48,15 @@ struct UnitTests
     {
         auto mlDir = getTempPath( "ml_folder" );
         InstantiateMediaLibrary( "test.db", mlDir );
-        if ( fsFactory == nullptr )
-        {
-            fsFactory = std::make_shared<mock::FileSystemFactory>();
-        }
+        fsMock = std::make_shared<mock::FileSystemFactory>();
+        SetupMockFileSystem();
         cbMock.reset( new CB );
 
         // Instantiate it here to avoid fiddling with multiple SetUp overloads
         if ( mockDeviceLister == nullptr )
             mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
-        ml->setFsFactory( fsFactory );
+        ml->setFsFactory( fsMock );
         ml->registerDeviceLister( mockDeviceLister, "file://" );
         ml->setVerbosity( LogLevel::Debug );
         auto res = ml->initialize( cbMock.get() );
@@ -66,6 +64,10 @@ struct UnitTests
         auto setupRes = ml->setupDummyFolder();
         ASSERT_TRUE( setupRes );
         TestSpecificSetup();
+    }
+
+    virtual void SetupMockFileSystem()
+    {
     }
 
     virtual void TestSpecificSetup()

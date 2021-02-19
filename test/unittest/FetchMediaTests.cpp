@@ -33,16 +33,13 @@ struct FetchMediaTests : public UnitTests<mock::WaitForDiscoveryComplete>
 {
     static const std::string RemovableDeviceUuid;
     static const std::string RemovableDeviceMountpoint;
-    std::shared_ptr<mock::FileSystemFactory> fsMock;
 
-    virtual void SetUp() override
+    virtual void SetupMockFileSystem() override
     {
         fsMock.reset( new mock::FileSystemFactory );
         fsMock->addFolder( "file:///a/mnt/" );
-        auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid, true );
+        fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid, true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
-        fsFactory = fsMock;
-        UnitTests<mock::WaitForDiscoveryComplete>::SetUp();
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
