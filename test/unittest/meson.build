@@ -57,7 +57,7 @@ album_tests = [
   'SortByDuration',
 ]
 foreach t : album_tests 
-  test('Album.' + t, album_test_exe, args: t, suite: ['unittest', 'Album'], is_parallel: false)
+  test('Album.' + t, album_test_exe, args: t, suite: ['unittest', 'Album'])
 endforeach
 
 device_fs_test_exe = executable('device_fs_tests', 'DeviceFsTests.cpp',
@@ -89,7 +89,7 @@ device_fs_tests = [
 ]
 
 foreach t : device_fs_tests
-  test('DeviceFs.' + t, device_fs_test_exe, args: t, suite: ['unittest', 'DeviceFs'], is_parallel: false)
+  test('DeviceFs.' + t, device_fs_test_exe, args: t, suite: ['unittest', 'DeviceFs'])
 endforeach
 
 device_test_exe = executable('device_tests', 'DeviceTests.cpp',
@@ -112,7 +112,7 @@ device_tests = [
 ]
 
 foreach t : device_tests
-  test('Device.' + t, device_test_exe, args: t, suite: ['unittest', 'Device'], is_parallel: false)
+  test('Device.' + t, device_test_exe, args: t, suite: ['unittest', 'Device'])
 endforeach
 
 album_track_tests = [
@@ -131,7 +131,7 @@ album_track_test_exe = executable('album_track_tests', 'AlbumTrackTests.cpp',
 )
 
 foreach t : album_track_tests
-  test('AlbumTrack.' + t, album_track_test_exe, args: t, suite: ['unittest', 'AlbumTrack'], is_parallel: false)
+  test('AlbumTrack.' + t, album_track_test_exe, args: t, suite: ['unittest', 'AlbumTrack'])
 endforeach
 
 misc_test_exe = executable('misc_tests', 'MiscTests.cpp',
@@ -161,7 +161,7 @@ misc_tests = [
 ]
 
 foreach t : misc_tests
-  test('Misc.' + t, misc_test_exe, args: t, suite: ['unittest', 'Misc'], is_parallel: false)
+  test('Misc.' + t, misc_test_exe, args: t, suite: ['unittest', 'Misc'])
 endforeach
 
 db_model_test_exe = executable('db_model_tests', 'DbModelTests.cpp',
@@ -200,7 +200,7 @@ db_model_tests = [
 ]
 
 foreach t : db_model_tests
-  test('DbModel.' + t, db_model_test_exe, args: t, suite: ['unittest', 'DbModel'], is_parallel: false)
+  test('DbModel.' + t, db_model_test_exe, args: t, suite: ['unittest', 'DbModel'])
 endforeach
 
 artist_test_exe = executable('artist_tests', 'ArtistTests.cpp',
@@ -240,7 +240,7 @@ artist_tests = [
 ]
 
 foreach t : artist_tests
-  test('Artist.' + t, artist_test_exe, args: t, suite: ['unittest', 'Artist'], is_parallel: false)
+  test('Artist.' + t, artist_test_exe, args: t, suite: ['unittest', 'Artist'])
 endforeach
 
 audio_track_test_exe = executable('audio_track_tests', 'AudioTrackTests.cpp',
@@ -261,7 +261,7 @@ audio_track_tests = [
 ]
 
 foreach t : audio_track_tests
-  test('AudioTrack.' + t, audio_track_test_exe, args: t, suite: ['unittest', 'AudioTrack'], is_parallel: false)
+  test('AudioTrack.' + t, audio_track_test_exe, args: t, suite: ['unittest', 'AudioTrack'])
 endforeach
 
 bookmark_test_exe = executable('bookmark_tests', 'BookmarkTests.cpp',
@@ -289,7 +289,7 @@ bookmark_tests = [
 ]
 
 foreach t : bookmark_tests
-  test('Bookmark.' + t, bookmark_test_exe, args: t, suite: ['unittest', 'Bookmark'], is_parallel: false)
+  test('Bookmark.' + t, bookmark_test_exe, args: t, suite: ['unittest', 'Bookmark'])
 endforeach
 
 chapter_test_exe = executable('chapter_tests', 'ChapterTests.cpp',
@@ -307,7 +307,7 @@ chapter_tests = [
 ]
 
 foreach t : chapter_tests
-  test('Chapter.' + t, chapter_test_exe, args: t, suite: ['unittest', 'Chapter'], is_parallel: false)
+  test('Chapter.' + t, chapter_test_exe, args: t, suite: ['unittest', 'Chapter'])
 endforeach
 
 discoverer_test_exe = executable('discoverer_tests', 'DiscovererTests.cpp',
@@ -329,7 +329,7 @@ discoverer_tests = [
 ]
 
 foreach t : discoverer_tests
-  test('Discoverer.' + t, discoverer_test_exe, args: t, suite: ['unittest', 'Discoverer'], is_parallel: false)
+  test('Discoverer.' + t, discoverer_test_exe, args: t, suite: ['unittest', 'Discoverer'])
 endforeach
 
 file_test_exe = executable('file_tests', 'FileTests.cpp',
@@ -353,7 +353,7 @@ file_tests = [
 ]
 
 foreach t : file_tests
-  test('File.' + t, file_test_exe, args: t, suite: ['unittest', 'File'], is_parallel: false)
+  test('File.' + t, file_test_exe, args: t, suite: ['unittest', 'File'])
 endforeach
 
 folder_test_exe = executable('folder_tests', 'FolderTests.cpp',
@@ -408,7 +408,7 @@ folder_tests = [
 ]
 
 foreach t : folder_tests
-  test('Folder.' + t, folder_test_exe, args: t, suite: ['unittest', 'Folder'], is_parallel: false)
+  test('Folder.' + t, folder_test_exe, args: t, suite: ['unittest', 'Folder'])
 endforeach
 
 fs_utils_test_exe = executable('fs_utils_tests', 'FsUtilsTests.cpp',
@@ -434,7 +434,7 @@ fs_utils_tests = [
 ]
 
 foreach t : fs_utils_tests
-  test('FsUtils.' + t, fs_utils_test_exe, args: t, suite: ['unittest', 'FsUtils'], is_parallel: false)
+  test('FsUtils.' + t, fs_utils_test_exe, args: t, suite: ['unittest', 'FsUtils'])
 endforeach
 
 genre_test_exe = executable('genre_tests', 'GenreTests.cpp',
@@ -466,7 +466,7 @@ genre_tests = [
 ]
 
 foreach t : genre_tests
-  test('Genre.' + t, genre_test_exe, args: t, suite: ['unittest', 'Genre'], is_parallel: false)
+  test('Genre.' + t, genre_test_exe, args: t, suite: ['unittest', 'Genre'])
 endforeach
 
 label_test_exe = executable('label_tests', 'LabelTests.cpp',
@@ -486,7 +486,7 @@ label_tests = [
 ]
 
 foreach t : label_tests
-  test('Label.' + t, label_test_exe, args: t, suite: ['unittest', 'Label'], is_parallel: false)
+  test('Label.' + t, label_test_exe, args: t, suite: ['unittest', 'Label'])
 endforeach
 
 media_group_test_exe = executable('media_groups_tests', 'MediaGroupTests.cpp',
@@ -536,7 +536,7 @@ media_group_tests = [
 ]
 
 foreach t : media_group_tests
-  test('MediaGroup.' + t, media_group_test_exe, args: t, suite: ['unittest', 'MediaGroup'], is_parallel: false)
+  test('MediaGroup.' + t, media_group_test_exe, args: t, suite: ['unittest', 'MediaGroup'])
 endforeach
 
 fetch_media_test_exe = executable('fetch_media_tests', 'FetchMediaTests.cpp',
@@ -554,7 +554,7 @@ fetch_media_tests = [
 ]
 
 foreach t : fetch_media_tests
-  test('FetchMedia.' + t, fetch_media_test_exe, args: t, suite: ['unittest', 'FetchMedia'], is_parallel: false)
+  test('FetchMedia.' + t, fetch_media_test_exe, args: t, suite: ['unittest', 'FetchMedia'])
 endforeach
 
 media_test_exe = executable('media_tests', 'MediaTests.cpp',
@@ -625,7 +625,7 @@ media_tests = [
 ]
 
 foreach t : media_tests
-  test('Media.' + t, media_test_exe, args: t, suite: ['unittest', 'Media'], is_parallel: false)
+  test('Media.' + t, media_test_exe, args: t, suite: ['unittest', 'Media'])
 endforeach
 
 movie_test_exe = executable('movie_tests', 'MovieTests.cpp',
@@ -647,7 +647,7 @@ movie_tests = [
 ]
 
 foreach t : movie_tests
-  test('Movie.' + t, movie_test_exe, args: t, suite: ['unittest', 'Movie'], is_parallel: false)
+  test('Movie.' + t, movie_test_exe, args: t, suite: ['unittest', 'Movie'])
 endforeach
 
 playlist_test_exe = executable('playlist_tests', 'PlaylistTests.cpp',
@@ -690,7 +690,7 @@ playlist_tests = [
 ]
 
 foreach t : playlist_tests
-  test('Playlist.' + t, playlist_test_exe, args: t, suite: ['unittest', 'Playlist'], is_parallel: false)
+  test('Playlist.' + t, playlist_test_exe, args: t, suite: ['unittest', 'Playlist'])
 endforeach
 
 removal_notifier_test_exe = executable('removal_notifier_tests', 'RemovalNotifierTests.cpp',
@@ -708,7 +708,7 @@ removal_notifier_tests = [
 ]
 
 foreach t : removal_notifier_tests
-  test('RemovalNotifier.' + t, removal_notifier_test_exe, args: t, suite: ['unittest', 'RemovalNotifier'], is_parallel: false)
+  test('RemovalNotifier.' + t, removal_notifier_test_exe, args: t, suite: ['unittest', 'RemovalNotifier'])
 endforeach
 
 show_test_exe = executable('show_tests', 'ShowTests.cpp',
@@ -743,7 +743,7 @@ show_tests = [
 ]
 
 foreach t : show_tests
-  test('Show.' + t, show_test_exe, args: t, suite: ['unittest', 'Show'], is_parallel: false)
+  test('Show.' + t, show_test_exe, args: t, suite: ['unittest', 'Show'])
 endforeach
 
 subtitle_track_test_exe = executable('subtitle_track_tests', 'SubtitleTrackTests.cpp',
@@ -763,7 +763,7 @@ subtitle_track_tests = [
 ]
 
 foreach t : subtitle_track_tests
-  test('SubtitleTrack.' + t, subtitle_track_test_exe, args: t, suite: ['unittest', 'SubtitleTrack'], is_parallel: false)
+  test('SubtitleTrack.' + t, subtitle_track_test_exe, args: t, suite: ['unittest', 'SubtitleTrack'])
 endforeach
 
 thumbnail_test_exe = executable('thumbnail_tests', 'ThumbnailTests.cpp',
@@ -795,7 +795,7 @@ thumbnail_tests = [
 ]
 
 foreach t : thumbnail_tests
-  test('Thumbnail.' + t, thumbnail_test_exe, args: t, suite: ['unittest', 'Thumbnail'], is_parallel: false)
+  test('Thumbnail.' + t, thumbnail_test_exe, args: t, suite: ['unittest', 'Thumbnail'])
 endforeach
 
 title_analyzer_test_exe = executable('title_analyzer_tests', 'TitleAnalyzerTests.cpp',
@@ -814,7 +814,7 @@ title_analyzer_tests = [
 ]
 
 foreach t : title_analyzer_tests
-  test('TitleAnalyzer.' + t, title_analyzer_test_exe, args: t, suite: ['unittest', 'TitleAnalyzer'], is_parallel: false)
+  test('TitleAnalyzer.' + t, title_analyzer_test_exe, args: t, suite: ['unittest', 'TitleAnalyzer'])
 endforeach
 
 url_test_exe = executable('url_tests', 'UrlTests.cpp',
@@ -836,7 +836,7 @@ url_tests = [
 ]
 
 foreach t : url_tests
-  test('Url.' + t, url_test_exe, args: t, suite: ['unittest', 'Url'], is_parallel: false)
+  test('Url.' + t, url_test_exe, args: t, suite: ['unittest', 'Url'])
 endforeach
 
 video_track_test_exe = executable('video_track_tests', 'VideoTrackTests.cpp',
@@ -855,5 +855,5 @@ video_track_tests = [
 ]
 
 foreach t : video_track_tests
-  test('VideoTrack.' + t, video_track_test_exe, args: t, suite: ['unittest', 'VideoTrack'], is_parallel: false)
+  test('VideoTrack.' + t, video_track_test_exe, args: t, suite: ['unittest', 'VideoTrack'])
 endforeach

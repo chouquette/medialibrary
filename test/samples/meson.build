@@ -67,12 +67,10 @@ foreach s : test_suites
       test(t, samples_exe,
           args: [s, t],
           suite: ['functional', s],
-          is_parallel: false,
       )
   endforeach
 endforeach
 
 test('BackupRestorePlaylist', samples_exe,
-  args: ['BackupRestorePlaylist', 'dummy'],
-  is_parallel: false
+  args: ['BackupRestorePlaylist', 'dummy']
 )
