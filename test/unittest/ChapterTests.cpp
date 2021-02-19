@@ -33,9 +33,8 @@ struct ChapterTests : public Tests
 {
     std::shared_ptr<Media> m;
 
-    virtual void SetUp() override
+    virtual void TestSpecificSetup() override
     {
-        Tests::SetUp();
         m = std::static_pointer_cast<Media>( ml->addMedia( "media.avi", IMedia::Type::Video ) );
     }
 };

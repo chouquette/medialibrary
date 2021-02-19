@@ -36,9 +36,8 @@ struct GenreTests : public Tests
 {
     std::shared_ptr<Genre> g;
 
-    virtual void SetUp() override
+    virtual void TestSpecificSetup() override
     {
-        Tests::SetUp();
         g = ml->createGenre( "genre" );
     }
 };

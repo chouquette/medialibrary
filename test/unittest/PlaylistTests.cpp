@@ -34,11 +34,9 @@
 struct PlaylistTests : public Tests
 {
     std::shared_ptr<Playlist> pl;
-    std::shared_ptr<Media> m;
 
-    virtual void SetUp() override
+    virtual void TestSpecificSetup() override
     {
-        Tests::SetUp();
         pl = std::static_pointer_cast<Playlist>( ml->createPlaylist( "test playlist" ) );
     }
 

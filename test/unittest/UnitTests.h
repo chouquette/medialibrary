@@ -65,6 +65,11 @@ struct UnitTests
         ASSERT_EQ( InitializeResult::Success, res );
         auto setupRes = ml->setupDummyFolder();
         ASSERT_TRUE( setupRes );
+        TestSpecificSetup();
+    }
+
+    virtual void TestSpecificSetup()
+    {
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,

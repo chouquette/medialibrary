@@ -33,9 +33,9 @@ struct FileTests : public Tests
 {
     std::shared_ptr<File> f;
     std::shared_ptr<Media> m;
-    virtual void SetUp() override
+
+    virtual void TestSpecificSetup() override
     {
-        Tests::SetUp();
         m = ml->addFile( "media.mkv", IMedia::Type::Unknown );
         auto files = m->files();
         ASSERT_EQ( 1u, files.size() );
