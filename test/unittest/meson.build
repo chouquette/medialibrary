@@ -74,7 +74,7 @@ device_fs_tests = [
   'RemoveDisk',
   'UnmountDisk',
   'ReplugDisk',
-  'ReplugDiskWithExtraFiles ',
+  'ReplugDiskWithExtraFiles',
   'RemoveAlbumAndArtist',
   'RemoveArtist',
   'PartialAlbumRemoval',
