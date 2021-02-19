@@ -183,20 +183,22 @@ public:
     virtual void onDbConnectionReady( sqlite::Connection* ) override
     {
     }
-
-    void deleteAllTables( sqlite::Connection* dbConn )
-    {
-        MediaLibrary::deleteAllTables( dbConn );
-    }
 };
 
 struct DbModel : public Tests
 {
-    std::unique_ptr<MediaLibraryTesterNoForceRescan> ml;
-
-    virtual void SetUp() override
+    virtual void InstantiateMediaLibrary( const std::string& dbPath,
+                                          const std::string& mlDir ) override
     {
-        ml.reset( new MediaLibraryTesterNoForceRescan( "test.db", "/tmp/ml_folder/" ) );
+        ml.reset( new MediaLibraryTesterNoForceRescan( dbPath, mlDir ) );
+    }
+
+    virtual void Initialize() override
+    {
+        /*
+         * Don't initialize the media lib now, wait until we load the fake
+         * database for the migration tests
+         */
     }
 
     void LoadFakeDB( const char* dbPath )

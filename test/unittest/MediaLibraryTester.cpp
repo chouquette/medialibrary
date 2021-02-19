@@ -286,3 +286,8 @@ bool MediaLibraryTester::setupDummyFolder()
         return false;
     return dummyFolder != nullptr;
 }
+
+void MediaLibraryTester::deleteAllTables( sqlite::Connection* dbConn )
+{
+    MediaLibrary::deleteAllTables( dbConn );
+}

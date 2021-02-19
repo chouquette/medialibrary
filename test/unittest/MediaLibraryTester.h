@@ -82,6 +82,7 @@ public:
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
     virtual bool setupDummyFolder();
+    void deleteAllTables( sqlite::Connection* dbConn );
 
 private:
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,

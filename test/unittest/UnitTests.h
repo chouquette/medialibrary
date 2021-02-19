@@ -59,10 +59,7 @@ struct UnitTests
         ml->setFsFactory( fsMock );
         ml->registerDeviceLister( mockDeviceLister, "file://" );
         ml->setVerbosity( LogLevel::Debug );
-        auto res = ml->initialize( cbMock.get() );
-        ASSERT_EQ( InitializeResult::Success, res );
-        auto setupRes = ml->setupDummyFolder();
-        ASSERT_TRUE( setupRes );
+        Initialize();
         TestSpecificSetup();
     }
 
@@ -72,6 +69,14 @@ struct UnitTests
 
     virtual void TestSpecificSetup()
     {
+    }
+
+    virtual void Initialize()
+    {
+        auto res = ml->initialize( cbMock.get() );
+        ASSERT_EQ( InitializeResult::Success, res );
+        auto setupRes = ml->setupDummyFolder();
+        ASSERT_TRUE( setupRes );
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
