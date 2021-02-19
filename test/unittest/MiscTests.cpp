@@ -54,8 +54,9 @@ struct MiscTests : public Tests
     virtual void SetUp() override
     {
         // No need to setup anything more than the media library instance,
-        // those tests are not using the DB
-        ml.reset( new MediaLibraryTester( "test.db", "/tmp/ml_folder" ) );
+        // those tests are not using the DB, we only need an instance for
+        // accessing the supported extensions
+        ml.reset( new MediaLibraryTester( "no_such_file", "or_directory" ) );
     }
 };
 
