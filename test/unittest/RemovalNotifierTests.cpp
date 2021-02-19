@@ -82,16 +82,8 @@ private:
     uint32_t m_nbTotalMedia;
 };
 
-struct RemovalNotifierTests : public Tests
+struct RemovalNotifierTests : public UnitTests<MockCallback>
 {
-    std::unique_ptr<MockCallback> cbMock;
-    virtual void SetUp() override
-    {
-        cbMock.reset( new MockCallback );
-        mlCb = cbMock.get();
-        Tests::SetUp();
-    }
-
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
                                           const std::string& mlFolderDir ) override
     {

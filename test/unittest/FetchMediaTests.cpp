@@ -29,23 +29,20 @@
 #include "mocks/FileSystem.h"
 #include "mocks/DiscovererCbMock.h"
 
-struct FetchMediaTests : public Tests
+struct FetchMediaTests : public UnitTests<mock::WaitForDiscoveryComplete>
 {
     static const std::string RemovableDeviceUuid;
     static const std::string RemovableDeviceMountpoint;
     std::shared_ptr<mock::FileSystemFactory> fsMock;
-    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
 
     virtual void SetUp() override
     {
         fsMock.reset( new mock::FileSystemFactory );
-        cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsMock->addFolder( "file:///a/mnt/" );
         auto device = fsMock->addDevice( RemovableDeviceMountpoint, RemovableDeviceUuid, true );
         fsMock->addFile( RemovableDeviceMountpoint + "removablefile.mp3" );
         fsFactory = fsMock;
-        mlCb = cbMock.get();
-        Tests::SetUp();
+        UnitTests<mock::WaitForDiscoveryComplete>::SetUp();
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,

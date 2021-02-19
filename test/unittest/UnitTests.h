@@ -30,22 +30,56 @@
 #include "MediaLibraryTester.h"
 #include "medialibrary/filesystem/IDirectory.h"
 
+#include "common/util.h"
+#include "mocks/FileSystem.h"
 
-struct Tests
+template <typename CB = mock::NoopCallback>
+struct UnitTests
 {
-    Tests();
-    virtual ~Tests() = default;
     std::unique_ptr<MediaLibraryTester> ml;
-    std::unique_ptr<mock::NoopCallback> cbMock;
-    IMediaLibraryCb* mlCb;
+    std::unique_ptr<CB> cbMock;
     std::shared_ptr<fs::IFileSystemFactory> fsFactory;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
-    virtual void SetUp();
+    UnitTests() = default;
+    virtual ~UnitTests() = default;
+
+    virtual void SetUp()
+    {
+        auto mlDir = getTempPath( "ml_folder" );
+        InstantiateMediaLibrary( "test.db", mlDir );
+        if ( fsFactory == nullptr )
+        {
+            fsFactory = std::shared_ptr<fs::IFileSystemFactory>( new mock::NoopFsFactory );
+        }
+        cbMock.reset( new CB );
+
+        // Instantiate it here to avoid fiddling with multiple SetUp overloads
+        if ( mockDeviceLister == nullptr )
+            mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
+
+        ml->setFsFactory( fsFactory );
+        ml->registerDeviceLister( mockDeviceLister, "file://" );
+        ml->setVerbosity( LogLevel::Debug );
+        auto res = ml->initialize( cbMock.get() );
+        ASSERT_EQ( InitializeResult::Success, res );
+        auto setupRes = ml->setupDummyFolder();
+        ASSERT_TRUE( setupRes );
+    }
+
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlFolderDir );
-    virtual void TearDown();
+                                          const std::string& mlDir )
+    {
+        ml.reset( new MediaLibraryTester( dbPath, mlDir ) );
+    }
+
+    virtual void TearDown()
+    {
+        ml.reset();
+    }
 };
+
+using Tests = UnitTests<>;
 
 #define INIT_TESTS_C(TestClass) \
     if ( ac != 2 ) { fprintf(stderr, "Missing test name\n" ); return 1; } \

@@ -37,20 +37,16 @@
 
 #include <memory>
 
-
-struct FolderTests : public Tests
+struct FolderTests : public UnitTests<mock::WaitForDiscoveryComplete>
 {
     std::shared_ptr<mock::FileSystemFactory> fsMock;
-    std::unique_ptr<mock::WaitForDiscoveryComplete> cbMock;
 
 public:
     virtual void SetUp() override
     {
         fsMock.reset( new mock::FileSystemFactory );
-        cbMock.reset( new mock::WaitForDiscoveryComplete );
         fsFactory = fsMock;
-        mlCb = cbMock.get();
-        Tests::SetUp();
+        UnitTests<mock::WaitForDiscoveryComplete>::SetUp();
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,

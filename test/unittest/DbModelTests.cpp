@@ -193,7 +193,6 @@ public:
 struct DbModel : public Tests
 {
     std::unique_ptr<MediaLibraryTesterNoForceRescan> ml;
-    std::unique_ptr<mock::NoopCallback> cbMock;
 
     virtual void SetUp() override
     {

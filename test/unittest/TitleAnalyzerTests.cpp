@@ -28,10 +28,6 @@
 
 #include "utils/TitleAnalyzer.h"
 
-class TitleAnalyzerTests : public Tests
-{
-};
-
 #define CHECK(out, in) \
     do \
     { \
