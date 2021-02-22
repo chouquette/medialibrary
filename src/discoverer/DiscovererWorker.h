@@ -31,8 +31,8 @@
 
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
-#include "discoverer/IDiscoverer.h"
 #include "medialibrary/IInterruptProbe.h"
+#include "FsDiscoverer.h"
 
 namespace medialibrary
 {
@@ -78,7 +78,7 @@ protected:
     DiscovererWorker() = default;
 
 public:
-    DiscovererWorker( MediaLibrary* ml, std::unique_ptr<IDiscoverer> discoverer );
+    DiscovererWorker( MediaLibrary* ml, std::unique_ptr<FsDiscoverer> discoverer );
     ~DiscovererWorker();
     void stop();
 
@@ -117,7 +117,7 @@ protected:
     std::atomic_bool m_run;
     // This will be true when a single task needs to be interrupted
     std::atomic_bool m_taskInterrupted;
-    std::unique_ptr<IDiscoverer> m_discoverer;
+    std::unique_ptr<FsDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
     compat::Thread m_thread;
 };

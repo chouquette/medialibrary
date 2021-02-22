@@ -35,6 +35,8 @@
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Defer.h"
 #include "parser/Parser.h"
+#include "FsDiscoverer.h"
+#include "probe/IProbe.h"
 
 #include <cassert>
 #include <algorithm>
@@ -43,7 +45,7 @@ namespace medialibrary
 {
 
 DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
-                                    std::unique_ptr<IDiscoverer> discoverer )
+                                    std::unique_ptr<FsDiscoverer> discoverer )
     : m_currentTask( nullptr )
     , m_run( true )
     , m_taskInterrupted( false )

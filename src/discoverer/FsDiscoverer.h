@@ -24,8 +24,8 @@
 
 #include <memory>
 
-#include "discoverer/IDiscoverer.h"
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "discoverer/probe/IProbe.h"
 
 namespace medialibrary
 {
@@ -33,21 +33,22 @@ namespace medialibrary
 class MediaLibrary;
 class IMediaLibraryCb;
 class Folder;
+class IInterruptProbe;
 
 namespace prober
 {
 class IProbe;
 }
 
-class FsDiscoverer : public IDiscoverer
+class FsDiscoverer
 {
 public:
     FsDiscoverer( MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
-    virtual bool discover( const std::string& entryPoint,
-                           const IInterruptProbe& interruptProbe ) override;
-    virtual bool reload( const IInterruptProbe& interruptProbe ) override;
-    virtual bool reload( const std::string& entryPoint,
-                         const IInterruptProbe& interruptProbe ) override;
+    bool discover( const std::string& entryPoint,
+                   const IInterruptProbe& interruptProbe );
+    bool reload( const IInterruptProbe& interruptProbe );
+    bool reload( const std::string& entryPoint,
+                 const IInterruptProbe& interruptProbe );
 
 private:
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
