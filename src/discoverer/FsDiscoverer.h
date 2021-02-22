@@ -31,6 +31,7 @@ namespace medialibrary
 {
 
 class MediaLibrary;
+class IMediaLibraryCb;
 class Folder;
 
 namespace prober

@@ -23,14 +23,11 @@
 #pragma once
 
 #include <string>
-#include "Types.h"
-#include "medialibrary/filesystem/IDirectory.h"
-#include "medialibrary/filesystem/IFile.h"
-#include "medialibrary/IMediaLibrary.h"
-#include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {
+
+class IInterruptProbe;
 
 class IDiscoverer
 {

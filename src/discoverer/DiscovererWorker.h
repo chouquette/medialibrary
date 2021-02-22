@@ -32,9 +32,12 @@
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
 #include "discoverer/IDiscoverer.h"
+#include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {
+
+class MediaLibrary;
 
 namespace parser
 {

@@ -30,6 +30,8 @@
 #include <utility>
 
 #include "medialibrary/filesystem/IDevice.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "Media.h"
 #include "File.h"
@@ -40,6 +42,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "discoverer/probe/IProbe.h"
+#include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {

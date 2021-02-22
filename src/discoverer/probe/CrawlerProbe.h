@@ -24,6 +24,8 @@
 #pragma once
 
 #include "discoverer/probe/IProbe.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include <cstring>
 
 namespace medialibrary
