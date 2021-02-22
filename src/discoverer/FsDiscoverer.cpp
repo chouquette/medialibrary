@@ -95,8 +95,7 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
             return true;
         // Fetch files explicitly
         fsDir->files();
-        auto newFolder = addFolder( fsDir, m_probe->getFolderParent().get(),
-                              *fsFactory );
+        auto newFolder = addFolder( fsDir, m_probe->getFolderParent().get() );
         auto res = newFolder != nullptr;
         if ( res == true )
         {
@@ -342,8 +341,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 {
                     if ( m_probe->isHidden( *subFolder ) )
                         continue;
-                    auto folder = addFolder( subFolder, currentFolder.get(),
-                                                fsFactory );
+                    auto folder = addFolder( subFolder, currentFolder.get() );
                     checkFolder( subFolder, std::move( folder ), interruptProbe, fsFactory,
                                  true, false );
                     continue;
@@ -528,7 +526,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
 
 std::shared_ptr<Folder>
 FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
-                         Folder* parentFolder, fs::IFileSystemFactory& fsFactory ) const
+                         Folder* parentFolder ) const
 {
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
@@ -537,7 +535,7 @@ FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
     if( deviceFs == nullptr )
         return nullptr;
     auto t = m_ml->getConn()->newTransaction();
-    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), fsFactory.scheme() );
+    auto device = Device::fromUuid( m_ml, deviceFs->uuid(), deviceFs->scheme() );
     if ( device == nullptr )
     {
         LOG_INFO( "Creating new device in DB ", deviceFs->uuid() );
