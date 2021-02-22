@@ -92,8 +92,14 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
             return true;
         // Fetch files explicitly
         fsDir->files();
-        auto res = addFolder( std::move( fsDir ), m_probe->getFolderParent().get(),
-                              interruptProbe, *fsFactory );
+        auto newFolder = addFolder( fsDir, m_probe->getFolderParent().get(),
+                              *fsFactory );
+        auto res = newFolder != nullptr;
+        if ( res == true )
+        {
+            checkFolder( fsDir, std::move( newFolder ), interruptProbe, *fsFactory,
+                         true, true );
+        }
         m_ml->getCb()->onEntryPointAdded( entryPoint, res );
         return res;
     }
@@ -333,8 +339,10 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 {
                     if ( m_probe->isHidden( *subFolder ) )
                         continue;
-                    addFolder( subFolder, currentFolder.get(), interruptProbe,
-                               fsFactory );
+                    auto folder = addFolder( subFolder, currentFolder.get(),
+                                                fsFactory );
+                    checkFolder( subFolder, std::move( folder ), interruptProbe, fsFactory,
+                                 true, false );
                     continue;
                 }
                 catch ( const sqlite::errors::ConstraintForeignKey& ex )
@@ -515,17 +523,16 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }
 
-bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
-                              Folder* parentFolder,
-                              const IInterruptProbe& interruptProbe,
-                              fs::IFileSystemFactory& fsFactory ) const
+std::shared_ptr<Folder>
+FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
+                         Folder* parentFolder, fs::IFileSystemFactory& fsFactory ) const
 {
     auto deviceFs = folder->device();
     // We are creating a folder, there has to be a device containing it.
     assert( deviceFs != nullptr );
     // But gracefully handle failure in release mode
     if( deviceFs == nullptr )
-        return false;
+        return nullptr;
     auto t = m_ml->getConn()->newTransaction();
     auto device = Device::fromUuid( m_ml, deviceFs->uuid(), fsFactory.scheme() );
     if ( device == nullptr )
@@ -535,7 +542,7 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                                  utils::url::scheme( folder->mrl() ),
                                  deviceFs->isRemovable(), deviceFs->isNetwork() );
         if ( device == nullptr )
-            return false;
+            return nullptr;
         if ( deviceFs->isNetwork() == true )
         {
             auto mountpoints = deviceFs->mountpoints();
@@ -549,11 +556,9 @@ bool FsDiscoverer::addFolder( std::shared_ptr<fs::IDirectory> folder,
                              parentFolder != nullptr ? parentFolder->id() : 0,
                              *device, *deviceFs );
     if ( f == nullptr )
-        return false;
+        return nullptr;
     t->commit();
-    checkFolder( std::move( folder ), std::move( f ), interruptProbe, fsFactory,
-                 true, true );
-    return true;
+    return f;
 }
 
 }
