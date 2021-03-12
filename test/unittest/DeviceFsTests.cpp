@@ -320,7 +320,7 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     ASSERT_NE( 0, removableAlbum->nbPresentTracks() );
     auto removableArtist = T->ml->artist( removableArtistId );
     ASSERT_NE( nullptr, removableArtist );
-    ASSERT_TRUE( removableArtist->isPresent() );
+    ASSERT_NE( 0, removableArtist->nbPresentTracks() );
 
 
     auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
@@ -345,7 +345,7 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     ASSERT_EQ( 0, removableAlbum->nbPresentTracks() );
     removableArtist = T->ml->artist( removableArtistId );
     ASSERT_NE( nullptr, removableArtist );
-    ASSERT_FALSE( removableArtist->isPresent() );
+    ASSERT_EQ( 0, removableArtist->nbPresentTracks() );
 
     // Now check that everything appears again when we plug the device back in
 

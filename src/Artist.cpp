@@ -49,7 +49,7 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbAlbums( row.extract<decltype(m_nbAlbums)>() )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_mbId( row.extract<decltype(m_mbId)>() )
-    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -60,7 +60,7 @@ Artist::Artist( MediaLibraryPtr ml, const std::string& name )
     , m_name( name )
     , m_nbAlbums( 0 )
     , m_nbTracks( 0 )
-    , m_isPresent( true )
+    , m_nbPresentTracks( 0 )
 {
 }
 
@@ -272,9 +272,9 @@ unsigned int Artist::nbTracks() const
     return m_nbTracks;
 }
 
-bool Artist::isPresent() const
+unsigned int Artist::nbPresentTracks() const
 {
-    return m_isPresent;
+    return m_nbPresentTracks;
 }
 
 void Artist::createTable( sqlite::Connection* dbConnection )

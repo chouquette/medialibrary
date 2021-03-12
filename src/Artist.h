@@ -106,7 +106,7 @@ public:
     bool setMusicBrainzId( const std::string& musicBrainzId );
     virtual unsigned int nbAlbums() const override;
     virtual unsigned int nbTracks() const override;
-    virtual bool isPresent() const override;
+    virtual unsigned int nbPresentTracks() const override;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
@@ -157,7 +157,7 @@ private:
     unsigned int m_nbAlbums;
     unsigned int m_nbTracks;
     std::string m_mbId;
-    bool m_isPresent;
+    unsigned int m_nbPresentTracks;
 
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
