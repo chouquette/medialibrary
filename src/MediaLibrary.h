@@ -270,6 +270,8 @@ public:
 
     virtual BookmarkPtr bookmark( int64_t bookmarkId ) const override;
 
+    virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) override;
+
 protected:
     // Allow access to unit test MediaLibrary implementations
     static const std::vector<const char*> SupportedMediaExtensions;

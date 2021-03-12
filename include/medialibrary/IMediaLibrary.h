@@ -31,6 +31,8 @@
 #include "IQuery.h"
 #include "IMedia.h"
 
+struct libvlc_instance_t;
+
 namespace medialibrary
 {
 
@@ -877,6 +879,18 @@ public:
                                    float position ) = 0;
 
     virtual BookmarkPtr bookmark( int64_t bookmarkId ) const = 0;
+
+    /**
+     * @brief setExternalLibvlcInstance Provides an existing libvlc instance
+     * @param inst A libvlc instance which can be released as soon as this function returns
+     * @return true if the instance was correctly set
+     *
+     * If the media library is build with libvlc support, this can't fail.
+     * This must be called before any discovery or parsing is started, so ideally
+     * the user should call this right after creating an IMediaLibrary instance
+     * through NewMediaLibrary
+     */
+    virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) = 0;
 };
 
 }

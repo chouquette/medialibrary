@@ -88,6 +88,7 @@
 #ifdef HAVE_LIBVLC
 #include "filesystem/libvlc/FileSystemFactory.h"
 #include "filesystem/libvlc/DeviceLister.h"
+#include "utils/VLCInstance.h"
 
 #include <vlcpp/vlc.hpp>
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
@@ -2919,6 +2920,49 @@ bool MediaLibrary::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType
 BookmarkPtr MediaLibrary::bookmark( int64_t bookmarkId ) const
 {
     return Bookmark::fetch( this, bookmarkId );
+}
+
+bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
+{
+#ifndef HAVE_LIBVLC
+    LOG_ERROR( "Trying to provide a libvlc instance with libvlc disabled" );
+    return false;
+#else
+    LOG_INFO( "Setting external libvlc instance: ", inst );
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( VLCInstance::isSet() == false )
+    {
+        /*
+         * If we never set the instance, we don't have to bother about background
+         * tasks using the previous one: take a shortcut.
+         */
+        VLCInstance::set( inst );
+        return true;
+    }
+    if ( m_parser != nullptr )
+    {
+        m_parser->stop();
+        m_parser.reset();
+        startParser();
+    }
+    if ( m_discovererWorker == nullptr )
+        return true;
+    m_discovererWorker->stop();
+    m_discovererWorker.reset();
+    /*
+     * This assumes that all network device lister are using libvlc and therefor
+     * they will need to be recreated
+     */
+    for ( auto& fsFactory : m_fsFactories )
+    {
+        if ( fsFactory->isNetworkFileSystem() == false )
+            continue;
+        fsFactory->stop();
+        fsFactory->start( &m_fsFactoryCb );
+    }
+    startDiscovererLocked();
+    return true;
+#endif
 }
 
 }

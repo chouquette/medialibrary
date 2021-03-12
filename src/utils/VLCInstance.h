@@ -39,6 +39,7 @@ class VLCInstance
 public:
     static VLC::Instance& get();
     static void set( libvlc_instance_t* instance );
+    static bool isSet();
 private:
     static compat::Mutex s_lock;
     static VLC::Instance s_instance;

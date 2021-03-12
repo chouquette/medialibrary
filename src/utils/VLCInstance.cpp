@@ -46,6 +46,12 @@ void VLCInstance::set( libvlc_instance_t* external_instance )
     s_instance = VLC::Instance{ external_instance };
 }
 
+bool VLCInstance::isSet()
+{
+    std::lock_guard<compat::Mutex> lock{ s_lock };
+    return s_instance.isValid();
+}
+
 VLC::Instance& VLCInstance::get()
 {
     std::lock_guard<compat::Mutex> lock{ s_lock };
