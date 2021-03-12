@@ -22,10 +22,14 @@
 
 #pragma once
 
+#include "compat/Mutex.h"
+
 namespace VLC
 {
 class Instance;
 }
+
+struct libvlc_instance_t;
 
 namespace medialibrary
 {
@@ -34,6 +38,10 @@ class VLCInstance
 {
 public:
     static VLC::Instance& get();
+    static void set( libvlc_instance_t* instance );
+private:
+    static compat::Mutex s_lock;
+    static VLC::Instance s_instance;
 };
 
 }

@@ -32,43 +32,31 @@
 #include "logging/Logger.h"
 #include "vlcpp/vlc.hpp"
 
-namespace
-{
-// Define this in the .cpp file to avoid including libvlcpp from the header.
-struct Init
-{
-    Init()
-    {
-        const char* args[] = {
-            "--no-lua",
-        };
-        instance = VLC::Instance( sizeof(args) / sizeof(args[0]), args );
-#if 0
-        // Do not take the string by reference. libvlcpp is constructing the std::string
-        // as it calls the log callback, so the string we receive will be move constructed
-        instance.logSet([](int lvl, const libvlc_log_t*, std::string msg) {
-            if ( lvl == LIBVLC_ERROR )
-                medialibrary::Log::Error( msg );
-            else if ( lvl == LIBVLC_WARNING )
-                medialibrary::Log::Warning( msg );
-            else
-                medialibrary::Log::Info( msg );
-        });
-#endif
-    }
-
-    VLC::Instance instance;
-};
-}
+#include <mutex>
 
 namespace medialibrary
 {
 
+compat::Mutex VLCInstance::s_lock;
+VLC::Instance VLCInstance::s_instance;
+
+void VLCInstance::set( libvlc_instance_t* external_instance )
+{
+    std::lock_guard<compat::Mutex> lock{ s_lock };
+    s_instance = VLC::Instance{ external_instance };
+}
+
 VLC::Instance& VLCInstance::get()
 {
-    // Instanciate the wrapper only once, and run initialization in its constructor.
-    static Init wrapper;
-    return wrapper.instance;
+    std::lock_guard<compat::Mutex> lock{ s_lock };
+    if ( s_instance.isValid() == false )
+    {
+        const char* args[] = {
+            "--no-lua",
+        };
+        s_instance = VLC::Instance{ sizeof(args) / sizeof(args[0]), args };
+    }
+    return s_instance;
 }
 
 }
