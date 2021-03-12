@@ -1162,15 +1162,20 @@ void MediaLibrary::startParser()
     m_parser = std::move( parser );
 }
 
-void MediaLibrary::startDiscoverer()
+void MediaLibrary::startDiscovererLocked()
 {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
     if ( m_discovererWorker != nullptr )
         return;
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
                                     std::make_unique<prober::CrawlerProbe>() );
     m_discovererWorker.reset( new DiscovererWorker( this,
                                                     std::move( discoverer ) ) );
+}
+
+void MediaLibrary::startDiscoverer()
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    startDiscovererLocked();
 }
 
 void MediaLibrary::startDeletionNotifier()
