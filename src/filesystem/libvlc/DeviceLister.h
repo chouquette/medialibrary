@@ -51,8 +51,8 @@ private:
 
 private:
     std::string m_protocol;
+    std::string m_sdName;
     VLC::MediaDiscoverer m_discoverer;
-    std::shared_ptr<VLC::MediaList> m_mediaList;
     IDeviceListerCb* m_cb;
 };
 

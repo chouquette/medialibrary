@@ -40,15 +40,11 @@ namespace libvlc
 {
 
 DeviceLister::DeviceLister( const std::string &protocol,
-                                          const std::string &sdName )
+                            const std::string &sdName )
     : m_protocol( protocol )
-    , m_discoverer( VLCInstance::get(), sdName )
-    , m_mediaList( m_discoverer.mediaList() )
+    , m_sdName( sdName )
     , m_cb( nullptr )
 {
-    auto& em = m_mediaList->eventManager();
-    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
-    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
 }
 
 void DeviceLister::refresh()
@@ -61,7 +57,14 @@ void DeviceLister::refresh()
 
 bool DeviceLister::start( IDeviceListerCb *cb )
 {
+    assert( m_cb == nullptr );
     m_cb = cb;
+    m_discoverer = VLC::MediaDiscoverer{ VLCInstance::get(), m_sdName };
+
+    auto& em = m_discoverer.mediaList()->eventManager();
+    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
+    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
+
     return m_discoverer.start();
 }
 
