@@ -45,7 +45,7 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     , m_id( row.extract<decltype(m_id)>() )
     , m_name( row.extract<decltype(m_name)>() )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
-    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -55,7 +55,7 @@ Genre::Genre( MediaLibraryPtr ml, const std::string& name )
     , m_id( 0 )
     , m_name( name )
     , m_nbTracks( 0 )
-    , m_isPresent( 0 )
+    , m_nbPresentTracks( 0 )
 {
 }
 
@@ -74,9 +74,9 @@ uint32_t Genre::nbTracks() const
     return m_nbTracks;
 }
 
-bool Genre::isPresent() const
+uint32_t Genre::nbPresentTracks() const
 {
-    return m_isPresent > 0;
+    return m_nbPresentTracks;
 }
 
 void Genre::updateCachedNbTracks( int increment )

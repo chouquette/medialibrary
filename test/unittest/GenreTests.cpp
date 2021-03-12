@@ -49,7 +49,7 @@ static void Create( GenreTests* T )
     ASSERT_EQ( "genre", T->g->name() );
     auto tracks = T->g->tracks( IGenre::TracksIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, tracks.size() );
-    ASSERT_FALSE( T->g->isPresent() );
+    ASSERT_EQ( 0u, T->g->nbPresentTracks() );
 }
 
 static void List( GenreTests* T )
@@ -75,7 +75,7 @@ static void ListAlbumTracks( GenreTests* T )
 
     T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
     ASSERT_EQ( 2u, T->g->nbTracks() );
-    ASSERT_TRUE( T->g->isPresent() );
+    ASSERT_NE( 0u, T->g->nbPresentTracks() );
 }
 
 static void ListArtists( GenreTests* T )

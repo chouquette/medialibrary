@@ -781,7 +781,7 @@ static void GenrePresence( DeviceFsTests* T )
     /* We should now have 3 tracks in the genre. 1 non-removable and 2 removable */
     genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
     ASSERT_EQ( 3u, genre->nbTracks() );
-    ASSERT_TRUE( genre->isPresent() );
+    ASSERT_EQ( 3u, genre->nbPresentTracks() );
 
     /*
      * Remove the device, the genre is still present and nb_tracks isn't changed
@@ -792,7 +792,7 @@ static void GenrePresence( DeviceFsTests* T )
 
     genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
     ASSERT_EQ( 3u, genre->nbTracks() );
-    ASSERT_TRUE( genre->isPresent() );
+    ASSERT_EQ( 1u, genre->nbPresentTracks() );
 
     /* Remove the present track */
     T->ml->deleteMedia( media1->id() );
@@ -800,14 +800,14 @@ static void GenrePresence( DeviceFsTests* T )
     /* The genre shouldn't have any remaining media and should now be missing */
     genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
     ASSERT_EQ( 2u, genre->nbTracks() );
-    ASSERT_FALSE( genre->isPresent() );
+    ASSERT_EQ( 0u, genre->nbPresentTracks() );
 
     T->fsMock->addDevice( device );
     T->Reload();
 
     genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
     ASSERT_EQ( 2u, genre->nbTracks() );
-    ASSERT_TRUE( genre->isPresent() );
+    ASSERT_EQ( 2u, genre->nbPresentTracks() );
 }
 
 static void PlaylistPresence( DeviceFsTests* T )

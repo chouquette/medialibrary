@@ -57,7 +57,7 @@ public:
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual uint32_t nbTracks() const override;
-    virtual bool isPresent() const override;
+    virtual uint32_t nbPresentTracks() const override;
     void updateCachedNbTracks( int increment );
     virtual Query<IArtist> artists( const QueryParameters* params ) const override;
     virtual Query<IArtist> searchArtists( const std::string& pattern,
@@ -96,7 +96,7 @@ private:
     int64_t m_id;
     const std::string m_name;
     uint32_t m_nbTracks;
-    uint32_t m_isPresent;
+    uint32_t m_nbPresentTracks;
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
     friend Genre::Table;
