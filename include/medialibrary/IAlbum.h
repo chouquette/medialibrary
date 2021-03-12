@@ -74,6 +74,10 @@ public:
      */
     virtual uint32_t nbTracks() const = 0;
     /**
+     * @brief nbPresentTracks Returns the number of present tracks in this album
+     */
+    virtual uint32_t nbPresentTracks() const = 0;
+    /**
      * @brief nbDiscs Returns the total number of discs for this album.
      * Defaults to 1
      */
@@ -89,10 +93,6 @@ public:
 
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;
-    /**
-     * @brief isPresent Returns true if at least one track is present
-     */
-    virtual bool isPresent() const = 0;
 };
 
 }

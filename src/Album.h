@@ -107,6 +107,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
                                               unsigned int discNumber, int64_t artistId, Genre* genre );
         bool removeTrack( Media& media, AlbumTrack& albumTrack );
         unsigned int nbTracks() const override;
+        uint32_t nbPresentTracks() const override;
         virtual uint32_t nbDiscs() const override;
         bool setNbDiscs( uint32_t nbDiscs );
         virtual int64_t duration() const override;
@@ -118,8 +119,6 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
 
         virtual Query<IMedia> searchTracks( const std::string& pattern,
                                             const QueryParameters* params = nullptr ) const override;
-
-        virtual bool isPresent() const override;
 
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
@@ -172,7 +171,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         unsigned int m_nbTracks;
         int64_t m_duration;
         uint32_t m_nbDiscs;
-        bool m_isPresent;
+        uint32_t m_nbPresentTracks;
 
         mutable std::vector<MediaPtr> m_tracks;
         mutable std::shared_ptr<Artist> m_albumArtist;

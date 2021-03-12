@@ -317,7 +317,7 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
     ASSERT_EQ( 2u, artists.size() );
     auto removableAlbum = T->ml->album( removableAlbumId );
     ASSERT_NE( nullptr, removableAlbum );
-    ASSERT_TRUE( removableAlbum->isPresent() );
+    ASSERT_NE( 0, removableAlbum->nbPresentTracks() );
     auto removableArtist = T->ml->artist( removableArtistId );
     ASSERT_NE( nullptr, removableArtist );
     ASSERT_TRUE( removableArtist->isPresent() );
@@ -342,7 +342,7 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
 
     removableAlbum = T->ml->album( removableAlbumId );
     ASSERT_NE( nullptr, removableAlbum );
-    ASSERT_FALSE( removableAlbum->isPresent() );
+    ASSERT_EQ( 0, removableAlbum->nbPresentTracks() );
     removableArtist = T->ml->artist( removableArtistId );
     ASSERT_NE( nullptr, removableArtist );
     ASSERT_FALSE( removableArtist->isPresent() );

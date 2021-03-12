@@ -54,7 +54,7 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_duration( row.extract<decltype(m_duration)>() )
     , m_nbDiscs( row.extract<decltype(m_nbDiscs)>() )
-    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -68,7 +68,7 @@ Album::Album( MediaLibraryPtr ml, const std::string& title )
     , m_nbTracks( 0 )
     , m_duration( 0 )
     , m_nbDiscs( 1 )
-    , m_isPresent( true )
+    , m_nbPresentTracks( 0 )
 {
 }
 
@@ -80,7 +80,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_nbTracks( 0 )
     , m_duration( 0 )
     , m_nbDiscs( 1 )
-    , m_isPresent( true )
+    , m_nbPresentTracks( 0 )
 {
 }
 
@@ -375,11 +375,6 @@ Query<IMedia> Album::searchTracks( const std::string& pattern,
     return Media::searchAlbumTracks( m_ml, pattern, m_id, params );
 }
 
-bool Album::isPresent() const
-{
-    return m_isPresent;
-}
-
 std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                                              unsigned int discNumber, int64_t artistId, Genre* genre )
 {
@@ -424,6 +419,11 @@ bool Album::removeTrack( Media& media, AlbumTrack& track )
 unsigned int Album::nbTracks() const
 {
     return m_nbTracks;
+}
+
+uint32_t Album::nbPresentTracks() const
+{
+    return m_nbPresentTracks;
 }
 
 uint32_t Album::nbDiscs() const
