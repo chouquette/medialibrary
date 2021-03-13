@@ -78,6 +78,7 @@ libmedialibrary_la_SOURCES = \
 	src/Folder.cpp \
 	src/Genre.cpp \
 	src/Label.cpp \
+	src/LockFile.cpp \
 	src/Media.cpp \
 	src/MediaLibrary.cpp \
 	src/Movie.cpp \
