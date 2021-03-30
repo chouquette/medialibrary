@@ -2966,4 +2966,16 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
 #endif
 }
 
+/* Defined out of the header for PIMPL to work with unique_ptr */
+PriorityAccess::PriorityAccess( std::unique_ptr<PriorityAccessImpl> p )
+    : p( std::move( p ) ) {}
+PriorityAccess::PriorityAccess( PriorityAccess&& ) = default;
+PriorityAccess::~PriorityAccess() = default;
+
+PriorityAccess MediaLibrary::acquirePriorityAccess()
+{
+    auto dbConn = m_dbConnection.get();
+    return std::make_unique<PriorityAccessImpl>( dbConn->acquirePriorityContext() );
+}
+
 }

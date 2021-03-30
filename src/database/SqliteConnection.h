@@ -45,6 +45,7 @@ class Connection : public std::enable_shared_from_this<Connection>
 public:
     using ReadContext = std::unique_lock<utils::ReadLocker>;
     using WriteContext = std::unique_lock<utils::WriteLocker>;
+    using PriorityContext = std::unique_lock<utils::PriorityLocker>;
     using Handle = sqlite3*;
     enum class HookReason
     {
@@ -72,6 +73,7 @@ public:
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
+    PriorityContext acquirePriorityContext();
 
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
     bool checkSchemaIntegrity();
@@ -143,6 +145,7 @@ private:
     utils::SWMRLock m_contextLock;
     utils::ReadLocker m_readLock;
     utils::WriteLocker m_writeLock;
+    utils::PriorityLocker m_priorityLock;
     std::unordered_map<std::string, UpdateHookCb> m_hooks;
 };
 

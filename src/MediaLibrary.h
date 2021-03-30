@@ -31,6 +31,7 @@
 #include "medialibrary/IMedia.h"
 #include "compat/Mutex.h"
 #include "LockFile.h"
+#include "database/SqliteConnection.h"
 
 #include <atomic>
 
@@ -64,6 +65,18 @@ namespace parser
 class Parser;
 class Worker;
 }
+
+class PriorityAccessImpl
+{
+public:
+    PriorityAccessImpl( sqlite::Connection::PriorityContext priorityContext )
+        : m_priorityContext( std::move( priorityContext ) )
+    {
+    }
+
+private:
+    sqlite::Connection::PriorityContext m_priorityContext;
+};
 
 class MediaLibrary : public IMediaLibrary
 {
@@ -271,6 +284,8 @@ public:
     virtual BookmarkPtr bookmark( int64_t bookmarkId ) const override;
 
     virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) override;
+
+    virtual PriorityAccess acquirePriorityAccess() override;
 
 protected:
     // Allow access to unit test MediaLibrary implementations

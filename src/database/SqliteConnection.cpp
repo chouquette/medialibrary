@@ -41,6 +41,7 @@ Connection::Connection( const std::string& dbPath )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
     , m_writeLock( m_contextLock )
+    , m_priorityLock( m_contextLock )
 {
     /* Indirect call to sqlite3_config */
     static SqliteConfigurator config;
@@ -155,6 +156,11 @@ Connection::ReadContext Connection::acquireReadContext()
 Connection::WriteContext Connection::acquireWriteContext()
 {
     return WriteContext{ m_writeLock };
+}
+
+Connection::PriorityContext Connection::acquirePriorityContext()
+{
+    return PriorityContext{ m_priorityLock };
 }
 
 void Connection::setPragma( Connection::Handle conn, const std::string& pragmaName,

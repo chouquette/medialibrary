@@ -36,6 +36,18 @@ struct libvlc_instance_t;
 namespace medialibrary
 {
 
+class PriorityAccessImpl;
+class PriorityAccess
+{
+public:
+    PriorityAccess( std::unique_ptr<PriorityAccessImpl> p );
+    PriorityAccess( PriorityAccess&& );
+    ~PriorityAccess();
+
+private:
+    std::unique_ptr<PriorityAccessImpl> p;
+};
+
 static constexpr auto UnknownArtistID = 1u;
 static constexpr auto VariousArtistID = 2u;
 static constexpr auto UnknownShowID = 1u;
@@ -891,6 +903,8 @@ public:
      * through NewMediaLibrary
      */
     virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) = 0;
+
+    virtual PriorityAccess acquirePriorityAccess() = 0;
 };
 
 }
