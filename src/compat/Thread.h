@@ -58,6 +58,7 @@ namespace compat
 namespace details { class thread_id; }
 namespace this_thread { details::thread_id get_id(); }
 class Thread;
+using ThreadId = details::thread_id;
 
 namespace details
 {
