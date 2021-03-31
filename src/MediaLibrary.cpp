@@ -2925,6 +2925,7 @@ BookmarkPtr MediaLibrary::bookmark( int64_t bookmarkId ) const
 bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
 {
 #ifndef HAVE_LIBVLC
+    (void) inst;
     LOG_ERROR( "Trying to provide a libvlc instance with libvlc disabled" );
     return false;
 #else
