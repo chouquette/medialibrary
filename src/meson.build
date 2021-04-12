@@ -50,6 +50,7 @@ medialib_src = [
 	'utils/TitleAnalyzer.cpp',
     'utils/Xml.cpp',
     'utils/Md5.cpp',
+	'utils/SWMRLock.cpp',
 	'Bookmark.cpp',
 	'MediaGroup.cpp',
 ]
