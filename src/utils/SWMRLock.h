@@ -42,14 +42,6 @@ namespace utils
 class SWMRLock
 {
 public:
-    SWMRLock()
-        : m_nbReader( 0 )
-        , m_nbReaderWaiting( 0 )
-        , m_writing( false )
-        , m_nbWriterWaiting( 0 )
-    {
-    }
-
     void lock_read()
     {
         auto tid = compat::this_thread::get_id();
@@ -141,10 +133,10 @@ private:
 
     compat::ConditionVariable m_cond;
     compat::Mutex m_lock;
-    unsigned int m_nbReader;
-    unsigned int m_nbReaderWaiting;
-    bool m_writing;
-    unsigned int m_nbWriterWaiting;
+    unsigned int m_nbReader = 0;
+    unsigned int m_nbReaderWaiting = 0;
+    bool m_writing = false;
+    unsigned int m_nbWriterWaiting = 0;
 
     /* If there is at least one thread with priority access, then all new lock
      * requests from threads without priority access are blocked. However, they
