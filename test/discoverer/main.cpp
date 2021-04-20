@@ -122,10 +122,12 @@ int main( int argc, char** argv )
     unlink( dbPath.c_str() );
 
     auto testCb = std::make_unique<TestCb>();
-    std::unique_ptr<medialibrary::IMediaLibrary> ml( NewMediaLibrary() );
+    std::unique_ptr<medialibrary::IMediaLibrary> ml{
+        NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false )
+    };
 
     ml->setVerbosity( medialibrary::LogLevel::Info );
-    ml->initialize( dbPath, mlDir, testCb.get() );
+    ml->initialize( testCb.get() );
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
     ml->discover( argv[1] );
