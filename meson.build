@@ -9,6 +9,14 @@ project('medialibrary', 'cpp',
         ]
 )
 
+macosx_dep = []
+if host_machine.system() == 'darwin'
+  add_languages('objcpp', required: true)
+  # https://github.com/mesonbuild/meson/issues/5495
+  add_global_arguments('-std=c++14', language: 'objcpp')
+  macosx_dep = dependency('appleframeworks', modules: 'foundation')
+endif
+
 medialib_soname_version = '0.0.0'
 ver_arr = medialib_soname_version.split('.')
 medialib_major_version = ver_arr[0]
