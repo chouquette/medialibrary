@@ -1,0 +1,22 @@
+#mesondefine _FILE_OFFSET_BITS
+
+#ifndef _WIN32_WINNT
+#mesondefine _WIN32_WINNT
+#endif
+
+#mesondefine _UNICODE
+#mesondefine UNICODE
+#mesondefine _POSIX_C_SOURCE
+#mesondefine _BSD_SOURCE
+#mesondefine _GNU_SOURCE
+
+#mesondefine HAVE_LINK
+
+#mesondefine CXX11_THREADS
+#mesondefine CXX11_MUTEX
+#mesondefine CXX11_THREAD_LOCAL
+
+#mesondefine HAVE_LIBVLC
+#mesondefine HAVE_JPEG
+#mesondefine FORCE_ATTACHMENTS_API
+

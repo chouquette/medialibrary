@@ -108,7 +108,7 @@ if get_option('force_attachment_api')
   endif
 endif
 
-config_h = configure_file(output: 'config.h', configuration: cdata)
+config_h = configure_file(input: 'config.h.in', output: 'config.h', configuration: cdata)
 add_project_arguments('-DHAVE_CONFIG_H=1', language: ['cpp'])
 
 includes = include_directories('.', 'include', 'src')

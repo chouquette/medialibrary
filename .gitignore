@@ -3,7 +3,7 @@
 #*#
 .*.swp
 
-config.h*
+config.h
 *.cache
 *.lo
 .dirstamp
