@@ -3,24 +3,10 @@
 #*#
 .*.swp
 
-compile
-config.status
 config.h*
-config.log
-configure
-Makefile
-Makefile.in
-aclocal.m4
 *.cache
 *.lo
 .dirstamp
-config.guess
-config.sub
-libtool
-ltmain.sh
-missing
-install-sh
-depcomp
 stamp-h1
 .deps
 
@@ -28,4 +14,3 @@ build*
 
 .libs
 .DS_Store
-*.la
