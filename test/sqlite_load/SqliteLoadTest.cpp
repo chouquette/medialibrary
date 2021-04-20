@@ -191,10 +191,12 @@ int main( int argc, char** argv)
     srand(time(nullptr));
 
     auto cbMock = std::make_shared<MockCallback>();
-    std::unique_ptr<IMediaLibrary> ml( NewMediaLibrary() );
+    std::unique_ptr<IMediaLibrary> ml{
+        NewMediaLibrary( "sqliteload.db", "/tmp/ml/", false )
+    };
     ml->setVerbosity( medialibrary::LogLevel::Info );
     unlink( "sqliteload.db" );
-    ml->initialize( "sqliteload.db", "/tmp/ml/", cbMock.get() );
+    ml->initialize( cbMock.get() );
 
     compat::Thread discoverer( &discovererMainLoop, ml.get(), cbMock, argv[1] );
     compat::Thread reader1( &readerMainLoop, ml.get(), cbMock );
