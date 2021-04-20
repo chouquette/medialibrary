@@ -114,69 +114,75 @@ void MockCallback::onParsingStatsUpdated(uint32_t percent)
     }
 }
 
-void discovererMainLoop( IMediaLibrary* ml, std::shared_ptr<MockCallback> cbMock,
-                         std::string samplesFolder )
+struct Tester
 {
-    for ( auto i = 0u; i < NbIterations; ++i )
-    {
-        cbMock->initWait();
-        if ( i == 0 )
-            ml->discover( samplesFolder );
-        else
-            ml->forceRescan();
-        auto res = cbMock->waitForParsingComplete();
-        assert( res == true );
-        std::cout << "Parsing #" << i << " completed." << std::endl;
-    }
-}
+    IMediaLibrary* ml;
+    std::shared_ptr<MockCallback> cbMock;
+    std::string samplesFolder;
 
-void readerMainLoop( IMediaLibrary* ml, std::shared_ptr<MockCallback> cbMock )
-{
-    while ( cbMock->isTestComplete() == false )
+    void discovererMainLoop()
     {
-        auto mode = rand() % 7;
-        switch ( mode )
+        for ( auto i = 0u; i < NbIterations; ++i )
         {
-            case 0:
-            {
-                auto audio = ml->audioFiles( nullptr )->all();
-                break;
-            }
-            case 1:
-            {
-                auto video = ml->videoFiles( nullptr )->all();
-                break;
-            }
-            case 2:
-            {
-                auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
-                break;
-            }
-            case 3:
-            {
-                auto albums = ml->albums( nullptr );
-                break;
-            }
-            case 4:
-            {
-                auto genres = ml->genres( nullptr )->all();
-                break;
-            }
-            case 5:
-            {
-                auto pl = ml->playlists( nullptr )->all();
-                break;
-            }
-            case 6:
-            {
-                auto folders = ml->folders( IMedia::Type::Unknown, nullptr )->all();
-                break;
-            }
-            default:
-                abort();
+            cbMock->initWait();
+            if ( i == 0 )
+                ml->discover( samplesFolder );
+            else
+                ml->forceRescan();
+            auto res = cbMock->waitForParsingComplete();
+            assert( res == true );
+            std::cout << "Parsing #" << i << " completed." << std::endl;
         }
     }
-}
+
+    void readerMainLoop()
+    {
+        while ( cbMock->isTestComplete() == false )
+        {
+            auto mode = rand() % 7;
+            switch ( mode )
+            {
+                case 0:
+                {
+                    auto audio = ml->audioFiles( nullptr )->all();
+                    break;
+                }
+                case 1:
+                {
+                    auto video = ml->videoFiles( nullptr )->all();
+                    break;
+                }
+                case 2:
+                {
+                    auto artists = ml->artists( ArtistIncluded::All, nullptr )->all();
+                    break;
+                }
+                case 3:
+                {
+                    auto albums = ml->albums( nullptr );
+                    break;
+                }
+                case 4:
+                {
+                    auto genres = ml->genres( nullptr )->all();
+                    break;
+                }
+                case 5:
+                {
+                    auto pl = ml->playlists( nullptr )->all();
+                    break;
+                }
+                case 6:
+                {
+                    auto folders = ml->folders( IMedia::Type::Unknown, nullptr )->all();
+                    break;
+                }
+                default:
+                    abort();
+            }
+        }
+    }
+};
 
 }
 
@@ -198,9 +204,11 @@ int main( int argc, char** argv)
     unlink( "sqliteload.db" );
     ml->initialize( cbMock.get() );
 
-    compat::Thread discoverer( &discovererMainLoop, ml.get(), cbMock, argv[1] );
-    compat::Thread reader1( &readerMainLoop, ml.get(), cbMock );
-    compat::Thread reader2( &readerMainLoop, ml.get(), cbMock );
+    Tester T{ ml.get(), cbMock, argv[1] };
+
+    compat::Thread discoverer( &Tester::discovererMainLoop, &T );
+    compat::Thread reader1( &Tester::readerMainLoop, &T );
+    compat::Thread reader2( &Tester::readerMainLoop, &T );
 
     discoverer.join();
     cbMock->signalEnd();
