@@ -63,7 +63,7 @@ struct Tests
                 t->TearDown(); \
                 return 0; \
             } catch ( const TestFailed& tf ) { \
-                fprintf(stderr, "Test %s failed: \n%s", #func, tf.what() ); \
+                fprintf(stderr, "Test %s failed: %s\n", #func, tf.what() ); \
             } \
         } \
     } while ( 0 )
