@@ -256,9 +256,9 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
         if ( fsFactory == nullptr)
             continue;
 
-        m_cb->onReloadStarted( mrl );
+        m_cb->onDiscoveryStarted( mrl );
         auto res = reloadFolder( f, interruptProbe, *fsFactory );
-        m_cb->onReloadCompleted( mrl, res );
+        m_cb->onDiscoveryCompleted( mrl, res );
     }
     return true;
 }

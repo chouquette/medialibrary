@@ -212,42 +212,32 @@ public:
     virtual void onBookmarksDeleted( std::set<int64_t> bookmarkIds ) = 0;
 
     /**
-     * @brief onDiscoveryStarted This callback will be invoked when a folder queued for discovery
-     * (by calling IMediaLibrary::discover()) gets processed.
+     * @brief onDiscoveryStarted This callback will be invoked when the discoverer
+     * starts to crawl an entrypoint that was scheduled for discovery or reload.
      * @param entryPoint The entrypoint being discovered
-     * This callback will be invoked once per endpoint.
+     *
+     * This callback will be invoked once per discovered/reloaded entrypoint.
      */
     virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
     /**
-     * @brief onDiscoveryProgress This callback will be invoked each time the discoverer enters a new
-     * entrypoint. Typically, everytime it enters a new folder.
+     * @brief onDiscoveryProgress This callback will be invoked each time the
+     * discoverer enters a new entrypoint.
      * @param entryPoint The entrypoint being discovered
+     *
      * This callback can be invoked multiple times even though a single entry point was asked to be
      * discovered. ie. In the case of a file system discovery, discovering a folder would make this
      * callback being invoked for all subfolders
      */
     virtual void onDiscoveryProgress( const std::string& entryPoint ) = 0;
     /**
-     * @brief onDiscoveryCompleted Will be invoked when the discovery of a specified entrypoint has
-     * completed.
-     * ie. in the case of a filesystem discovery, once the folder, and all its files and subfolders
-     * have been discovered.
+     * @brief onDiscoveryCompleted Will be invoked when the discoverer finishes
+     * crawling an entrypoint scheduled for discovery or reload.
      * This will also be invoked with an empty entryPoint when the initial reload of the medialibrary
      * has completed.
+     *
+     * This callback will be invoked once per discovered/reloaded entrypoint.
      */
     virtual void onDiscoveryCompleted( const std::string& entryPoint, bool sucess ) = 0;
-    /**
-     * @brief onReloadStarted will be invoked when a reload operation begins.
-     * @param entryPoint Will be an empty string is the reload is a global reload, or the specific
-     * entry point that gets reloaded
-     */
-    virtual void onReloadStarted( const std::string& entryPoint ) = 0;
-    /**
-     * @brief onReloadCompleted will be invoked when a reload operation gets completed.
-     * @param entryPoint Will be an empty string is the reload was a global reload, or the specific
-     * entry point that has been reloaded
-     */
-    virtual void onReloadCompleted( const std::string& entryPoint, bool success ) = 0;
 
     /**
      * @brief onEntryPointAdded will be invoked when an entrypoint gets added

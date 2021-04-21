@@ -61,19 +61,6 @@ public:
         if ( m_discoveryStarted.empty() == true )
             m_cond.notify_all();
     }
-    virtual void onReloadStarted( const std::string& ep ) override
-    {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        assert( m_reloadStarted.find( ep ) == cend( m_reloadStarted ) );
-        m_reloadStarted.insert( ep );
-    }
-    virtual void onReloadCompleted( const std::string& ep, bool ) override
-    {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        auto it = m_reloadStarted.find( ep );
-        assert( it != cend( m_reloadStarted ) );
-        m_reloadStarted.erase( it );
-    }
     virtual void onBackgroundTasksIdleChanged( bool idle ) override
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -85,7 +72,6 @@ public:
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
         assert( m_discoveryStarted.empty() == true );
-        assert( m_reloadStarted.empty() == true );
     }
 
     void markDoneQueuing()
@@ -105,7 +91,6 @@ public:
 
 private:
     std::set<std::string> m_discoveryStarted;
-    std::set<std::string> m_reloadStarted;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     bool m_doneQueuing;
