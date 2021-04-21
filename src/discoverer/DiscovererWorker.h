@@ -51,7 +51,6 @@ protected:
     {
         enum class Type
         {
-            Discover,
             Reload,
             Remove,
             Ban,
@@ -67,7 +66,7 @@ protected:
             : entityId( entityId ), type( type ) {}
         bool isLongRunning() const
         {
-            return type == Type::Discover || type == Type::Reload;
+            return type == Type::Reload;
         }
         std::string entryPoint;
         int64_t entityId;
@@ -98,7 +97,6 @@ private:
     void enqueue( int64_t entityId, Task::Type type );
     virtual void notify();
     void run();
-    void runDiscover( const std::string& entryPoint );
     void runReload( const std::string& entryPoint );
     void runRemove( const std::string& entryPoint );
     void runBan( const std::string& entryPoint );

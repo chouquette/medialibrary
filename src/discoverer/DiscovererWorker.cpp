@@ -78,7 +78,9 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
     if ( entryPoint.length() == 0 )
         return false;
     LOG_INFO( "Adding ", entryPoint, " to the folder discovery list" );
-    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Discover );
+    auto ep = utils::file::toFolderPath( entryPoint );
+    enqueue( ep, Task::Type::AddEntryPoint );
+    enqueue( ep, Task::Type::Reload );
     return true;
 }
 
@@ -124,7 +126,6 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
     auto filterOut = false;
     switch ( newTask.type )
     {
-        case Task::Type::Discover:
         case Task::Type::AddEntryPoint:
         {
             /*
@@ -147,7 +148,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
                         it = m_tasks.erase( it );
                         continue;
                     }
-                    if ( (*it).type == Task::Type::Discover )
+                    if ( (*it).type == Task::Type::AddEntryPoint )
                         return true;
                 }
                 ++it;
@@ -177,7 +178,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
         {
             /*
              * We are about to remove an entry point.
-             * If we see a task discovering or reloading this entry point, we
+             * If we see a task adding or reloading this entry point, we
              * can remove those.
              * If another remove task for the same entrypoint is scheduled, we
              * can filter this one out
@@ -186,7 +187,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
             {
                 if ( (*it).entryPoint == newTask.entryPoint )
                 {
-                    if ( (*it).type == Task::Type::Discover ||
+                    if ( (*it).type == Task::Type::AddEntryPoint ||
                          (*it).type == Task::Type::Reload )
                     {
                         it = m_tasks.erase( it );
@@ -213,7 +214,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
             {
                 if ( (*it).entryPoint == newTask.entryPoint )
                 {
-                    if ( (*it).type == Task::Type::Discover ||
+                    if ( (*it).type == Task::Type::AddEntryPoint ||
                          (*it).type == Task::Type::Reload ||
                          (*it).type == Task::Type::Unban )
                     {
@@ -267,7 +268,6 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
 
     switch ( t.type )
     {
-        case Task::Type::Discover:
         case Task::Type::Reload:
             /*
              * These task types may just be queued after any currently
@@ -310,8 +310,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                  * ban/remove operation on the same mountpoint, we might as well
                  * not reload this folder since it won't be found afterward
                  */
-                if ( ( m_currentTask->type != Task::Type::Discover &&
-                       m_currentTask->type != Task::Type::Reload ) ||
+                if ( m_currentTask->type != Task::Type::Reload ||
                      ( t.type != Task::Type::Ban &&
                        t.type != Task::Type::Remove ) ||
                      t.entryPoint != m_currentTask->entryPoint )
@@ -395,9 +394,6 @@ void DiscovererWorker::run()
             auto needTaskRefresh = false;
             switch ( task.type )
             {
-            case Task::Type::Discover:
-                runDiscover( task.entryPoint );
-                break;
             case Task::Type::Reload:
                 runReload( task.entryPoint );
                 break;
@@ -553,31 +549,6 @@ bool DiscovererWorker::isInterrupted() const
 {
     return m_run.load() == false ||
            m_taskInterrupted.load() == true;
-}
-
-void DiscovererWorker::runDiscover( const std::string& entryPoint )
-{
-    m_ml->getCb()->onDiscoveryStarted( entryPoint );
-    LOG_INFO( "Running discover on: ", entryPoint );
-    // Assume only one discoverer can handle an entrypoint.
-    bool discovered = false;
-    try
-    {
-        auto chrono = std::chrono::steady_clock::now();
-        discovered = m_discoverer->discover( entryPoint, *this );
-        if ( discovered == true )
-        {
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_VERBOSE( "Discovered ", entryPoint, " in ",
-                       std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-        }
-    }
-    catch(std::exception& ex)
-    {
-        LOG_ERROR( "Fatal error while discovering ", entryPoint, ": ", ex.what() );
-    }
-
-    m_ml->getCb()->onDiscoveryCompleted( entryPoint, discovered );
 }
 
 }

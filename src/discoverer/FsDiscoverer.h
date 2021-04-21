@@ -38,8 +38,6 @@ class FsDiscoverer
 {
 public:
     FsDiscoverer(MediaLibrary* ml , IMediaLibraryCb* cb);
-    bool discover( const std::string& entryPoint,
-                   const IInterruptProbe& interruptProbe );
     bool reload( const IInterruptProbe& interruptProbe );
     bool reload( const std::string& entryPoint,
                  const IInterruptProbe& interruptProbe );

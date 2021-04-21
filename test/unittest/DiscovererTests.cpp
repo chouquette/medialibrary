@@ -71,7 +71,9 @@ static void SimpleEnqueue( DiscovererTests* T )
 {
     T->discoverer->discover( "file:///test/" );
     const auto& tasks = T->discoverer->tasks();
-    ASSERT_EQ( 1u, tasks.size() );
+    ASSERT_EQ( 2u, tasks.size() );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
 static void FilterDoubleEnqueue( DiscovererTests* T )
@@ -80,7 +82,9 @@ static void FilterDoubleEnqueue( DiscovererTests* T )
     T->discoverer->discover( "file:///test/" );
     T->discoverer->discover( "file:///test/" );
     const auto& tasks = T->discoverer->tasks();
-    ASSERT_EQ( 1u, tasks.size() );
+    ASSERT_EQ( 2u, tasks.size() );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
 static void DontFilterUnrelatedDoubleEnqueue( DiscovererTests* T )
@@ -88,7 +92,7 @@ static void DontFilterUnrelatedDoubleEnqueue( DiscovererTests* T )
     T->discoverer->discover( "file:///sea/" );
     T->discoverer->discover( "file:///otter/" );
     const auto& tasks = T->discoverer->tasks();
-    ASSERT_EQ( 2u, tasks.size() );
+    ASSERT_EQ( 4u, tasks.size() );
 }
 
 static void ReduceDiscoverRemove( DiscovererTests* T )
@@ -102,8 +106,9 @@ static void ReduceDiscoverRemove( DiscovererTests* T )
     T->discoverer->discover( "file:///test/" );
 
     tasks = T->discoverer->tasks();
-    ASSERT_EQ( 1u, tasks.size() );
-    ASSERT_EQ( DiscovererWorkerTest::Task::Type::Discover, tasks[0].type );
+    ASSERT_EQ( 2u, tasks.size() );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
 static void ReduceBanUnban( DiscovererTests* T )

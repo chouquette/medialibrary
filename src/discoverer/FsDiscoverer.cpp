@@ -53,66 +53,6 @@ FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb )
 {
 }
 
-bool FsDiscoverer::discover( const std::string& entryPoint,
-                             const IInterruptProbe& interruptProbe )
-{
-    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
-    if ( fsFactory == nullptr )
-        return false;
-
-    std::shared_ptr<fs::IDirectory> fsDir;
-    try
-    {
-        fsDir = fsFactory->createDirectory( entryPoint );
-    }
-    catch ( const fs::errors::System& ex )
-    {
-        LOG_WARN( entryPoint, " discovery aborted because of a filesystem error: ", ex.what() );
-        return true;
-    }
-    auto fsDirMrl = fsDir->mrl(); // Saving MRL now since we might need it after fsDir is moved
-    auto f = Folder::fromMrl( m_ml, fsDirMrl );
-    // If the folder exists, we assume it will be handled by reload()
-    if ( f != nullptr )
-        return true;
-    /*
-     * Ensure we have a device containing the folder before trying to probe it
-     * IFileSystemFactory::createDirectory doesn't check for the actual mrl
-     * existence, so we might be trying to index something that doesn't exist.
-     */
-    auto deviceFs = fsDir->device();
-    if ( deviceFs == nullptr )
-    {
-        LOG_INFO( "Can't discover ", entryPoint, ": no associated device is "
-                  "present" );
-        return false;
-    }
-    try
-    {
-        if ( fsDir->contains( ".nomedia" ) )
-            return true;
-        auto newFolder = addFolder( fsDir, nullptr );
-        auto res = newFolder != nullptr;
-        if ( res == true )
-        {
-            checkFolder( fsDir, std::move( newFolder ), interruptProbe, *fsFactory,
-                         true, true );
-        }
-        m_ml->getCb()->onEntryPointAdded( entryPoint, res );
-        return res;
-    }
-    catch ( sqlite::errors::ConstraintUnique& ex )
-    {
-        LOG_DEBUG( fsDirMrl, " discovery aborted (assuming banned folder): ", ex.what() );
-    }
-    catch ( fs::errors::DeviceRemoved& )
-    {
-        // Simply ignore, the device has already been marked as removed and the DB updated accordingly
-        LOG_DEBUG( "Discovery of ", fsDirMrl, " was stopped after the device was removed" );
-    }
-    return true;
-}
-
 bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
                                  const IInterruptProbe& probe,
                                  fs::IFileSystemFactory& fsFactory )
