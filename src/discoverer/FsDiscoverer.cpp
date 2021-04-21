@@ -286,6 +286,35 @@ bool FsDiscoverer::reload( const std::string& entryPoint,
     return true;
 }
 
+bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
+{
+    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
+    if ( fsFactory == nullptr )
+        return false;
+
+    std::shared_ptr<fs::IDirectory> fsDir;
+    try
+    {
+        fsDir = fsFactory->createDirectory( entryPoint );
+    }
+    catch ( const fs::errors::System& ex )
+    {
+        LOG_ERROR( "Can't create IDirectory to represent ", entryPoint,
+                   ": ", ex.what() );
+        return false;
+    }
+     // Use the canonical path computed by IDirectory
+    try
+    {
+        return addFolder( std::move( fsDir ), nullptr ) != nullptr;
+    }
+    catch ( const sqlite::errors::ConstraintViolation& ex )
+    {
+        LOG_WARN( "Can't add entrypoint ", entryPoint, ": ", ex.what() );
+        return false;
+    }
+}
+
 void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                                 std::shared_ptr<Folder> currentFolder,
                                 const IInterruptProbe& interruptProbe,

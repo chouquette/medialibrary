@@ -43,6 +43,7 @@ public:
     bool reload( const IInterruptProbe& interruptProbe );
     bool reload( const std::string& entryPoint,
                  const IInterruptProbe& interruptProbe );
+    bool addEntryPoint(const std::string& entryPoint );
 
 private:
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,

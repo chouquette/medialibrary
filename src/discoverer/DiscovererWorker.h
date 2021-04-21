@@ -57,6 +57,7 @@ protected:
             Ban,
             Unban,
             ReloadDevice,
+            AddEntryPoint,
         };
 
         Task() = default;
@@ -89,6 +90,7 @@ public:
     void ban( const std::string& entryPoint );
     void unban( const std::string& entryPoint );
     void reloadDevice( int64_t deviceId );
+    void addEntryPoint( std::string entryPoint );
 
 private:
     void enqueue( Task t );
@@ -103,6 +105,7 @@ private:
     void runUnban( const std::string& entryPoint );
     void runReloadDevice( int64_t deviceId );
     void runReloadAllDevices();
+    void runAddEntryPoint( const std::string& entryPoint );
     bool filter( const Task& newTask );
 
 private:

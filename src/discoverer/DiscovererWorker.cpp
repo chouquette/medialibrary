@@ -112,6 +112,12 @@ void DiscovererWorker::reloadDevice(int64_t deviceId)
     enqueue( deviceId, Task::Type::ReloadDevice );
 }
 
+void DiscovererWorker::addEntryPoint(std::string entryPoint)
+{
+    enqueue( utils::file::toFolderPath( std::move( entryPoint ) ),
+             Task::Type::AddEntryPoint );
+}
+
 bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
 {
     /* This *must* be called with the mutex locked */
@@ -119,6 +125,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
     switch ( newTask.type )
     {
         case Task::Type::Discover:
+        case Task::Type::AddEntryPoint:
         {
             /*
              * We are required to discover an entry point.
@@ -272,6 +279,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
         case Task::Type::Ban:
         case Task::Type::Unban:
         case Task::Type::ReloadDevice:
+        case Task::Type::AddEntryPoint:
         {
             /*
              * These types need to be processed as soon as possible, meaning we
@@ -412,6 +420,9 @@ void DiscovererWorker::run()
                 runReloadDevice( task.entityId );
                 needTaskRefresh = true;
                 break;
+            case Task::Type::AddEntryPoint:
+                runAddEntryPoint( task.entryPoint );
+                break;
             default:
                 assert(false);
             }
@@ -530,6 +541,12 @@ void DiscovererWorker::runReloadAllDevices()
     m_ml->startFsFactoriesAndRefresh();
 
     MediaLibrary::removeOldEntities( m_ml );
+}
+
+void DiscovererWorker::runAddEntryPoint( const std::string& entryPoint )
+{
+    auto res = m_discoverer->addEntryPoint( entryPoint );
+    m_ml->getCb()->onEntryPointAdded( entryPoint, res );
 }
 
 bool DiscovererWorker::isInterrupted() const
