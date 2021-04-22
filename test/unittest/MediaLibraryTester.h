@@ -67,11 +67,10 @@ public:
     virtual void addLocalFsFactory() override;
     std::shared_ptr<Device> device( const std::string& uuid,
                                     const std::string& scheme);
-    virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
+    virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                   IFile::Type fileType,
-                                   std::pair<int64_t, int64_t> ) override;
+                                   IFile::Type fileType) override;
     virtual void populateNetworkFsFactories() override;
     MediaPtr addMedia( const std::string& mrl, IMedia::Type type );
     void deleteMedia( int64_t mediaId );

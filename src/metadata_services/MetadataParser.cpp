@@ -46,7 +46,6 @@
 #include "utils/ModificationsNotifier.h"
 #include "utils/TitleAnalyzer.h"
 #include "discoverer/FsDiscoverer.h"
-#include "discoverer/probe/PathProbe.h"
 #include "Device.h"
 #include "VideoTrack.h"
 #include "AudioTrack.h"

@@ -111,10 +111,10 @@ public:
                                                   const QueryParameters* params ) const override;
     virtual bool regroupAll() override;
 
-    virtual void onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
+    virtual void onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                   IFile::Type fileType , std::pair<int64_t, int64_t> parentPlaylist);
+                                   IFile::Type fileType );
     void onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs, IFile::Type fileType );
     void onUpdatedFile( std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs,
                         std::shared_ptr<Folder> parentFolder,

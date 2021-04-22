@@ -25,7 +25,6 @@
 #include <memory>
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
-#include "discoverer/probe/IProbe.h"
 
 namespace medialibrary
 {
@@ -35,15 +34,10 @@ class IMediaLibraryCb;
 class Folder;
 class IInterruptProbe;
 
-namespace prober
-{
-class IProbe;
-}
-
 class FsDiscoverer
 {
 public:
-    FsDiscoverer( MediaLibrary* ml , IMediaLibraryCb* cb, std::unique_ptr<prober::IProbe> probe );
+    FsDiscoverer(MediaLibrary* ml , IMediaLibraryCb* cb);
     bool discover( const std::string& entryPoint,
                    const IInterruptProbe& interruptProbe );
     bool reload( const IInterruptProbe& interruptProbe );
@@ -70,7 +64,6 @@ private:
 private:
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_cb;
-    std::unique_ptr<prober::IProbe> m_probe;
 };
 
 }

@@ -175,8 +175,7 @@ std::shared_ptr<Device> MediaLibraryTester::device( const std::string& uuid,
 void MediaLibraryTester::onDiscoveredFile(std::shared_ptr<fs::IFile> fileFs,
                                           std::shared_ptr<Folder> parentFolder,
                                           std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                          IFile::Type fileType,
-                                          std::pair<int64_t, int64_t>)
+                                          IFile::Type fileType)
 {
     addFile( fileFs, parentFolder, parentFolderFs, fileType, IMedia::Type::Unknown );
 }

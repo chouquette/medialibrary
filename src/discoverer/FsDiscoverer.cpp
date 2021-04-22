@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <cstring>
 
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IDirectory.h"
@@ -41,17 +42,14 @@
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
-#include "discoverer/probe/IProbe.h"
 #include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {
 
-FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb,
-                            std::unique_ptr<prober::IProbe> probe )
+FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb )
     : m_ml( ml )
     , m_cb( cb )
-    , m_probe( std::move( probe ) )
 {
 }
 
@@ -91,11 +89,9 @@ bool FsDiscoverer::discover( const std::string& entryPoint,
     }
     try
     {
-        if ( m_probe->proceedOnDirectory( *fsDir ) == false || m_probe->isHidden( *fsDir ) == true )
+        if ( fsDir->contains( ".nomedia" ) )
             return true;
-        // Fetch files explicitly
-        fsDir->files();
-        auto newFolder = addFolder( fsDir, m_probe->getFolderParent().get() );
+        auto newFolder = addFolder( fsDir, nullptr );
         auto res = newFolder != nullptr;
         if ( res == true )
         {
@@ -301,7 +297,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
         // We already know of this folder, though it may now contain a .nomedia file.
         // In this case, simply delete the folder.
-        if ( m_probe->isHidden( *currentFolderFs ) == true )
+        if ( currentFolderFs->contains( ".nomedia" ) )
         {
             if ( newFolder == false )
             {
@@ -324,10 +320,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
         {
             if ( interruptProbe.isInterrupted() == true )
                 break;
-            if ( m_probe->stopFileDiscovery() == true )
-                break;
-            if ( m_probe->proceedOnDirectory( *subFolder ) == false )
-                continue;
             auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
                                     [&subFolder](const std::shared_ptr<Folder>& f) {
                 auto subFolderName = utils::file::directoryName( subFolder->mrl() );
@@ -339,7 +331,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
                 try
                 {
-                    if ( m_probe->isHidden( *subFolder ) )
+                    if ( subFolder->contains( ".nomedia" ) == true )
                         continue;
                     auto folder = addFolder( subFolder, currentFolder.get() );
                     checkFolder( subFolder, std::move( folder ), interruptProbe, fsFactory,
@@ -369,14 +361,11 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                          false, false );
             subFoldersInDB.erase( it );
         }
-        if ( m_probe->deleteUnseenFolders() == true )
+        // Now all folders we had in DB but haven't seen from the FS must have been deleted.
+        for ( const auto& f : subFoldersInDB )
         {
-            // Now all folders we had in DB but haven't seen from the FS must have been deleted.
-            for ( const auto& f : subFoldersInDB )
-            {
-                LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
-                Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
-            }
+            LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
+            Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
         }
         checkFiles( currentFolderFs, currentFolder, interruptProbe );
     }
@@ -419,16 +408,12 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( interruptProbe.isInterrupted() == true )
             return;
-        if ( m_probe->stopFileDiscovery() == true )
-            break;
-        if ( m_probe->proceedOnFile( *fileFs ) == false )
-            continue;
         auto it = std::find_if( begin( files ), end( files ),
                                 [fileFs](const std::shared_ptr<File>& f) {
             auto fileName = utils::file::fileName( f->mrl() );
             return fileName == fileFs->name();
         });
-        if ( it == end( files ) || m_probe->forceFileRefresh() == true )
+        if ( it == end( files ) )
         {
             if ( fileFs->linkedType() == fs::IFile::LinkedFileType::None )
             {
@@ -475,8 +460,6 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         }
         files.erase( it );
     }
-    if ( m_probe->deleteUnseenFiles() == false )
-        files.clear();
 
     for ( const auto& file : files )
     {
@@ -513,7 +496,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
         if ( interruptProbe.isInterrupted() == true )
             break;
         m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
-                                p.type, m_probe->getPlaylistParent() );
+                                p.type );
     }
     for ( auto p : linkedFilesToAdd )
     {

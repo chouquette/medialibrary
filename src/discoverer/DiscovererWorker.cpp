@@ -36,7 +36,6 @@
 #include "utils/Defer.h"
 #include "parser/Parser.h"
 #include "FsDiscoverer.h"
-#include "probe/IProbe.h"
 
 #include <cassert>
 #include <algorithm>

@@ -35,7 +35,6 @@
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
-#include "discoverer/probe/CrawlerProbe.h"
 #include "utils/ModificationsNotifier.h"
 #include "Chapter.h"
 #include "Device.h"
@@ -804,13 +803,10 @@ void MediaLibrary::removeOldEntities( MediaLibraryPtr ml )
 void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                      std::shared_ptr<Folder> parentFolder,
                                      std::shared_ptr<fs::IDirectory> parentFolderFs,
-                                     IFile::Type fileType,
-                                     std::pair<int64_t, int64_t> parentPlaylist )
+                                     IFile::Type fileType )
 {
     auto mrl = fileFs->mrl();
     std::unique_ptr<sqlite::Transaction> t;
-    if ( parentPlaylist.first != 0 )
-        t = getConn()->newTransaction();
     auto parser = getParser();
     try
     {
@@ -826,29 +822,6 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
         // discovery after a crash.
         LOG_INFO( "Failed to insert ", mrl, ": ", ex.what(), ". "
                   "Assuming the file is already scheduled for discovery" );
-    }
-    if ( parentPlaylist.first != 0 )
-    {
-        try
-        {
-            auto task = parser::Task::createLinkTask( this, mrl, parentPlaylist.first,
-                                               parser::IItem::LinkType::Playlist,
-                                               parentPlaylist.second );
-            if ( task == nullptr )
-                return;
-            if ( parser != nullptr )
-                parser->parse( std::move( task ) );
-            t->commit();
-        }
-        catch( const sqlite::errors::ConstraintViolation& ex )
-        {
-            // We might have created the file but not the link task yet, so this
-            // needs to be in a different catch clause (otherwise we'd have a
-            // constraint violation for the Creation task, and wouldn't try to
-            // create the link task while it should be.
-            LOG_INFO( "Failed to create link task for ", mrl, ": ", ex.what(), ". "
-                      "Assuming it was already created before" );
-        }
     }
 }
 
@@ -1167,8 +1140,7 @@ void MediaLibrary::startDiscovererLocked()
 {
     if ( m_discovererWorker != nullptr )
         return;
-    auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback,
-                                    std::make_unique<prober::CrawlerProbe>() );
+    auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback );
     m_discovererWorker.reset( new DiscovererWorker( this,
                                                     std::move( discoverer ) ) );
 }

@@ -27,7 +27,6 @@ medialib_src = [
 	'database/SqliteTransaction.cpp',
 	'discoverer/DiscovererWorker.cpp',
 	'discoverer/FsDiscoverer.cpp',
-	'discoverer/probe/PathProbe.cpp',
 	'factory/DeviceListerFactory.cpp',
 	'filesystem/common/CommonDevice.cpp',
 	'filesystem/common/CommonDeviceLister.cpp',
