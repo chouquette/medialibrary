@@ -58,6 +58,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cstring>
+#include <stack>
 
 namespace medialibrary
 {
@@ -305,12 +306,28 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
     // first time, just schedule all members for insertion. media & files will
     // be recreated if need be, and appropriate entries in PlaylistMediaRelation
     // table will be recreated to link things together.
-
     for ( auto i = 0u; i < item.nbLinkedItems(); ++i )
     {
         if ( m_stopped.load() == true )
             break;
-        addPlaylistElement( item, playlistPtr, item.linkedItem( i ) );
+        const auto& subItem = item.linkedItem( i );
+        auto subItemMrl = subItem.mrl();
+        if ( utils::url::schemeIs( "file://", subItemMrl ) == true )
+        {
+            auto path = utils::url::toLocalPath( subItemMrl );
+            /*
+             * If we're trying to add a directory, we need to crawl it to add
+             * individual files. Otherwise we can just link a file MRL directly
+             */
+            if ( utils::fs::isDirectory( path ) == true )
+            {
+                addFolderToPlaylist( item, playlistPtr, subItem );
+                continue;
+            }
+        }
+        addPlaylistElement( item, playlistPtr, subItem.mrl(),
+                            subItem.meta( Task::IItem::Metadata::Title ),
+                            subItem.linkExtra() );
     }
 
     return Status::Success;
@@ -318,107 +335,115 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
 
 void MetadataAnalyzer::addPlaylistElement( IItem& item,
                                            std::shared_ptr<Playlist> playlistPtr,
-                                           const IItem& subitem ) const
+                                           const std::string& mrl,
+                                           const std::string& itemTitle,
+                                           int64_t itemIdx ) const
 {
-    const auto& mrl = subitem.mrl();
     const auto& playlistMrl = item.mrl();
-    LOG_DEBUG( "Try to add ", mrl, " to the playlist ", playlistMrl, " at index ", subitem.linkExtra() );
-    // Create Media, etc.
-    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+    LOG_DEBUG( "Trying to add ", mrl, " to the playlist ", playlistMrl,
+               " at index ", itemIdx );
 
-    if ( fsFactory == nullptr ) // Media not supported by any FsFactory, registering it as external
+    std::unique_ptr<sqlite::Transaction> t;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        t = m_ml->getConn()->newTransaction();
+
+    std::shared_ptr<Media> media;
+    auto file = File::fromMrl( m_ml, mrl );
+    if ( file == nullptr )
     {
-        auto t2 = m_ml->getConn()->newTransaction();
-        // Check if the file was already created before. Beware that the MRL here
-        // is not the item's one. The mrl we're interested in is the one from the
-        // subitem, ie. the playlist item we're adding.
-        if ( File::exists( m_ml, mrl ) == false )
+        file = File::fromExternalMrl( m_ml, mrl );
+        if ( file == nullptr )
         {
-            auto externalMedia = Media::createExternal( m_ml, mrl, -1 );
-            if ( externalMedia == nullptr )
+            /* Temporarily create an external media to represent that playlist item
+             * If the media ends up being discovered, it will be converted to
+             *  an internal one
+             */
+            media = Media::createExternal( m_ml, mrl, item.duration() );
+            if ( media == nullptr )
+                return;
+            auto files = media->files();
+            auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+                                          []( const std::shared_ptr<IFile>& f ) {
+                return f->isMain();
+            });
+            if ( mainFileIt == cend( files ) )
             {
-                LOG_ERROR( "Failed to create external media for ", mrl, " in the playlist ", playlistMrl );
+                assert( !"A main file was expected but not found" );
                 return;
             }
-            auto title = subitem.meta( IItem::Metadata::Title );
-            if ( title.empty() == false )
-                externalMedia->setTitle( title, false );
+            file = std::static_pointer_cast<File>( *mainFileIt );
+            if ( itemTitle.empty() == false )
+                media->setTitle( itemTitle, false );
         }
-        try
-        {
-            auto task = Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
-                                              Task::LinkType::Playlist,
-                                              subitem.linkExtra() );
-            if ( task == nullptr )
-                return;
-            auto parser = m_ml->getParser();
-            if ( parser != nullptr )
-                parser->parse( std::move( task ) );
-        }
-        catch ( const sqlite::errors::ConstraintUnique& ex )
-        {
-            // A duplicated file shouldn't happen as we're in a transaction, meaning
-            // other threads can't write to the database. However, we might be trying
-            // to insert a duplicated link task
-            LOG_INFO( "Failed to insert duplicated link task: ", ex.what(),
-                      ". Ignoring" );
-            return;
-        }
-        t2->commit();
-        return;
     }
-    bool isDirectory;
     try
     {
-        isDirectory = utils::fs::isDirectory( utils::url::toLocalPath( mrl ) );
+        auto task = Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
+                                          Task::LinkType::Playlist,
+                                          itemIdx );
+        if ( task == nullptr )
+            return;
+        auto parser = m_ml->getParser();
+        if ( parser != nullptr )
+            parser->parse( std::move( task ) );
     }
-    catch ( const fs::errors::UnhandledScheme& ex )
+    catch ( const sqlite::errors::ConstraintUnique& ex )
     {
-        LOG_ERROR( "Can't check if ", mrl, " is a directory: ", ex.what() );
+        // A duplicated file shouldn't happen as we're in a transaction, meaning
+        // other threads can't write to the database. However, we might be trying
+        // to insert a duplicated link task
+        LOG_INFO( "Failed to insert duplicated link task: ", ex.what(),
+                  ". Ignoring" );
         return;
     }
-    catch ( const fs::errors::System& ex )
-    {
-        LOG_ERROR( "Failed to check if ", mrl, " was a directory: ", ex.what() );
-        return;
-    }
-    LOG_DEBUG( "Importing ", isDirectory ? "folder " : "file ", mrl, " in the playlist ", playlistMrl );
-    auto directoryMrl = utils::file::directory( mrl );
-    auto parentFolder = Folder::fromMrl( m_ml, directoryMrl );
-    bool parentKnown = parentFolder != nullptr;
 
-    // The minimal entrypoint must be a device mountpoint
-    auto device = fsFactory->createDeviceFromMrl( mrl );
-    if ( device == nullptr )
+    if ( t != nullptr )
+        t->commit();
+}
+
+void MetadataAnalyzer::addFolderToPlaylist( IItem& item,
+                                            std::shared_ptr<Playlist> playlistPtr,
+                                            const IItem& subitem ) const
+{
+    const auto& mrl = subitem.mrl();
+    LOG_DEBUG( "Adding folder ", mrl, " to playlist ", playlistPtr->mrl() );
+    auto fsFactory = m_ml->fsFactoryForMrl( mrl );
+    std::stack<std::shared_ptr<fs::IDirectory>> directories;
+    int64_t itemIdx = 0;
+
+    try
     {
-        LOG_ERROR( "Can't add a local folder with unknown storage device. ");
+        directories.push( fsFactory->createDirectory( mrl ) );
+    }
+    catch ( const std::exception& ex )
+    {
         return;
     }
-    auto entryPoint = device->mountpoints()[0];
-    if ( parentKnown == false && Folder::fromMrl( m_ml, entryPoint ) != nullptr )
+    while ( directories.empty() == false )
     {
-        auto probePtr = std::make_unique<prober::PathProbe>(
-                    utils::url::toLocalPath( mrl ), isDirectory, parentFolder,
-                    utils::url::toLocalPath( directoryMrl ), playlistPtr->id(),
-                    subitem.linkExtra(), true );
-        FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
-        discoverer.reload( entryPoint, *this );
-        return;
+        auto dir = directories.top();
+        directories.pop();
+        std::vector<std::shared_ptr<fs::IDirectory>> subDirs;
+        std::vector<std::shared_ptr<fs::IFile>> subFiles;
+        try
+        {
+            subDirs = dir->dirs();
+            subFiles = dir->files();
+        }
+        catch ( const std::exception& ex )
+        {
+            continue;
+        }
+
+        for ( auto& d : subDirs )
+            directories.push( std::move( d ) );
+        auto t = m_ml->getConn()->newTransaction();
+        for ( auto& f : subFiles )
+        {
+            addPlaylistElement( item, playlistPtr, f->mrl(), {}, itemIdx++ );
+        }
+        t->commit();
     }
-    auto probePtr = std::make_unique<prober::PathProbe>(
-                utils::url::toLocalPath( mrl ), isDirectory, parentFolder,
-                utils::url::toLocalPath( directoryMrl ), playlistPtr->id(),
-                subitem.linkExtra(), false );
-    FsDiscoverer discoverer( m_ml, nullptr, std::move( probePtr ) );
-    if ( parentKnown == false )
-    {
-        discoverer.discover( entryPoint, *this );
-        auto entryFolder = Folder::fromMrl( m_ml, entryPoint );
-        if ( entryFolder != nullptr )
-            Folder::excludeEntryFolder( m_ml, entryFolder->id() );
-        return;
-    }
-    discoverer.reload( directoryMrl, *this );
 }
 
 /* Video files */

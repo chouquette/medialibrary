@@ -66,7 +66,9 @@ protected:
 
     Status parsePlaylist( IItem& item ) const;
     void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
-                             const IItem& subitem ) const;
+                             const std::string& mrl, const std::string& itemTitle,
+                             int64_t itemIdx ) const;
+    void addFolderToPlaylist(IItem& item, std::shared_ptr<Playlist> playlistPtr , const IItem& subitem) const;
     Status parseAudioFile( IItem& task );
     bool parseVideoFile( IItem& task ) const;
     Status createFileAndMedia( IItem& item ) const;

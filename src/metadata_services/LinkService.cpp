@@ -91,7 +91,16 @@ Status LinkService::linkToPlaylist(IItem& item)
     {
         file = File::fromMrl( m_ml, mrl );
         if ( file == nullptr )
-            return Status::Requeue;
+        {
+            /*
+             * We expect an external media to be created before the link task
+             * gets created. If we can't find a media associated to the mrl
+             * we can give up.
+             * If the media gets analyzed later on, it will be converted to an
+             * internal one.
+             */
+            return Status::Fatal;
+        }
     }
     if ( file->isMain() == false )
         return Status::Fatal;
