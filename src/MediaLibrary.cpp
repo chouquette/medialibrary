@@ -2295,12 +2295,13 @@ bool MediaLibrary::forceParserRetry()
 
 void MediaLibrary::clearDatabase( bool restorePlaylists )
 {
-    pauseBackgroundOperations();
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    pauseBackgroundOperationsLocked();
     // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
     {
         recreateDatabase();
-        resumeBackgroundOperations();
+        resumeBackgroundOperationsLocked();
         return;
     }
 
@@ -2355,13 +2356,13 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
             auto task = parser::Task::createRestoreTask( this, mrl, IFile::Type::Playlist );
             if ( task != nullptr )
             {
-                auto parser = getParser();
+                auto parser = getParserLocked();
                 if ( parser != nullptr )
                     parser->parse( std::move( task ) );
             }
         }
     }
-    resumeBackgroundOperations();
+    resumeBackgroundOperationsLocked();
 }
 
 void MediaLibrary::pauseBackgroundOperations()
