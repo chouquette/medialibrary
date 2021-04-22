@@ -2367,17 +2367,25 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
 void MediaLibrary::pauseBackgroundOperations()
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
+    pauseBackgroundOperationsLocked();
+}
 
+void MediaLibrary::resumeBackgroundOperations()
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    resumeBackgroundOperationsLocked();
+}
+
+void MediaLibrary::pauseBackgroundOperationsLocked()
+{
     if ( m_parser != nullptr )
         m_parser->pause();
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->pause();
 }
 
-void MediaLibrary::resumeBackgroundOperations()
+void MediaLibrary::resumeBackgroundOperationsLocked()
 {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-
     if ( m_parser != nullptr )
         m_parser->resume();
     if ( m_thumbnailerWorker != nullptr )
