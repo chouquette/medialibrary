@@ -628,6 +628,9 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
     if ( file->update( *item.fileFs(), item.parentFolder()->id(),
                        deviceFs->isRemovable() ) == false )
         return Status::Fatal;
+    auto updatedTitle = item.meta( Task::IItem::Metadata::Title );
+    if ( updatedTitle.empty() == false )
+        media->setTitleBuffered( updatedTitle );
     media->setTypeBuffered( newType );
     media->setDuration( item.duration() );
     media->setDeviceId( device->id() );
