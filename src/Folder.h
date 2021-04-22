@@ -50,6 +50,7 @@ public:
         static const std::string Name;
     };
 
+    /* Deprecated since model 30 */
     struct ExcludedFolderTable
     {
         static const std::string Name;
@@ -107,7 +108,6 @@ public:
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl,
                                            int64_t parentId, const Device& device,
                                            fs::IDevice& deviceFs );
-    static bool excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId );
     static bool ban( MediaLibraryPtr ml, const std::string& mrl,
                      RemovalBehavior behavior );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );

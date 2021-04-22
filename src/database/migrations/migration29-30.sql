@@ -128,3 +128,5 @@ Playlist::trigger( Playlist::Triggers::UpdateNbPresentMediaOnPresenceChange, 30 
 parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 30 ),
 
 Playlist::index( Playlist::Indexes::FileId, 30 ),
+
+"DROP TABLE ExcludedEntryFolder",

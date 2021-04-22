@@ -130,7 +130,6 @@ namespace
         "Chapter",
         "Device",
         "DeviceMountpoint",
-        "ExcludedEntryFolder",
         "File",
         "Folder",
         "FolderFts",

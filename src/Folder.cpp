@@ -83,7 +83,6 @@ void Folder::createTable( sqlite::Connection* connection)
 {
     const std::string reqs[] = {
         schema( Table::Name, Settings::DbModelVersion ),
-        schema( ExcludedFolderTable::Name, Settings::DbModelVersion ),
         schema( FtsTable::Name, Settings::DbModelVersion ),
     };
     for ( const auto& req : reqs )
@@ -325,10 +324,7 @@ bool Folder::checkDbModel( MediaLibraryPtr ml )
                                        Table::Name ) == false ||
         sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
-                                       FtsTable::Name ) == false ||
-        sqlite::Tools::checkTableSchema( ml->getConn(),
-                                       schema( ExcludedFolderTable::Name, Settings::DbModelVersion ),
-                                       ExcludedFolderTable::Name ) == false )
+                                       FtsTable::Name ) == false )
         return false;
 
     auto check = []( sqlite::Connection* dbConn, Triggers t ) {
@@ -370,13 +366,6 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     if ( device.isRemovable() == true )
         self->m_fullPath = deviceFs.absoluteMrl( path );
     return self;
-}
-
-bool Folder::excludeEntryFolder( MediaLibraryPtr ml, int64_t folderId )
-{
-    std::string req = "INSERT INTO " + ExcludedFolderTable::Name +
-            "(folder_id) VALUES(?)";
-    return sqlite::Tools::executeInsert( ml->getConn(), req, folderId ) != 0;
 }
 
 bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl,
@@ -894,11 +883,8 @@ uint32_t Folder::nbMedia() const
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )
 {
     static const std::string req = "SELECT f.* FROM " + Folder::Table::Name + " f "
-            " LEFT JOIN " + ExcludedFolderTable::Name +
-            " ON f.id_folder = " + ExcludedFolderTable::Name + ".folder_id"
             " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = f.device_id"
-            " WHERE " + ExcludedFolderTable::Name + ".folder_id IS NULL AND"
-            " parent_id IS NULL AND is_banned = 0 AND d.is_present != 0";
+            " WHERE f.parent_id IS NULL AND f.is_banned = 0 AND d.is_present != 0";
     return DatabaseHelpers::fetchAll<Folder>( ml, req );
 }
 
