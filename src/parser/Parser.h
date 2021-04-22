@@ -87,12 +87,13 @@ public:
 
     virtual void refreshTaskList() override;
 
+    void flush();
+
 private:
     void updateStats();
     virtual void done( std::shared_ptr<Task> task,
                        Status status ) override;
     virtual void onIdleChanged( bool idle ) override;
-    void flush();
     // Queues all unparsed files for parsing.
     void restore();
     ///
