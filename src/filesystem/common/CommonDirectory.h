@@ -40,6 +40,7 @@ public:
     virtual const std::vector<std::shared_ptr<IDirectory>>& dirs() const override;
     virtual std::shared_ptr<IDevice> device() const override;
     virtual std::shared_ptr<IFile> file( const std::string& mrl ) const override;
+    virtual bool contains( const std::string& fileName ) const override;
 
 protected:
     virtual void read() const = 0;

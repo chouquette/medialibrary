@@ -25,6 +25,7 @@
 #endif
 
 #include <cassert>
+#include <algorithm>
 
 #include "MockDirectory.h"
 #include "MockFile.h"
@@ -76,6 +77,11 @@ const std::vector<std::shared_ptr<fs::IDirectory>>& Directory::dirs() const
 std::shared_ptr<fs::IDevice> Directory::device() const
 {
     return std::static_pointer_cast<fs::IDevice>( m_device.lock() );
+}
+
+bool Directory::contains( const std::string& fileName ) const
+{
+    return m_files.find( fileName ) != cend( m_files );
 }
 
 void Directory::addFile(const std::string& filePath)

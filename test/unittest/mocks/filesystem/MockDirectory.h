@@ -44,6 +44,7 @@ public:
     virtual const std::vector<std::shared_ptr<fs::IFile>>& files() const override;
     virtual const std::vector<std::shared_ptr<fs::IDirectory>>& dirs() const override;
     virtual std::shared_ptr<fs::IDevice> device() const override;
+    virtual bool contains( const std::string& file ) const override;
     void addFile( const std::string& filePath );
     void addFolder( const std::string& folder );
     void removeFile( const std::string& filePath  );

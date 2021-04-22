@@ -463,6 +463,11 @@ class NoopDirectory : public fs::IDirectory
     {
         return std::make_shared<NoopDevice>();
     }
+
+    virtual bool contains( const std::string& ) const override
+    {
+        abort();
+    }
 };
 
 class NoopFsFactory : public fs::IFileSystemFactory

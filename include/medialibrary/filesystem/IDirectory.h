@@ -51,6 +51,15 @@ namespace fs
         /// \return An IFile instance if a file matched, nullptr otherwise.
         ///
         virtual std::shared_ptr<IFile> file( const std::string& mrl ) const = 0;
+        ///
+        /// \brief contains Returns true if this directory contains the given file
+        /// \param file The file to search for
+        /// \return true if the file is contained in this directory, false otherwise
+        ///
+        /// The comparison is done in a case insensitive way.
+        /// \warning The comparison is done against the URL encoded file name
+        ///
+        virtual bool contains( const std::string& file ) const = 0;
     };
 }
 

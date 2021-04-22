@@ -77,5 +77,14 @@ std::shared_ptr<IFile> CommonDirectory::file( const std::string& mrl ) const
     return *it;
 }
 
+bool CommonDirectory::contains( const std::string& fileName ) const
+{
+    auto fs = files();
+    return std::find_if( cbegin( fs ), cend( fs ),
+        [&fileName]( const std::shared_ptr<fs::IFile> f ) {
+            return f->name() == fileName;
+    }) != cend( fs );
+}
+
 }
 }
