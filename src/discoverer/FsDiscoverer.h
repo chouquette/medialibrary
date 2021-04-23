@@ -44,11 +44,10 @@ public:
     bool addEntryPoint(const std::string& entryPoint );
 
 private:
-    void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
+    void checkFolder(std::shared_ptr<fs::IDirectory> currentFolderFs,
                       std::shared_ptr<Folder> currentFolder,
                       const IInterruptProbe& interruptProbe,
-                      fs::IFileSystemFactory& fsFactory, bool newFolder,
-                      bool rootFolder ) const;
+                      fs::IFileSystemFactory& fsFactory) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                      std::shared_ptr<Folder> parentFolder,
                      const IInterruptProbe& interruptProbe ) const;

@@ -86,8 +86,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     }
     try
     {
-        checkFolder( std::move( directory ), std::move( f ), probe, fsFactory,
-                     false, true );
+        checkFolder( std::move( directory ), std::move( f ), probe, fsFactory );
     }
     catch ( fs::errors::DeviceRemoved& )
     {
@@ -255,37 +254,65 @@ bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
     }
 }
 
-void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
-                                std::shared_ptr<Folder> currentFolder,
+void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
+                                std::shared_ptr<Folder> folder,
                                 const IInterruptProbe& interruptProbe,
-                                fs::IFileSystemFactory& fsFactory,
-                                bool newFolder, bool rootFolder ) const
+                                fs::IFileSystemFactory& fsFactory ) const
 {
-    try
+    struct CurrentFolder
     {
-        LOG_DEBUG( "Checking for modifications in ", currentFolderFs->mrl() );
-        // We already know of this folder, though it may now contain a .nomedia file.
-        // In this case, simply delete the folder.
-        if ( currentFolderFs->contains( ".nomedia" ) )
+        std::shared_ptr<fs::IDirectory> fs;
+        std::shared_ptr<Folder> entity;
+        bool newFolder;
+    };
+    auto rootFolder = true;
+
+    std::stack<CurrentFolder> directories;
+    directories.push( { std::move( folderFs ), std::move( folder ), false } );
+    while ( directories.empty() == false )
+    {
+        auto dirPair = directories.top();
+        auto dirFs = std::move( dirPair.fs );
+        auto dir = std::move( dirPair.entity );
+        auto newFolder = dirPair.newFolder;
+        directories.pop();
+        LOG_DEBUG( "Checking for modifications in ", dirFs->mrl() );
+        bool hasNoMedia;
+        try
+        {
+            hasNoMedia = dirFs->contains( ".nomedia" );
+        }
+        catch ( const fs::errors::System& ex )
+        {
+            LOG_WARN( "Failed to browse ", dirFs->mrl(), ": ", ex.what() );
+            checkRemovedDevices( *dirFs, std::move( dir ),
+                                 fsFactory, newFolder, rootFolder );
+            // If the device has indeed been removed, fs::errors::DeviceRemoved will
+            // be thrown, otherwise, we just failed to browse that folder and will
+            // have to try again later.
+            return;
+        }
+        /*
+         * We managed to read from the directory we're refreshing, so we can
+         * flag the device as readable for future potential checkRemovedDevice
+         * calls
+         */
+        rootFolder = false;
+        if ( hasNoMedia == true )
         {
             if ( newFolder == false )
             {
                 LOG_INFO( "A .nomedia file was added into a known folder, "
                           "removing it." );
-                Folder::remove( m_ml, std::move( currentFolder ),
+                Folder::remove( m_ml, std::move( dir ),
                                  Folder::RemovalBehavior::RemovedFromDisk );
             }
             return;
         }
-
         if ( m_cb != nullptr )
-            m_cb->onDiscoveryProgress( currentFolderFs->mrl() );
-        // Load the folders we already know of:
-        // Don't try to fetch any potential sub folders if the folder was freshly added
-        std::vector<std::shared_ptr<Folder>> subFoldersInDB;
-        if ( newFolder == false )
-            subFoldersInDB = currentFolder->folders();
-        for ( const auto& subFolder : currentFolderFs->dirs() )
+            m_cb->onDiscoveryProgress( dirFs->mrl() );
+        auto subFoldersInDB = dir->folders();
+        for ( const auto& subFolder : dirFs->dirs() )
         {
             if ( interruptProbe.isInterrupted() == true )
                 break;
@@ -302,9 +329,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                 {
                     if ( subFolder->contains( ".nomedia" ) == true )
                         continue;
-                    auto folder = addFolder( subFolder, currentFolder.get() );
-                    checkFolder( subFolder, std::move( folder ), interruptProbe, fsFactory,
-                                 true, false );
+                    auto folder = addFolder( subFolder, dir.get() );
+                    directories.push( { std::move( subFolder ), std::move( folder ), true } );
                     continue;
                 }
                 catch ( const sqlite::errors::ConstraintForeignKey& ex )
@@ -326,8 +352,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             // In any case, check for modifications, as a change related to a mountpoint might
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
-            checkFolder( subFolder, folderInDb, interruptProbe, fsFactory,
-                         false, false );
+            directories.push( { std::move( subFolder ), std::move( folderInDb ), false } );
             subFoldersInDB.erase( it );
         }
         // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -336,21 +361,9 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
             LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
             Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
         }
-        checkFiles( currentFolderFs, currentFolder, interruptProbe );
+        checkFiles( dirFs, dir, interruptProbe );
+        LOG_DEBUG( "Done checking subfolders in ", dir->mrl() );
     }
-    // Only check once for a fs system error. They are bound to happen when we list the files/folders
-    // within, and IProbe::isHidden is the first place when this is done
-    catch ( const fs::errors::System& ex )
-    {
-        LOG_WARN( "Failed to browse ", currentFolderFs->mrl(), ": ", ex.what() );
-        checkRemovedDevices( *currentFolderFs, std::move( currentFolder ),
-                             fsFactory, newFolder, rootFolder );
-        // If the device has indeed been removed, fs::errors::DeviceRemoved will
-        // be thrown, otherwise, we just failed to browse that folder and will
-        // have to try again later.
-        return;
-    }
-    LOG_DEBUG( "Done checking subfolders in ", currentFolderFs->mrl() );
 }
 
 void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
