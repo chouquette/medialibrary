@@ -25,6 +25,7 @@ linux:
         -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
         -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
         --xml cobertura.xml --html=html/medialibrary.html --html-details
+        -s
         -j 4
     artifacts:
       reports:
