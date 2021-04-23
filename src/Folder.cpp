@@ -154,7 +154,7 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         "(id_device) ON DELETE CASCADE,"
 
         "UNIQUE(path,device_id) ON CONFLICT FAIL"
-        ")";
+    ")";
 }
 
 std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
