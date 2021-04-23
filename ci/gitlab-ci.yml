@@ -10,8 +10,6 @@ linux:
     rules:
       - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
     tags:
       - docker
       - amd64
