@@ -123,6 +123,7 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
     }
     else if ( tableName == ExcludedFolderTable::Name )
     {
+        assert( dbModel < 30 );
         return "CREATE TABLE " + ExcludedFolderTable::Name +
         "("
             "folder_id UNSIGNED INTEGER NOT NULL,"
