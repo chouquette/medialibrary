@@ -77,8 +77,8 @@ bool DiscovererWorker::discover( const std::string& entryPoint )
 {
     if ( entryPoint.length() == 0 )
         return false;
-    LOG_INFO( "Adding ", entryPoint, " to the folder discovery list" );
     auto ep = utils::file::toFolderPath( entryPoint );
+    LOG_INFO( "Adding ", ep, " to the folder discovery list" );
     enqueue( ep, Task::Type::AddEntryPoint );
     enqueue( ep, Task::Type::Reload );
     return true;
