@@ -8,8 +8,9 @@ variables:
 linux:
     image: $MEDIALIBRARY_IMG
     rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: $CI_MERGE_REQUEST_IID
+      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
     tags:
       - docker
       - amd64
