@@ -40,10 +40,6 @@
 
 #include <algorithm>
 
-extern bool Verbose;
-extern bool ExtraVerbose;
-extern bool DebugVerbose;
-
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
     , m_thumbnailSuccess( false )
@@ -181,12 +177,7 @@ void Tests::SetUp()
     InitializeCallback();
     auto mlDir = getTempPath( "ml_folder" );
     InitializeMediaLibrary( "test.db", mlDir );
-    if ( ExtraVerbose == true )
-        m_ml->setVerbosity( LogLevel::Debug );
-    else if ( Verbose == true )
-        m_ml->setVerbosity( LogLevel::Info );
-    else if ( DebugVerbose == true )
-        m_ml->setVerbosity( LogLevel::Verbose );
+    m_ml->setVerbosity( LogLevel::Debug );
 
     auto res = m_ml->initialize( m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );

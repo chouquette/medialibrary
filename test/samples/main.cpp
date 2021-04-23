@@ -36,9 +36,6 @@
 
 static std::string TestDirectory = SRC_DIR "/test/samples/";
 static std::string ForcedTestDirectory;
-bool Verbose = false;
-bool ExtraVerbose = false;
-bool DebugVerbose = false;
 
 static void Parse( Tests* T, const std::string& testFile )
 {
@@ -305,21 +302,12 @@ static void RunBackupRestorePlaylist( Tests* T, const std::string& )
 
 int main(int ac, char** av)
 {
-    const std::string verboseArg = "-v";
-    const std::string extraVerboseArg = "-vv";
-    const std::string debugVerboseArg = "-vvv";
     const std::string forcedTestDir = "--testdir";
     std::string testType;
     std::string testName;
     for ( auto i = 1; i < ac; ++i )
     {
-        if ( av[i] == verboseArg )
-            Verbose = true;
-        else if ( av[i] == extraVerboseArg )
-            ExtraVerbose = true;
-        else if ( av[i] == debugVerboseArg )
-            DebugVerbose = true;
-        else if ( av[i] == forcedTestDir )
+        if ( av[i] == forcedTestDir )
         {
             assert(i + 1 < ac);
             ForcedTestDirectory = av[i + 1];
