@@ -263,18 +263,18 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
     {
         std::shared_ptr<fs::IDirectory> fs;
         std::shared_ptr<Folder> entity;
-        bool newFolder;
+        std::shared_ptr<Folder> parentFolder;
     };
     auto rootFolder = true;
 
     std::stack<CurrentFolder> directories;
-    directories.push( { std::move( folderFs ), std::move( folder ), false } );
+    directories.push( { std::move( folderFs ), std::move( folder ), nullptr } );
     while ( directories.empty() == false )
     {
         auto dirPair = directories.top();
         auto dirFs = std::move( dirPair.fs );
         auto dir = std::move( dirPair.entity );
-        auto newFolder = dirPair.newFolder;
+        auto newFolder = dir == nullptr;
         directories.pop();
         LOG_DEBUG( "Checking for modifications in ", dirFs->mrl() );
         bool hasNoMedia;
@@ -285,6 +285,12 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
         catch ( const fs::errors::System& ex )
         {
             LOG_WARN( "Failed to browse ", dirFs->mrl(), ": ", ex.what() );
+            /*
+             * If we were supposed to add this folder but can't read from it
+             * just ignore it
+             */
+            if ( dir == nullptr )
+                return;
             checkRemovedDevices( *dirFs, std::move( dir ),
                                  fsFactory, newFolder, rootFolder );
             // If the device has indeed been removed, fs::errors::DeviceRemoved will
@@ -298,6 +304,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
          * calls
          */
         rootFolder = false;
+
         if ( hasNoMedia == true )
         {
             if ( newFolder == false )
@@ -308,6 +315,28 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                                  Folder::RemovalBehavior::RemovedFromDisk );
             }
             return;
+        }
+
+        if ( dir == nullptr )
+        {
+            try
+            {
+                dir = addFolder( dirFs, dirPair.parentFolder.get() );
+            }
+            catch ( const sqlite::errors::ConstraintForeignKey& ex )
+            {
+                // A foreign key constraint violation indicates that the
+                // parent folders have been deleted due to being banned
+                LOG_WARN( "Creation of a folder failed because the parent is"
+                          " non existing: ", ex.what(),
+                          ". Assuming it was deleted due to being banned" );
+                return;
+            }
+            catch ( sqlite::errors::ConstraintViolation& ex )
+            {
+                LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
+                continue;
+            }
         }
         if ( m_cb != nullptr )
             m_cb->onDiscoveryProgress( dirFs->mrl() );
@@ -325,34 +354,15 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             if ( it == end( subFoldersInDB ) )
             {
                 LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
-                try
-                {
-                    if ( subFolder->contains( ".nomedia" ) == true )
-                        continue;
-                    auto folder = addFolder( subFolder, dir.get() );
-                    directories.push( { std::move( subFolder ), std::move( folder ), true } );
-                    continue;
-                }
-                catch ( const sqlite::errors::ConstraintForeignKey& ex )
-                {
-                    // A foreign key constraint violation indicates that the
-                    // parent folders have been deleted due to being banned
-                    LOG_WARN( "Creation of a folder failed because the parent is"
-                              " non existing: ", ex.what(),
-                              ". Assuming it was deleted due to being banned" );
-                    return;
-                }
-                catch ( sqlite::errors::ConstraintViolation& ex )
-                {
-                    LOG_WARN( "Creation of a folder failed: ", ex.what(), ". Assuming it was banned" );
-                    continue;
-                }
+                directories.push( { std::move( subFolder ), nullptr, dir } );
+                continue;
             }
             auto folderInDb = *it;
             // In any case, check for modifications, as a change related to a mountpoint might
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
-            directories.push( { std::move( subFolder ), std::move( folderInDb ), false } );
+            directories.push( { std::move( subFolder ), std::move( folderInDb ),
+                                dir } );
             subFoldersInDB.erase( it );
         }
         // Now all folders we had in DB but haven't seen from the FS must have been deleted.
