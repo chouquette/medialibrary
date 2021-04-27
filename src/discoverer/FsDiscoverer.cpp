@@ -323,6 +323,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             try
             {
                 currentDir = addFolder( currentDirFs, parentDir.get() );
+                if ( currentDir == nullptr )
+                    return;
             }
             catch ( const sqlite::errors::ConstraintForeignKey& ex )
             {
