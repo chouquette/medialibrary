@@ -410,7 +410,7 @@ folder_tests = [
 ]
 
 foreach t : folder_tests
-  test('File.' + t, folder_test_exe, args: t, suite: ['unittest', 'Folder'], is_parallel: false)
+  test('Folder.' + t, folder_test_exe, args: t, suite: ['unittest', 'Folder'], is_parallel: false)
 endforeach
 
 fs_utils_test_exe = executable('fs_utils_tests', 'FsUtilsTests.cpp',
