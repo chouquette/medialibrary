@@ -263,7 +263,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
     {
         std::shared_ptr<fs::IDirectory> fs;
         std::shared_ptr<Folder> entity;
-        std::shared_ptr<Folder> parentFolder;
+        std::shared_ptr<Folder> parent;
     };
     auto rootFolder = true;
 
@@ -271,27 +271,28 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
     directories.push( { std::move( folderFs ), std::move( folder ), nullptr } );
     while ( directories.empty() == false )
     {
-        auto dirPair = directories.top();
-        auto dirFs = std::move( dirPair.fs );
-        auto dir = std::move( dirPair.entity );
-        auto newFolder = dir == nullptr;
+        auto& dirToCheck = directories.top();
+        auto currentDirFs = std::move( dirToCheck.fs );
+        auto currentDir = std::move( dirToCheck.entity );
+        auto parentDir = std::move( dirToCheck.parent );
+        auto newFolder = currentDir == nullptr;
         directories.pop();
-        LOG_DEBUG( "Checking for modifications in ", dirFs->mrl() );
+        LOG_DEBUG( "Checking for modifications in ", currentDirFs->mrl() );
         bool hasNoMedia;
         try
         {
-            hasNoMedia = dirFs->contains( ".nomedia" );
+            hasNoMedia = currentDirFs->contains( ".nomedia" );
         }
         catch ( const fs::errors::System& ex )
         {
-            LOG_WARN( "Failed to browse ", dirFs->mrl(), ": ", ex.what() );
+            LOG_WARN( "Failed to browse ", currentDirFs->mrl(), ": ", ex.what() );
             /*
              * If we were supposed to add this folder but can't read from it
              * just ignore it
              */
-            if ( dir == nullptr )
+            if ( currentDir == nullptr )
                 return;
-            checkRemovedDevices( *dirFs, std::move( dir ),
+            checkRemovedDevices( *currentDirFs, std::move( currentDir ),
                                  fsFactory, newFolder, rootFolder );
             // If the device has indeed been removed, fs::errors::DeviceRemoved will
             // be thrown, otherwise, we just failed to browse that folder and will
@@ -311,17 +312,17 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             {
                 LOG_INFO( "A .nomedia file was added into a known folder, "
                           "removing it." );
-                Folder::remove( m_ml, std::move( dir ),
+                Folder::remove( m_ml, std::move( currentDir ),
                                  Folder::RemovalBehavior::RemovedFromDisk );
             }
             return;
         }
 
-        if ( dir == nullptr )
+        if ( currentDir == nullptr )
         {
             try
             {
-                dir = addFolder( dirFs, dirPair.parentFolder.get() );
+                currentDir = addFolder( currentDirFs, parentDir.get() );
             }
             catch ( const sqlite::errors::ConstraintForeignKey& ex )
             {
@@ -339,9 +340,9 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             }
         }
         if ( m_cb != nullptr )
-            m_cb->onDiscoveryProgress( dirFs->mrl() );
-        auto subFoldersInDB = dir->folders();
-        for ( const auto& subFolder : dirFs->dirs() )
+            m_cb->onDiscoveryProgress( currentDirFs->mrl() );
+        auto subFoldersInDB = currentDir->folders();
+        for ( const auto& subFolder : currentDirFs->dirs() )
         {
             if ( interruptProbe.isInterrupted() == true )
                 break;
@@ -354,7 +355,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             if ( it == end( subFoldersInDB ) )
             {
                 LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
-                directories.push( { std::move( subFolder ), nullptr, dir } );
+                directories.push( { std::move( subFolder ), nullptr, currentDir } );
                 continue;
             }
             auto folderInDb = *it;
@@ -362,7 +363,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
             directories.push( { std::move( subFolder ), std::move( folderInDb ),
-                                dir } );
+                                currentDir } );
             subFoldersInDB.erase( it );
         }
         // Now all folders we had in DB but haven't seen from the FS must have been deleted.
@@ -371,8 +372,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
             Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
         }
-        checkFiles( dirFs, dir, interruptProbe );
-        LOG_DEBUG( "Done checking subfolders in ", dir->mrl() );
+        checkFiles( currentDirFs, currentDir, interruptProbe );
+        LOG_DEBUG( "Done checking subfolders in ", currentDir->mrl() );
     }
 }
 
