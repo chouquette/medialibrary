@@ -59,7 +59,7 @@ void Tests::SetUp()
 
     ml->setFsFactory( fsFactory );
     ml->registerDeviceLister( mockDeviceLister, "file://" );
-    ml->setVerbosity( LogLevel::Error );
+    ml->setVerbosity( LogLevel::Debug );
     auto res = ml->initialize( mlCb );
     ASSERT_EQ( InitializeResult::Success, res );
     auto setupRes = ml->setupDummyFolder();
