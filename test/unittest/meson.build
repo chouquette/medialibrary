@@ -4,7 +4,7 @@
 # definition of sqlite symbols
 
 common_test_code = static_library('common_test_code',
-  [ 'MediaLibraryTester.cpp', 'Tests.cpp', 'mocks/FileSystem.cpp' ],
+  [ 'MediaLibraryTester.cpp', 'UnitTests.cpp', 'mocks/FileSystem.cpp' ],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
 )
