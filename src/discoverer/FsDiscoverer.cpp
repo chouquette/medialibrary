@@ -357,14 +357,14 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             // We don't know this folder, it's a new one
             if ( it == end( subFoldersInDB ) )
             {
-                directories.push( { std::move( subFolder ), nullptr, currentDir } );
+                directories.push( { subFolder, nullptr, currentDir } );
                 continue;
             }
             auto folderInDb = *it;
             // In any case, check for modifications, as a change related to a mountpoint might
             // not update the folder modification date.
             // Also, relying on the modification date probably isn't portable
-            directories.push( { std::move( subFolder ), std::move( folderInDb ),
+            directories.push( { subFolder, std::move( folderInDb ),
                                 currentDir } );
             subFoldersInDB.erase( it );
         }
