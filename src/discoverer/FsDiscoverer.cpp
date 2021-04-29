@@ -325,6 +325,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                 currentDir = addFolder( currentDirFs, parentDir.get() );
                 if ( currentDir == nullptr )
                     return;
+                LOG_DEBUG( "New folder detected: ", currentDirFs->mrl() );
             }
             catch ( const sqlite::errors::ConstraintForeignKey& ex )
             {
@@ -356,7 +357,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             // We don't know this folder, it's a new one
             if ( it == end( subFoldersInDB ) )
             {
-                LOG_DEBUG( "New folder detected: ", subFolder->mrl() );
                 directories.push( { std::move( subFolder ), nullptr, currentDir } );
                 continue;
             }
