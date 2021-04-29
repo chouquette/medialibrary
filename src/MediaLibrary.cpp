@@ -29,6 +29,7 @@
 #include <utility>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstring>
 
 #include "Album.h"
 #include "AlbumTrack.h"
