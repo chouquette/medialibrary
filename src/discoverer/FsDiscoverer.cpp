@@ -291,13 +291,13 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
              * just ignore it
              */
             if ( currentDir == nullptr )
-                return;
+                continue;
             checkRemovedDevices( *currentDirFs, std::move( currentDir ),
                                  fsFactory, newFolder, rootFolder );
             // If the device has indeed been removed, fs::errors::DeviceRemoved will
             // be thrown, otherwise, we just failed to browse that folder and will
             // have to try again later.
-            return;
+            continue;
         }
         /*
          * We managed to read from the directory we're refreshing, so we can
@@ -315,7 +315,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                 Folder::remove( m_ml, std::move( currentDir ),
                                  Folder::RemovalBehavior::RemovedFromDisk );
             }
-            return;
+            continue;
         }
 
         if ( currentDir == nullptr )
@@ -324,7 +324,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             {
                 currentDir = addFolder( currentDirFs, parentDir.get() );
                 if ( currentDir == nullptr )
-                    return;
+                    continue;
                 LOG_DEBUG( "New folder detected: ", currentDirFs->mrl() );
             }
             catch ( const sqlite::errors::ConstraintForeignKey& ex )
@@ -334,7 +334,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                 LOG_WARN( "Creation of a folder failed because the parent is"
                           " non existing: ", ex.what(),
                           ". Assuming it was deleted due to being banned" );
-                return;
+                continue;
             }
             catch ( sqlite::errors::ConstraintViolation& ex )
             {
