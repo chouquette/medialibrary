@@ -36,6 +36,17 @@ linux:
       paths:
         - build/html/
 
+linux-novlc:
+    image: $MEDIALIBRARY_IMG
+    rules:
+      - if: $CI_MERGE_REQUEST_IID
+    tags:
+      - docker
+      - amd64
+    script:
+      - meson -Dlibvlc=disabled build
+      - cd build && ninja
+
 win32:
     image: $MEDIALIBRARY_WIN32_IMG
     rules:
