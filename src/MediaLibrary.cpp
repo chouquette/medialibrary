@@ -2315,13 +2315,11 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
         if ( playlistsBackups.size() > 2 )
         {
             auto playlistFolderMrl = utils::file::toMrl( m_playlistPath );
-            auto fsFactory = fsFactoryForMrl( playlistFolderMrl );
             while ( playlistsBackups.size() > 2 )
             {
                 auto backupPath = utils::file::toFolderPath( playlistFolderMrl +
                         std::to_string( playlistsBackups.begin()->first ) );
-                auto dir = fsFactory->createDirectory( backupPath );
-                utils::fs::rmdir( *dir );
+                utils::fs::rmdir( backupPath );
                 playlistsBackups.erase( playlistsBackups.begin() );
             }
         }

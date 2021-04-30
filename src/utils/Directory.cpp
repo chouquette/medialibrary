@@ -45,6 +45,9 @@
 # include <limits.h>
 # include <cstdlib>
 # include <unistd.h>
+# include <dirent.h>
+# include <sys/types.h>
+# include <cstring>
 #endif
 
 namespace medialibrary
@@ -141,19 +144,88 @@ bool mkdir( const std::string& path )
     return true;
 }
 
-bool rmdir( medialibrary::fs::IDirectory& dir )
+#ifndef _WIN32
+bool rmdir( std::string path )
 {
-    for ( const auto& f : dir.files() )
+    path = utils::file::toFolderPath( path );
+
+    std::unique_ptr<DIR, int(*)(DIR*)> dir{
+        opendir( path.c_str() ), &closedir
+    };
+    if ( dir == nullptr )
+        return false;
+
+    for ( auto d = readdir( dir.get() );
+          d != nullptr; d = readdir( dir.get() ) )
     {
-        utils::fs::remove( utils::url::toLocalPath( f->mrl() ) );
+        if ( !strcmp( d->d_name, "." ) ||
+             !strcmp( d->d_name, ".." ) )
+            continue;
+
+        auto p = path + d->d_name;
+        struct stat s;
+        if ( lstat( p.c_str(), &s ) < 0 )
+            return false;
+        switch ( s.st_mode & S_IFMT )
+        {
+            case S_IFDIR:
+                if ( rmdir( p ) == false )
+                    return false;
+                break;
+            case S_IFLNK:
+            case S_IFREG:
+                unlink( p.c_str() );
+                break;
+            default:
+                LOG_WARN( "Unhandled file type during folder removal: ", p );
+                break;
+        }
     }
-#ifdef _WIN32
-    auto wPath = charset::ToWide( dir.mrl().c_str() );
-    return _wrmdir( wPath.get() ) != 0;
-#else
-    return ::rmdir( utils::url::toLocalPath( dir.mrl() ).c_str() ) == 0;
-#endif
+    ::rmdir( path.c_str() );
+    return true;
 }
+
+#else
+
+bool rmdir( std::string path )
+{
+    path = utils::file::toFolderPath( path );
+    LOG_ERROR( "Removing directory ", path );
+    WIN32_FIND_DATA f;
+    auto pattern = path + '*';
+    auto wpattern = charset::ToWide( pattern.c_str() );
+    auto h = FindFirstFile( wpattern.get(), &f );
+    if ( h == INVALID_HANDLE_VALUE )
+    {
+        return false;
+    }
+    do
+    {
+        auto file = charset::FromWide( f.cFileName );
+        if ( strcmp( file.get(), "." ) == 0 ||
+             strcmp( file.get(), ".." ) == 0 )
+            continue;
+        auto fullpath = path + file.get();
+        if ( ( f.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+        {
+            if ( rmdir( fullpath ) == false )
+                return false;
+        }
+        else
+        {
+            LOG_ERROR( "Removing file ", fullpath );
+            auto res = _unlink( fullpath.c_str() );
+            LOG_ERROR( "Removal result: ", res, " errno: ", errno );
+        }
+    } while ( FindNextFile( h, &f ) != 0 );
+    auto wPath = charset::ToWide( path.c_str() );
+    auto res = _wrmdir( wPath.get() );
+    if ( res == 0 )
+        return true;
+    return errno == ENOENT;
+}
+
+#endif
 
 }
 

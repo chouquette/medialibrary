@@ -28,11 +28,6 @@
 namespace medialibrary
 {
 
-namespace fs
-{
-    class IDirectory;
-}
-
 namespace utils
 {
 
@@ -48,7 +43,7 @@ bool mkdir( const std::string& path );
  *
  * This will *not* remove subdirectories
  */
-bool rmdir( medialibrary::fs::IDirectory& dir );
+bool rmdir( std::string path );
 
 }
 
