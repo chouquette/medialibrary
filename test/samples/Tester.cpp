@@ -185,9 +185,23 @@ void Tests::InitTestCase( const std::string& testName )
     ASSERT_NE( 0u, ret );
     buff[ret] = 0;
     doc.Parse( buff );
+
+    lock = m_cb->lock();
+
+    if ( doc.HasMember( "banned" ) == true )
+    {
+        const auto& banned = doc["banned"];
+        for ( auto i = 0u; i < banned.Size(); ++i )
+        {
+            auto bannedDir = Directory + "samples/" + banned[i].GetString();
+            ASSERT_TRUE( utils::fs::isDirectory( bannedDir ) );
+            bannedDir = utils::fs::toAbsolute( bannedDir );
+            m_ml->banFolder( utils::file::toMrl( bannedDir ) );
+        }
+    }
+
     ASSERT_TRUE( doc.HasMember( "input" ) );
     input = doc["input"];
-    lock = m_cb->lock();
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
