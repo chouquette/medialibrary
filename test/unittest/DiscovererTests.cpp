@@ -60,10 +60,18 @@ struct DiscovererTests : public Tests
 {
     std::unique_ptr<DiscovererWorkerTest> discoverer;
 
-    virtual void SetUp() override
+    virtual void SetUp( const std::string& testSuite,
+                        const std::string& testName ) override
     {
-        InstantiateMediaLibrary( "test.db", "/tmp/ml_folder/" );
+        InitTestFolder( testSuite, testName );
+        /* We won't use the database in these tests but need a valid medialib instance */
+        InstantiateMediaLibrary( "/no/such/file.db", "/or/directory" );
         discoverer.reset( new DiscovererWorkerTest() );
+    }
+
+    virtual void TearDown() override
+    {
+        ml.reset();
     }
 };
 

@@ -29,6 +29,8 @@
 #include "mocks/MockDeviceLister.h"
 #include "MediaLibraryTester.h"
 #include "medialibrary/filesystem/IDirectory.h"
+#include "utils/Directory.h"
+#include "filesystem/libvlc/FileSystemFactory.h"
 
 #include "common/util.h"
 #include "mocks/FileSystem.h"
@@ -44,10 +46,15 @@ struct UnitTests
     UnitTests() = default;
     virtual ~UnitTests() = default;
 
-    virtual void SetUp()
+    void InitTestFolder( const std::string& testSuite, const std::string& testName )
     {
-        auto mlDir = getTempPath( "ml_folder" );
-        InstantiateMediaLibrary( "test.db", mlDir );
+        m_testDir = getTempPath( testSuite + "." + testName );
+    }
+
+    virtual void SetUp( const std::string& testSuite, const std::string& testName )
+    {
+        InitTestFolder( testSuite, testName );
+        InstantiateMediaLibrary( getDbPath(), m_testDir );
         fsMock = std::make_shared<mock::FileSystemFactory>();
         SetupMockFileSystem();
         cbMock.reset( new CB );
@@ -88,7 +95,15 @@ struct UnitTests
     virtual void TearDown()
     {
         ml.reset();
+        ASSERT_TRUE( utils::fs::rmdir( m_testDir ) );
     }
+
+    std::string getDbPath()
+    {
+        return m_testDir + "test.db";
+    }
+private:
+    std::string m_testDir;
 };
 
 using Tests = UnitTests<>;
@@ -96,7 +111,8 @@ using Tests = UnitTests<>;
 #define INIT_TESTS_COMMON(TestClass, TestSuite) \
     if ( ac != 2 ) { fprintf(stderr, "Missing test name\n" ); return 1; } \
     const char* selectedTest = av[1]; \
-    auto t = std::make_unique<TestClass>();
+    auto t = std::make_unique<TestClass>(); \
+    auto testSuite = #TestSuite;
 
 #define INIT_TESTS(TestSuite) INIT_TESTS_COMMON(Tests, TestSuite)
 #define INIT_TESTS_C(TestClass) INIT_TESTS_COMMON( TestClass, TestClass )
@@ -105,7 +121,7 @@ using Tests = UnitTests<>;
     do { \
         if ( strcmp( #func, selectedTest ) == 0 ) { \
             try { \
-                t->SetUp(); \
+                t->SetUp( testSuite, selectedTest ); \
                 func( t.get() ); \
                 t->TearDown(); \
                 return 0; \

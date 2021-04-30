@@ -95,7 +95,8 @@ private:
 struct Tests
 {
     virtual ~Tests() = default;
-    virtual void SetUp( const std::string& testName );
+    virtual void SetUp(const std::string& testSuite, const std::string& testName );
+    virtual void TearDown();
     std::unique_ptr<MockCallback> m_cb;
     std::unique_ptr<IMediaLibrary> m_ml;
 
@@ -127,6 +128,9 @@ struct Tests
 
 protected:
     virtual void InitTestCase( const std::string& testName );
+
+private:
+    std::string m_testDir;
 };
 
 class MediaLibraryResumeTest : public MediaLibrary

@@ -80,8 +80,8 @@ int main( int argc, char** argv )
     }
     auto entryPoint = utils::file::toMrl( argv[1] );
 
-    auto dbPath = getTempPath( "test.db" );
-    auto mlDir = getTempPath( "ml_folder" );
+    auto mlDir = getTempPath( "fast_teardown_test" );
+    auto dbPath = mlDir + "test.db";
 
     for ( auto i = 0; i < 1000; ++i )
     {

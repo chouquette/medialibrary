@@ -39,7 +39,7 @@ static inline std::string getTempDir()
 #endif
 }
 
-static inline std::string getTempPath(std::string filename)
+static inline std::string getTempPath( std::string filename )
 {
-    return getTempDir() + std::move(filename);
+    return getTempDir() + "medialib/" + std::move(filename) + "/";
 }

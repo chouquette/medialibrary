@@ -38,6 +38,7 @@
 #include "medialibrary/IShowEpisode.h"
 #include "medialibrary/IMediaGroup.h"
 #include "utils/Directory.h"
+#include "filesystem/libvlc/FileSystemFactory.h"
 
 #include <algorithm>
 
@@ -213,17 +214,25 @@ void Tests::InitTestCase( const std::string& testName )
     }
 }
 
-void Tests::SetUp( const std::string& testName )
+void Tests::SetUp( const std::string& testSuite, const std::string& testName )
 {
     InitializeCallback();
-    auto mlDir = getTempPath( "ml_folder" );
-    InitializeMediaLibrary( "test.db", mlDir );
+    m_testDir = getTempPath( testSuite + "." + testName );
+    auto dbPath = m_testDir + "/test.db";
+    InitializeMediaLibrary( dbPath, m_testDir );
     m_ml->setVerbosity( LogLevel::Debug );
 
     auto res = m_ml->initialize( m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
 
     InitTestCase( testName );
+}
+
+void Tests::TearDown()
+{
+    /* Ensure we are closing our database connection before we try to delete it */
+    m_ml.reset();
+    ASSERT_TRUE( utils::fs::rmdir( m_testDir ) );
 }
 
 void Tests::InitializeCallback()

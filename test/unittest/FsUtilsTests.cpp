@@ -33,7 +33,7 @@ using namespace medialibrary;
 
 struct FsUtilsTests
 {
-    void SetUp() {}
+    void SetUp( const std::string&, const std::string& ) {}
     void TearDown() {}
 };
 

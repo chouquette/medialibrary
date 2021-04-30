@@ -203,9 +203,11 @@ struct DbModel : public Tests
 
     void LoadFakeDB( const char* dbPath )
     {
+        utils::fs::mkdir( utils::file::directory( getDbPath() ) );
+
         std::ifstream file{ dbPath };
         {
-            auto dbConn = sqlite::Connection::connect( "test.db" );
+            auto dbConn = sqlite::Connection::connect( getDbPath() );
             ml->deleteAllTables( dbConn.get() );
             // The backup file already contains a transaction
             char buff[2048];
@@ -294,7 +296,7 @@ struct DbModel : public Tests
 
     virtual void TearDown() override
     {
-        auto dbConn = sqlite::Connection::connect( "test.db" );
+        auto dbConn = sqlite::Connection::connect( getDbPath() );
         medialibrary::sqlite::Statement stmt{ dbConn->handle(),
                 "SELECT * FROM Settings" };
         stmt.execute();
@@ -302,6 +304,7 @@ struct DbModel : public Tests
         uint32_t dbVersion;
         row >> dbVersion;
         ASSERT_EQ( Settings::DbModelVersion, dbVersion );
+        utils::fs::rmdir( utils::file::directory( getDbPath() ) );
     }
 
     void CommonMigrationTest( const char* mockDb )

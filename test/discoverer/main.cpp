@@ -116,8 +116,8 @@ int main( int argc, char** argv )
         return 1;
     }
 
-    auto dbPath = getTempPath( "test.db" );
-    auto mlDir = getTempPath( "ml_folder" );
+    auto mlDir = getTempPath( "discoverer_test" );
+    auto dbPath = mlDir + "/test.db";
 
     unlink( dbPath.c_str() );
 

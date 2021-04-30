@@ -106,8 +106,8 @@ int main( int argc, char** argv )
     }
     auto entrypoint = utils::file::toMrl( argv[1] );
 
-    auto dbPath = getTempPath( "test.db" );
-    auto mlDir = getTempPath( "ml_folder" );
+    auto mlDir = getTempPath( "fast_discoverer_cancel_test" );
+    auto dbPath = mlDir + "test.db";
 
     auto testCb = std::make_unique<FastDiscoverCancelCb>();
     auto ml = std::make_unique<medialibrary::MediaLibrary>( dbPath, mlDir, nullptr );

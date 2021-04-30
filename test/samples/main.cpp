@@ -179,8 +179,9 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 
 #define RUN_TEST( Type, Func ) \
     auto T = std::make_unique<Type>(); \
-    T->SetUp( testName ); \
+    T->SetUp( testType, testName ); \
     Func( T.get() ); \
+    T->TearDown();
 
 int main(int ac, char** av)
 {
