@@ -40,6 +40,7 @@ test_list = [
   'media_groups',
   'attached_subs',
   'attached_audio',
+  'various',
 ]
 
 if libvlc_dep.version().version_compare('>=4.0')

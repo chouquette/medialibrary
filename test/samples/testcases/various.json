@@ -1,0 +1,39 @@
+{
+    "banned": [
+        "music/various/entrypoint1/banned"
+    ],
+    "input": [
+        "music/various/entrypoint1",
+        "music/various/entrypoint2"
+    ],
+    "expected": {
+        "nbAudios": 9,
+        "nbVideos": 0,
+        "albums": [
+            {
+                "title": "ep1-album1",
+                "artist": "ep1-artist"
+            },
+            {
+                "title": "ep2-album1",
+                "artist": "ep2-artist"
+            },
+            {
+                "title": "ep2-album2",
+                "artist": "ep2-artist"
+            }
+        ],
+        "artists": [
+            {
+                "name": "ep1-artist",
+                "nbTracks": 3,
+                "nbAlbums": 1
+            },
+            {
+                "name": "ep2-artist",
+                "nbTracks": 6,
+                "nbAlbums": 2
+            }
+        ]
+    }
+}
