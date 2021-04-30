@@ -93,12 +93,13 @@ struct UnitTests
 
 using Tests = UnitTests<>;
 
-#define INIT_TESTS_C(TestClass) \
+#define INIT_TESTS_COMMON(TestClass, TestSuite) \
     if ( ac != 2 ) { fprintf(stderr, "Missing test name\n" ); return 1; } \
     const char* selectedTest = av[1]; \
     auto t = std::make_unique<TestClass>();
 
-#define INIT_TESTS INIT_TESTS_C(Tests)
+#define INIT_TESTS(TestSuite) INIT_TESTS_COMMON(Tests, TestSuite)
+#define INIT_TESTS_C(TestClass) INIT_TESTS_COMMON( TestClass, TestClass )
 
 #define ADD_TEST( func ) \
     do { \

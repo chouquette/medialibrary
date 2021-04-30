@@ -210,7 +210,7 @@ static void FullExtraction( Tests* )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS(TitleAnalyzer);
 
     ADD_TEST( SimpleTests );
     ADD_TEST( RemovePatterns );

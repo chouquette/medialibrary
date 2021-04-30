@@ -538,7 +538,7 @@ static void UpdateAfterSuccessAndFailure( Tests* T )
 
 int main( int ac, char **av )
 {
-    INIT_TESTS;
+    INIT_TESTS( Thumbnail );
 
     ADD_TEST( Create );
     ADD_TEST( MediaSetThumbnail );

@@ -139,7 +139,7 @@ static void Path( Tests* )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS(Url);
 
     ADD_TEST( encode );
     ADD_TEST( stripScheme );

@@ -409,7 +409,7 @@ static void DeleteEpisodeByMediaId( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS( Show );
 
     ADD_TEST( Create );
     ADD_TEST( Fetch );

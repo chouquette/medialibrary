@@ -198,7 +198,7 @@ int test_without_ml_init( int ac, char** av )
 
 int test_with_ml_init( int ac, char** av )
 {
-    INIT_TESTS
+    INIT_TESTS(MiscTests)
 
     ADD_TEST( CheckTaskDbModel );
     ADD_TEST( ClearDatabaseKeepPlaylist );

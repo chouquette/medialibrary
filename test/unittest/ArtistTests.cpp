@@ -701,7 +701,7 @@ static void CheckDbModel( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS
+    INIT_TESTS( Artist )
 
     ADD_TEST( Create );
     ADD_TEST( ShortBio );

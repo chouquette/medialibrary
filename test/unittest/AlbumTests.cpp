@@ -862,7 +862,7 @@ static void SortByDuration( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS
+    INIT_TESTS( Album )
     ADD_TEST( Create );
     ADD_TEST( Fetch );
     ADD_TEST( AddTrack );

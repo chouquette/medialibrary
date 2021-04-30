@@ -1380,7 +1380,7 @@ static void KoreanTitles( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS( MediaGroup );
 
     ADD_TEST( Create );
     ADD_TEST( ListAll );

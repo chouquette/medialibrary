@@ -118,7 +118,7 @@ static void DeleteByMediaId( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS(Movie);
 
     ADD_TEST( Create );
     ADD_TEST( Fetch );

@@ -1366,7 +1366,7 @@ static void ConvertToExternal( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS( Media );
 
     ADD_TEST( Create );
     ADD_TEST( Fetch );

@@ -117,7 +117,7 @@ static void UnlinkExternalTrack( Tests* T )
 
 int main( int ac, char** av )
 {
-    INIT_TESTS;
+    INIT_TESTS(SubtitleTrack);
 
     ADD_TEST( AddTrack );
     ADD_TEST( FetchTracks );
