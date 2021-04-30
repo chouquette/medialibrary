@@ -95,15 +95,21 @@ private:
 struct Tests
 {
     virtual ~Tests() = default;
-    virtual void SetUp();
+    virtual void SetUp( const std::string& testName );
     std::unique_ptr<MockCallback> m_cb;
     std::unique_ptr<IMediaLibrary> m_ml;
+
+    std::unique_lock<compat::Mutex> lock;
+    rapidjson::Document doc;
+    rapidjson::GenericValue<rapidjson::UTF8<>> input;
+
+    static const std::string Directory;
 
     virtual void InitializeCallback();
     virtual void InitializeMediaLibrary( const std::string& dbPath,
                                          const std::string& mlFolderDir );
 
-    void runChecks( const rapidjson::Document& doc );
+    void runChecks();
 
     void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );
     void checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks );
@@ -118,6 +124,9 @@ struct Tests
     void checkMediaGroups( const rapidjson::Value& expectedMediaGroups,
                            std::vector<MediaGroupPtr> mediaGroups );
     void checkMediaFiles( const IMedia* media, const rapidjson::Value &expectedFiles );
+
+protected:
+    virtual void InitTestCase( const std::string& testName );
 };
 
 class MediaLibraryResumeTest : public MediaLibrary
@@ -141,6 +150,11 @@ struct RefreshTests : public Tests
 {
     void forceRefresh();
     virtual void InitializeCallback() override;
+};
+
+struct BackupRestorePlaylistTests : public Tests
+{
+    virtual void InitTestCase( const std::string& ) override {}
 };
 
 #endif // TESTER_H

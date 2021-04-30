@@ -37,8 +37,11 @@
 #include "medialibrary/IShow.h"
 #include "medialibrary/IShowEpisode.h"
 #include "medialibrary/IMediaGroup.h"
+#include "utils/Directory.h"
 
 #include <algorithm>
+
+const std::string Tests::Directory = SRC_DIR "/test/samples/";
 
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
@@ -172,7 +175,31 @@ bool MockResumeCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>
     });
 }
 
-void Tests::SetUp()
+void Tests::InitTestCase( const std::string& testName )
+{
+    auto casePath = Directory + "testcases/" + testName + ".json";
+    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
+    ASSERT_NE( nullptr, f );
+    char buff[65536];
+    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
+    ASSERT_NE( 0u, ret );
+    buff[ret] = 0;
+    doc.Parse( buff );
+    ASSERT_TRUE( doc.HasMember( "input" ) );
+    input = doc["input"];
+    lock = m_cb->lock();
+    for ( auto i = 0u; i < input.Size(); ++i )
+    {
+        // Quick and dirty check to ensure we're discovering something that exists
+        auto samplesDir = Directory + "samples/" + input[i].GetString();
+        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+        samplesDir = utils::fs::toAbsolute( samplesDir );
+
+        m_ml->discover( utils::file::toMrl( samplesDir ) );
+    }
+}
+
+void Tests::SetUp( const std::string& testName )
 {
     InitializeCallback();
     auto mlDir = getTempPath( "ml_folder" );
@@ -181,6 +208,8 @@ void Tests::SetUp()
 
     auto res = m_ml->initialize( m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
+
+    InitTestCase( testName );
 }
 
 void Tests::InitializeCallback()
@@ -207,7 +236,7 @@ void Tests::InitializeMediaLibrary( const std::string& dbPath,
     m_ml.reset( new MediaLibraryTester{ dbPath, mlFolderDir } );
 }
 
-void Tests::runChecks(const rapidjson::Document& doc)
+void Tests::runChecks()
 {
     if ( doc.HasMember( "expected" ) == false )
     {
@@ -372,7 +401,7 @@ void Tests::checkMediaFiles( const IMedia *media, const rapidjson::Value& expect
                        static_cast<std::underlying_type_t<IFile::Type>>( (*it)->type() ) );
         }
         files.erase( it );
-    }
+}
 }
 
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)

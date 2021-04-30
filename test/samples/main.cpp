@@ -34,198 +34,80 @@
 
 #include <vlcpp/vlc.hpp>
 
-static std::string TestDirectory = SRC_DIR "/test/samples/";
-static std::string ForcedTestDirectory;
-
-static void Parse( Tests* T, const std::string& testFile )
+static void Parse( Tests* T )
 {
-    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + testFile + ".json";
-    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
-    ASSERT_NE( nullptr, f );
-    char buff[65536]; // That's how ugly I am!
-    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
-    ASSERT_NE( 0u, ret );
-    buff[ret] = 0;
-    rapidjson::Document doc;
-    doc.Parse( buff );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    const auto& input = doc["input"];
-    auto lock = T->m_cb->lock();
-    for ( auto i = 0u; i < input.Size(); ++i )
-    {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
-    }
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
-
-    T->runChecks( doc );
+    T->runChecks();
 }
 
-static void ParseTwice( Tests* T, const std::string& testFile )
+static void ParseTwice( Tests* T )
 {
-    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + testFile + ".json";
-    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
-    ASSERT_NE( nullptr, f );
-    char buff[65536]; // That's how ugly I am!
-    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
-    ASSERT_NE( 0u, ret );
-    buff[ret] = 0;
-    rapidjson::Document doc;
-    doc.Parse( buff );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    const auto& input = doc["input"];
-    auto lock = T->m_cb->lock();
-    for ( auto i = 0u; i < input.Size(); ++i )
+    T->runChecks();
+
+    for ( auto i = 0u; i < T->input.Size(); ++i )
     {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
-    }
-
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
-
-    T->runChecks( doc );
-
-    for ( auto i = 0u; i < input.Size(); ++i )
-    {
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
         samplesDir = utils::fs::toAbsolute( samplesDir );
         T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForRemovalComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForRemovalComplete( T->lock ) );
 
-    for ( auto i = 0u; i < input.Size(); ++i )
+    for ( auto i = 0u; i < T->input.Size(); ++i )
     {
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
+        auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
         samplesDir = utils::fs::toAbsolute( samplesDir );
         T->m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    T->runChecks( doc );
+    T->runChecks();
 }
 
-static void RunResumeTests( ResumeTests* T, const std::string& testFile )
+static void RunResumeTests( ResumeTests* T )
 {
-    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + testFile + ".json";
-    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
-    ASSERT_NE( nullptr, f );
-    char buff[65536]; // That's how ugly I am!
-    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
-    ASSERT_NE( 0u, ret );
-    buff[ret] = 0;
-    rapidjson::Document doc;
-    doc.Parse( buff );
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    const auto& input = doc["input"];
-    auto lock = T->m_cb->lock();
-    for ( auto i = 0u; i < input.Size(); ++i )
-    {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
-    }
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    T->runChecks( doc );
+    T->runChecks();
 }
 
-static void Rescan( ResumeTests* T, const std::string& testFile )
+static void Rescan( ResumeTests* T )
 {
-    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + testFile + ".json";
-    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
-    ASSERT_NE( nullptr, f );
-    char buff[65536]; // That's how ugly I am!
-    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
-    ASSERT_NE( 0u, ret );
-    buff[ret] = 0;
-    rapidjson::Document doc;
-    doc.Parse( buff );
-
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    const auto& input = doc["input"];
-    auto lock = T->m_cb->lock();
-    for ( auto i = 0u; i < input.Size(); ++i )
-    {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
-    }
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
     T->m_cb->reinit();
     T->m_ml->forceRescan();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    T->runChecks( doc );
+    T->runChecks();
 }
 
-static void RunRefreshTests( RefreshTests* T, const std::string& testFile )
+static void RunRefreshTests( RefreshTests* T )
 {
-    auto testDir = ForcedTestDirectory.empty() == false ? ForcedTestDirectory : TestDirectory;
-    auto casePath = testDir + "testcases/" + testFile + ".json";
-    std::unique_ptr<FILE, int(*)(FILE*)> f( fopen( casePath.c_str(), "rb" ), &fclose );
-    ASSERT_NE( nullptr, f );
-    char buff[65536]; // That's how ugly I am!
-    auto ret = fread( buff, sizeof(buff[0]), sizeof(buff), f.get() );
-    ASSERT_NE( 0u, ret );
-    buff[ret] = 0;
-    rapidjson::Document doc;
-    doc.Parse( buff );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    const auto& input = doc["input"];
-    auto lock = T->m_cb->lock();
-    for ( auto i = 0u; i < input.Size(); ++i )
-    {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = testDir + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
-    }
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( lock ) );
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
-
-    T->runChecks( doc );
+    T->runChecks();
 
     T->m_cb->reinit();
     T->forceRefresh();
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
 
-    T->runChecks( doc );
+    T->runChecks();
 }
 
-static void RunBackupRestorePlaylist( Tests* T, const std::string& )
+static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 {
     auto lock = T->m_cb->lock();
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
@@ -297,29 +179,24 @@ static void RunBackupRestorePlaylist( Tests* T, const std::string& )
 
 #define RUN_TEST( Type, Func ) \
     auto T = std::make_unique<Type>(); \
-    T->SetUp(); \
-    Func( T.get(), testName ); \
+    T->SetUp( testName ); \
+    Func( T.get() ); \
 
 int main(int ac, char** av)
 {
-    const std::string forcedTestDir = "--testdir";
     std::string testType;
     std::string testName;
+    if ( ac != 3 )
+    {
+        fprintf( stderr, "usage: %s <test type> <test name>\n", av[0] );
+        return 1;
+    }
     for ( auto i = 1; i < ac; ++i )
     {
-        if ( av[i] == forcedTestDir )
-        {
-            assert(i + 1 < ac);
-            ForcedTestDirectory = av[i + 1];
-            ++i;
-        }
-        else
-        {
-            testType = av[i];
-            testName = av[i + 1];
-            assert( i + 2 == ac && "Invalid number of arguments" );
-            break;
-        }
+        testType = av[i];
+        testName = av[i + 1];
+        assert( i + 2 == ac && "Invalid number of arguments" );
+        break;
     }
     if ( testType == "Parse" )
     {
@@ -343,7 +220,7 @@ int main(int ac, char** av)
     }
     else if ( testType == "BackupRestorePlaylist" )
     {
-        RUN_TEST( Tests, RunBackupRestorePlaylist );
+        RUN_TEST( BackupRestorePlaylistTests, RunBackupRestorePlaylist );
     }
     else
         assert( !"Invalid test type" );
