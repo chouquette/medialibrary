@@ -691,21 +691,22 @@ public:
      * @brief banFolder will prevent an entry point folder from being discovered.
      * If the folder was already discovered, it will be removed prior to the ban, and all
      * associated media will be discarded.
+     * @param mrl The MRL to ban
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
      *       task
      */
-    virtual void banFolder( const std::string& path ) = 0;
+    virtual void banFolder( const std::string& mrl ) = 0;
     /**
      * @brief unbanFolder Unban an entrypoint.
      * In case this entry point was indeed previously banned, this will issue a reload of
      * that entry point
-     * @param entryPoint The entry point to unban
+     * @param mrl The MRL to unban
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
      *       task
      */
-    virtual void unbanFolder( const std::string& entryPoint ) = 0;
+    virtual void unbanFolder( const std::string& mrl ) = 0;
     /**
      * @brief bannedEntryPoints Returns a query representing the banned entry points
      *
