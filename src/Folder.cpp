@@ -369,8 +369,7 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     return self;
 }
 
-bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl,
-                  RemovalBehavior behavior )
+bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
 {
     auto f = fromMrl( ml, mrl, BannedType::Any );
     if ( f != nullptr )
@@ -378,7 +377,7 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl,
         // No need to ban a folder twice
         if ( f->m_isBanned == true )
             return true;
-        return remove( ml, std::move( f ), behavior );
+        return remove( ml, std::move( f ), RemovalBehavior::RemovedFromDisk );
     }
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )

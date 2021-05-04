@@ -108,8 +108,7 @@ public:
     static std::shared_ptr<Folder> create( MediaLibraryPtr ml, const std::string& mrl,
                                            int64_t parentId, const Device& device,
                                            fs::IDevice& deviceFs );
-    static bool ban( MediaLibraryPtr ml, const std::string& mrl,
-                     RemovalBehavior behavior );
+    static bool ban( MediaLibraryPtr ml, const std::string& mrl );
     static std::vector<std::shared_ptr<Folder>> fetchRootFolders( MediaLibraryPtr ml );
 
     static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,

@@ -475,8 +475,7 @@ void DiscovererWorker::runRemove( const std::string& ep )
 
 void DiscovererWorker::runBan( const std::string& entryPoint )
 {
-    auto res = Folder::ban( m_ml, entryPoint,
-                            Folder::RemovalBehavior::RemovedFromDisk );
+    auto res = Folder::ban( m_ml, entryPoint );
     m_ml->getCb()->onEntryPointBanned( entryPoint, res );
 }
 
