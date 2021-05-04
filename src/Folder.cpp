@@ -371,13 +371,16 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
 
 bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
 {
+    auto t = ml->getConn()->newTransaction();
+
     auto f = fromMrl( ml, mrl, BannedType::Any );
     if ( f != nullptr )
     {
         // No need to ban a folder twice
         if ( f->m_isBanned == true )
             return true;
-        return remove( ml, std::move( f ), RemovalBehavior::RemovedFromDisk );
+        if ( remove( ml, std::move( f ), RemovalBehavior::RemovedFromDisk ) == false )
+            return false;
     }
     auto fsFactory = ml->fsFactoryForMrl( mrl );
     if ( fsFactory == nullptr )
@@ -415,6 +418,8 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
     auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
                                              nullptr, true, device->id(),
                                              deviceFs->isRemovable() ) != 0;
+    if ( res == true )
+        t->commit();
     return res;
 }
 
