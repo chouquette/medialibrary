@@ -259,18 +259,28 @@ static void UpdateFile( FolderTests* T )
 
 static void Ban( FolderTests* T )
 {
-    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
-    T->cbMock->waitBanFolder();
+    /* Attempt to ban a folder after its discovery and check that it stays banned */
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
+    T->ml->banFolder( mock::FileSystemFactory::SubFolder );
+    T->cbMock->waitBanFolder();
+
     auto f = T->ml->folder( mock::FileSystemFactory::SubFolder );
+    ASSERT_EQ( nullptr, f );
+
+    T->ml->discover( mock::FileSystemFactory::Root );
+    discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    f = T->ml->folder( mock::FileSystemFactory::SubFolder );
     ASSERT_EQ( nullptr, f );
 }
 
 static void DiscoverBanned( FolderTests* T )
 {
+    /* Attempt to ban a folder prior to its discovery */
     T->ml->banFolder( mock::FileSystemFactory::Root );
     T->cbMock->waitBanFolder();
     T->ml->discover( mock::FileSystemFactory::Root );
