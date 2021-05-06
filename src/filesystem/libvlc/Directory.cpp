@@ -152,11 +152,25 @@ void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
         auto path = utils::url::toLocalPath( mrl );
 
 #ifdef _WIN32
-        struct _stat64 s;
-        if ( _wstat64( charset::ToWide( path.c_str() ).get(), &s ) != 0 )
+        /* We can't use _wstat here, see #323 */
+        WIN32_FILE_ATTRIBUTE_DATA attributes;
+        if ( GetFileAttributesExW( charset::ToWide( path.c_str() ).get(),
+                                   GetFileExInfoStandard, &attributes ) == 0 )
         {
-            LOG_ERROR( "Failed to get ", path, " stats" );
-            throw errors::System{ errno, "Failed to get stats" };
+            LOG_ERROR( "Failed to get ", path, " attributes" );
+            throw errors::System{ GetLastError(), "Failed to get stats" };
+        }
+        LARGE_INTEGER li;
+        li.u.LowPart = attributes.ftLastWriteTime.dwLowDateTime;
+        li.u.HighPart = attributes.ftLastWriteTime.dwHighDateTime;
+        lastModificationDate = li.QuadPart / 10000000ULL - 11644473600ULL;
+        if ( ( attributes.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) != 0 )
+            fileSize = 0;
+        else
+        {
+            li.u.LowPart = attributes.nFileSizeLow;
+            li.u.HighPart = attributes.nFileSizeHigh;
+            fileSize = li.QuadPart;
         }
 #else
         struct stat s;
@@ -175,9 +189,9 @@ void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
             LOG_ERROR( "Failed to get file ", mrl, " info" );
             throw errors::System{ errno, "Failed to get file info" };
         }
-#endif
         lastModificationDate = s.st_mtime;
         fileSize = s.st_size;
+#endif
     }
     if ( linkedType == IFile::LinkedFileType::None )
         m_files.push_back( std::make_shared<File>( std::move( mrl ),
