@@ -50,6 +50,8 @@
 # include <cstring>
 #endif
 
+#include <cassert>
+
 namespace medialibrary
 {
 
@@ -107,8 +109,10 @@ std::string toAbsolute( const std::string& path )
 
 bool mkdir( const std::string& path )
 {
+    assert( path.empty() == false );
     auto paths = utils::file::splitPath( path, true );
 #ifndef _WIN32
+    assert( path[0] == '/' );
     std::string fullPath{ "/" };
 #else
     std::string fullPath;

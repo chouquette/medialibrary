@@ -36,6 +36,13 @@ namespace fs
 
 bool isDirectory( const std::string& path );
 std::string toAbsolute( const std::string& path );
+/**
+ * @brief mkdir Creates a directory including the intermediate directories if needed
+ * @param path The path to the folder to create
+ * @return true in case of success, false otherwise
+ *
+ * @warning This only supports absolute path
+ */
 bool mkdir( const std::string& path );
 /**
  * @brief rmdir Remove a directory and all the files it contains
