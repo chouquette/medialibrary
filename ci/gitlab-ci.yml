@@ -4,6 +4,7 @@ variables:
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20210215200735
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20210216181601
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20210218132922
+  MEDIALIB_TEST_FOLDER: $CI_PROJECT_DIR/medialib_tests/
 
 linux:
     image: $MEDIALIBRARY_IMG
@@ -35,6 +36,8 @@ linux:
       name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
       paths:
         - build/html/
+        - $MEDIALIB_TEST_FOLDER/**/test.db
+      when: always
 
 linux-novlc:
     image: $MEDIALIBRARY_IMG
@@ -67,7 +70,12 @@ win32:
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - meson test --print-errorlogs
+      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --print-errorlogs
+    artifacts:
+      when: on_failure
+      paths: 
+        - $MEDIALIB_TEST_FOLDER/**/test.db
+      expire_in: 1 week
 
 win64:
     image: $MEDIALIBRARY_WIN64_IMG
@@ -89,7 +97,12 @@ win64:
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - meson test --print-errorlogs
+      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --print-errorlogs
+    artifacts:
+      when: on_failure
+      paths: 
+        - $MEDIALIB_TEST_FOLDER/**/test.db
+      expire_in: 1 week
 
 asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
@@ -114,6 +127,11 @@ asan-ubsan:
       - meson compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+    artifacts:
+      when: on_failure
+      paths:
+        - /tmp/medialib/**/test.db
+      expire_in: 1 week
 
 #tsan:
 #    image: $VLC_DEBIAN_UNSTABLE_IMG
