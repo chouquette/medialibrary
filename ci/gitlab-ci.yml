@@ -110,7 +110,7 @@ asan-ubsan:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
       - cd ..
       - meson -Db_sanitize=address,undefined build
-      - cd build && meson test
+      - cd build && meson test --print-errorlogs
       - meson compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
