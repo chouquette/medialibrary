@@ -29,6 +29,9 @@
 
 static inline std::string getTempDir()
 {
+    auto forcedPath = getenv( "MEDIALIB_TEST_FOLDER" );
+    if ( forcedPath != nullptr )
+        return forcedPath;
 #ifdef _WIN32
     WCHAR path[MAX_PATH];
     GetTempPathW( MAX_PATH, path );
