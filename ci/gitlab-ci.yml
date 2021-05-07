@@ -103,7 +103,7 @@ asan-ubsan:
     variables:
       LSAN_OPTIONS: 'detect_leaks=0'
     script:
-      - git clone https://git.videolan.org/git/vlc.git --depth=1
+      - git clone https://code.videolan.org/videolan/vlc.git --depth=1
       - cd vlc && ./bootstrap
       - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
       - make install -j8
@@ -127,7 +127,7 @@ asan-ubsan:
 #    variables:
 #        TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
 #    script:
-#      - git clone https://git.videolan.org/git/vlc.git --depth=1
+#      - git clone https://code.videolan.org/videolan/vlc.git --depth=1
 #      - cd vlc && ./bootstrap
 #      - ./configure LDFLAGS="-ltsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=thread --disable-medialibrary --disable-nls --enable-debug
 #      - make install -j8
