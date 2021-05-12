@@ -55,6 +55,7 @@ static void ParseTwice( Tests* T )
     }
 
     ASSERT_TRUE( T->m_cb->waitForRemovalComplete( T->lock ) );
+    T->m_cb->prepareForDiscovery( T->input.Size() );
 
     for ( auto i = 0u; i < T->input.Size(); ++i )
     {
@@ -110,6 +111,7 @@ static void RunRefreshTests( RefreshTests* T )
 static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 {
     auto lock = T->m_cb->lock();
+    T->m_cb->prepareForDiscovery( 1 );
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
@@ -163,6 +165,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
      * converted back to internal media, meaning they'll recover their titles
      * and duration among other information.
      */
+    T->m_cb->prepareForDiscovery( 1 );
     T->m_ml->discover( utils::file::toMrl( samplesFolder ) );
     res = T->m_cb->waitForParsingComplete( lock );
     ASSERT_TRUE( res );

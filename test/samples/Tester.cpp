@@ -50,8 +50,8 @@ MockCallback::MockCallback()
     , m_done( false )
     , m_discoveryCompleted( false )
     , m_removalCompleted( false )
+    , m_nbEntryPointsExpected( 0 )
 {
-
 }
 
 std::unique_lock<compat::Mutex> MockCallback::lock()
@@ -100,6 +100,9 @@ void MockCallback::onDiscoveryCompleted(const std::string& entryPoint, bool )
     if ( entryPoint.empty() == true )
         return;
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
+    assert( m_nbEntryPointsExpected > 0 );
+    if ( --m_nbEntryPointsExpected != 0 )
+        return;
     m_discoveryCompleted = true;
 }
 
@@ -203,6 +206,7 @@ void Tests::InitTestCase( const std::string& testName )
 
     ASSERT_TRUE( doc.HasMember( "input" ) );
     input = doc["input"];
+    m_cb->prepareForDiscovery( input.Size() );
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -902,4 +906,21 @@ bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock 
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
     });
+}
+
+void MockCallback::prepareForDiscovery( uint32_t nbEntryPointsExpected )
+{
+    /*
+     * When running the tests on wine32, this sample fails:
+     * ```
+     *   compat::Mutex m;
+     *   m.lock();
+     *   assert( m.try_lock() == false );
+     * ```
+     * AFAICS we can't use try_lock reliably on wine32
+     */
+#if !defined(_WIN32) || defined(__WIN64)
+    assert( m_parsingMutex.try_lock() == false );
+#endif
+    m_nbEntryPointsExpected = nbEntryPointsExpected;
 }

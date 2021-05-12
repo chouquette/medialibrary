@@ -59,6 +59,7 @@ public:
     std::unique_lock<compat::Mutex> lock();
     void prepareForPlaylistReload();
     bool waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock );
+    void prepareForDiscovery( uint32_t nbEntryPointsExpected );
 
 protected:
     virtual void onDiscoveryCompleted( const std::string&, bool ) override;
@@ -77,6 +78,7 @@ protected:
     bool m_done;
     bool m_discoveryCompleted;
     bool m_removalCompleted;
+    uint32_t m_nbEntryPointsExpected;
 };
 
 class MockResumeCallback : public MockCallback
