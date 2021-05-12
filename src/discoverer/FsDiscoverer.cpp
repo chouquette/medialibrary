@@ -304,6 +304,10 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
     directories.push( { std::move( folderFs ), std::move( folder ), nullptr } );
     while ( directories.empty() == false )
     {
+        if ( isInterrupted() == true )
+            break;
+        waitIfPaused();
+
         auto& dirToCheck = directories.top();
         auto currentDirFs = std::move( dirToCheck.fs );
         auto currentDir = std::move( dirToCheck.entity );
@@ -380,10 +384,6 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
         auto subFoldersInDB = currentDir->folders();
         for ( const auto& subFolder : currentDirFs->dirs() )
         {
-            if ( isInterrupted() == true )
-                break;
-            waitIfPaused();
-
             auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
                                     [&subFolder](const std::shared_ptr<Folder>& f) {
                 auto subFolderName = utils::file::directoryName( subFolder->mrl() );
