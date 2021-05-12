@@ -53,6 +53,8 @@ linux-novlc:
 
 win32:
     image: $MEDIALIBRARY_WIN32_IMG
+    variables:
+      MESON_TESTTHREADS: 8
     rules:
       - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
@@ -81,6 +83,8 @@ win32:
 
 win64:
     image: $MEDIALIBRARY_WIN64_IMG
+    variables:
+      MESON_TESTTHREADS: 8
     rules:
       - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
