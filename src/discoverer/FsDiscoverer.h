@@ -23,6 +23,7 @@
 #pragma once
 
 #include <memory>
+#include <atomic>
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 
@@ -32,36 +33,38 @@ namespace medialibrary
 class MediaLibrary;
 class IMediaLibraryCb;
 class Folder;
-class IInterruptProbe;
 
 class FsDiscoverer
 {
 public:
     FsDiscoverer(MediaLibrary* ml , IMediaLibraryCb* cb);
-    bool reload( const IInterruptProbe& interruptProbe );
-    bool reload( const std::string& entryPoint,
-                 const IInterruptProbe& interruptProbe );
+    bool reload();
+    bool reload( const std::string& entryPoint );
     bool addEntryPoint(const std::string& entryPoint );
+    /**
+     * @brief interrupt Interrupts the current operation and return ASAP
+     */
+    void interrupt();
 
 private:
-    void checkFolder(std::shared_ptr<fs::IDirectory> currentFolderFs,
+    void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
                       std::shared_ptr<Folder> currentFolder,
-                      const IInterruptProbe& interruptProbe,
                       fs::IFileSystemFactory& fsFactory) const;
     void checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
-                     std::shared_ptr<Folder> parentFolder,
-                     const IInterruptProbe& interruptProbe ) const;
+                     std::shared_ptr<Folder> parentFolder ) const;
     std::shared_ptr<Folder> addFolder(std::shared_ptr<fs::IDirectory> folder,
                                       Folder* parentFolder) const;
     bool reloadFolder( std::shared_ptr<Folder> folder,
-                       const IInterruptProbe& probe, fs::IFileSystemFactory& fsFactory );
+                       fs::IFileSystemFactory& fsFactory );
     void checkRemovedDevices(fs::IDirectory& fsFolder, std::shared_ptr<Folder> folder,
                               fs::IFileSystemFactory& fsFactory, bool newFolder,
                               bool rootFolder ) const;
+    bool isInterrupted() const;
 
 private:
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_cb;
+    std::atomic_bool m_isInterrupted;
 };
 
 }

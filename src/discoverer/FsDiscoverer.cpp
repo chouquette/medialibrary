@@ -42,7 +42,6 @@
 #include "MediaLibrary.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
-#include "medialibrary/IInterruptProbe.h"
 
 namespace medialibrary
 {
@@ -50,11 +49,11 @@ namespace medialibrary
 FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb )
     : m_ml( ml )
     , m_cb( cb )
+    , m_isInterrupted( false )
 {
 }
 
 bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
-                                 const IInterruptProbe& probe,
                                  fs::IFileSystemFactory& fsFactory )
 {
     assert( f->isPresent() );
@@ -86,7 +85,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     }
     try
     {
-        checkFolder( std::move( directory ), std::move( f ), probe, fsFactory );
+        checkFolder( std::move( directory ), std::move( f ), fsFactory );
     }
     catch ( fs::errors::DeviceRemoved& )
     {
@@ -154,13 +153,18 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
     }
 }
 
-bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
+bool FsDiscoverer::isInterrupted() const
+{
+    return m_isInterrupted.load( std::memory_order_acquire );
+}
+
+bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             break;
         /*
          * We only fetch present folders, but during the reload (or even between
@@ -196,14 +200,13 @@ bool FsDiscoverer::reload( const IInterruptProbe& interruptProbe )
             continue;
 
         m_cb->onDiscoveryStarted( mrl );
-        auto res = reloadFolder( f, interruptProbe, *fsFactory );
+        auto res = reloadFolder( f, *fsFactory );
         m_cb->onDiscoveryCompleted( mrl, res );
     }
     return true;
 }
 
-bool FsDiscoverer::reload( const std::string& entryPoint,
-                           const IInterruptProbe& interruptProbe )
+bool FsDiscoverer::reload( const std::string& entryPoint )
 {
     auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
     if ( fsFactory == nullptr )
@@ -221,7 +224,7 @@ bool FsDiscoverer::reload( const std::string& entryPoint,
                   "be reloaded" );
         return false;
     }
-    reloadFolder( std::move( folder ), interruptProbe, *fsFactory );
+    reloadFolder( std::move( folder ), *fsFactory );
     return true;
 }
 
@@ -254,9 +257,13 @@ bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
     }
 }
 
+void FsDiscoverer::interrupt()
+{
+    m_isInterrupted.store( true, std::memory_order_release );
+}
+
 void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                                 std::shared_ptr<Folder> folder,
-                                const IInterruptProbe& interruptProbe,
                                 fs::IFileSystemFactory& fsFactory ) const
 {
     struct CurrentFolder
@@ -347,7 +354,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
         auto subFoldersInDB = currentDir->folders();
         for ( const auto& subFolder : currentDirFs->dirs() )
         {
-            if ( interruptProbe.isInterrupted() == true )
+            if ( isInterrupted() == true )
                 break;
             auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
                                     [&subFolder](const std::shared_ptr<Folder>& f) {
@@ -374,14 +381,13 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             LOG_DEBUG( "Folder ", f->mrl(), " not found in FS, deleting it" );
             Folder::remove( m_ml, f, Folder::RemovalBehavior::RemovedFromDisk );
         }
-        checkFiles( currentDirFs, currentDir, interruptProbe );
+        checkFiles( currentDirFs, currentDir );
         LOG_DEBUG( "Done checking subfolders in ", currentDir->mrl() );
     }
 }
 
 void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
-                               std::shared_ptr<Folder> parentFolder,
-                               const IInterruptProbe& interruptProbe) const
+                               std::shared_ptr<Folder> parentFolder ) const
 {
     LOG_DEBUG( "Checking file in ", parentFolderFs->mrl() );
 
@@ -401,7 +407,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     std::vector<std::pair<std::shared_ptr<File>, std::shared_ptr<fs::IFile>>> filesToRefresh;
     for ( const auto& fileFs: parentFolderFs->files() )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             return;
         auto it = std::find_if( begin( files ), end( files ),
                                 [fileFs](const std::shared_ptr<File>& f) {
@@ -458,7 +464,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
 
     for ( const auto& file : files )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             break;
         LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
         if ( file->type() == IFile::Type::Playlist )
@@ -481,21 +487,21 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     }
     for ( auto& p: filesToRefresh )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             break;
         m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ),
                              parentFolder, parentFolderFs );
     }
     for ( auto& p : filesToAdd )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             break;
         m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
                                 p.type );
     }
     for ( auto p : linkedFilesToAdd )
     {
-        if ( interruptProbe.isInterrupted() == true )
+        if ( isInterrupted() == true )
             break;
         m_ml->onDiscoveredLinkedFile( std::move( p.file ), p.type );
     }

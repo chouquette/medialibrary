@@ -68,6 +68,7 @@ void DiscovererWorker::stop()
             std::unique_lock<compat::Mutex> lock( m_mutex );
             m_tasks.clear();
         }
+        m_discoverer->interrupt();
         m_cond.notify_all();
         m_thread.join();
     }
@@ -304,7 +305,8 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                  * effectively cancel any potential remove operation we might
                  * be queuing.
                  */
-                m_taskInterrupted = true;
+                if ( m_discoverer != nullptr )
+                    m_discoverer->interrupt();
                 /*
                  * If we are interrupting a discover or reload operation with a
                  * ban/remove operation on the same mountpoint, we might as well
@@ -442,13 +444,13 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
         if ( entryPoint.empty() == true )
         {
             // Let the discoverer invoke the callbacks for all its known folders
-            m_discoverer->reload( *this );
+            m_discoverer->reload();
         }
         else
         {
             m_ml->getCb()->onDiscoveryStarted( entryPoint );
             LOG_INFO( "Reloading folder ", entryPoint );
-            auto res = m_discoverer->reload( entryPoint, *this );
+            auto res = m_discoverer->reload( entryPoint );
             m_ml->getCb()->onDiscoveryCompleted( entryPoint, res );
         }
     }
