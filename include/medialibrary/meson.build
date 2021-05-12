@@ -23,7 +23,6 @@ medialib_headers = [
 	'IMetadata.h',
 	'ISubtitleTrack.h',
 	'IThumbnailer.h',
-	'IInterruptProbe.h',
 	'IMediaGroup.h',
 ]
 

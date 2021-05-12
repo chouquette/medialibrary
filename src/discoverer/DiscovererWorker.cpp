@@ -47,7 +47,6 @@ DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
                                     std::unique_ptr<FsDiscoverer> discoverer )
     : m_currentTask( nullptr )
     , m_run( true )
-    , m_taskInterrupted( false )
     , m_discoverer( std::move( discoverer ) )
     , m_ml( ml )
     , m_thread( &DiscovererWorker::run, this )
@@ -374,7 +373,6 @@ void DiscovererWorker::run()
             Task task;
             auto d = utils::make_defer( [this](){
                 std::lock_guard<compat::Mutex> lock( m_mutex );
-                m_taskInterrupted = false;
                 m_currentTask = nullptr;
             });
             {
@@ -544,12 +542,6 @@ void DiscovererWorker::runAddEntryPoint( const std::string& entryPoint )
 {
     auto res = m_discoverer->addEntryPoint( entryPoint );
     m_ml->getCb()->onEntryPointAdded( entryPoint, res );
-}
-
-bool DiscovererWorker::isInterrupted() const
-{
-    return m_run.load() == false ||
-           m_taskInterrupted.load() == true;
 }
 
 }

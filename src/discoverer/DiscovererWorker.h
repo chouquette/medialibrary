@@ -31,7 +31,6 @@
 
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
-#include "medialibrary/IInterruptProbe.h"
 #include "FsDiscoverer.h"
 
 namespace medialibrary
@@ -44,7 +43,7 @@ namespace parser
     class IParserCb;
 }
 
-class DiscovererWorker : public IInterruptProbe
+class DiscovererWorker
 {
 protected:
     struct Task
@@ -79,7 +78,7 @@ protected:
 
 public:
     DiscovererWorker( MediaLibrary* ml, std::unique_ptr<FsDiscoverer> discoverer );
-    ~DiscovererWorker();
+    virtual ~DiscovererWorker();
     void stop();
 
     bool discover( const std::string& entryPoint );
@@ -106,9 +105,6 @@ private:
     void runAddEntryPoint( const std::string& entryPoint );
     bool filter( const Task& newTask );
 
-private:
-    virtual bool isInterrupted() const override;
-
 protected:
     std::list<Task> m_tasks;
     Task* m_currentTask;
@@ -116,8 +112,6 @@ protected:
     compat::ConditionVariable m_cond;
     // This will be set to false when the worker needs to be stopped
     std::atomic_bool m_run;
-    // This will be true when a single task needs to be interrupted
-    std::atomic_bool m_taskInterrupted;
     std::unique_ptr<FsDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
     compat::Thread m_thread;
