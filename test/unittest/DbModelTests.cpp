@@ -296,15 +296,21 @@ struct DbModel : public Tests
 
     virtual void TearDown() override
     {
-        auto dbConn = sqlite::Connection::connect( getDbPath() );
-        medialibrary::sqlite::Statement stmt{ dbConn->handle(),
-                "SELECT * FROM Settings" };
-        stmt.execute();
-        auto row = stmt.row();
-        uint32_t dbVersion;
-        row >> dbVersion;
-        ASSERT_EQ( Settings::DbModelVersion, dbVersion );
-        utils::fs::rmdir( utils::file::directory( getDbPath() ) );
+        {
+            auto dbConn = sqlite::Connection::connect( getDbPath() );
+            medialibrary::sqlite::Statement stmt{ dbConn->handle(),
+                    "SELECT * FROM Settings" };
+            stmt.execute();
+            auto row = stmt.row();
+            uint32_t dbVersion;
+            row >> dbVersion;
+            ASSERT_EQ( Settings::DbModelVersion, dbVersion );
+            /*
+             * Let the local connection be closed before starting tearing down
+             * all others and removing the database from disk
+             */
+        }
+        Tests::TearDown();
     }
 
     void CommonMigrationTest( const char* mockDb )
