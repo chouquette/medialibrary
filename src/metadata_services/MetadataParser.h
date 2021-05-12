@@ -23,7 +23,6 @@
 #pragma once
 
 #include "medialibrary/parser/IParserService.h"
-#include "medialibrary/IInterruptProbe.h"
 #include "medialibrary/IMedia.h"
 
 #include <atomic>
@@ -46,7 +45,7 @@ class Show;
 namespace parser
 {
 
-class MetadataAnalyzer : public IParserService, public IInterruptProbe
+class MetadataAnalyzer : public IParserService
 {
 public:
     MetadataAnalyzer();
@@ -61,8 +60,6 @@ protected:
     virtual void onRestarted() override;
     virtual Step targetedStep() const override;
     virtual void stop() override;
-
-    virtual bool isInterrupted() const override;
 
     Status parsePlaylist( IItem& item ) const;
     void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,

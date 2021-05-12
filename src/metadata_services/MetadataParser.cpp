@@ -1600,10 +1600,5 @@ void MetadataAnalyzer::stop()
     m_stopped.store( true );
 }
 
-bool MetadataAnalyzer::isInterrupted() const
-{
-    return m_stopped.load();
-}
-
 }
 }
