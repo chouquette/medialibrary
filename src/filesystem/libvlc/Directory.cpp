@@ -106,6 +106,20 @@ void Directory::read() const
     for ( auto i = 0; i < subItems->count(); ++i )
     {
         auto m = subItems->itemAtIndex( i );
+        auto fileName = utils::file::fileName( m->mrl() );
+        if ( fileName[0] == '.' )
+        {
+            /*
+             * We need to expose the .nomedia file to the discoverer, but we don't
+             * want to bother with hidden files & folders since they would be ignored
+             * later on.
+             * However, we consider something starting with '..' as a non-hidden
+             * file or folder, see #218
+             */
+            if ( strcasecmp( fileName.c_str(), ".nomedia" ) != 0 &&
+                 fileName.compare( 0, 2, ".." ) != 0 )
+                continue;
+        }
         if ( m->type() == VLC::Media::Type::Directory )
             m_dirs.push_back( std::make_shared<Directory>( m->mrl(), m_fsFactory ) );
         else
