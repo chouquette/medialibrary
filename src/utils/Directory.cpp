@@ -39,6 +39,7 @@
 # include <windows.h>
 # include <direct.h>
 #include "utils/Charsets.h"
+#include "utils/Defer.h"
 #else
 # include <cerrno>
 # include <sys/stat.h>
@@ -203,6 +204,9 @@ bool rmdir( std::string path )
     {
         return false;
     }
+    auto closeHandle = utils::make_defer( [h]() {
+        FindClose( h );
+    });
     do
     {
         auto file = charset::FromWide( f.cFileName );
