@@ -23,7 +23,7 @@ linux:
       - >
         gcovr -r "$CI_PROJECT_DIR/"
         --exclude-directories "$CI_PROJECT_DIR/libvlcpp"
-        -e "CI_PROJECT_DIR/src/database/SqliteErrors.h"
+        -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
         -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
         -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
         --xml cobertura.xml --html=html/medialibrary.html --html-details
