@@ -73,6 +73,16 @@ void DiscovererWorker::stop()
     }
 }
 
+void DiscovererWorker::pause()
+{
+    m_discoverer->pause();
+}
+
+void DiscovererWorker::resume()
+{
+    m_discoverer->resume();
+}
+
 bool DiscovererWorker::discover( const std::string& entryPoint )
 {
     if ( entryPoint.length() == 0 )

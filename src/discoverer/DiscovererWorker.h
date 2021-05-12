@@ -80,6 +80,8 @@ public:
     DiscovererWorker( MediaLibrary* ml, std::unique_ptr<FsDiscoverer> discoverer );
     virtual ~DiscovererWorker();
     void stop();
+    void pause();
+    void resume();
 
     bool discover( const std::string& entryPoint );
     void remove( const std::string& entryPoint );

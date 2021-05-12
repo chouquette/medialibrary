@@ -50,6 +50,7 @@ FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb )
     : m_ml( ml )
     , m_cb( cb )
     , m_isInterrupted( false )
+    , m_paused( false )
 {
 }
 
@@ -158,6 +159,14 @@ bool FsDiscoverer::isInterrupted() const
     return m_isInterrupted.load( std::memory_order_acquire );
 }
 
+void FsDiscoverer::waitIfPaused() const
+{
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    m_cond.wait( lock, [this](){
+        return m_paused == false;
+    });
+}
+
 bool FsDiscoverer::reload()
 {
     LOG_INFO( "Reloading all folders" );
@@ -166,6 +175,8 @@ bool FsDiscoverer::reload()
     {
         if ( isInterrupted() == true )
             break;
+        waitIfPaused();
+
         /*
          * We only fetch present folders, but during the reload (or even between
          * the fetch from database & the time we actually use the results)
@@ -262,6 +273,21 @@ void FsDiscoverer::interrupt()
     m_isInterrupted.store( true, std::memory_order_release );
 }
 
+void FsDiscoverer::pause()
+{
+    std::lock_guard<compat::Mutex> lock( m_mutex );
+    m_paused = true;
+}
+
+void FsDiscoverer::resume()
+{
+    {
+        std::lock_guard<compat::Mutex> lock( m_mutex );
+        m_paused = false;
+    }
+    m_cond.notify_all();
+}
+
 void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
                                 std::shared_ptr<Folder> folder,
                                 fs::IFileSystemFactory& fsFactory ) const
@@ -356,6 +382,8 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
         {
             if ( isInterrupted() == true )
                 break;
+            waitIfPaused();
+
             auto it = std::find_if( begin( subFoldersInDB ), end( subFoldersInDB ),
                                     [&subFolder](const std::shared_ptr<Folder>& f) {
                 auto subFolderName = utils::file::directoryName( subFolder->mrl() );
@@ -409,6 +437,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( isInterrupted() == true )
             return;
+        waitIfPaused();
         auto it = std::find_if( begin( files ), end( files ),
                                 [fileFs](const std::shared_ptr<File>& f) {
             auto fileName = utils::file::fileName( f->mrl() );
@@ -466,6 +495,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( isInterrupted() == true )
             break;
+        waitIfPaused();
+
         LOG_DEBUG( "File ", file->mrl(), " not found on filesystem, deleting it" );
         if ( file->type() == IFile::Type::Playlist )
         {
@@ -489,6 +520,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( isInterrupted() == true )
             break;
+        waitIfPaused();
+
         m_ml->onUpdatedFile( std::move( p.first ), std::move( p.second ),
                              parentFolder, parentFolderFs );
     }
@@ -496,6 +529,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( isInterrupted() == true )
             break;
+        waitIfPaused();
+
         m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
                                 p.type );
     }
@@ -503,6 +538,8 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
     {
         if ( isInterrupted() == true )
             break;
+        waitIfPaused();
+
         m_ml->onDiscoveredLinkedFile( std::move( p.file ), p.type );
     }
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );

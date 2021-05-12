@@ -2352,6 +2352,8 @@ void MediaLibrary::resumeBackgroundOperations()
 
 void MediaLibrary::pauseBackgroundOperationsLocked()
 {
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->pause();
     if ( m_parser != nullptr )
         m_parser->pause();
     if ( m_thumbnailerWorker != nullptr )
@@ -2360,6 +2362,8 @@ void MediaLibrary::pauseBackgroundOperationsLocked()
 
 void MediaLibrary::resumeBackgroundOperationsLocked()
 {
+    if ( m_discovererWorker != nullptr )
+        m_discovererWorker->resume();
     if ( m_parser != nullptr )
         m_parser->resume();
     if ( m_thumbnailerWorker != nullptr )

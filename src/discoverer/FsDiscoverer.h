@@ -26,6 +26,8 @@
 #include <atomic>
 
 #include "medialibrary/filesystem/IFileSystemFactory.h"
+#include "compat/ConditionVariable.h"
+#include "compat/Mutex.h"
 
 namespace medialibrary
 {
@@ -45,6 +47,8 @@ public:
      * @brief interrupt Interrupts the current operation and return ASAP
      */
     void interrupt();
+    void pause();
+    void resume();
 
 private:
     void checkFolder( std::shared_ptr<fs::IDirectory> currentFolderFs,
@@ -60,11 +64,15 @@ private:
                               fs::IFileSystemFactory& fsFactory, bool newFolder,
                               bool rootFolder ) const;
     bool isInterrupted() const;
+    void waitIfPaused() const;
 
 private:
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_cb;
     std::atomic_bool m_isInterrupted;
+    mutable compat::Mutex m_mutex;
+    mutable compat::ConditionVariable m_cond;
+    bool m_paused;
 };
 
 }
