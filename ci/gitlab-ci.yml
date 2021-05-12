@@ -130,7 +130,7 @@ asan-ubsan:
     artifacts:
       when: on_failure
       paths:
-        - /tmp/medialib/**/test.db
+        - $MEDIALIB_TEST_FOLDER/**/test.db
       expire_in: 1 week
 
 #tsan:
