@@ -18,7 +18,7 @@ linux:
     script:
       - meson -Db_coverage=true build
       - cd build && ninja
-      - meson test --print-errorlogs
+      - meson test --no-stdsplit
       - mkdir html/
       - >
         gcovr -r "$CI_PROJECT_DIR/"
@@ -37,6 +37,7 @@ linux:
       paths:
         - build/html/
         - $MEDIALIB_TEST_FOLDER/**/test.db
+        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       when: always
 
 linux-novlc:
@@ -70,11 +71,12 @@ win32:
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --print-errorlogs
+      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
     artifacts:
       when: on_failure
       paths: 
         - $MEDIALIB_TEST_FOLDER/**/test.db
+        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
 
 win64:
@@ -97,11 +99,12 @@ win64:
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
-      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --print-errorlogs
+      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
     artifacts:
       when: on_failure
       paths: 
         - $MEDIALIB_TEST_FOLDER/**/test.db
+        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
 
 asan-ubsan:
@@ -123,7 +126,7 @@ asan-ubsan:
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
       - cd ..
       - meson -Db_sanitize=address,undefined build
-      - cd build && meson test --print-errorlogs
+      - cd build && meson test --no-stdsplit
       - meson compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
@@ -131,6 +134,7 @@ asan-ubsan:
       when: on_failure
       paths:
         - $MEDIALIB_TEST_FOLDER/**/test.db
+        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
 
 #tsan:
@@ -152,7 +156,7 @@ asan-ubsan:
 #      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
 #      - cd ..
 #      - meson -Db_sanitize=thread build
-#      - cd build && meson test
+#      - cd build && meson test --no-stdsplit
 #      - meson compile fast_discover_cancel fast_teardown
 #      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
 #      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
