@@ -195,7 +195,6 @@ bool rmdir( std::string path )
 bool rmdir( std::string path )
 {
     path = utils::file::toFolderPath( path );
-    LOG_ERROR( "Removing directory ", path );
     WIN32_FIND_DATA f;
     auto pattern = path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
@@ -221,9 +220,7 @@ bool rmdir( std::string path )
         }
         else
         {
-            LOG_ERROR( "Removing file ", fullpath );
             auto res = _unlink( fullpath.c_str() );
-            LOG_ERROR( "Removal result: ", res, " errno: ", errno );
         }
     } while ( FindNextFile( h, &f ) != 0 );
     auto wPath = charset::ToWide( path.c_str() );
