@@ -38,8 +38,8 @@
 template <typename CB = mock::NoopCallback>
 struct UnitTests
 {
-    std::unique_ptr<MediaLibraryTester> ml;
     std::unique_ptr<CB> cbMock;
+    std::unique_ptr<MediaLibraryTester> ml;
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
