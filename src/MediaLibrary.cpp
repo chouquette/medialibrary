@@ -2964,4 +2964,9 @@ PriorityAccess MediaLibrary::acquirePriorityAccess()
     return std::make_unique<PriorityAccessImpl>( dbConn->acquirePriorityContext() );
 }
 
+bool MediaLibrary::flushUserProvidedThumbnails()
+{
+    return Thumbnail::flushUserProvided( this );
+}
+
 }

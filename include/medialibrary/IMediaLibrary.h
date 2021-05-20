@@ -896,6 +896,17 @@ public:
     virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) = 0;
 
     virtual PriorityAccess acquirePriorityAccess() = 0;
+
+    /**
+     * @brief flushUserProvidedThumbnails Removes all user provided thumbnail from the database
+     * @return true in case of success, false otherwise.
+     *
+     * The media library will *not* attempt to remove the files, as it doesn't
+     * own them.
+     * This will only make sure that any media that the application provided a
+     * thumbnail for will not have a thumbnail associated with it anymore.
+     */
+    virtual bool flushUserProvidedThumbnails() = 0;
 };
 
 }

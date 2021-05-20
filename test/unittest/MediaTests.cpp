@@ -1364,6 +1364,59 @@ static void ConvertToExternal( Tests* T )
     ASSERT_FALSE( m2->isExternalMedia() );
 }
 
+static void FlushUserProvidedThumbnails( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    auto t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_EQ( t, nullptr );
+    ASSERT_EQ( t2, nullptr );
+
+    auto res = m->setThumbnail( "file:///path/to/thumb.jpg", ThumbnailSizeType::Thumbnail );
+    ASSERT_TRUE( res );
+
+    std::string ownedThumbnailMrl = utils::file::toMrl( T->ml->thumbnailPath() + "thumb.jpg" );
+    t2 = std::make_shared<Thumbnail>( T->ml.get(), ownedThumbnailMrl,
+                                      Thumbnail::Origin::Media, ThumbnailSizeType::Thumbnail,
+                                      true );
+    res = m2->setThumbnail( std::move( t2 ) );
+    ASSERT_TRUE( res );
+    t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( t2 );
+
+    res = T->ml->flushUserProvidedThumbnails();
+    ASSERT_TRUE( res );
+
+    /* Ensure we don't fetch something from the media cache */
+    m = T->ml->media( m->id() );
+    m2 = T->ml->media( m2->id() );
+    ASSERT_NON_NULL( m );
+    ASSERT_NON_NULL( m2 );
+
+    t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_EQ( t, nullptr );
+    t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( t2 );
+
+    /*
+     * We can't use Thumbnail::fetchAll since the Thumbnail constructor expects
+     * both Thumbnail and ThumbnailLinking to be selected from.
+     * We're just want to check that removing from the linking table removed
+     * the thumbnail as well and that we only have a single thumbnail in DB now
+     */
+    {
+        medialibrary::sqlite::Statement stmt{ T->ml->getConn()->handle(),
+                "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
+        };
+        stmt.execute();
+        auto row = stmt.row();
+        ASSERT_EQ( 1u, row.nbColumns() );
+        auto nbThumbnails = row.extract<int64_t>();
+        ASSERT_EQ( nbThumbnails, 1u );
+    }
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1424,6 +1477,7 @@ int main( int ac, char** av )
     ADD_TEST( ForceTitle );
     ADD_TEST( FetchInProgress );
     ADD_TEST( ConvertToExternal );
+    ADD_TEST( FlushUserProvidedThumbnails );
 
     END_TESTS
 }

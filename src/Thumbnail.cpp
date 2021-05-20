@@ -825,6 +825,13 @@ std::string Thumbnail::path( MediaLibraryPtr ml, int64_t thumbnailId )
     return ml->thumbnailPath() + std::to_string( thumbnailId ) + ".jpg";
 }
 
+bool Thumbnail::flushUserProvided(MediaLibraryPtr ml)
+{
+    const std::string req = "DELETE FROM " + LinkingTable::Name +
+            " WHERE origin = ?";
+    return sqlite::Tools::executeDelete( ml->getConn(), req, Origin::UserProvided );
+}
+
 std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
 {
     if ( absoluteMrl.empty() == true )

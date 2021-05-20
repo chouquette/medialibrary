@@ -287,6 +287,8 @@ public:
 
     virtual PriorityAccess acquirePriorityAccess() override;
 
+    virtual bool flushUserProvidedThumbnails() override;
+
 private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;

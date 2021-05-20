@@ -247,6 +247,8 @@ public:
         return static_cast<std::underlying_type_t<ThumbnailSizeType>>( sizeType );
     }
 
+    static bool flushUserProvided( MediaLibraryPtr ml );
+
 private:
     /**
      * @brief toRelativeMrl Convert the provided absolute mrl to a mrl relative to
