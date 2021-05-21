@@ -109,29 +109,98 @@ private:
     std::string m_str;
 };
 
-#define FAIL_TEST( lhs, rhs ) \
-    throw TestFailed{ ( lhs ), ( rhs ), #lhs, #rhs, __FILE__, __LINE__ }
+/*
+ * We don't know how the test macros will be invoked, and don't want to evaluate
+ * the values more than once.
+ * However:
+ * - We can't just store them in a temporary directly since some parameters
+ *   will only be valid during the expression lifetime, for instance something like
+ *   value->fetchContent()->getAnotherValue() will trigger a use-after-free if
+ *   fetchContent() returns by value and getAnotherValue() returns a reference,
+ *   meaning we sometimes have to store a copy.
+ * - We also can't just copy since some of the tested values won't be copyable
+ *   mostly when we check a unique_ptr for nullity.
+ *
+ * So basically, if we can copy, we do so, if we can't, we return a reference
+ */
+namespace
+{
+template <typename T>
+std::enable_if_t<std::is_copy_assignable<std::decay_t<T>>::value, T> getTestedValue( T t )
+{
+    return t;
+}
+
+template <typename T>
+std::enable_if_t<!std::is_copy_assignable<std::decay_t<T>>::value, T&> getTestedValue( T& t )
+{
+    return t;
+}
+}
+
+#define FAIL_TEST( lhsValue, rhsValue, lhsExp, rhsExp ) \
+    throw TestFailed{ ( lhsValue ), ( rhsValue ), lhsExp, rhsExp, __FILE__, __LINE__ }
 
 #define FAIL_TEST_MSG( msg ) \
     throw TestFailed{ msg, __FILE__, __LINE__ }
 
-#define ASSERT_EQ( lhs, rhs ) \
-    do { if ( ( lhs ) != ( rhs ) ) { FAIL_TEST( ( lhs ), ( rhs ) ); } } while ( 0 )
+#define ASSERT_EQ( lhsExp, rhsExp ) \
+    do { \
+        auto&& lhsValue = getTestedValue( lhsExp ); \
+        auto&& rhsValue = getTestedValue( rhsExp ); \
+        if ( lhsValue != rhsValue ) { \
+            FAIL_TEST( lhsValue, rhsValue, ( #lhsExp ), ( #rhsExp ) ); \
+        } \
+    } while ( 0 )
 
-#define ASSERT_NE( lhs, rhs ) \
-    do { if ( ( lhs ) == ( rhs ) ) { FAIL_TEST( ( lhs ), ( rhs ) ); } } while ( 0 )
+#define ASSERT_NE( lhsExp, rhsExp ) \
+    do { \
+        auto&& lhsValue = getTestedValue( lhsExp ); \
+        auto&& rhsValue = getTestedValue( rhsExp ); \
+        if ( lhsValue == rhsValue ) { \
+            FAIL_TEST( std::forward<decltype(lhsValue)>( lhsValue ), \
+                       std::forward<decltype(rhsValue)>( rhsValue ), \
+                       ( #lhsExp ), ( #rhsExp ) ); \
+        } \
+    } while ( 0 )
 
-#define ASSERT_TRUE( val ) \
-    do { if ( ( val ) != true ) { FAIL_TEST( ( val ), true ); } } while ( 0 )
+#define ASSERT_TRUE( exp ) \
+    do { \
+        auto&& value = getTestedValue( exp ); \
+        if ( ( value ) != true ) { \
+            FAIL_TEST( std::forward<decltype(value)>( value ), true, \
+                       ( #exp ), "true" ); \
+        } \
+    } while ( 0 )
 
-#define ASSERT_FALSE( val ) \
-    do { if ( ( val ) != false ) { FAIL_TEST( ( val ), false ); } } while ( 0 )
+#define ASSERT_FALSE( exp ) \
+    do { \
+        auto&& value = getTestedValue( exp ); \
+        if ( ( value ) != false ) { \
+            FAIL_TEST( std::forward<decltype(value)>( value ), false, \
+                       ( #exp ), "false" ); \
+        } \
+    } while ( 0 )
 
-#define ASSERT_NON_NULL( val ) \
-    do { if ( val == nullptr ) { FAIL_TEST( ( val ), nullptr ); } } while ( 0 )
+#define ASSERT_NON_NULL( exp ) \
+    do { \
+        auto&& value = getTestedValue( exp ); \
+        if ( value == nullptr ) { \
+            FAIL_TEST( std::forward<decltype(value)>( value ), nullptr, \
+                       ( #exp ), "nullptr" ); \
+        } \
+    } while ( 0 )
 
-#define ASSERT_LE( lhs, rhs ) \
-    do { if ( ( lhs ) > ( rhs ) ) { FAIL_TEST( ( lhs ), ( rhs ) ); } } while ( 0 )
+#define ASSERT_LE( lhsExp, rhsExp ) \
+    do { \
+        auto&& lhsValue = getTestedValue( lhsExp ); \
+        auto&& rhsValue = getTestedValue( rhsExp ); \
+        if ( lhsValue > rhsValue ) { \
+            FAIL_TEST( std::forward<decltype(lhsValue)>( lhsValue ), \
+                       std::forward<decltype(rhsValue)>( rhsValue ), \
+                       ( #lhsExp ), ( #rhsExp ) ); \
+        } \
+    } while ( 0 )
 
 #define ASSERT_THROW( stmt, ex_type ) \
     do { \
