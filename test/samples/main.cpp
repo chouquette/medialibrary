@@ -182,10 +182,18 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 }
 
 #define RUN_TEST( Type, Func ) \
-    auto T = std::make_unique<Type>(); \
-    T->SetUp( testType, testName ); \
-    Func( T.get() ); \
-    T->TearDown();
+    try \
+    { \
+        auto T = std::make_unique<Type>(); \
+        T->SetUp( testType, testName ); \
+        Func( T.get() ); \
+        T->TearDown(); \
+        return 0; \
+    } catch ( const TestFailed& tf ) { \
+        fprintf( stderr, "Test %s.%s failed: %s\n", testType.c_str(), \
+                 testName.c_str(), tf.what() ); \
+        return 2; \
+    }
 
 int main(int ac, char** av)
 {
@@ -223,6 +231,9 @@ int main(int ac, char** av)
         RUN_TEST( BackupRestorePlaylistTests, RunBackupRestorePlaylist );
     }
     else
+    {
         assert( !"Invalid test type" );
-
+        return 1;
+    }
+    return 1;
 }
