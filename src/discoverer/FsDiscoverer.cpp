@@ -159,6 +159,11 @@ bool FsDiscoverer::isInterrupted() const
     return m_isInterrupted.load( std::memory_order_acquire );
 }
 
+void FsDiscoverer::resetInterrupt()
+{
+    m_isInterrupted.store( false, std::memory_order_release );
+}
+
 void FsDiscoverer::waitIfPaused() const
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
@@ -169,6 +174,7 @@ void FsDiscoverer::waitIfPaused() const
 
 bool FsDiscoverer::reload()
 {
+    resetInterrupt();
     LOG_INFO( "Reloading all folders" );
     auto rootFolders = Folder::fetchRootFolders( m_ml );
     for ( const auto& f : rootFolders )
@@ -219,6 +225,7 @@ bool FsDiscoverer::reload()
 
 bool FsDiscoverer::reload( const std::string& entryPoint )
 {
+    resetInterrupt();
     auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
     if ( fsFactory == nullptr )
         return false;

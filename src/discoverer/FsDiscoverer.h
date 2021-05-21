@@ -64,6 +64,7 @@ private:
                               fs::IFileSystemFactory& fsFactory, bool newFolder,
                               bool rootFolder ) const;
     bool isInterrupted() const;
+    void resetInterrupt();
     void waitIfPaused() const;
 
 private:
