@@ -195,13 +195,8 @@ int main(int ac, char** av)
         fprintf( stderr, "usage: %s <test type> <test name>\n", av[0] );
         return 1;
     }
-    for ( auto i = 1; i < ac; ++i )
-    {
-        testType = av[i];
-        testName = av[i + 1];
-        assert( i + 2 == ac && "Invalid number of arguments" );
-        break;
-    }
+    testType = av[1];
+    testName = av[2];
     if ( testType == "Parse" )
     {
         RUN_TEST( Tests, Parse );
