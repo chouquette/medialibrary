@@ -100,7 +100,7 @@ static void DeleteOne( RemovalNotifierTests* T )
     // This media doesn't have any associated files, and should be removed by a sqlite hook
     // The notification will arrive "late", as it will need to timeout first
     auto res = T->cbMock->waitForNotif( lock,
-        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 2000 } ),
         hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
@@ -120,7 +120,7 @@ static void DeleteOne( RemovalNotifierTests* T )
 
     // Wait again, now it should arrive.
     res = T->cbMock->waitForNotif( lock,
-        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1000 } ),
+        std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 2000 } ),
         hasTimedout );
     ASSERT_FALSE( hasTimedout );
     ASSERT_EQ( 1u, res );
@@ -143,7 +143,7 @@ static void DeleteBatch( RemovalNotifierTests* T )
     while ( nbTotalNotified != 10 )
     {
         auto nbNotified = T->cbMock->waitForNotif( lock,
-            std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 1500 } ),
+            std::chrono::duration_cast<std::chrono::seconds>( std::chrono::milliseconds{ 2000 } ),
             hasTimedout );
         ASSERT_NE( 0u, nbNotified );
         ASSERT_FALSE( hasTimedout );
