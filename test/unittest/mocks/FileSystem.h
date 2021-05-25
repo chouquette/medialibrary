@@ -215,7 +215,7 @@ struct FileSystemFactory : public fs::IFileSystemFactory
     {
     }
 
-    std::shared_ptr<Device> device( const std::string& mrl )
+    std::shared_ptr<Device> device( const std::string& mrl ) const
     {
         std::shared_ptr<Device> ret;
         std::string mountpoint;
