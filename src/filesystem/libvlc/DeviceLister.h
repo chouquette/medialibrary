@@ -37,13 +37,20 @@ namespace libvlc
 
 class DeviceLister : public IDeviceLister
 {
+private:
+    struct SD
+    {
+        std::string name;
+        VLC::MediaDiscoverer discoverer;
+    };
 public:
-    DeviceLister( const std::string& protocol, const std::string& sdName );
+    DeviceLister(const std::string& protocol);
     virtual ~DeviceLister() = default;
 
     virtual void refresh() override;
     virtual bool start( IDeviceListerCb* cb ) override;
     virtual void stop() override;
+    void addSD( const std::string& name );
 
 private:
     void onDeviceAdded( VLC::MediaPtr media );
@@ -51,8 +58,7 @@ private:
 
 private:
     std::string m_protocol;
-    std::string m_sdName;
-    VLC::MediaDiscoverer m_discoverer;
+    std::vector<SD> m_sds;
     IDeviceListerCb* m_cb;
 };
 

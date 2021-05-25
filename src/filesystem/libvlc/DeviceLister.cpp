@@ -39,10 +39,8 @@ namespace fs
 namespace libvlc
 {
 
-DeviceLister::DeviceLister( const std::string &protocol,
-                            const std::string &sdName )
+DeviceLister::DeviceLister( const std::string &protocol )
     : m_protocol( protocol )
-    , m_sdName( sdName )
     , m_cb( nullptr )
 {
 }
@@ -59,24 +57,41 @@ bool DeviceLister::start( IDeviceListerCb *cb )
 {
     assert( m_cb == nullptr );
     m_cb = cb;
-    m_discoverer = VLC::MediaDiscoverer{ VLCInstance::get(), m_sdName };
+    auto started = false;
 
-    auto& em = m_discoverer.mediaList()->eventManager();
-    em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
-    em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
+    for ( auto& sd : m_sds )
+    {
+        auto& em = sd.discoverer.mediaList()->eventManager();
+        em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
+        em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
+        if ( sd.discoverer.start() == false )
+            LOG_WARN( "Failed to start SD ", sd.name );
+        else if ( started == false )
+            started = true;
+    }
 
-    return m_discoverer.start();
+    return started;
 }
 
 void DeviceLister::stop()
 {
-    m_discoverer.stop();
+    for ( auto& sd : m_sds )
+        sd.discoverer.stop();
+}
+
+void DeviceLister::addSD( const std::string& name )
+{
+    m_sds.push_back( SD{
+        name,
+        VLC::MediaDiscoverer{ VLCInstance::get(), name }
+    } );
 }
 
 void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-    assert( utils::url::scheme( mrl ) == m_protocol );
+    if ( utils::url::scheme( mrl ) != m_protocol )
+        return;
 
     auto uuid = utils::url::stripScheme( mrl );
     LOG_DEBUG( "Mountpoint added: ", mrl, " from device ", uuid );
@@ -86,7 +101,8 @@ void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
 void DeviceLister::onDeviceRemoved( VLC::MediaPtr media )
 {
     const auto& mrl = media->mrl();
-    assert( utils::url::scheme( mrl ) == m_protocol );
+    if ( utils::url::scheme( mrl ) != m_protocol )
+        return;
 
     auto uuid = utils::url::stripScheme( mrl );
     LOG_DEBUG( "Mountpoint removed: ", mrl, " from device ", uuid );

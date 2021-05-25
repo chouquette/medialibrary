@@ -1200,7 +1200,8 @@ void MediaLibrary::addDefaultDeviceListers()
 #ifdef HAVE_LIBVLC
     if ( m_deviceListers.find( "smb://" ) == cend( m_deviceListers ) )
     {
-        auto deviceLister = std::make_shared<fs::libvlc::DeviceLister>( "smb://", "dsm-sd" );
+        auto deviceLister = std::make_shared<fs::libvlc::DeviceLister>( "smb://" );
+        deviceLister->addSD( "dsm-sd" );
         m_deviceListers["smb://"] = std::move( deviceLister );
     }
 #endif
