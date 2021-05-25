@@ -33,6 +33,7 @@
 #include "filesystem/libvlc/Device.h"
 #include "utils/Filename.h"
 #include "MediaLibrary.h"
+#include "logging/Logger.h"
 
 #include <algorithm>
 #include <cstring>
@@ -108,6 +109,7 @@ const std::string& FileSystemFactory::scheme() const
 
 bool FileSystemFactory::start( fs::IFileSystemFactoryCb* cb )
 {
+    LOG_DEBUG( "Starting FS Factory with scheme ", m_scheme );
     if ( isStarted() == true )
         return true;
     m_cb = cb;

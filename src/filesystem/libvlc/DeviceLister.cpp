@@ -64,6 +64,7 @@ bool DeviceLister::start( IDeviceListerCb *cb )
         auto& em = sd.discoverer.mediaList()->eventManager();
         em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
         em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
+        LOG_DEBUG( "Starting Service Discovery ", sd.name );
         if ( sd.discoverer.start() == false )
             LOG_WARN( "Failed to start SD ", sd.name );
         else if ( started == false )
