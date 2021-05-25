@@ -263,6 +263,13 @@ bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
                    ": ", ex.what() );
         return false;
     }
+    /*
+     * We are about to add an entry point, and will need a device representation.
+     * Since this is a function that's (indirectly) called explicitely by the users
+     * from a background thread, we can afford to wait a bit.
+     */
+    if ( fsFactory->waitForDevice( entryPoint, 5000 ) == false )
+        return false;
      // Use the canonical path computed by IDirectory
     try
     {
