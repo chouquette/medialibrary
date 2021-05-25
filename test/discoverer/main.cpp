@@ -126,7 +126,7 @@ int main( int argc, char** argv )
         NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false )
     };
 
-    ml->setVerbosity( medialibrary::LogLevel::Info );
+    ml->setVerbosity( medialibrary::LogLevel::Debug );
     ml->initialize( testCb.get() );
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
