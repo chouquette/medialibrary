@@ -93,7 +93,7 @@ void DeviceLister::onDeviceAdded( VLC::MediaPtr media )
     if ( utils::url::scheme( mrl ) != m_protocol )
         return;
 
-    auto uuid = utils::url::stripScheme( mrl );
+    auto uuid = media->meta( libvlc_meta_Title );
     LOG_DEBUG( "Mountpoint added: ", mrl, " from device ", uuid );
     m_cb->onDeviceMounted( uuid, utils::file::toFolderPath( mrl ), true );
 }
@@ -104,7 +104,7 @@ void DeviceLister::onDeviceRemoved( VLC::MediaPtr media )
     if ( utils::url::scheme( mrl ) != m_protocol )
         return;
 
-    auto uuid = utils::url::stripScheme( mrl );
+    auto uuid = media->meta( libvlc_meta_Title );
     LOG_DEBUG( "Mountpoint removed: ", mrl, " from device ", uuid );
 
     m_cb->onDeviceUnmounted( uuid, utils::file::toFolderPath( mrl ) );
