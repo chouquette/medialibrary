@@ -99,7 +99,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
 void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
                                         std::shared_ptr<Folder> folder,
                                         fs::IFileSystemFactory& fsFactory,
-                                        bool newFolder, bool rootFolder ) const
+                                        bool rootFolder ) const
 {
     assert( folder != nullptr );
     // Even when we're discovering a new folder, we want to rule out device removal as the cause of
@@ -146,12 +146,9 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
     //   as we would not check the folder if it wasn't present during the parent folder browsing
     //   but it might also be that we're checking an entry point.
     //   The error won't arise earlier, as we only perform IO when reading the folder from this function.
-    if ( newFolder == false )
-    {
-        // If we ever came across this folder, its content is now unaccessible: let's remove it.
-        Folder::remove( m_ml, std::move( folder ),
-                        Folder::RemovalBehavior::RemovedFromDisk );
-    }
+    // If we ever came across this folder, its content is now unaccessible: let's remove it.
+    Folder::remove( m_ml, std::move( folder ),
+                    Folder::RemovalBehavior::RemovedFromDisk );
 }
 
 bool FsDiscoverer::isInterrupted() const
@@ -344,7 +341,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
             if ( newFolder == true )
                 continue;
             checkRemovedDevices( *currentDirFs, std::move( currentDir ),
-                                 fsFactory, newFolder, rootFolder );
+                                 fsFactory, rootFolder );
             // If the device has indeed been removed, fs::errors::DeviceRemoved will
             // be thrown, otherwise, we just failed to browse that folder and will
             // have to try again later.

@@ -61,7 +61,7 @@ private:
     bool reloadFolder( std::shared_ptr<Folder> folder,
                        fs::IFileSystemFactory& fsFactory );
     void checkRemovedDevices(fs::IDirectory& fsFolder, std::shared_ptr<Folder> folder,
-                              fs::IFileSystemFactory& fsFactory, bool newFolder,
+                              fs::IFileSystemFactory& fsFactory,
                               bool rootFolder ) const;
     bool isInterrupted() const;
     void resetInterrupt();
