@@ -242,6 +242,11 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return device( mrl );
     }
 
+    virtual bool waitForDevice( const std::string& mrl, uint32_t ) const override
+    {
+        return device( mrl ) != nullptr;
+    }
+
     virtual bool isMrlSupported( const std::string& mrl ) const override
     {
         return mrl.compare( 0, strlen( "file://" ), "file://" ) == 0;

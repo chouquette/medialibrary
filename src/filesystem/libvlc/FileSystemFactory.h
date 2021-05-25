@@ -25,6 +25,7 @@
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IDeviceLister.h"
 #include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
 #include "Types.h"
 
 namespace medialibrary
@@ -54,6 +55,7 @@ public:
     virtual bool start( fs::IFileSystemFactoryCb* cb ) override;
     virtual void stop() override;
     virtual bool isStarted() const override;
+    virtual bool waitForDevice( const std::string& mrl, uint32_t timeout ) const override;
 
 private:
     virtual void onDeviceMounted( const std::string& uuid,
@@ -65,7 +67,8 @@ private:
 
 private:
     const std::string m_scheme;
-    compat::Mutex m_devicesLock;
+    mutable compat::Mutex m_devicesLock;
+    mutable compat::ConditionVariable m_devicesCond;
     std::vector<std::shared_ptr<fs::IDevice>> m_devices;
     std::shared_ptr<IDeviceLister> m_deviceLister;
     fs::IFileSystemFactoryCb* m_cb;

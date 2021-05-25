@@ -140,6 +140,13 @@ namespace fs
         /// \brief isStarted Returns true if the factory is started
         ///
         virtual bool isStarted() const = 0;
+        ///
+        /// \brief waitForDevice Will wait for a device that matches the given url
+        /// \param mrl The mrl to match, as it would be passed to createDeviceFromMrl
+        /// \param timeout A timeout, in milliseconds
+        /// \return true if the device was already available or appeared before the timeout, false otherwise
+        ///
+        virtual bool waitForDevice( const std::string& mrl, uint32_t timeout ) const = 0;
     };
 }
 

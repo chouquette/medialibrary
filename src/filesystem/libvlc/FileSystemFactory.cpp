@@ -144,6 +144,9 @@ void FileSystemFactory::onDeviceMounted( const std::string& uuid,
         device->addMountpoint( mountpoint );
 
     m_cb->onDeviceMounted( *device, mountpoint );
+
+    if ( addMountpoint == false )
+        m_devicesCond.notify_all();
 }
 
 void FileSystemFactory::onDeviceUnmounted( const std::string& uuid,
@@ -199,6 +202,22 @@ std::shared_ptr<fs::IDevice> FileSystemFactory::deviceByMrlLocked( const std::st
 bool FileSystemFactory::isStarted() const
 {
     return m_cb != nullptr;
+}
+
+bool FileSystemFactory::waitForDevice( const std::string& mrl, uint32_t timeout ) const
+{
+    assert( isStarted() == true );
+    std::unique_lock<compat::Mutex> lock( m_devicesLock );
+    return m_devicesCond.wait_for( lock, std::chrono::milliseconds{ timeout },
+                            [this, &mrl](){
+        for ( const auto& d : m_devices )
+        {
+            auto match = d->matchesMountpoint( mrl );
+            if ( std::get<0>( match ) == true )
+                return true;
+        }
+        return false;
+    });
 }
 
 }
