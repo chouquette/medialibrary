@@ -341,7 +341,7 @@ void FsDiscoverer::checkFolder( std::shared_ptr<fs::IDirectory> folderFs,
              * If we were supposed to add this folder but can't read from it
              * just ignore it
              */
-            if ( currentDir == nullptr )
+            if ( newFolder == true )
                 continue;
             checkRemovedDevices( *currentDirFs, std::move( currentDir ),
                                  fsFactory, newFolder, rootFolder );
