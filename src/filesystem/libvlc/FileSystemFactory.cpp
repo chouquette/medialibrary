@@ -46,7 +46,7 @@ namespace libvlc
 {
 
 FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml,
-                                                    const std::string& scheme )
+                                      const std::string& scheme )
     : m_scheme( scheme )
     , m_deviceLister( ml->deviceListerLocked( scheme ) )
     , m_cb( nullptr )
