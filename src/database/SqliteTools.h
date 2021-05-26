@@ -436,21 +436,6 @@ class Tools
             return tables;
         }
 
-        static std::vector<std::string> listViews( sqlite::Connection* dbConn )
-        {
-            std::vector<std::string> views;
-            medialibrary::sqlite::Statement stmt{ dbConn->handle(),
-                    "SELECT name FROM sqlite_master WHERE type='view'"
-            };
-            stmt.execute();
-            sqlite::Row row;
-            while ( ( row = stmt.row() ) != nullptr )
-            {
-                views.push_back( row.load<std::string>( 0 ) );
-            }
-            return views;
-        }
-
         /**
          * @brief sanitizePattern Ensures the pattern is valid, and append a wildcard char
          * @return Essentially returns pattern with «'» and «"» encoded for

@@ -372,14 +372,11 @@ bool MediaLibrary::createAllTables()
 void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
 {
     auto tables = sqlite::Tools::listTables( dbConn );
-    auto views = sqlite::Tools::listViews( dbConn );
     assert( sqlite::Transaction::transactionInProgress() == false );
     sqlite::Connection::WeakDbContext ctx{ dbConn };
     auto t = dbConn->newTransaction();
     for ( const auto& table : tables )
         sqlite::Tools::executeRequest( dbConn, "DROP TABLE " + table );
-    for ( const auto& view : views )
-        sqlite::Tools::executeRequest( dbConn, "DROP VIEW " + view );
     t->commit();
 }
 
