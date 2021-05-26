@@ -44,6 +44,19 @@
 
 const std::string Tests::Directory = SRC_DIR "/test/samples/";
 
+/*
+ * When running the tests on wine32, this sample fails:
+ * ```
+ *   compat::Mutex m;
+ *   m.lock();
+ *   assert( m.try_lock() == false );
+ * ```
+ * AFAICS we can't use try_lock reliably on wine32
+ */
+#if !defined(_WIN32) || defined(__WIN64)
+# define CAN_USE_TRYLOCK
+#endif
+
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
     , m_thumbnailSuccess( false )
@@ -61,6 +74,9 @@ std::unique_lock<compat::Mutex> MockCallback::lock()
 
 bool MockCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock )
 {
+#ifdef CAN_USE_TRYLOCK
+    assert( m_parsingMutex.try_lock() == false );
+#endif
     m_done = false;
     m_discoveryCompleted = false;
     // Wait for a while, generating snapshots can be heavy...
@@ -71,6 +87,9 @@ bool MockCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock
 
 bool MockCallback::waitForRemovalComplete( std::unique_lock<compat::Mutex>& lock )
 {
+#ifdef CAN_USE_TRYLOCK
+    assert( m_parsingMutex.try_lock() == false );
+#endif
     m_removalCompleted = false;
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_removalCompleted;
@@ -906,16 +925,7 @@ bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock 
 
 void MockCallback::prepareForDiscovery( uint32_t nbEntryPointsExpected )
 {
-    /*
-     * When running the tests on wine32, this sample fails:
-     * ```
-     *   compat::Mutex m;
-     *   m.lock();
-     *   assert( m.try_lock() == false );
-     * ```
-     * AFAICS we can't use try_lock reliably on wine32
-     */
-#if !defined(_WIN32) || defined(__WIN64)
+#ifdef CAN_USE_TRYLOCK
     assert( m_parsingMutex.try_lock() == false );
 #endif
     m_nbEntryPointsExpected = nbEntryPointsExpected;
