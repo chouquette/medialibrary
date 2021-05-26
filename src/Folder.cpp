@@ -669,6 +669,12 @@ bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
         auto subFolders = f->subfolders( nullptr )->all();
         while ( subFolders.empty() == false )
         {
+            /*
+             * subfolders() will return the folders with a parent, which is not
+             * the case for banned folders.
+             * If we were to remove a ban folder here, we would actually unban it
+             */
+            assert( subFolders.back()->isBanned() == false );
             queue.push( std::move( subFolders.back() ) );
             subFolders.pop_back();
         }
