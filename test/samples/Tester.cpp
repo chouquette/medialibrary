@@ -138,10 +138,6 @@ void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
     m_parsingCompleteVar.notify_all();
 }
 
-MockResumeCallback::MockResumeCallback()
-{
-}
-
 void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint, bool )
 {
     if ( entryPoint.empty() == true )

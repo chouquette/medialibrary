@@ -84,7 +84,6 @@ protected:
 class MockResumeCallback : public MockCallback
 {
 public:
-    MockResumeCallback();
     virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock ) override;
     virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock ) override;
     virtual void onDiscoveryCompleted( const std::string& entryPoint, bool ) override;
