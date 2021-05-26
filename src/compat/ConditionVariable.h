@@ -81,7 +81,7 @@ public:
         auto timeout = std::chrono::duration_cast<std::chrono::milliseconds>( relTime );
         while ( pred() == false )
         {
-            auto now = std::chrono::system_clock::now();
+            auto now = std::chrono::steady_clock::now();
             if ( SleepConditionVariableCS( &m_cond, lock.mutex()->native_handle(), timeout.count() ) == 0 )
             {
                 auto res = GetLastError();
@@ -89,7 +89,7 @@ public:
                     return false;
                 throw std::system_error{ std::make_error_code( std::errc::resource_unavailable_try_again ) };
             }
-            timeout -= std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - now );
+            timeout -= std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - now );
         }
         return true;
     }
