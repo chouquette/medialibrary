@@ -346,8 +346,7 @@ void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
 
     if ( entryPoint.empty() == false )
     {
-        LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ",
-                  static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
+        LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ", type );
     }
     else
     {
@@ -361,8 +360,7 @@ void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
 {
     assert( type == Task::Type::ReloadDevice );
 
-    LOG_INFO( "Queuing entity ", entityId, " of type ",
-              static_cast<typename std::underlying_type<Task::Type>::type>( type ) );
+    LOG_INFO( "Queuing entity ", entityId, " of type ", type );
     enqueue( Task{ entityId, type } );
 }
 
@@ -552,6 +550,35 @@ void DiscovererWorker::runAddEntryPoint( const std::string& entryPoint )
 {
     auto res = m_discoverer->addEntryPoint( entryPoint );
     m_ml->getCb()->onEntryPointAdded( entryPoint, res );
+}
+
+std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t )
+{
+    switch ( t )
+    {
+        case DiscovererWorker::Task::Type::Reload:
+            s << "Reload";
+            break;
+        case DiscovererWorker::Task::Type::Remove:
+            s << "Remove";
+            break;
+        case DiscovererWorker::Task::Type::Ban:
+            s << "Ban";
+            break;
+        case DiscovererWorker::Task::Type::Unban:
+            s << "Unban";
+            break;
+        case DiscovererWorker::Task::Type::ReloadDevice:
+            s << "ReloadDevice";
+            break;
+        case DiscovererWorker::Task::Type::AddEntryPoint:
+            s << "AddEntryPoint";
+            break;
+        default:
+            assert( !"Invalid task type" );
+            break;
+    }
+    return s;
 }
 
 }
