@@ -315,7 +315,11 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                  * be queuing.
                  */
                 if ( m_discoverer != nullptr )
+                {
+                    LOG_DEBUG( "Interrupting long running discovery task on "
+                        "entrypoint ", m_currentTask->entryPoint );
                     m_discoverer->interrupt();
+                }
                 /*
                  * If we are interrupting a discover or reload operation with a
                  * ban/remove operation on the same mountpoint, we might as well
@@ -326,6 +330,8 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                        t.type != Task::Type::Remove ) ||
                      t.entryPoint != m_currentTask->entryPoint )
                 {
+                    LOG_DEBUG( "Requeuing reload task of entrypoint ",
+                               m_currentTask->entryPoint );
                     it = m_tasks.emplace( it, m_currentTask->entryPoint,
                                           Task::Type::Reload );
                 }
