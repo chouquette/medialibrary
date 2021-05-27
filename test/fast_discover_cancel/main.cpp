@@ -43,35 +43,20 @@ class FastDiscoverCancelCb : public mock::NoopCallback
 public:
     FastDiscoverCancelCb()
         : m_doneQueuing( false )
-        , m_discovererRunning( true )
+        , m_discovereryCompleted( false )
     {
     }
-    virtual void onDiscoveryStarted( const std::string& ep ) override
+    virtual void onDiscoveryStarted() override
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
-        assert( m_discoveryStarted.find( ep ) == cend( m_discoveryStarted ) );
-        m_discoveryStarted.insert( ep );
-    }
-    virtual void onDiscoveryCompleted( const std::string& ep ) override
-    {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        auto it = m_discoveryStarted.find( ep );
-        assert( it != cend( m_discoveryStarted ) );
-        m_discoveryStarted.erase( it );
-        if ( m_discoveryStarted.empty() == true )
-            m_cond.notify_all();
-    }
-    virtual void onBackgroundTasksIdleChanged( bool idle ) override
-    {
-        std::lock_guard<compat::Mutex> lock( m_mutex );
-        m_discovererRunning = !idle;
-        m_cond.notify_all();
+        m_discovereryCompleted = false;
     }
 
-    void check()
+    virtual void onDiscoveryCompleted() override
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
-        assert( m_discoveryStarted.empty() == true );
+        m_discovereryCompleted = true;
+        m_cond.notify_all();
     }
 
     void markDoneQueuing()
@@ -84,17 +69,16 @@ public:
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         auto res = m_cond.wait_for( lock, std::chrono::minutes{ 10 }, [this](){
-            return m_doneQueuing == true && m_discovererRunning == false;
+            return m_doneQueuing == true && m_discovereryCompleted == true;
         });
         assert( res == true );
     }
 
 private:
-    std::set<std::string> m_discoveryStarted;
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     bool m_doneQueuing;
-    bool m_discovererRunning;
+    bool m_discovereryCompleted;
 };
 
 int main( int argc, char** argv )

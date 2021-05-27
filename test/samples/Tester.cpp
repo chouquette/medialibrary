@@ -63,7 +63,6 @@ MockCallback::MockCallback()
     , m_done( false )
     , m_discoveryCompleted( false )
     , m_removalCompleted( false )
-    , m_nbEntryPointsExpected( 0 )
     , m_nbEntryPointsRemovalExpected( 0 )
 {
 }
@@ -117,14 +116,16 @@ bool MockCallback::waitForThumbnail()
     return m_thumbnailSuccess;
 }
 
-void MockCallback::onDiscoveryCompleted( const std::string& entryPoint )
+
+void MockCallback::onDiscoveryStarted()
 {
-    if ( entryPoint.empty() == true )
-        return;
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
-    assert( m_nbEntryPointsExpected > 0 );
-    if ( --m_nbEntryPointsExpected != 0 )
-        return;
+    m_discoveryCompleted = false;
+}
+
+void MockCallback::onDiscoveryCompleted()
+{
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
 }
 
@@ -163,11 +164,8 @@ void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
     m_parsingCompleteVar.notify_all();
 }
 
-void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint )
+void MockResumeCallback::onDiscoveryCompleted()
 {
-    if ( entryPoint.empty() == true )
-        return;
-
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
     m_discoveryCompletedVar.notify_all();
@@ -227,7 +225,6 @@ void Tests::InitTestCase( const std::string& testName )
 
     ASSERT_TRUE( doc.HasMember( "input" ) );
     input = doc["input"];
-    m_cb->prepareForDiscovery( input.Size() );
     for ( auto i = 0u; i < input.Size(); ++i )
     {
         // Quick and dirty check to ensure we're discovering something that exists
@@ -927,14 +924,6 @@ bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock 
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
     });
-}
-
-void MockCallback::prepareForDiscovery( uint32_t nbEntryPointsExpected )
-{
-#ifdef CAN_USE_TRYLOCK
-    assert( m_parsingMutex.try_lock() == false );
-#endif
-    m_nbEntryPointsExpected = nbEntryPointsExpected;
 }
 
 void MockCallback::prepareForRemoval( uint32_t nbEntryPointsRemovalExpected )

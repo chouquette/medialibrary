@@ -63,7 +63,8 @@ public:
     void prepareForRemoval( uint32_t nbEntryPointsRemovalExpected );
 
 protected:
-    virtual void onDiscoveryCompleted( const std::string& ) override;
+    virtual void onDiscoveryStarted() override;
+    virtual void onDiscoveryCompleted() override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
@@ -79,7 +80,6 @@ protected:
     bool m_done;
     bool m_discoveryCompleted;
     bool m_removalCompleted;
-    uint32_t m_nbEntryPointsExpected;
     uint32_t m_nbEntryPointsRemovalExpected;
 };
 
@@ -88,7 +88,7 @@ class MockResumeCallback : public MockCallback
 public:
     virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock ) override;
     virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock ) override;
-    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override;
+    virtual void onDiscoveryCompleted() override;
     virtual void reinit() override;
 
 private:

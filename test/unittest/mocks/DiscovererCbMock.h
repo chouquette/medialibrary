@@ -47,9 +47,8 @@ public:
     {
     }
 
-    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override
+    virtual void onDiscoveryCompleted() override
     {
-        assert( entryPoint.empty() == false );
         m_discoveryDone = true;
         m_cond.notify_all();
     }

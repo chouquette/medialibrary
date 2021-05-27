@@ -117,6 +117,7 @@ protected:
     std::unique_ptr<FsDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
     compat::Thread m_thread;
+    bool m_discoveryNotified;
 
     friend std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t );
 };

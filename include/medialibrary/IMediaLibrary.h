@@ -225,11 +225,11 @@ public:
     /**
      * @brief onDiscoveryStarted This callback will be invoked when the discoverer
      * starts to crawl an entrypoint that was scheduled for discovery or reload.
-     * @param entryPoint The entrypoint being discovered
      *
-     * This callback will be invoked once per discovered/reloaded entrypoint.
+     * This callback will be invoked when the discoverer thread gets woken up
+     * regardless of how many entry points need to be discovered.
      */
-    virtual void onDiscoveryStarted( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryStarted() = 0;
     /**
      * @brief onDiscoveryProgress This callback will be invoked each time the
      * discoverer enters a new entrypoint.
@@ -242,13 +242,11 @@ public:
     virtual void onDiscoveryProgress( const std::string& entryPoint ) = 0;
     /**
      * @brief onDiscoveryCompleted Will be invoked when the discoverer finishes
-     * crawling an entrypoint scheduled for discovery or reload.
-     * This will also be invoked with an empty entryPoint when the initial reload of the medialibrary
-     * has completed.
+     * all its queued operations and goes back to idle.
      *
-     * This callback will be invoked once per discovered/reloaded entrypoint.
+     * This callback will be invoked once for each invocation fo onDiscoveryStarted
      */
-    virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryCompleted() = 0;
 
     /**
      * @brief onDiscoveryFailed Will be invoked when a discovery operation fails

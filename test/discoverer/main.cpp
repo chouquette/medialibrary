@@ -40,8 +40,7 @@ class TestCb : public mock::NoopCallback
 {
 public:
     TestCb()
-        : m_nbDiscoveryToRun( 0 )
-        , m_nbDiscoveryCompleted( 0 )
+        : m_isDiscoveryCompleted( false )
         , m_isParsingCompleted( false )
         , m_isIdle( false )
         , m_error( false )
@@ -52,8 +51,7 @@ public:
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         m_cond.wait( lock, [this](){
-            return (m_nbDiscoveryToRun > 0 &&
-                    m_nbDiscoveryToRun == m_nbDiscoveryCompleted &&
+            return (m_isDiscoveryCompleted == true &&
                     m_isParsingCompleted == true &&
                     m_isIdle == true) || m_error;
         });
@@ -61,20 +59,21 @@ public:
     }
 
 private:
-    virtual void onDiscoveryStarted( const std::string& ) override
+    virtual void onDiscoveryStarted() override
     {
         {
             std::lock_guard<compat::Mutex> lock( m_mutex );
-            m_nbDiscoveryToRun++;
+            m_isDiscoveryCompleted = false;
             m_isParsingCompleted = false;
         }
         m_cond.notify_all();
     }
-    virtual void onDiscoveryCompleted(const std::string& ) override
+
+    virtual void onDiscoveryCompleted() override
     {
         {
             std::lock_guard<compat::Mutex> lock( m_mutex );
-            m_nbDiscoveryCompleted++;
+            m_isDiscoveryCompleted = true;
         }
         m_cond.notify_all();
     }
@@ -108,8 +107,7 @@ private:
 private:
     compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
-    uint32_t m_nbDiscoveryToRun;
-    uint32_t m_nbDiscoveryCompleted;
+    bool m_isDiscoveryCompleted;
     bool m_isParsingCompleted;
     bool m_isIdle;
     bool m_error;

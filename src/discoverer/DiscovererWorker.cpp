@@ -50,6 +50,7 @@ DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
     , m_discoverer( std::move( discoverer ) )
     , m_ml( ml )
     , m_thread( &DiscovererWorker::run, this )
+    , m_discoveryNotified( false )
 {
 }
 
@@ -393,6 +394,11 @@ void DiscovererWorker::run()
                 std::unique_lock<compat::Mutex> lock( m_mutex );
                 if ( m_tasks.empty() == true )
                 {
+                    if ( m_discoveryNotified == true )
+                    {
+                        m_ml->getCb()->onDiscoveryCompleted();
+                        m_discoveryNotified = false;
+                    }
                     m_ml->onDiscovererIdleChanged( true );
                     m_cond.wait( lock, [this]() {
                         return m_tasks.empty() == false || m_run == false;
@@ -409,6 +415,11 @@ void DiscovererWorker::run()
             switch ( task.type )
             {
             case Task::Type::Reload:
+                if ( m_discoveryNotified == false )
+                {
+                    m_ml->getCb()->onDiscoveryStarted();
+                    m_discoveryNotified = true;
+                }
                 runReload( task.entryPoint );
                 break;
             case Task::Type::Remove:
@@ -460,12 +471,9 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
         }
         else
         {
-            m_ml->getCb()->onDiscoveryStarted( entryPoint );
             LOG_INFO( "Reloading folder ", entryPoint );
             auto res = m_discoverer->reload( entryPoint );
-            if ( res == true )
-                m_ml->getCb()->onDiscoveryCompleted( entryPoint );
-            else
+            if ( res == false )
                 m_ml->getCb()->onDiscoveryFailed( entryPoint );
         }
     }
