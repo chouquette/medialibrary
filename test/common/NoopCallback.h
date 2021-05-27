@@ -45,7 +45,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onAlbumsAdded( std::vector<AlbumPtr> ) override {}
     virtual void onAlbumsModified( std::set<int64_t> ) override {}
     virtual void onAlbumsDeleted( std::set<int64_t> ) override {}
-    virtual void onParsingStatsUpdated( uint32_t ) override {}
+    virtual void onParsingStatsUpdated( uint32_t, uint32_t ) override {}
     virtual void onPlaylistsAdded( std::vector<PlaylistPtr> ) override {}
     virtual void onPlaylistsModified( std::set<int64_t> ) override {}
     virtual void onPlaylistsDeleted( std::set<int64_t> ) override {}

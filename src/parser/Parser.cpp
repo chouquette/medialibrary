@@ -44,7 +44,6 @@ Parser::Parser( MediaLibrary* ml )
     , m_callback( ml->getCb() )
     , m_opToDo( 0 )
     , m_opDone( 0 )
-    , m_percent( 0 )
 {
 }
 
@@ -163,20 +162,19 @@ void Parser::updateStats()
 {
     if ( m_opDone == 0 && m_opToDo > 0 && m_chrono == decltype(m_chrono){})
         m_chrono = std::chrono::steady_clock::now();
-    auto percent = m_opToDo > 0 ? ( m_opDone * 100 / m_opToDo ) : 0;
     assert( m_opToDo >= m_opDone );
-    if ( percent != m_percent )
+    if ( m_opToDo % 10 == 0 || m_opToDo == m_opDone )
     {
-        m_percent = percent;
-        LOG_DEBUG( "Updating progress: ", percent );
-        m_callback->onParsingStatsUpdated( m_percent );
-        if ( m_percent == 100 )
-        {
-            auto duration = std::chrono::steady_clock::now() - m_chrono;
-            LOG_VERBOSE( "Finished all parsing operations in ",
-                       std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
-            m_chrono = decltype(m_chrono){};
-        }
+        LOG_DEBUG( "Updating progress: operations scheduled ", m_opToDo,
+                   "; operations done: ", m_opDone );
+        m_callback->onParsingStatsUpdated( m_opToDo, m_opDone );
+    }
+    if ( m_opToDo == m_opDone )
+    {
+        auto duration = std::chrono::steady_clock::now() - m_chrono;
+        LOG_VERBOSE( "Finished all parsing operations in ",
+                   std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
+        m_chrono = decltype(m_chrono){};
     }
 }
 

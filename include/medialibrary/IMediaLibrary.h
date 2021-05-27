@@ -296,10 +296,11 @@ public:
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
      * There is no waranty about how often this will be called.
-     * @param percent The progress percentage [0,100]
+     * @param opsDone The number of operation the parser completed
+     * @param opsScheduled The number of operations currently scheduled by the parser
      *
      */
-    virtual void onParsingStatsUpdated( uint32_t percent) = 0;
+    virtual void onParsingStatsUpdated( uint32_t opsDone, uint32_t opsScheduled ) = 0;
     /**
      * @brief onBackgroundTasksIdleChanged Called when background tasks idle state change
      *

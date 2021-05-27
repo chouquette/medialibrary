@@ -52,7 +52,7 @@ public:
     bool isTestComplete();
 protected:
     virtual void onDiscoveryCompleted() override;
-    virtual void onParsingStatsUpdated(uint32_t percent) override;
+    virtual void onParsingStatsUpdated( uint32_t done, uint32_t scheduled ) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;
@@ -100,9 +100,9 @@ void MockCallback::onDiscoveryCompleted()
     m_discoveryCompleted = true;
 }
 
-void MockCallback::onParsingStatsUpdated(uint32_t percent)
+void MockCallback::onParsingStatsUpdated( uint32_t done, uint32_t scheduled )
 {
-    if ( percent == 100 )
+    if ( done == scheduled )
     {
         std::lock_guard<compat::Mutex> lock( m_parsingMutex );
         if ( m_discoveryCompleted == false )

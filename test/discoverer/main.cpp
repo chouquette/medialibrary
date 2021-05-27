@@ -87,11 +87,11 @@ private:
         m_cond.notify_all();
     }
 
-    virtual void onParsingStatsUpdated(uint32_t percent) override
+    virtual void onParsingStatsUpdated( uint32_t done, uint32_t scheduled ) override
     {
         {
             std::lock_guard<compat::Mutex> lock( m_mutex );
-            m_isParsingCompleted = percent == 100;
+            m_isParsingCompleted = (done == scheduled);
         }
         m_cond.notify_all();
     }

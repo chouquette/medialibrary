@@ -65,7 +65,7 @@ public:
 protected:
     virtual void onDiscoveryStarted() override;
     virtual void onDiscoveryCompleted() override;
-    virtual void onParsingStatsUpdated(uint32_t percent) override;
+    virtual void onParsingStatsUpdated( uint32_t done, uint32_t scheduled ) override;
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
     virtual void onEntryPointRemoved( const std::string& entryPoint, bool res ) override;
