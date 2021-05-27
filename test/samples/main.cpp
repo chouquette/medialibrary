@@ -47,6 +47,7 @@ static void ParseTwice( Tests* T )
 
     T->runChecks();
 
+    T->m_cb->prepareForRemoval( T->input.Size() );
     for ( auto i = 0u; i < T->input.Size(); ++i )
     {
         auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();

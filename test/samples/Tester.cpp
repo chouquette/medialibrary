@@ -64,6 +64,7 @@ MockCallback::MockCallback()
     , m_discoveryCompleted( false )
     , m_removalCompleted( false )
     , m_nbEntryPointsExpected( 0 )
+    , m_nbEntryPointsRemovalExpected( 0 )
 {
 }
 
@@ -90,6 +91,8 @@ bool MockCallback::waitForRemovalComplete( std::unique_lock<compat::Mutex>& lock
 #ifdef CAN_USE_TRYLOCK
     assert( m_parsingMutex.try_lock() == false );
 #endif
+    assert( m_done == true );
+    assert( m_discoveryCompleted == true );
     m_removalCompleted = false;
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_removalCompleted;
@@ -153,6 +156,9 @@ void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
 {
     assert( entryPoint.empty() == false );
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
+    assert( m_nbEntryPointsRemovalExpected > 0 );
+    if ( --m_nbEntryPointsRemovalExpected > 0 )
+        return;
     m_removalCompleted = true;
     m_parsingCompleteVar.notify_all();
 }
@@ -929,4 +935,12 @@ void MockCallback::prepareForDiscovery( uint32_t nbEntryPointsExpected )
     assert( m_parsingMutex.try_lock() == false );
 #endif
     m_nbEntryPointsExpected = nbEntryPointsExpected;
+}
+
+void MockCallback::prepareForRemoval( uint32_t nbEntryPointsRemovalExpected )
+{
+#ifdef CAN_USE_TRYLOCK
+    assert( m_parsingMutex.try_lock() == false );
+#endif
+    m_nbEntryPointsRemovalExpected = nbEntryPointsRemovalExpected;
 }
