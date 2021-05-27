@@ -248,7 +248,13 @@ public:
      *
      * This callback will be invoked once per discovered/reloaded entrypoint.
      */
-    virtual void onDiscoveryCompleted( const std::string& entryPoint, bool sucess ) = 0;
+    virtual void onDiscoveryCompleted( const std::string& entryPoint ) = 0;
+
+    /**
+     * @brief onDiscoveryFailed Will be invoked when a discovery operation fails
+     * @param entryPoint The entry point for which the discovery failed.
+     */
+    virtual void onDiscoveryFailed( const std::string& entryPoint ) = 0;
 
     /**
      * @brief onEntryPointAdded will be invoked when an entrypoint gets added

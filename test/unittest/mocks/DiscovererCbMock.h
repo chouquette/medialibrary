@@ -47,7 +47,14 @@ public:
     {
     }
 
-    virtual void onDiscoveryCompleted( const std::string& entryPoint, bool ) override
+    virtual void onDiscoveryCompleted( const std::string& entryPoint ) override
+    {
+        assert( entryPoint.empty() == false );
+        m_discoveryDone = true;
+        m_cond.notify_all();
+    }
+
+    virtual void onDiscoveryFailed( const std::string& entryPoint ) override
     {
         assert( entryPoint.empty() == false );
         m_discoveryDone = true;

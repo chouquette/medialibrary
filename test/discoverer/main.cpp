@@ -70,17 +70,24 @@ private:
         }
         m_cond.notify_all();
     }
-    virtual void onDiscoveryCompleted(const std::string&, bool success ) override
+    virtual void onDiscoveryCompleted(const std::string& ) override
     {
         {
             std::lock_guard<compat::Mutex> lock( m_mutex );
-            if ( success == true )
-                m_nbDiscoveryCompleted++;
-            else
-                m_error = true;
+            m_nbDiscoveryCompleted++;
         }
         m_cond.notify_all();
     }
+
+    virtual void onDiscoveryFailed( const std::string& ) override
+    {
+        {
+            std::lock_guard<compat::Mutex> lock( m_mutex );
+            m_error = true;
+        }
+        m_cond.notify_all();
+    }
+
     virtual void onParsingStatsUpdated(uint32_t percent) override
     {
         {

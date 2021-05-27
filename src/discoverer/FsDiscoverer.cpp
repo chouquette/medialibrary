@@ -215,7 +215,10 @@ bool FsDiscoverer::reload()
 
         m_cb->onDiscoveryStarted( mrl );
         auto res = reloadFolder( std::move( f ), *fsFactory );
-        m_cb->onDiscoveryCompleted( mrl, res );
+        if ( res == true )
+            m_cb->onDiscoveryCompleted( mrl );
+        else
+            m_cb->onDiscoveryFailed( mrl );
     }
     return true;
 }

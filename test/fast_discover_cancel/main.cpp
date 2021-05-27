@@ -52,7 +52,7 @@ public:
         assert( m_discoveryStarted.find( ep ) == cend( m_discoveryStarted ) );
         m_discoveryStarted.insert( ep );
     }
-    virtual void onDiscoveryCompleted( const std::string& ep, bool ) override
+    virtual void onDiscoveryCompleted( const std::string& ep ) override
     {
         std::lock_guard<compat::Mutex> lock( m_mutex );
         auto it = m_discoveryStarted.find( ep );

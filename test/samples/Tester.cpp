@@ -117,7 +117,7 @@ bool MockCallback::waitForThumbnail()
     return m_thumbnailSuccess;
 }
 
-void MockCallback::onDiscoveryCompleted(const std::string& entryPoint, bool )
+void MockCallback::onDiscoveryCompleted( const std::string& entryPoint )
 {
     if ( entryPoint.empty() == true )
         return;
@@ -163,7 +163,7 @@ void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
     m_parsingCompleteVar.notify_all();
 }
 
-void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint, bool )
+void MockResumeCallback::onDiscoveryCompleted( const std::string& entryPoint )
 {
     if ( entryPoint.empty() == true )
         return;

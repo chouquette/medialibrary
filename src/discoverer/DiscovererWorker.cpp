@@ -463,7 +463,10 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
             m_ml->getCb()->onDiscoveryStarted( entryPoint );
             LOG_INFO( "Reloading folder ", entryPoint );
             auto res = m_discoverer->reload( entryPoint );
-            m_ml->getCb()->onDiscoveryCompleted( entryPoint, res );
+            if ( res == true )
+                m_ml->getCb()->onDiscoveryCompleted( entryPoint );
+            else
+                m_ml->getCb()->onDiscoveryFailed( entryPoint );
         }
     }
     catch(std::exception& ex)

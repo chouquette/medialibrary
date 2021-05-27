@@ -51,7 +51,7 @@ public:
     void signalEnd();
     bool isTestComplete();
 protected:
-    virtual void onDiscoveryCompleted( const std::string&, bool ) override;
+    virtual void onDiscoveryCompleted( const std::string& ) override;
     virtual void onParsingStatsUpdated(uint32_t percent) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
@@ -94,7 +94,7 @@ bool MockCallback::isTestComplete()
     return m_testDone == true;
 }
 
-void MockCallback::onDiscoveryCompleted(const std::string& entryPoint, bool )
+void MockCallback::onDiscoveryCompleted(const std::string& entryPoint )
 {
     if ( entryPoint.empty() == true )
         return;
