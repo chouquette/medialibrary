@@ -232,14 +232,14 @@ public:
     virtual void onDiscoveryStarted() = 0;
     /**
      * @brief onDiscoveryProgress This callback will be invoked each time the
-     * discoverer enters a new entrypoint.
-     * @param entryPoint The entrypoint being discovered
+     * discoverer enters a new folder.
+     * @param currentFolder The folder being discovered
      *
      * This callback can be invoked multiple times even though a single entry point was asked to be
      * discovered. ie. In the case of a file system discovery, discovering a folder would make this
      * callback being invoked for all subfolders
      */
-    virtual void onDiscoveryProgress( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryProgress( const std::string& currentFolder ) = 0;
     /**
      * @brief onDiscoveryCompleted Will be invoked when the discoverer finishes
      * all its queued operations and goes back to idle.
