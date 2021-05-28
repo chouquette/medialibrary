@@ -91,7 +91,9 @@ win32:
       - ln -s /prefix/lib/vlc/plugins/ .
       - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
     artifacts:
-      when: on_failure
+      when: always
+      reports:
+        junit: build/meson-logs/testlog.junit.xml
       paths: 
         - $MEDIALIB_TEST_FOLDER/**/test.db
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
@@ -121,7 +123,9 @@ win64:
       - ln -s /prefix/lib/vlc/plugins/ .
       - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
     artifacts:
-      when: on_failure
+      when: always
+      reports:
+        junit: build/meson-logs/testlog.junit.xml
       paths: 
         - $MEDIALIB_TEST_FOLDER/**/test.db
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
