@@ -61,6 +61,8 @@ bool DeviceLister::start( IDeviceListerCb *cb )
 
     for ( auto& sd : m_sds )
     {
+        if ( sd.name == "upnp" || sd.name == "sap" )
+            continue;
         auto& em = sd.discoverer.mediaList()->eventManager();
         em.onItemAdded( [this]( VLC::MediaPtr m, int ) { onDeviceAdded( std::move( m ) ); } );
         em.onItemDeleted( [this]( VLC::MediaPtr m, int ) { onDeviceRemoved( std::move( m ) ); } );
