@@ -958,6 +958,23 @@ static void FolderPresence( DeviceFsTests* T )
     ASSERT_EQ( 2u, folders.size() );
 }
 
+static void CompareMountpoints( DeviceFsTests* T )
+{
+    auto d = T->fsMock->addDevice( "smb://1.2.3.4:445", "{fake-uuid}", true );
+    auto doCheck = [&d]( const std::string& mrl, bool exp ) {
+        auto res = d->matchesMountpoint( mrl );
+        ASSERT_EQ( std::get<0>( res ), exp );
+    };
+    doCheck( "SMB://1.2.3.4:445", true );
+    doCheck( "SMB://1.2.3.4", true );
+    doCheck( "SMB://1.2.3.4:666", false );
+    doCheck( "SMB://1.2.3.4:445/foo/bar", true );
+    doCheck( "SMB://1.2.3.4/foo/bar", true );
+    doCheck( "sMb://1.3.1.2", false );
+    doCheck( "upnp://1.2.3.4:445", false );
+    doCheck( "upnp://1.2.3.4", false );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -978,6 +995,7 @@ int main( int ac, char** av )
     ADD_TEST( GenrePresence );
     ADD_TEST( PlaylistPresence );
     ADD_TEST( FolderPresence );
+    ADD_TEST( CompareMountpoints );
 
     END_TESTS
 }

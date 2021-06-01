@@ -147,7 +147,22 @@ std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
 
 bool CommonDevice::Mountpoint::operator==( const Mountpoint& lhs ) const
 {
-    return strncasecmp( mrl.c_str(), lhs.mrl.c_str(), mrl.size() ) == 0;
+    if ( strcasecmp( url.scheme.c_str(), lhs.url.scheme.c_str() ) != 0 )
+        return false;
+    if ( strcasecmp( url.host.c_str(), lhs.url.host.c_str() ) != 0 )
+        return false;
+    if ( url.port != lhs.url.port )
+    {
+        if ( strcasecmp( lhs.url.scheme.c_str(), "smb" ) == 0 )
+        {
+            if ( ! ( url.port.empty() == true && lhs.url.port == "445" ) &&
+                 ! ( lhs.url.port.empty() == true && url.port == "445" ) )
+                return false;
+        }
+        else
+            return false;
+    }
+    return strncasecmp( lhs.url.path.c_str(), url.path.c_str(), url.path.length() ) == 0;
 }
 
 }
