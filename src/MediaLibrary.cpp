@@ -1477,6 +1477,13 @@ bool MediaLibrary::recreateDatabase()
     // We dropped the database, there is no setting to be read anymore
     auto res = m_settings.load();
     t->commit();
+
+    /*
+     * We just delete all tables but this won't invoke the thumbnails deletion
+     * hooks, so we need to delete the files ourselves
+     */
+    removeThumbnails();
+
     return res;
 }
 
