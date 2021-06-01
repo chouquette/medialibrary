@@ -113,14 +113,12 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
     return matchesMountpointLocked( mrl );
 }
 
-std::tuple<bool, std::string> CommonDevice::matchesMountpointLocked(const std::string& mrl) const
+std::tuple<bool, std::string> CommonDevice::matchesMountpointLocked( const std::string& mrl ) const
 {
-    for ( const auto& m : m_mountpoints )
-    {
-        if ( strncasecmp( m.mrl.c_str(), mrl.c_str(), m.mrl.size() ) == 0 )
-            return std::make_tuple( true, m.mrl );
-    }
-    return std::make_tuple( false, "" );
+    auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mrl );
+    if ( it == cend( m_mountpoints ) )
+        return std::make_tuple( false, "" );
+    return std::make_tuple( true, (*it).mrl );
 }
 
 
@@ -148,7 +146,7 @@ std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
 
 bool CommonDevice::Mountpoint::operator==( const std::string& lhs ) const
 {
-    return mrl == lhs;
+    return strncasecmp( mrl.c_str(), lhs.c_str(), mrl.size() ) == 0;
 }
 
 }
