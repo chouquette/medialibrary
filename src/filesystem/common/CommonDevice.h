@@ -62,7 +62,7 @@ private:
             , url( utils::url::split( mrl ) )
         {
         }
-        bool operator==( const std::string& mrl ) const;
+        bool operator==( const Mountpoint& mrl ) const;
         std::string mrl;
         utils::url::parts url;
     };

@@ -87,9 +87,9 @@ std::vector<std::string> CommonDevice::mountpoints() const
     return res;
 }
 
-void CommonDevice::addMountpoint( std::string mountpoint )
+void CommonDevice::addMountpoint( std::string mp )
 {
-    utils::file::toFolderPath( mountpoint );
+    Mountpoint mountpoint( utils::file::toFolderPath( mp ) );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( std::find( cbegin( m_mountpoints ), cend( m_mountpoints ),
                     mountpoint ) != cend( m_mountpoints ) )
@@ -99,7 +99,7 @@ void CommonDevice::addMountpoint( std::string mountpoint )
 
 void CommonDevice::removeMountpoint( const std::string& mp )
 {
-    auto mountpoint = utils::file::toFolderPath( mp );
+    Mountpoint mountpoint( utils::file::toFolderPath( mp ) );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     auto it = std::find( begin( m_mountpoints ), end( m_mountpoints ), mountpoint );
     if ( it != end( m_mountpoints ) )
@@ -115,7 +115,8 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 
 std::tuple<bool, std::string> CommonDevice::matchesMountpointLocked( const std::string& mrl ) const
 {
-    auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mrl );
+    Mountpoint mountpoint( utils::file::toFolderPath( mrl ) );
+    auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mountpoint );
     if ( it == cend( m_mountpoints ) )
         return std::make_tuple( false, "" );
     return std::make_tuple( true, (*it).mrl );
@@ -144,9 +145,9 @@ std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
     return m_mountpoints[0].mrl + relativeMrl;
 }
 
-bool CommonDevice::Mountpoint::operator==( const std::string& lhs ) const
+bool CommonDevice::Mountpoint::operator==( const Mountpoint& lhs ) const
 {
-    return strncasecmp( mrl.c_str(), lhs.c_str(), mrl.size() ) == 0;
+    return strncasecmp( mrl.c_str(), lhs.mrl.c_str(), mrl.size() ) == 0;
 }
 
 }
