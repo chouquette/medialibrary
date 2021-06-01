@@ -24,6 +24,7 @@
 
 #include "medialibrary/filesystem/IDevice.h"
 #include "compat/Mutex.h"
+#include "utils/Url.h"
 #include <vector>
 
 namespace medialibrary
@@ -54,8 +55,18 @@ private:
         matchesMountpointLocked( const std::string& mrl ) const;
 
 private:
+    struct Mountpoint
+    {
+        explicit Mountpoint( std::string m )
+            : mrl( std::move( m ) )
+            , url( utils::url::split( mrl ) )
+        {
+        }
+        std::string mrl;
+        utils::url::parts url;
+    };
     std::string m_uuid;
-    std::vector<std::string> m_mountpoints;
+    std::vector<Mountpoint> m_mountpoints;
     std::string m_scheme;
     mutable compat::Mutex m_mutex;
     bool m_removable;

@@ -40,7 +40,7 @@ namespace fs
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint,
                             std::string scheme, bool isRemovable, bool isNetwork )
     : m_uuid( uuid )
-    , m_mountpoints( { utils::file::toFolderPath( mountpoint ) } )
+    , m_mountpoints( { Mountpoint{ utils::file::toFolderPath( mountpoint ) } } )
     , m_scheme( std::move( scheme ) )
     , m_removable( isRemovable )
     , m_isNetwork( isNetwork )
@@ -78,24 +78,35 @@ std::vector<std::string> CommonDevice::mountpoints() const
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( m_mountpoints.empty() == true )
         throw fs::errors::DeviceRemoved();
-    return m_mountpoints;
+    std::vector<std::string> res;
+    res.reserve( m_mountpoints.size() );
+    std::transform( cbegin( m_mountpoints ), cend( m_mountpoints ),
+                    std::back_inserter( res ), []( const Mountpoint& m ) {
+        return m.mrl;
+    });
+    return res;
 }
 
 void CommonDevice::addMountpoint( std::string mountpoint )
 {
     utils::file::toFolderPath( mountpoint );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
-    if ( std::find( cbegin( m_mountpoints ),
-                    cend( m_mountpoints ), mountpoint ) != cend( m_mountpoints ) )
+    if ( std::find_if( cbegin( m_mountpoints ),
+                       cend( m_mountpoints ), [&mountpoint]( const Mountpoint& m ) {
+                           return m.mrl == mountpoint;
+        } ) != cend( m_mountpoints ) )
         return;
-    m_mountpoints.push_back( std::move( mountpoint ) );
+    m_mountpoints.emplace_back( std::move( mountpoint ) );
 }
 
 void CommonDevice::removeMountpoint( const std::string& mp )
 {
     auto mountpoint = utils::file::toFolderPath( mp );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
-    auto it = std::find( begin( m_mountpoints ), end( m_mountpoints ), mountpoint );
+    auto it = std::find_if( begin( m_mountpoints ), end( m_mountpoints ),
+                            [&mountpoint]( const Mountpoint& m ) {
+        return m.mrl == mountpoint;
+    } );
     if ( it != end( m_mountpoints ) )
         m_mountpoints.erase( it );
 }
@@ -111,8 +122,8 @@ std::tuple<bool, std::string> CommonDevice::matchesMountpointLocked(const std::s
 {
     for ( const auto& m : m_mountpoints )
     {
-        if ( strncasecmp( m.c_str(), mrl.c_str(), m.size() ) == 0 )
-            return std::make_tuple( true, m );
+        if ( strncasecmp( m.mrl.c_str(), mrl.c_str(), m.mrl.size() ) == 0 )
+            return std::make_tuple( true, m.mrl );
     }
     return std::make_tuple( false, "" );
 }
@@ -127,7 +138,7 @@ std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
             throw fs::errors::DeviceRemoved{};
         res = matchesMountpointLocked( absoluteMrl );
         if ( std::get<0>( res ) == false )
-            throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0] };
+            throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0].mrl };
     }
     return utils::file::removePath( absoluteMrl, std::get<1>( res ) );
 }
@@ -137,7 +148,7 @@ std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     if ( m_mountpoints.empty() == true )
         throw fs::errors::DeviceRemoved{};
-    return m_mountpoints[0] + relativeMrl;
+    return m_mountpoints[0].mrl + relativeMrl;
 }
 
 }
