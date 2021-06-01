@@ -91,10 +91,8 @@ void CommonDevice::addMountpoint( std::string mountpoint )
 {
     utils::file::toFolderPath( mountpoint );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
-    if ( std::find_if( cbegin( m_mountpoints ),
-                       cend( m_mountpoints ), [&mountpoint]( const Mountpoint& m ) {
-                           return m.mrl == mountpoint;
-        } ) != cend( m_mountpoints ) )
+    if ( std::find( cbegin( m_mountpoints ), cend( m_mountpoints ),
+                    mountpoint ) != cend( m_mountpoints ) )
         return;
     m_mountpoints.emplace_back( std::move( mountpoint ) );
 }
@@ -103,10 +101,7 @@ void CommonDevice::removeMountpoint( const std::string& mp )
 {
     auto mountpoint = utils::file::toFolderPath( mp );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
-    auto it = std::find_if( begin( m_mountpoints ), end( m_mountpoints ),
-                            [&mountpoint]( const Mountpoint& m ) {
-        return m.mrl == mountpoint;
-    } );
+    auto it = std::find( begin( m_mountpoints ), end( m_mountpoints ), mountpoint );
     if ( it != end( m_mountpoints ) )
         m_mountpoints.erase( it );
 }
@@ -149,6 +144,11 @@ std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
     if ( m_mountpoints.empty() == true )
         throw fs::errors::DeviceRemoved{};
     return m_mountpoints[0].mrl + relativeMrl;
+}
+
+bool CommonDevice::Mountpoint::operator==( const std::string& lhs ) const
+{
+    return mrl == lhs;
 }
 
 }
