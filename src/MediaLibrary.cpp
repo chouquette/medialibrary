@@ -1475,7 +1475,8 @@ bool MediaLibrary::recreateDatabase()
     createAllTriggers();
 
     // We dropped the database, there is no setting to be read anymore
-    auto res = m_settings.load();
+    if ( m_settings.load() == false )
+        return false;
     t->commit();
 
     /*
@@ -1484,7 +1485,7 @@ bool MediaLibrary::recreateDatabase()
      */
     removeThumbnails();
 
-    return res;
+    return true;
 }
 
 void MediaLibrary::migrateModel3to5()
