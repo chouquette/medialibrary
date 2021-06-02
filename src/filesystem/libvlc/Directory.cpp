@@ -58,10 +58,10 @@ namespace libvlc
 
 Directory::Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
-    , m_mrl( utils::url::encode( utils::url::decode( mrl ) ) )
+    , m_mrl( utils::file::toFolderPath(
+                 utils::url::encode(
+                     utils::url::decode( mrl ) ) ) )
 {
-    // Add the final '/' in place if needed to avoid a useless copy in the init list
-    utils::file::toFolderPath( m_mrl );
 }
 
 const std::string& Directory::mrl() const

@@ -131,7 +131,7 @@ std::string removePath( const std::string& fullPath, const std::string& toRemove
     return fullPath.substr( pos );
 }
 
-std::string& toFolderPath( std::string& path )
+std::string toFolderPath( std::string path )
 {
 #ifdef _WIN32
     if ( *path.crbegin() == '\\' )
@@ -141,19 +141,6 @@ std::string& toFolderPath( std::string& path )
     if ( *path.crbegin() != '/' )
         path += '/';
     return path;
-}
-
-std::string toFolderPath( const std::string& path )
-{
-    auto p = path;
-#ifdef _WIN32
-    if ( *p.crbegin() == '\\' )
-        *p.rbegin() = '/';
-    else
-#endif
-    if ( *p.crbegin() != '/' )
-        p += '/';
-    return p;
 }
 
 #ifndef _WIN32

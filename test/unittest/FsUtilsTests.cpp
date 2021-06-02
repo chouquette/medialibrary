@@ -172,7 +172,7 @@ static void ToFolderPath( FsUtilsTests* )
     ASSERT_EQ( "/path/to/folder/", res );
 
     std::string i2{ "/path/to/folder" };
-    utils::file::toFolderPath( i2 );
+    i2 = utils::file::toFolderPath( std::move( i2 ) );
     ASSERT_EQ( "/path/to/folder/", i2 );
 
 #ifdef _WIN32
@@ -181,7 +181,7 @@ static void ToFolderPath( FsUtilsTests* )
     ASSERT_EQ( "/path/to/folder/", res );
 
     std::string i4{ "/path/to/folder\\" };
-    utils::file::toFolderPath( i4 );
+    i4 = utils::file::toFolderPath( std::move( i4 ) );
     ASSERT_EQ( "/path/to/folder/", i4 );
 #endif
 }

@@ -59,8 +59,7 @@ namespace file
      * @brief toFolder  Ensures a path is a folder path; ie. it has a terminal '/'
      * @param path      The path to sanitize
      */
-    std::string& toFolderPath( std::string& path );
-    std::string  toFolderPath( const std::string& path );
+    std::string toFolderPath( std::string path );
 
     /**
      * @brief toMrl Convert a filepath to an MRL
