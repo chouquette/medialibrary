@@ -40,11 +40,11 @@ namespace fs
 CommonDevice::CommonDevice( const std::string& uuid, const std::string& mountpoint,
                             std::string scheme, bool isRemovable, bool isNetwork )
     : m_uuid( uuid )
-    , m_mountpoints( { Mountpoint{ utils::file::toFolderPath( mountpoint ) } } )
     , m_scheme( std::move( scheme ) )
     , m_removable( isRemovable )
     , m_isNetwork( isNetwork )
 {
+    m_mountpoints.emplace_back( utils::file::toFolderPath( mountpoint ) );
 }
 
 const std::string& CommonDevice::uuid() const

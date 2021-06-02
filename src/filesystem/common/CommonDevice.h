@@ -58,10 +58,16 @@ private:
             , url( utils::url::split( mrl ) )
         {
         }
+        Mountpoint( const Mountpoint& ) = delete;
+        Mountpoint& operator=( const Mountpoint& ) = delete;
+        Mountpoint( Mountpoint&& ) = default;
+        Mountpoint& operator=( Mountpoint&& ) = default;
+
         bool operator==( const Mountpoint& mrl ) const;
         std::string mrl;
         utils::url::parts url;
     };
+
     std::string m_uuid;
     std::vector<Mountpoint> m_mountpoints;
     std::string m_scheme;
