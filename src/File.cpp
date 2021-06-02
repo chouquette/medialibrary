@@ -435,13 +435,13 @@ std::shared_ptr<File> File::fromMrl( MediaLibraryPtr ml, const std::string& mrl 
     auto folder = Folder::fromMrl( ml, utils::file::directory( mrl ) );
     if ( folder == nullptr )
     {
-        LOG_WARN( "Failed to find folder containing ", mrl );
+        LOG_DEBUG( "Failed to find folder containing ", mrl );
         return nullptr;
     }
     file = fromFileName( ml, utils::file::fileName( mrl ), folder->id() );
     if ( file == nullptr )
     {
-        LOG_WARN( "Failed to fetch file for ", mrl );
+        LOG_DEBUG( "Failed to fetch file for ", mrl );
     }
     return file;
 }
