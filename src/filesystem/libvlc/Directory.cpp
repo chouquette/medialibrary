@@ -56,11 +56,11 @@ namespace fs
 namespace libvlc
 {
 
-Directory::Directory( const std::string& mrl, fs::IFileSystemFactory& fsFactory )
+Directory::Directory( std::string mrl, fs::IFileSystemFactory& fsFactory )
     : CommonDirectory( fsFactory )
     , m_mrl( utils::file::toFolderPath(
                  utils::url::encode(
-                     utils::url::decode( mrl ) ) ) )
+                     utils::url::decode( std::move( mrl ) ) ) ) )
 {
 }
 

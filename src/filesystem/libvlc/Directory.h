@@ -35,7 +35,7 @@ namespace libvlc
 class Directory : public CommonDirectory
 {
 public:
-    Directory(const std::string& mrl, fs::IFileSystemFactory& fsFactory );
+    Directory( std::string mrl, fs::IFileSystemFactory& fsFactory );
     virtual const std::string& mrl() const override;
 
 private:
