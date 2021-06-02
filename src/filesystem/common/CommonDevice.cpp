@@ -119,18 +119,30 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 
 std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 {
-    std::string res;
     Mountpoint mountpoint( utils::file::toFolderPath( absoluteMrl ) );
+    std::string::size_type offset;
     {
         std::unique_lock<compat::Mutex> lock{ m_mutex };
         if ( m_mountpoints.empty() == true )
             throw fs::errors::DeviceRemoved{};
-        auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mountpoint );
+        auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ),
+                             mountpoint );
         if ( it == cend( m_mountpoints ) )
             throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0].mrl };
-        res = (*it).mrl;
+        offset =
+                /* Remove the scheme plus the "://" */
+                mountpoint.url.scheme.length() + 3
+                /*
+                 * Remove the host based on the input MRL. The matching host is
+                 * equivalent, but might differ in term of case
+                 */
+                + mountpoint.url.host.length()
+                /* If a port was specified, drop it and the associated ':' */
+                + ( mountpoint.url.port.length() == 0 ? 0 : mountpoint.url.port.length() + 1 )
+                /* Finally, remove the potential path from the matching mountpoint */
+                + (*it).url.path.length();
     }
-    return absoluteMrl.substr( res.length() );
+    return absoluteMrl.substr( offset );
 }
 
 std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const

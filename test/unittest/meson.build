@@ -87,6 +87,7 @@ device_fs_tests = [
   'PlaylistPresence',
   'FolderPresence',
   'CompareMountpoints',
+  'RelativeMrl',
 ]
 
 foreach t : device_fs_tests

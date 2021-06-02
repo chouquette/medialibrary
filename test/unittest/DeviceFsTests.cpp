@@ -975,6 +975,22 @@ static void CompareMountpoints( DeviceFsTests* T )
     doCheck( "upnp://1.2.3.4", false );
 }
 
+static void RelativeMrl( DeviceFsTests* T )
+{
+    auto d = T->fsMock->addDevice( "smb://1.2.3.4:445", "{fake-uuid}", true );
+    d->addMountpoint( "smb://SHARENAME/" );
+    auto doCheck = [&d]( const std::string& mrl, const std::string& exp ) {
+        auto relativeMrl = d->relativeMrl( mrl );
+        ASSERT_EQ( relativeMrl, exp );
+    };
+
+    doCheck( "smb://1.2.3.4:445/a/b/c", "a/b/c" );
+    doCheck( "smb://1.2.3.4/a/b/c", "a/b/c" );
+    doCheck( "smb://SHARENAME/a/b/c", "a/b/c" );
+    doCheck( "smb://SHARENAME:445/a/b/c", "a/b/c" );
+    doCheck( "smb://SHARENAME:445/", "" );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -996,6 +1012,7 @@ int main( int ac, char** av )
     ADD_TEST( PlaylistPresence );
     ADD_TEST( FolderPresence );
     ADD_TEST( CompareMountpoints );
+    ADD_TEST( RelativeMrl );
 
     END_TESTS
 }
