@@ -134,7 +134,7 @@ std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
         if ( std::get<0>( res ) == false )
             throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0].mrl };
     }
-    return utils::file::removePath( absoluteMrl, std::get<1>( res ) );
+    return absoluteMrl.substr( std::get<1>( res ).length() );
 }
 
 std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const
