@@ -152,7 +152,7 @@ bool mkdir( const std::string& path )
 #ifndef _WIN32
 bool rmdir( std::string path )
 {
-    path = utils::file::toFolderPath( path );
+    path = utils::file::toFolderPath( std::move( path ) );
 
     std::unique_ptr<DIR, int(*)(DIR*)> dir{
         opendir( path.c_str() ), &closedir
@@ -194,7 +194,7 @@ bool rmdir( std::string path )
 
 bool rmdir( std::string path )
 {
-    path = utils::file::toFolderPath( path );
+    path = utils::file::toFolderPath( std::move( path ) );
     WIN32_FIND_DATA f;
     auto pattern = path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
