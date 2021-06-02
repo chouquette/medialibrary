@@ -109,32 +109,28 @@ void CommonDevice::removeMountpoint( const std::string& mp )
 std::tuple<bool, std::string>
 CommonDevice::matchesMountpoint( const std::string& mrl ) const
 {
-    std::unique_lock<compat::Mutex> lock{ m_mutex };
-    return matchesMountpointLocked( mrl );
-}
-
-std::tuple<bool, std::string> CommonDevice::matchesMountpointLocked( const std::string& mrl ) const
-{
     Mountpoint mountpoint( utils::file::toFolderPath( mrl ) );
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
     auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mountpoint );
     if ( it == cend( m_mountpoints ) )
-        return std::make_tuple( false, "" );
+        return std::make_tuple(false, "");
     return std::make_tuple( true, (*it).mrl );
 }
 
-
 std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 {
-    std::tuple<bool, std::string> res;
+    std::string res;
+    Mountpoint mountpoint( utils::file::toFolderPath( absoluteMrl ) );
     {
         std::unique_lock<compat::Mutex> lock{ m_mutex };
         if ( m_mountpoints.empty() == true )
             throw fs::errors::DeviceRemoved{};
-        res = matchesMountpointLocked( absoluteMrl );
-        if ( std::get<0>( res ) == false )
+        auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mountpoint );
+        if ( it == cend( m_mountpoints ) )
             throw errors::NotFound{ absoluteMrl, "device " + m_mountpoints[0].mrl };
+        res = (*it).mrl;
     }
-    return absoluteMrl.substr( std::get<1>( res ).length() );
+    return absoluteMrl.substr( res.length() );
 }
 
 std::string CommonDevice::absoluteMrl( const std::string& relativeMrl ) const

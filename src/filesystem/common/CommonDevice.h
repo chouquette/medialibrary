@@ -51,10 +51,6 @@ public:
     virtual std::string absoluteMrl( const std::string& relativeMrl ) const override;
 
 private:
-    std::tuple<bool, std::string>
-        matchesMountpointLocked( const std::string& mrl ) const;
-
-private:
     struct Mountpoint
     {
         explicit Mountpoint( std::string m )
