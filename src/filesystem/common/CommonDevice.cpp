@@ -109,7 +109,7 @@ void CommonDevice::removeMountpoint( const std::string& mp )
 std::tuple<bool, std::string>
 CommonDevice::matchesMountpoint( const std::string& mrl ) const
 {
-    Mountpoint mountpoint( utils::file::toFolderPath( mrl ) );
+    Mountpoint mountpoint( mrl );
     std::unique_lock<compat::Mutex> lock{ m_mutex };
     auto it = std::find( cbegin( m_mountpoints ), cend( m_mountpoints ), mountpoint );
     if ( it == cend( m_mountpoints ) )
@@ -119,7 +119,7 @@ CommonDevice::matchesMountpoint( const std::string& mrl ) const
 
 std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
 {
-    Mountpoint mountpoint( utils::file::toFolderPath( absoluteMrl ) );
+    Mountpoint mountpoint( absoluteMrl );
     std::string::size_type offset;
     {
         std::unique_lock<compat::Mutex> lock{ m_mutex };
@@ -139,9 +139,16 @@ std::string CommonDevice::relativeMrl( const std::string& absoluteMrl ) const
                 + mountpoint.url.host.length()
                 /* If a port was specified, drop it and the associated ':' */
                 + ( mountpoint.url.port.length() == 0 ? 0 : mountpoint.url.port.length() + 1 )
-                /* Finally, remove the potential path from the matching mountpoint */
+                /*
+                 * Finally, remove the potential path from the matching mountpoint.
+                 * This is usually empty when dealing with network devices, but
+                 * not empty at all when dealing with a local device
+                 */
                 + (*it).url.path.length();
     }
+    /* Account for an MRL that's equal to the mountpoint, without the terminal '/' */
+    if ( offset >= absoluteMrl.length() )
+        return {};
     return absoluteMrl.substr( offset );
 }
 
@@ -170,7 +177,31 @@ bool CommonDevice::Mountpoint::operator==( const Mountpoint& lhs ) const
         else
             return false;
     }
-    return strncasecmp( lhs.url.path.c_str(), url.path.c_str(), url.path.length() ) == 0;
+    if ( strncasecmp( lhs.url.path.c_str(), url.path.c_str(), url.path.length() ) != 0 )
+    {
+        /* If the path don't match, account for a potential "" vs "/" path */
+        for ( auto c : lhs.url.path )
+        {
+            if ( c == '/' )
+                continue;
+#ifdef _WIN32
+            if ( c == '\\' )
+                continue;
+#endif
+            return false;
+        }
+        for ( auto c : url.path )
+        {
+            if ( c == '/' )
+                continue;
+#ifdef _WIN32
+            if ( c == '\\' )
+                continue;
+#endif
+            return false;
+        }
+    }
+    return true;
 }
 
 }

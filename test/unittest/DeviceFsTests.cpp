@@ -973,6 +973,8 @@ static void CompareMountpoints( DeviceFsTests* T )
     doCheck( "sMb://1.3.1.2", false );
     doCheck( "upnp://1.2.3.4:445", false );
     doCheck( "upnp://1.2.3.4", false );
+    doCheck( "smb://1.2.3.4/////////", true );
+    doCheck( "smb://1.2.3.4:445/", true );
 }
 
 static void RelativeMrl( DeviceFsTests* T )
@@ -988,7 +990,12 @@ static void RelativeMrl( DeviceFsTests* T )
     doCheck( "smb://1.2.3.4/a/b/c", "a/b/c" );
     doCheck( "smb://SHARENAME/a/b/c", "a/b/c" );
     doCheck( "smb://SHARENAME:445/a/b/c", "a/b/c" );
-    doCheck( "smb://SHARENAME:445/", "" );
+    doCheck( "smb://SHARENAME:445", "" );
+    /*
+     * relative mrl doesn't remove useless path separators, but manage to return
+     * something sensible
+     */
+    doCheck( "smb://SHARENAME:445/////", "////" );
 }
 
 int main( int ac, char** av )
