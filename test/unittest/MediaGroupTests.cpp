@@ -1378,6 +1378,50 @@ static void KoreanTitles( Tests* T )
     ASSERT_EQ( "[NEO지식창고] 03월01일 TEST", groups[0]->name() );
 }
 
+static void DontReturnExternalMedia( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m1 );
+    ASSERT_NON_NULL( m2 );
+
+    auto mg = T->ml->createMediaGroup( "group" );
+    ASSERT_NON_NULL( mg );
+
+    auto res = mg->add( *m1 );
+    ASSERT_TRUE( res );
+    res = mg->add( m2->id() );
+    ASSERT_TRUE( res );
+
+    auto groupMediaQuery = mg->media( IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 2u, groupMediaQuery->count() );
+    ASSERT_EQ( 2u, groupMediaQuery->all().size() );
+    groupMediaQuery = mg->searchMedia( "media", IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 2u, groupMediaQuery->count() );
+    ASSERT_EQ( 2u, groupMediaQuery->all().size() );
+
+    res = m1->convertToExternal();
+    ASSERT_TRUE( res );
+
+    groupMediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 1u, groupMediaQuery->count() );
+    ASSERT_EQ( 1u, groupMediaQuery->all().size() );
+    groupMediaQuery = mg->searchMedia( "media", IMedia::Type::Video, nullptr );
+    ASSERT_EQ( 1u, groupMediaQuery->count() );
+    ASSERT_EQ( 1u, groupMediaQuery->all().size() );
+
+    res = m2->convertToExternal();
+    ASSERT_TRUE( res );
+    groupMediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 0u, groupMediaQuery->count() );
+    ASSERT_EQ( 0u, groupMediaQuery->all().size() );
+    groupMediaQuery = mg->searchMedia( "media", IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 0u, groupMediaQuery->count() );
+    ASSERT_EQ( 0u, groupMediaQuery->all().size() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( MediaGroup );
@@ -1417,6 +1461,7 @@ int main( int ac, char** av )
     ADD_TEST( RegroupAll );
     ADD_TEST( MergeAutoCreated );
     ADD_TEST( KoreanTitles );
+    ADD_TEST( DontReturnExternalMedia );
 
     END_TESTS;
 }

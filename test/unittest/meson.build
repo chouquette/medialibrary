@@ -535,6 +535,7 @@ media_group_tests = [
   'RegroupAll',
   'MergeAutoCreated',
   'KoreanTitles',
+  'DontReturnExternalMedia',
 ]
 
 foreach t : media_group_tests

@@ -1933,16 +1933,17 @@ Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type ty
 {
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params, false, false );
-    req += " WHERE m.group_id = ?";
+    req += " WHERE m.group_id = ? AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                          groupId, type );
+                                          groupId, ImportType::Internal, type );
     }
-    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ), groupId );
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                      groupId, ImportType::Internal );
 }
 
 Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
@@ -1956,7 +1957,7 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
     req += addRequestJoin( params, false, false );
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
             " WHERE " + FtsTable::Name + " MATCH ?)"
-           " AND m.group_id = ?";
+           " AND m.group_id = ? AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     if ( type != Type::Unknown )
@@ -1964,11 +1965,11 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                           sqlite::Tools::sanitizePattern( pattern ),
-                                          groupId, type );
+                                          groupId, ImportType::Internal, type );
     }
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      groupId );
+                                      groupId, ImportType::Internal );
 }
 
 bool Media::clearHistory( MediaLibraryPtr ml )
