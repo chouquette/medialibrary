@@ -669,6 +669,12 @@ static void Upgrade29to30( DbModel* T )
     ASSERT_EQ( 2u, mediaGroups[1]->nbPresentMedia() );
 }
 
+static void Upgrade30to31( DbModel* T )
+{
+    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v30.sql" );
+}
+
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DbModel )
@@ -696,6 +702,7 @@ int main( int ac, char** av )
     ADD_TEST( Upgrade26to27 );
     ADD_TEST( Upgrade27to28 );
     ADD_TEST( Upgrade29to30 );
+    ADD_TEST( Upgrade30to31 );
 
     END_TESTS
 }
