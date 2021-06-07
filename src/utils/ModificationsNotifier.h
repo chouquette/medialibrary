@@ -47,6 +47,8 @@ public:
     void notifyMediaModification( int64_t media );
     void notifyMediaRemoval( int64_t media );
 
+    void notifyMediaConvertedToExternal( int64_t mediaId );
+
     void notifyArtistCreation( ArtistPtr artist );
     void notifyArtistModification( int64_t artist );
     void notifyArtistRemoval( int64_t artist );
@@ -111,6 +113,14 @@ private:
             (*m_cb.*addedCb)( std::move( queue.added ) );
         if ( queue.modified.size() > 0 )
             (*m_cb.*modifiedCb)( std::move( queue.modified ) );
+        if ( queue.removed.size() > 0 )
+            (*m_cb.*removedCb)( std::move( queue.removed ) );
+        queue.timeout = std::chrono::time_point<std::chrono::steady_clock>{};
+    }
+
+    template <typename RemovedCb>
+    void notify( Queue<void>&& queue, RemovedCb removedCb )
+    {
         if ( queue.removed.size() > 0 )
             (*m_cb.*removedCb)( std::move( queue.removed ) );
         queue.timeout = std::chrono::time_point<std::chrono::steady_clock>{};
@@ -195,6 +205,7 @@ private:
     Queue<IMediaGroup> m_mediaGroups;
     Queue<IBookmark> m_bookmarks;
     Queue<void> m_thumbnails;
+    Queue<void> m_convertedMedia;
 
     // Notifier thread
     compat::Mutex m_lock;

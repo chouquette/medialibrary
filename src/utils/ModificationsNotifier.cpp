@@ -73,6 +73,11 @@ void ModificationNotifier::notifyMediaRemoval( int64_t mediaId )
     notifyRemoval( mediaId, m_media );
 }
 
+void ModificationNotifier::notifyMediaConvertedToExternal( int64_t mediaId )
+{
+    notifyRemoval( mediaId, m_convertedMedia );
+}
+
 void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
 {
     notifyCreation( std::move( artist ), m_artists );
@@ -198,6 +203,7 @@ void ModificationNotifier::run()
     Queue<IMediaGroup> mediaGroups;
     Queue<IBookmark> bookmarks;
     Queue<void> thumbnails;
+    Queue<void> convertedMedia;
 
     while ( m_stop == false )
     {
@@ -232,6 +238,7 @@ void ModificationNotifier::run()
                 checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now );
                 checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
                 checkQueue( m_bookmarks, bookmarks, nextTimeout, now );
+                checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now );
                 m_timeout = nextTimeout;
             }
             notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
@@ -248,6 +255,7 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onMediaGroupsModified, &IMediaLibraryCb::onMediaGroupsDeleted );
             notify( std::move( bookmarks ), &IMediaLibraryCb::onBookmarksAdded,
                     &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
+            notify( std::move( convertedMedia ), &IMediaLibraryCb::onMediaConvertedToExternal );
             for ( auto thumbnailId : thumbnails.removed )
             {
                 auto path = Thumbnail::path( m_ml, thumbnailId );
