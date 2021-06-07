@@ -56,6 +56,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "thumbnails/ThumbnailerWorker.h"
+#include "utils/ModificationsNotifier.h"
 
 namespace medialibrary
 {
@@ -797,6 +798,9 @@ bool Media::convertToExternal()
         return false;
     if ( t != nullptr )
         t->commit();
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaConvertedToExternal( m_id );
     return true;
 }
 
