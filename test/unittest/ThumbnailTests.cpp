@@ -339,10 +339,12 @@ static void AutoDelete( Tests* T )
     m3->removeThumbnail( ThumbnailSizeType::Thumbnail );
 
     ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
+    ASSERT_EQ( ThumbnailStatus::Missing, m3->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 
     m->removeThumbnail( ThumbnailSizeType::Thumbnail );
 
     ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
+    ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
 static void AutoDeleteAfterUpdate( Tests* T )

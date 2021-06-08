@@ -263,6 +263,14 @@ public:
     ///
     virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
                                    uint32_t desiredHeight, float position ) = 0;
+    ///
+    /// \brief removeThumbnail Clear this media's thumbnail
+    /// \param sizeType The thumbnail size type
+    /// \return true if the thumbnail was successfully cleared, false otherwise
+    ///
+    /// If this is successful, later calls to thumbnailStatus will return Missing
+    ///
+    virtual bool removeThumbnail( ThumbnailSizeType sizeType ) = 0;
 
     virtual unsigned int insertionDate() const = 0;
     virtual unsigned int releaseDate() const = 0;
