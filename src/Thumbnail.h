@@ -156,7 +156,7 @@ public:
      * @param entityId The ID of the entity to unlink
      * @param type The type of entity of the linking record to remove
      */
-    void unlinkThumbnail( int64_t entityId, EntityType entityType );
+    bool unlinkThumbnail( int64_t entityId, EntityType entityType );
 
     Origin origin() const;
     /**

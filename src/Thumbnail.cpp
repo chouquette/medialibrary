@@ -216,14 +216,15 @@ bool Thumbnail::insertLinkRecord( int64_t entityId, EntityType type,
     return true;
 }
 
-void Thumbnail::unlinkThumbnail( int64_t entityId, EntityType type )
+bool Thumbnail::unlinkThumbnail( int64_t entityId, EntityType type )
 {
     const std::string req = "DELETE FROM " + LinkingTable::Name +
             " WHERE entity_id = ? AND entity_type = ? AND size_type = ?";
     if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, entityId, type,
                                        m_sizeType ) == false )
-        return;
+        return false;
     --m_sharedCounter;
+    return true;
 }
 
 Thumbnail::Origin Thumbnail::origin() const
