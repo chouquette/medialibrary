@@ -830,13 +830,16 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     return res;
 }
 
-void Media::removeThumbnail( ThumbnailSizeType sizeType )
+bool Media::removeThumbnail( ThumbnailSizeType sizeType )
 {
     auto t = thumbnail( sizeType );
     if ( t == nullptr )
-        return;
-    t->unlinkThumbnail( m_id, Thumbnail::EntityType::Media );
+        return true;
+    auto res = t->unlinkThumbnail( m_id, Thumbnail::EntityType::Media );
+    if ( res == false )
+        return false;
     m_thumbnails[Thumbnail::SizeToInt( sizeType )] = nullptr;
+    return true;
 }
 
 bool Media::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )

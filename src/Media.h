@@ -213,7 +213,7 @@ class Media : public IMedia,
         virtual bool setThumbnail( const std::string &thumbnail,
                                    ThumbnailSizeType sizeType ) override;
         bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
-        void removeThumbnail( ThumbnailSizeType sizeType );
+        bool removeThumbnail( ThumbnailSizeType sizeType );
         virtual unsigned int insertionDate() const override;
         virtual unsigned int releaseDate() const override;
         /**
