@@ -162,21 +162,12 @@ void Parser::updateStats()
     auto opScheduled = m_opToDo.load( std::memory_order_relaxed );
     auto opDone = m_opDone.load( std::memory_order_relaxed );
 
-    if ( opDone == 0 && opScheduled > 0 && m_chrono == decltype(m_chrono){})
-        m_chrono = std::chrono::steady_clock::now();
     assert( opScheduled >= opDone );
     if ( opScheduled % 10 == 0 || opScheduled == opDone )
     {
         LOG_DEBUG( "Updating progress: operations scheduled ", opScheduled,
                    "; operations done: ", opDone );
         m_callback->onParsingStatsUpdated( opDone, opScheduled );
-    }
-    if ( opScheduled == opDone )
-    {
-        auto duration = std::chrono::steady_clock::now() - m_chrono;
-        LOG_VERBOSE( "Finished all parsing operations in ",
-                   std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count(), "ms" );
-        m_chrono = decltype(m_chrono){};
     }
 }
 
