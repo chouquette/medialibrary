@@ -66,7 +66,7 @@ void Parser::parse( std::shared_ptr<Task> task )
         return;
     assert( task != nullptr );
     m_serviceWorkers[0]->parse( std::move( task ) );
-    ++m_opToDo;
+    m_opToDo.fetch_add( 1, std::memory_order_relaxed );
     updateStats();
 }
 
@@ -104,8 +104,12 @@ void Parser::flush()
 {
     for ( auto& s : m_serviceWorkers )
         s->flush();
-    m_opToDo = 0;
-    m_opDone = 0;
+    /*
+     * The services are now paused so we are ensured we won't have a concurrent
+     * update for the task counters
+     */
+    m_opToDo.store( 0, std::memory_order_relaxed );
+    m_opDone.store( 0, std::memory_order_relaxed );
 }
 
 void Parser::prepareRescan()
@@ -138,7 +142,7 @@ void Parser::restore()
         return;
     }
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
-    m_opToDo += tasks.size();
+    m_opToDo.fetch_add( tasks.size(), std::memory_order_relaxed );
     updateStats();
     m_serviceWorkers[0]->parse( std::move( tasks ) );
 }
@@ -190,7 +194,7 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
          status == Status::Discarded ||
          t->isCompleted() )
     {
-        ++m_opDone;
+        m_opDone.fetch_add( 1, std::memory_order_relaxed );
 
         updateStats();
         // We create a separate task for refresh, which doesn't count toward
@@ -210,7 +214,7 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
         // forever.
         if ( t->attemptsRemaining() == 0 )
         {
-            ++m_opDone;
+            m_opDone.fetch_add( 1, std::memory_order_relaxed );
             updateStats();
             return;
         }
