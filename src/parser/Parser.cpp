@@ -160,16 +160,19 @@ void Parser::refreshTaskList()
 
 void Parser::updateStats()
 {
-    if ( m_opDone == 0 && m_opToDo > 0 && m_chrono == decltype(m_chrono){})
+    auto opScheduled = m_opToDo.load( std::memory_order_relaxed );
+    auto opDone = m_opDone.load( std::memory_order_relaxed );
+
+    if ( opDone == 0 && opScheduled > 0 && m_chrono == decltype(m_chrono){})
         m_chrono = std::chrono::steady_clock::now();
-    assert( m_opToDo >= m_opDone );
-    if ( m_opToDo % 10 == 0 || m_opToDo == m_opDone )
+    assert( opScheduled >= opDone );
+    if ( opScheduled % 10 == 0 || opScheduled == opDone )
     {
-        LOG_DEBUG( "Updating progress: operations scheduled ", m_opToDo,
-                   "; operations done: ", m_opDone );
-        m_callback->onParsingStatsUpdated( m_opDone, m_opToDo );
+        LOG_DEBUG( "Updating progress: operations scheduled ", opScheduled,
+                   "; operations done: ", opDone );
+        m_callback->onParsingStatsUpdated( opDone, opScheduled );
     }
-    if ( m_opToDo == m_opDone )
+    if ( opScheduled == opDone )
     {
         auto duration = std::chrono::steady_clock::now() - m_chrono;
         LOG_VERBOSE( "Finished all parsing operations in ",
