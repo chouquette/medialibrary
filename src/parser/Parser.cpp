@@ -163,7 +163,7 @@ void Parser::updateStats()
     auto opDone = m_opDone.load( std::memory_order_relaxed );
 
     assert( opScheduled >= opDone );
-    if ( opScheduled % 10 == 0 || opScheduled == opDone )
+    if ( opDone % 10 == 0 || opScheduled == opDone )
     {
         LOG_DEBUG( "Updating progress: operations scheduled ", opScheduled,
                    "; operations done: ", opDone );
