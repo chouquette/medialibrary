@@ -42,7 +42,7 @@ namespace parser
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
     , m_callback( ml->getCb() )
-    , m_opToDo( 0 )
+    , m_opScheduled( 0 )
     , m_opDone( 0 )
 {
 }
@@ -66,7 +66,7 @@ void Parser::parse( std::shared_ptr<Task> task )
         return;
     assert( task != nullptr );
     m_serviceWorkers[0]->parse( std::move( task ) );
-    m_opToDo.fetch_add( 1, std::memory_order_relaxed );
+    m_opScheduled.fetch_add( 1, std::memory_order_relaxed );
     updateStats();
 }
 
@@ -108,7 +108,7 @@ void Parser::flush()
      * The services are now paused so we are ensured we won't have a concurrent
      * update for the task counters
      */
-    m_opToDo.store( 0, std::memory_order_relaxed );
+    m_opScheduled.store( 0, std::memory_order_relaxed );
     m_opDone.store( 0, std::memory_order_relaxed );
 }
 
@@ -137,7 +137,7 @@ void Parser::restore()
         return;
     }
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
-    m_opToDo.fetch_add( tasks.size(), std::memory_order_relaxed );
+    m_opScheduled.fetch_add( tasks.size(), std::memory_order_relaxed );
     updateStats();
     m_serviceWorkers[0]->parse( std::move( tasks ) );
 }
@@ -159,7 +159,7 @@ void Parser::refreshTaskList()
 
 void Parser::updateStats()
 {
-    auto opScheduled = m_opToDo.load( std::memory_order_relaxed );
+    auto opScheduled = m_opScheduled.load( std::memory_order_relaxed );
     auto opDone = m_opDone.load( std::memory_order_relaxed );
 
     assert( opScheduled >= opDone );

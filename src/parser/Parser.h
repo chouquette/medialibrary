@@ -101,7 +101,7 @@ private:
 
     MediaLibrary* m_ml;
     IMediaLibraryCb* m_callback;
-    std::atomic_uint m_opToDo;
+    std::atomic_uint m_opScheduled;
     std::atomic_uint m_opDone;
 };
 
