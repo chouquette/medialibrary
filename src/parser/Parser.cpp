@@ -210,7 +210,6 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
 
     // If some services declined to parse the file, start over again.
     assert( serviceIdx < m_serviceWorkers.size() );
-    updateStats();
     m_serviceWorkers[serviceIdx]->parse( std::move( t ) );
 }
 
