@@ -120,15 +120,10 @@ void Parser::prepareRescan()
 
 void Parser::rescan()
 {
-    restart();
-    restore();
-    resume();
-}
-
-void Parser::restart()
-{
     for ( auto& s : m_serviceWorkers )
         s->restart();
+    restore();
+    resume();
 }
 
 void Parser::restore()

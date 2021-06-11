@@ -96,12 +96,7 @@ private:
     virtual void onIdleChanged( bool idle ) override;
     // Queues all unparsed files for parsing.
     void restore();
-    ///
-    /// \brief restart Will instruct the parser services to prepare for restarting
-    ///                after a flush operation. This is different from resume
-    ///                as it can imply initialization side effects
-    ///
-    void restart();
+
 private:
     std::vector<std::unique_ptr<Worker>> m_serviceWorkers;
 
