@@ -167,7 +167,7 @@ void Parser::updateStats()
     {
         LOG_DEBUG( "Updating progress: operations scheduled ", m_opToDo,
                    "; operations done: ", m_opDone );
-        m_callback->onParsingStatsUpdated( m_opToDo, m_opDone );
+        m_callback->onParsingStatsUpdated( m_opDone, m_opToDo );
     }
     if ( m_opToDo == m_opDone )
     {
