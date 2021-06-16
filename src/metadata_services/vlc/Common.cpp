@@ -84,7 +84,7 @@ bool medialibrary::MetadataCommon::startPlayback( VLC::Media& media,
 
     mp.play();
     std::unique_lock<compat::Mutex> lock( mutex );
-    success = cond.wait_for( lock, std::chrono::seconds( 3 ), [&failedToStart, &hasAnyTrack]() {
+    success = cond.wait_for( lock, std::chrono::seconds( 10 ), [&failedToStart, &hasAnyTrack]() {
         return failedToStart == true || hasAnyTrack == true;
     });
 
