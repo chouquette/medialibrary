@@ -56,7 +56,7 @@ public:
         UpdateDurationOnMediaChange,
         UpdateDurationOnMediaDeletion,
         UpdateNbMediaPerType,
-        UpdateTotalNbMedia,
+        UpdateTotalNbMedia, // Deprecated in model 30
         UpdateMediaCountOnPresenceChange,
     };
     enum class Indexes : uint8_t
