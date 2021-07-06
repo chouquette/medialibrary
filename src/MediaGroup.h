@@ -58,6 +58,7 @@ public:
         UpdateNbMediaPerType,
         UpdateTotalNbMedia, // Deprecated in model 30
         UpdateMediaCountOnPresenceChange,
+        UpdateNbMediaOnImportTypeChange, // Introduced in model 31
     };
     enum class Indexes : uint8_t
     {

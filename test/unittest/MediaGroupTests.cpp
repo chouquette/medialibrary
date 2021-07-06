@@ -1422,6 +1422,148 @@ static void DontReturnExternalMedia( Tests* T )
     ASSERT_EQ( 0u, groupMediaQuery->all().size() );
 }
 
+static void InsertRemoveExternalMedia( Tests* T )
+{
+    auto mg = std::static_pointer_cast<MediaGroup>(
+                T->ml->createMediaGroup( "group" ) );
+    auto external = T->ml->addExternalMedia( "http://external.media/movie.mkv", -1 );
+    auto m = T->ml->addMedia( "file:///path/to/media.mkv", IMedia::Type::Video );
+    auto res = mg->add( *external );
+    ASSERT_TRUE( res );
+
+    /* We inserted an external media, it shouldn't impact the media count */
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    res = mg->add( m->id() );
+    ASSERT_TRUE( res );
+
+    /* Now that we added a internal media, the media count should be updated */
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 1u, mg->nbTotalMedia() );
+
+    /*
+     * If we remove the internal media, the group shouldn't be deleted since it
+     * still contains an external media
+     */
+    res = mg->remove( m->id() );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_NON_NULL( mg );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+
+    res = mg->remove( external->id() );
+    ASSERT_TRUE( res );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( nullptr, mg );
+}
+
+static void ConvertMediaToExternal( Tests* T )
+{
+    auto mg = std::static_pointer_cast<MediaGroup>(
+                T->ml->createMediaGroup( "group" ) );
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file:///path/to/media.mkv", IMedia::Type::Video ) );
+
+    auto res = mg->add( *m );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, mg->nbVideo() );
+    ASSERT_EQ( 1u, mg->nbTotalMedia() );
+
+    res = m->convertToExternal();
+    ASSERT_TRUE( res );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    /* We should now have a group that still exists, but without any video */
+    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_NON_NULL( mg );
+    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    /* Now convert the media back to internal */
+    m->markAsInternal();
+    res = m->save();
+    ASSERT_TRUE( res );
+
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_NON_NULL( mg );
+    ASSERT_EQ( 1u, mg->nbVideo() );
+    ASSERT_EQ( 1u, mg->nbTotalMedia() );
+    ASSERT_EQ( 0u, mg->nbExternalMedia() );
+
+    T->ml->deleteMedia( m->id() );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( nullptr, mg );
+}
+
+static void ConvertExternalMediaType( Tests* T )
+{
+    auto mg = std::static_pointer_cast<MediaGroup>(
+                T->ml->createMediaGroup( "group" ) );
+    auto external = std::static_pointer_cast<Media>(
+                T->ml->addExternalMedia( "http://external.media/movie.mkv", -1 ) );
+    auto res = mg->add( external->id() );
+    ASSERT_TRUE( res );
+    /*
+     * We added the media with the add( int64_t ) overload so the counters won't
+     * be updated in place
+     */
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    res = external->setType( IMedia::Type::Video );
+    ASSERT_TRUE( res );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    /*
+     * Don't bother checking the nb_present_* columns since they are enforced
+     * with CHECK() constraints, so if the number of present video/audio/unknown
+     * grows over the overall number of media, an exception will be thrown
+     */
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    external->markAsInternal();
+    res = external->save();
+    ASSERT_TRUE( res );
+
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 1u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbVideo() );
+    ASSERT_EQ( 0u, mg->nbExternalMedia() );
+
+    res = external->convertToExternal();
+    ASSERT_TRUE( res );
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 0u, mg->nbVideo() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    res = external->setType( IMedia::Type::Audio );
+    ASSERT_TRUE( res );
+
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 0u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbExternalMedia() );
+
+    external->markAsInternal();
+    res = external->save();
+    ASSERT_TRUE( res );
+
+    mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
+    ASSERT_EQ( 1u, mg->nbTotalMedia() );
+    ASSERT_EQ( 1u, mg->nbAudio() );
+    ASSERT_EQ( 0u, mg->nbExternalMedia() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( MediaGroup );
@@ -1462,6 +1604,9 @@ int main( int ac, char** av )
     ADD_TEST( MergeAutoCreated );
     ADD_TEST( KoreanTitles );
     ADD_TEST( DontReturnExternalMedia );
+    ADD_TEST( InsertRemoveExternalMedia );
+    ADD_TEST( ConvertMediaToExternal );
+    ADD_TEST( ConvertExternalMediaType );
 
     END_TESTS;
 }

@@ -75,6 +75,7 @@ namespace
         "media_group_rename_forced_singleton",
         "media_group_update_duration_on_media_change",
         "media_group_update_duration_on_media_deletion",
+        "media_group_update_media_count_on_import_type_change",
         "media_group_update_nb_media_types",
         "media_group_update_nb_media_types_presence",
         "media_update_device_presence",

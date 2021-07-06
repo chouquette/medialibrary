@@ -538,6 +538,9 @@ media_group_tests = [
   'MergeAutoCreated',
   'KoreanTitles',
   'DontReturnExternalMedia',
+  'InsertRemoveExternalMedia',
+  'ConvertMediaToExternal',
+  'ConvertExternalMediaType',
 ]
 
 foreach t : media_group_tests

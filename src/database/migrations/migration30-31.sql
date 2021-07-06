@@ -76,6 +76,14 @@ MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 31 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 31 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 31 ),
 
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::UpdateNbMediaPerType, 30 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 31 ),
+
+"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DeleteEmptyGroups, 30 ),
+MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 31 ),
+
+MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 31 ),
+
 MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 31 ),
 MediaGroup::index( MediaGroup::Indexes::Duration, 31 ),
 MediaGroup::index( MediaGroup::Indexes::CreationDate, 31 ),
