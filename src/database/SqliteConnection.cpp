@@ -121,11 +121,11 @@ Connection::Handle Connection::handle()
         if ( t == SQLITE_TRACE_STMT )
         {
             const char* str = static_cast<const char*>( x );
-            LOG_VERBOSE( "Executed: ", str );
+            LOG_DEBUG( "Executed: ", str );
         }
         else if ( t == SQLITE_TRACE_CLOSE )
         {
-            LOG_VERBOSE( "Connection ", p, " was closed" );
+            LOG_DEBUG( "Connection ", p, " was closed" );
         }
         return 0;
     }, nullptr );
