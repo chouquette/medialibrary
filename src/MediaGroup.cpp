@@ -846,12 +846,9 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " END";
             }
             /*
-             * The only change in v31 is that we now only monitor internal media
-             * for type changes but I've often regreted sprinkling large
-             * trigger/table creation requests with some conditionals as it
-             * quickly becomes really hard to follow.
-             * So this time, the entire trigger creation request is entirely
-             * duplicated.
+             * Changes since V30:
+             * - We now only monitor internal media
+             * - Fix invalid decrement of nb_audio
              */
             return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                    " AFTER UPDATE OF type, group_id ON " + Media::Table::Name +
@@ -917,7 +914,7 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                        IMedia::Type::Audio ) ) +
                                    " THEN 1 ELSE 0 END) END),"
-                       " nb_audio = nb_audio + "
+                       " nb_audio = nb_audio - "
                            "(CASE old.type WHEN " +
                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                    IMedia::Type::Audio ) ) +

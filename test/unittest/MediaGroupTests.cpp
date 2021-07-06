@@ -1564,6 +1564,51 @@ static void ConvertExternalMediaType( Tests* T )
     ASSERT_EQ( 0u, mg->nbExternalMedia() );
 }
 
+static void ChangeExternalMediaGroup( Tests* T )
+{
+    auto g1 = std::static_pointer_cast<MediaGroup>(
+                T->ml->createMediaGroup( "first" ) );
+    auto g2 = std::static_pointer_cast<MediaGroup>(
+                T->ml->createMediaGroup( "second" ) );
+
+    auto external = T->ml->addExternalMedia( "https://external.media/show.mkv", -1 );
+    auto m = T->ml->addMedia( "media.mkv", IMedia::Type::Audio );
+    auto res = g1->add( *external );
+    ASSERT_TRUE( res );
+    res = g1->add( *m );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 1u, g1->nbExternalMedia() );
+    ASSERT_EQ( 1u, g1->nbTotalMedia() );
+
+    g1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g1->id() ) );
+    ASSERT_EQ( 1u, g1->nbExternalMedia() );
+    ASSERT_EQ( 1u, g1->nbTotalMedia() );
+
+    g2->add( *external );
+    ASSERT_EQ( 1u, g2->nbExternalMedia() );
+    ASSERT_EQ( 0u, g2->nbTotalMedia() );
+
+    g1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g1->id() ) );
+    ASSERT_EQ( 0u, g1->nbExternalMedia() );
+    ASSERT_EQ( 1u, g1->nbTotalMedia() );
+
+    g2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g2->id() ) );
+    ASSERT_EQ( 1u, g2->nbExternalMedia() );
+    ASSERT_EQ( 0u, g2->nbTotalMedia() );
+
+    res = g2->add( *m );
+    ASSERT_TRUE( res );
+
+    g1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g1->id() ) );
+    ASSERT_EQ( nullptr, g1 );
+
+    g2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( g2->id() ) );
+    ASSERT_EQ( 1u, g2->nbExternalMedia() );
+    ASSERT_EQ( 1u, g2->nbTotalMedia() );
+    ASSERT_EQ( 1u, g2->nbAudio() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( MediaGroup );
@@ -1607,6 +1652,7 @@ int main( int ac, char** av )
     ADD_TEST( InsertRemoveExternalMedia );
     ADD_TEST( ConvertMediaToExternal );
     ADD_TEST( ConvertExternalMediaType );
+    ADD_TEST( ChangeExternalMediaGroup );
 
     END_TESTS;
 }

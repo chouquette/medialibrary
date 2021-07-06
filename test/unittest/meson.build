@@ -541,6 +541,7 @@ media_group_tests = [
   'InsertRemoveExternalMedia',
   'ConvertMediaToExternal',
   'ConvertExternalMediaType',
+  'ChangeExternalMediaGroup',
 ]
 
 foreach t : media_group_tests
