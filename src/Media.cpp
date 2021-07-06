@@ -801,6 +801,10 @@ bool Media::convertToExternal()
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyMediaConvertedToExternal( m_id );
+    m_subType = IMedia::SubType::Unknown;
+    m_importType = ImportType::External;
+    m_deviceId = 0;
+    m_folderId = 0;
     return true;
 }
 

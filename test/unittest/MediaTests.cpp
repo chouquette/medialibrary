@@ -1341,8 +1341,10 @@ static void ConvertToExternal( Tests* T )
     auto videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 2u, videos.size() );
 
+    ASSERT_TRUE( m1->isDiscoveredMedia() );
     auto res = m1->convertToExternal();
     ASSERT_TRUE( res );
+    ASSERT_FALSE( m1->isDiscoveredMedia() );
 
     videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 1u, videos.size() );
