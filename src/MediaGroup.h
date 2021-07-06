@@ -99,6 +99,13 @@ public:
     bool rename( std::string name, bool userInitiated );
 
     bool isForcedSingleton() const;
+    /**
+     * @brief nbExternalMedia Return the number of external media stored in this group
+     *
+     * This is not expected to be exposed to the applications and is only there
+     * for testing purposes
+     */
+    uint32_t nbExternalMedia() const;
 
     /**
      * @brief rename Rename a group
@@ -150,6 +157,7 @@ private:
     uint32_t m_nbVideo;
     uint32_t m_nbAudio;
     uint32_t m_nbUnknown;
+    uint32_t m_nbExternal;
     uint32_t m_nbPresentVideo;
     uint32_t m_nbPresentAudio;
     uint32_t m_nbPresentUnknown;

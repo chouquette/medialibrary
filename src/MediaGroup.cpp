@@ -49,6 +49,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbUnknown( row.extract<decltype(m_nbUnknown)>() )
+    , m_nbExternal( row.extract<decltype(m_nbExternal)>() )
     , m_nbPresentVideo( row.extract<decltype(m_nbPresentVideo)>() )
     , m_nbPresentAudio( row.extract<decltype(m_nbPresentAudio)>() )
     , m_nbPresentUnknown( row.extract<decltype(m_nbPresentUnknown)>() )
@@ -69,6 +70,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_nbExternal( 0 )
     , m_nbPresentVideo( 0 )
     , m_nbPresentAudio( 0 )
     , m_nbPresentUnknown( 0 )
@@ -87,6 +89,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml , std::string name )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
     , m_nbUnknown( 0 )
+    , m_nbExternal( 0 )
     , m_nbPresentVideo( 0 )
     , m_nbPresentAudio( 0 )
     , m_nbPresentUnknown( 0 )
@@ -323,6 +326,11 @@ bool MediaGroup::rename( std::string name, bool userInitiated )
 bool MediaGroup::isForcedSingleton() const
 {
     return m_forcedSingleton;
+}
+
+uint32_t MediaGroup::nbExternalMedia() const
+{
+    return m_nbExternal;
 }
 
 bool MediaGroup::destroy()
@@ -566,6 +574,30 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "forced_singleton BOOLEAN"
         ")";
     }
+    if ( dbModel == 30 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE,"
+            // Total number of media, regardless of presence
+            "nb_video UNSIGNED INTEGER DEFAULT 0,"
+            "nb_audio UNSIGNED INTEGER DEFAULT 0,"
+            "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+            // Nb media per type, accounting for their presence.
+            "nb_present_video UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_video <= nb_video),"
+            "nb_present_audio UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_audio <= nb_audio),"
+            "nb_present_unknown UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_unknown <= nb_unknown),"
+            "duration INTEGER DEFAULT 0,"
+            "creation_date INTEGER NOT NULL,"
+            "last_modification_date INTEGER NOT NULL,"
+            "user_interacted BOOLEAN,"
+            "forced_singleton BOOLEAN"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -574,6 +606,9 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER DEFAULT 0,"
         "nb_audio UNSIGNED INTEGER DEFAULT 0,"
         "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+        // The number of media that were assigned to this group
+        // before they were converted to external media
+        "nb_external UNSIGNED INTEGER DEFAULT 0,"
         // Nb media per type, accounting for their presence.
         "nb_present_video UNSIGNED INTEGER DEFAULT 0 "
             "CHECK(nb_present_video <= nb_video),"
