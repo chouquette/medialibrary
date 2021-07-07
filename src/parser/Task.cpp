@@ -145,7 +145,7 @@ void Task::markStepCompleted( Step stepCompleted )
 
 bool Task::saveParserStep()
 {
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET step = ?, "
+    static const std::string req = "UPDATE " + Table::Name + " SET step = ?, "
             "attempts_left = "
             "(CASE type "
                 "WHEN " +
@@ -163,7 +163,7 @@ bool Task::saveParserStep()
 
 bool Task::decrementRetryCount()
 {
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "attempts_left = attempts_left + 1 WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return false;
@@ -214,7 +214,7 @@ bool Task::isStepCompleted( Step step ) const
 
 void Task::startParserStep()
 {
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "attempts_left = attempts_left - 1 WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id ) == false )
         return;
@@ -413,7 +413,7 @@ bool Task::restoreLinkedEntities( LastTaskInfo& lastTask )
 
 bool Task::setMrl( MediaLibraryPtr ml, int64_t taskId, const std::string& mrl )
 {
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "mrl = ? WHERE id_task = ?";
     return sqlite::Tools::executeUpdate( ml->getConn(), req, mrl, taskId );
 }
@@ -644,10 +644,10 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
 bool Task::resetRetryCount( MediaLibraryPtr ml )
 {
     auto t = ml->getConn()->newTransaction();
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "attempts_left = (SELECT max_task_attempts FROM SETTINGS) "
             "WHERE step & ?1 != ?1 AND type = ?";
-    static const std::string linkReq = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string linkReq = "UPDATE " + Table::Name + " SET "
             "attempts_left = (SELECT max_link_task_attempts FROM SETTINGS) "
             "WHERE step & ?1 != ?1 AND type = ?";
     auto res = sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
@@ -663,16 +663,16 @@ bool Task::resetRetryCount( MediaLibraryPtr ml )
 bool Task::resetParsing( MediaLibraryPtr ml )
 {
     assert( sqlite::Transaction::transactionInProgress() == true );
-    static const std::string resetReq = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string resetReq = "UPDATE " + Table::Name + " SET "
             "attempts_left = (SELECT max_task_attempts FROM Settings), "
             "step = ? WHERE type != ?";
-    static const std::string resetLinkReq = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string resetLinkReq = "UPDATE " + Table::Name + " SET "
             "attempts_left = (SELECT max_link_task_attempts FROM Settings), "
             "step = ? WHERE type = ?";
     /* We also want to delete the refresh tasks, since we are going to rescan
      * all existing media anyway
      */
-    static const std::string deleteRefreshReq = "DELETE FROM " + Task::Table::Name +
+    static const std::string deleteRefreshReq = "DELETE FROM " + Table::Name +
             " WHERE type = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), deleteRefreshReq, Type::Refresh ) &&
             sqlite::Tools::executeUpdate( ml->getConn(), resetReq,
@@ -683,7 +683,7 @@ bool Task::resetParsing( MediaLibraryPtr ml )
 
 std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
 {
-    static const std::string req = "SELECT t.* FROM " + Task::Table::Name + " t"
+    static const std::string req = "SELECT t.* FROM " + Table::Name + " t"
         " LEFT JOIN " + Folder::Table::Name + " fol ON t.parent_folder_id = fol.id_folder"
         " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
         " WHERE step & ? != ? AND attempts_left > 0 AND "
@@ -704,7 +704,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ),
         std::move( fileFs ), std::move( parentFolder ), std::move( parentFolderFs ),
         fileType );
-    const std::string req = "INSERT INTO " + Task::Table::Name +
+    const std::string req = "INSERT INTO " + Table::Name +
         "(attempts_left, type, mrl, file_type, parent_folder_id, link_to_id, link_to_type, "
             "link_extra, link_to_mrl)"
             "VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
@@ -724,7 +724,7 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
     auto self = std::make_shared<Task>( ml, std::move( file ), std::move( fileFs ),
                                         std::move( parentFolder ),
                                         std::move( parentFolderFs ) );
-    const std::string req = "INSERT INTO " + Task::Table::Name +
+    const std::string req = "INSERT INTO " + Table::Name +
             "(attempts_left, type, mrl, file_type, file_id, parent_folder_id, link_to_id, "
             "link_to_type, link_extra, link_to_mrl)"
             "VALUES(?, ?, ?, ?, ?, ?, 0, 0, 0, '')";
@@ -777,7 +777,7 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
 {
     auto self = std::make_shared<Task>( ml, std::move( mrl ), linkToId, linkToType,
                                         linkToExtra );
-    const std::string req = "INSERT INTO " + Task::Table::Name +
+    const std::string req = "INSERT INTO " + Table::Name +
             "(attempts_left, type, mrl, file_type, file_id, parent_folder_id, link_to_id,"
             "link_to_type, link_extra, link_to_mrl) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, '')";
     if ( insert( ml, self, req, Settings::MaxLinkTaskAttempts, Type::Link, self->mrl(),
@@ -796,7 +796,7 @@ std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
     auto self = std::make_shared<Task>( ml, std::move( mrl ), fileType,
                                         std::move( linkToMrl ), linkToType,
                                         linkToExtra );
-    const std::string req = "INSERT INTO " + Task::Table::Name +
+    const std::string req = "INSERT INTO " + Table::Name +
             "(attempts_left, type, mrl, file_type, link_to_id, link_to_type, link_extra, link_to_mrl) "
             "VALUES(?, ?, ?, ?, 0, ?, ?, ?)";
     if ( insert( ml, self, req, Settings::MaxLinkTaskAttempts, Type::Link,
@@ -821,7 +821,7 @@ std::shared_ptr<Task> Task::createRestoreTask( MediaLibraryPtr ml, std::string m
 
 bool Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 {
-    const std::string req = "DELETE FROM " + Task::Table::Name + " "
+    const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE type = ? AND link_to_type = ? AND link_to_id = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
                                          LinkType::Playlist, playlistId );
@@ -829,7 +829,7 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml, int64_t playlistId )
 
 bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
 {
-    const std::string req = "DELETE FROM " + Task::Table::Name + " "
+    const std::string req = "DELETE FROM " + Table::Name + " "
             "WHERE type = ? AND link_to_type = ?";
     return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
                                          LinkType::Playlist );
@@ -841,10 +841,10 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
  */
 bool Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 {
-    static const std::string req = "INSERT INTO " + Task::Table::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(file_id, parent_folder_id)"
             " SELECT id_file, folder_id FROM " + File::Table::Name +
-            " f LEFT JOIN " + Task::Table::Name + " t"
+            " f LEFT JOIN " + Table::Name + " t"
             " ON t.file_id = f.id_file WHERE t.file_id IS NULL"
             " AND f.folder_id IS NOT NULL";
     return sqlite::Tools::executeInsert( ml->getConn(), req );
@@ -953,7 +953,7 @@ bool Task::setFile( FilePtr file )
         return true ;
     assert( m_fileId == 0 );
     assert( fileId != 0 );
-    static const std::string req = "UPDATE " + Task::Table::Name + " SET "
+    static const std::string req = "UPDATE " + Table::Name + " SET "
             "file_id = ? WHERE id_task = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileId, m_id ) == false )
         return false;
