@@ -48,7 +48,8 @@ static void Create( Tests* T )
     ASSERT_EQ( m->albumTrack(), nullptr );
     ASSERT_EQ( m->showEpisode(), nullptr );
     ASSERT_EQ( m->duration(), -1 );
-    ASSERT_EQ( -1, m->progress() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
     ASSERT_NE( 0u, m->insertionDate() );
     ASSERT_TRUE( m->isDiscoveredMedia() );
     ASSERT_TRUE( m->isPresent() );
@@ -112,89 +113,141 @@ static void SetProgress( Tests* T )
     m2->setDuration( 5 * 3600 * 1000 ); // 5h
     m2->save();
 
-    ASSERT_EQ( -1.f, m1->progress() );
-    ASSERT_EQ( -1.f, m2->progress() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
+    ASSERT_EQ( -1.f, m2->lastPosition() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1, m2->lastTime() );
 
     /*
      * Test a duration in the middle of the media. This should just bump the
      * duration as such
      */
-    auto res = m1->setProgress( 0.5 );
+    auto expectedPosition = 0.5f;
+    auto res = m1->setLastPosition( expectedPosition );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 0.5, m1->progress() );
+    ASSERT_EQ( expectedPosition, m1->lastPosition() );
+    ASSERT_EQ( m1->duration() / 2, m1->lastTime() );
     ASSERT_EQ( 0u, m1->playCount() );
     m1 = T->ml->media( m1->id() );
-    ASSERT_EQ( 0.5, m1->progress() );
+    ASSERT_EQ( expectedPosition, m1->lastPosition() );
+    ASSERT_EQ( m1->duration() / 2, m1->lastTime() );
     ASSERT_EQ( 0u, m1->playCount() );
 
     /* Then update to a progress to 3%. This should reset it to -1 */
-    res = m1->setProgress( .03f );
+
+    res = m1->setLastTime( 54000 ); //3% of 30 minutes in milliseconds
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 0u, m1->playCount() );
     m1 = T->ml->media( m1->id() );
-    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 0u, m1->playCount() );
 
     /* Then again at 4% and ensure the progress is still -1 */
-    res = m1->setProgress( .04f );
+    res = m1->setLastPosition( 0.04 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1.f, m1->progress() );
-    ASSERT_EQ( 0u, m1->playCount() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
     m1 = T->ml->media( m1->id() );
-    ASSERT_EQ( -1.f, m1->progress() );
-    ASSERT_EQ( 0u, m1->playCount() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
 
     /*
      * Now set a progress of 99% and check the playcount was bumped, and
      * progress reset
      */
-    res = m1->setProgress( .98f );
+    res = m1->setLastTime( 1782000 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 1u, m1->playCount() );
     m1 = T->ml->media( m1->id() );
-    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1, m1->lastTime() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 1u, m1->playCount() );
 
     /* Now do the same with a longer media to ensure the "margin" are updated */
-    res = m2->setProgress( 0.5 );
+    expectedPosition = 0.5f;
+    res = m2->setLastPosition( expectedPosition );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 0.5, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    ASSERT_EQ( m2->duration() / 2, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
     m2 = T->ml->media( m2->id() );
-    ASSERT_EQ( 0.5, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    ASSERT_EQ( m2->duration() / 2, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
 
     /* This media should only ignore the first & last percent */
-    res = m2->setProgress( .009f );
+    res = m2->setLastPosition( 0.009f );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1.f, m2->progress() );
+    ASSERT_EQ( -1.f, m2->lastPosition() );
+    ASSERT_EQ( -1, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
     m2 = T->ml->media( m2->id() );
-    ASSERT_EQ( -1.f, m2->progress() );
+    ASSERT_EQ( -1.f, m2->lastPosition() );
+    ASSERT_EQ( -1, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
 
     /* So check 0.01 is not ignored */
-    res = m2->setProgress( .01f );
+    expectedPosition = 0.01f;
+    res = m2->setLastPosition( expectedPosition );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 0.01f, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    /* Don't fail the tests because of a rounding error */
+    ASSERT_TRUE( m2->lastTime() >= 180000 - 1 &&
+                 m2->lastTime() <= 180000 );
     ASSERT_EQ( 0u, m2->playCount() );
     m2 = T->ml->media( m2->id() );
-    ASSERT_EQ( 0.01f, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    ASSERT_TRUE( m2->lastTime() >= 180000 - 1 &&
+                 m2->lastTime() <= 180000 );
     ASSERT_EQ( 0u, m2->playCount() );
 
     /*
      * And finally check that 0.98 is just a regular progress and not the end of
      * the media since it's 5hours long
      */
-    res = m2->setProgress( .98f );
+    expectedPosition = 0.98;
+    res = m2->setLastPosition( expectedPosition );
     ASSERT_TRUE( res );
-    ASSERT_EQ( .98f, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    ASSERT_TRUE( m2->lastTime() >= 17640000 - 1 &&
+                 m2->lastTime() <= 17640000 );
     ASSERT_EQ( 0u, m2->playCount() );
     m2 = T->ml->media( m2->id() );
-    ASSERT_EQ( .98f, m2->progress() );
+    ASSERT_EQ( expectedPosition, m2->lastPosition() );
+    ASSERT_TRUE( m2->lastTime() >= 17640000 - 1 &&
+                 m2->lastTime() <= 17640000 );
     ASSERT_EQ( 0u, m2->playCount() );
+}
+
+static void SetLastPositionNoDuration( Tests* T )
+{
+    auto m = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
+    /* Check that we accept any value when no duration is provided */
+    auto res = m->setLastPosition( 123.456f );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123.456f, m->lastPosition() );
+    /* And ensure we didn't infer the last_time value since we can't compute it */
+    ASSERT_EQ( -1, m->lastTime() );
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 123.456f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
+
+    /*
+     * And check the other way around: if we set a time we don't get a
+     * position back
+     */
+    res = m->setLastTime( 123456 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 123456, m->lastTime() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 123456, m->lastTime() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
 }
 
 static void Rating( Tests* T )
@@ -394,15 +447,14 @@ static void History( Tests* T )
     auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->setProgress( 0.5f );
-    m->save();
+    m->setLastPosition( 0.5f );
     history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-    m2->setProgress( 0.5f );
+    m2->setLastTime( 50 );
 
     history = T->ml->history()->all();
     ASSERT_EQ( 2u, history.size() );
@@ -416,9 +468,9 @@ static void StreamHistory( Tests* T )
     auto m2 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.org/sample2.mkv" ) );
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
 
-    m1->setProgress( 0.5f );
-    m2->setProgress( 0.5f );
-    m3->setProgress( 0.5f );
+    m1->setLastPosition( 0.5 );
+    m2->setLastPosition( 0.5 );
+    m3->setLastPosition( 0.5 );
 
     auto history = T->ml->streamHistory()->all();
     ASSERT_EQ( 2u, history.size() );
@@ -430,12 +482,10 @@ static void StreamHistory( Tests* T )
 static void HistoryByType( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "video.mkv", IMedia::Type::Video ) );
-    m1->setProgress( 0.5f );
-    m1->save();
+    m1->setLastPosition( 0.5f );
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
-    m2->save();
-    m2->setProgress( 0.5f );
+    m2->setLastTime( 50 );
 
     auto h = T->ml->history( IMedia::Type::Audio )->all();
     ASSERT_EQ( 1u, h.size() );
@@ -454,8 +504,7 @@ static void ClearHistory( Tests* T )
     auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->setProgress( 0.5f );
-    m->save();
+    m->setLastPosition( 0.5f );
     history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
 
@@ -465,18 +514,20 @@ static void ClearHistory( Tests* T )
     ASSERT_EQ( 0u, history.size() );
 
     m = T->ml->media( m->id() );
-    ASSERT_EQ( -1.f, m->progress() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
 }
 
 static void RemoveFromHistory( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    m->setDuration( 100 );
+    m->save();
 
     auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
 
-    m->setProgress( 1.f );
-    m->save();
+    m->setLastPosition( 1.f );
     history = T->ml->history()->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
@@ -487,11 +538,13 @@ static void RemoveFromHistory( Tests* T )
     history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
     ASSERT_EQ( 0u, m->playCount() );
-    ASSERT_EQ( -1.f, m->progress() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
 
     m = T->ml->media( m->id() );
     ASSERT_EQ( 0u, m->playCount() );
-    ASSERT_EQ( -1.f, m->progress() );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
 }
 
 static void SetReleaseDate( Tests* T )
@@ -1287,13 +1340,19 @@ static void ForceTitle( Tests* T )
 
 static void FetchInProgress( Tests* T )
 {
-    auto m1 = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
-    auto m2 = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    m1->setDuration( 10000 );
+    m1->save();
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
+    m2->setDuration( 10000 );
+    m2->save();
 
     auto m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, m.size() );
 
-    m1->setProgress( 0.5f );
+    m1->setLastPosition( .5f );
     m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m1->id(), m[0]->id() );
@@ -1305,7 +1364,7 @@ static void FetchInProgress( Tests* T )
     m = T->ml->inProgressMedia( IMedia::Type::Audio, nullptr )->all();
     ASSERT_EQ( 0u, m.size() );
 
-    m2->setProgress( 0.8f );
+    m2->setLastPosition( 0.8f );
 
     m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 2u, m.size() );
@@ -1318,14 +1377,15 @@ static void FetchInProgress( Tests* T )
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m2->id(), m[0]->id() );
 
-    m1->setProgress( .9999f );
+    m1->setLastPosition( 0.999f );
 
     m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 1u, m.size() );
     ASSERT_EQ( m2->id(), m[0]->id() );
 
     m1 = T->ml->media( m1->id() );
-    ASSERT_EQ( -1.f, m1->progress() );
+    ASSERT_EQ( -1.f, m1->lastPosition() );
+    ASSERT_EQ( -1, m1->lastTime() );
     ASSERT_EQ( 1u, m1->playCount() );
 }
 
@@ -1428,6 +1488,7 @@ int main( int ac, char** av )
     ADD_TEST( Duration );
     ADD_TEST( GetThumbnail );
     ADD_TEST( SetProgress );
+    ADD_TEST( SetLastPositionNoDuration );
     ADD_TEST( Rating );
     ADD_TEST( Search );
     ADD_TEST( SearchAndSort );

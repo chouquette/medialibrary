@@ -136,18 +136,20 @@ public:
     virtual int64_t duration() const = 0;
     virtual uint32_t playCount() const = 0;
     /**
-     * @brief progress Returns the media progress, in percent
+     * @brief lastPosition Returns the last saved progress
      *
      * This is the same unit as VLC's playback position, ie. a float between
      * 0 and 1.
      * If the value is negative, it means the playback has either never been
      * played, or it was played to completion
+     * If the duration is unknown, the media library will just return what the
+     * application provided during its last call to setLastPosition()
      */
-    virtual float progress() const = 0;
+    virtual float lastPosition() const = 0;
     /**
-     * @brief setProgress updates the media playback progress
+     * @brief setLastPosition updates the last playback position
      *
-     * @param progress The current media progress
+     * @param lastPosition The current playback position expressed by a number in the range [0;1]
      *
      * The media library will interpret the value to determine if the playback
      * is completed and the media should be marked as watched (therefor increasing
@@ -160,13 +162,38 @@ public:
      * These 5% are decreased by 1% for every playback hour, so for instance, a
      * 3h movie will use 5% - (3h * 1%), so the first 2% will be ignored, the last
      * 2% will trigger the completion.
+     * If the media duration is unknown, the progress will be stored as-is in
+     * database but the playcount will not be updated, nor will the position be
+     * clamped in the [0;1] range.
      *
      * This returns true in case of success, false otherwise.
-     * Calling progress() or playCount() afterward will fetch the curated values.
+     * Calling lastPosition() or playCount() afterward will fetch the curated values.
      * This will also bump the media last played date, causing it to appear at
-     * the top of the history
+     * the top of the history.
+     * If the duration is known, this will also update lastTime().
+     * If the duration is unknown, lastTime will be set to -1 when this function
+     * is called.
      */
-    virtual bool setProgress( float progress ) = 0;
+    virtual bool setLastPosition( float lastPosition ) = 0;
+    /**
+     * @brief lastTime Returns the last playback time as provided by the application
+     *
+     * This is expected to be a time in millisecond, but is ultimately what the
+     * application provided to the media library.
+     * This defaults to -1 is the playback isn't in progress
+     */
+    virtual int64_t lastTime() const = 0;
+    /**
+     * @brief setLastTime Sets the last playback time.
+     * @param lastTime A time in millisecond
+     * @return true in case of success, false otherwise.
+     *
+     * This is similar to setLastPosition but works with a time in
+     * milliseconds rather than a percentage.
+     * If the duration is unknown, calling this function will reset the lastProgress
+     * to -1.
+     */
+    virtual bool setLastTime( int64_t lastTime ) = 0;
     /**
      * @brief setPlayCount Set a specific value to this media's play count
      *

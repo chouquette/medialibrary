@@ -162,7 +162,8 @@ class Media : public IMedia,
         virtual AlbumTrackPtr albumTrack() const override;
         void setAlbumTrack( AlbumTrackPtr albumTrack );
         virtual int64_t duration() const override;
-        virtual float progress() const override;
+        virtual float lastPosition() const override;
+        virtual int64_t lastTime() const override;
         void setDuration( int64_t duration);
         virtual ShowEpisodePtr showEpisode() const override;
         void setShowEpisode( ShowEpisodePtr episode );
@@ -170,7 +171,8 @@ class Media : public IMedia,
         virtual bool removeLabel( LabelPtr label ) override;
         virtual Query<ILabel> labels() const override;
         virtual uint32_t playCount() const override;
-        virtual bool setProgress( float progress ) override;
+        virtual bool setLastPosition( float lastPosition ) override;
+        virtual bool setLastTime( int64_t lastTime ) override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
         virtual bool removeFromHistory() override;
@@ -323,6 +325,24 @@ class Media : public IMedia,
         static bool regroupAll( MediaLibraryPtr ml );
 
 private:
+        enum class PositionTypes : uint8_t
+        {
+            /**
+             * The provided position is at the begining of the media, it should
+             * be stored as -1 and the playback will not be considered started
+            */
+            Begin,
+            /**
+             * The provided position is at the end of the media, it should be stored
+             * as -1 to indicate that the media has been played fully and the
+             * playcount should be updated.
+             */
+            End,
+            /**
+             * The position isn't anything special and should be stored as is
+             */
+            Any,
+        };
         static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
         static std::string sortRequest( const QueryParameters* params );
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
@@ -332,6 +352,9 @@ private:
                                                            ImportType importType,
                                                            int64_t duration );
         std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
+        PositionTypes computePositionType( float position ) const;
+        bool setLastPositionAndTime( PositionTypes positionType, float lastPos,
+                                     int64_t lastTime );
 
         /*
          * Marked as private so that it can only be used through IMedia interface
@@ -348,7 +371,8 @@ private:
         Type m_type;
         SubType m_subType;
         int64_t m_duration;
-        float m_progress;
+        float m_lastPosition;
+        int64_t m_lastTime;
         unsigned int m_playCount;
         time_t m_lastPlayedDate;
         const time_t m_insertionDate;

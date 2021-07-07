@@ -72,16 +72,82 @@ MediaGroup::schema( MediaGroup::Table::Name, 31 ),
             Media::ImportType::External ) ) + ") as MQ "
     "WHERE MQ.group_id = id_group",
 
+"CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
+"("
+   "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+   "type INTEGER,"
+   "subtype INTEGER,"
+   "duration INTEGER,"
+   "progress REAL,"
+   "play_count UNSIGNED INTEGER,"
+   "last_played_date UNSIGNED INTEGER,"
+   "real_last_played_date UNSIGNED INTEGER,"
+   "insertion_date UNSIGNED INTEGER,"
+   "release_date UNSIGNED INTEGER,"
+   "title TEXT COLLATE NOCASE,"
+   "filename TEXT COLLATE NOCASE,"
+   "is_favorite BOOLEAN,"
+   "is_present BOOLEAN,"
+   "device_id INTEGER,"
+   "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+   "folder_id UNSIGNED INTEGER,"
+   "import_type UNSIGNED INTEGER NOT NULL,"
+   "group_id UNSIGNED INTEGER,"
+   "forced_title BOOLEAN NOT NULL DEFAULT 0"
+")",
+
+"INSERT INTO " + Media::Table::Name + "_backup "
+    "SELECT * FROM " + Media::Table::Name,
+
+"DROP TABLE " + Media::Table::Name,
+
+Media::schema( Media::Table::Name, 31 ),
+
+"INSERT INTO " + Media::Table::Name + " SELECT "
+    "id_media, type, subtype, duration, progress,"
+    "IIF(duration >= 0 AND progress >= 0, duration * progress, -1),"
+    "play_count, last_played_date, real_last_played_date, insertion_date, release_date,"
+    "title, filename, is_favorite, is_present, device_id, nb_playlists, folder_id,"
+    "import_type, group_id, forced_title FROM " + Media::Table::Name + "_backup",
+
+"DROP TABLE " + Media::Table::Name + "_backup",
+
+Media::trigger( Media::Triggers::InsertFts, 31 ),
+Media::trigger( Media::Triggers::UpdateFts, 31 ),
+Media::trigger( Media::Triggers::DeleteFts, 31 ),
+
+Media::index( Media::Indexes::LastPlayedDate, 31 ),
+Media::index( Media::Indexes::Presence, 31 ),
+Media::index( Media::Indexes::Types, 31 ),
+Media::index( Media::Indexes::LastUsageDate, 31 ),
+Media::index( Media::Indexes::Folder, 31 ),
+Media::index( Media::Indexes::MediaGroup, 31 ),
+Media::index( Media::Indexes::Progress, 31 ),
+
+Album::trigger( Album::Triggers::IsPresent, 31 ),
+Artist::trigger( Artist::Triggers::HasTrackPresent, 31 ),
+Thumbnail::trigger( Thumbnail::Triggers::AutoDeleteMedia, 31 ),
+Show::trigger( Show::Triggers::UpdateIsPresent, 31 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnIndex, 31 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnUpdate, 31 ),
+Folder::trigger( Folder::Triggers::UpdateNbMediaOnDelete, 31 ),
+Genre::trigger( Genre::Triggers::UpdateIsPresent, 31 ),
+Playlist::trigger( Playlist::Triggers::UpdateNbMediaOnMediaDeletion, 31 ),
+Playlist::trigger( Playlist::Triggers::UpdateNbPresentMediaOnPresenceChange, 31 ),
+
 MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 31 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 31 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 31 ),
 
-"DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::UpdateNbMediaPerType, 30 ),
-MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 31 ),
-
 "DROP TRIGGER " + MediaGroup::triggerName( MediaGroup::Triggers::DeleteEmptyGroups, 30 ),
 MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 31 ),
 
+MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 31 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateMediaCountOnPresenceChange, 31 ),
+MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 31 ),
+MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 31 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 31 ),
+MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 31 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 31 ),
 
 MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 31 ),

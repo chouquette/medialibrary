@@ -73,28 +73,29 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_type( row.load<decltype(m_type)>( 1 ) )
     , m_subType( row.load<decltype(m_subType)>( 2 ) )
     , m_duration( row.load<decltype(m_duration)>( 3 ) )
-    , m_progress( row.load<decltype(m_progress)>( 4 ) )
-    , m_playCount( row.load<decltype(m_playCount)>( 5 ) )
-    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 6 ) )
+    , m_lastPosition( row.load<decltype(m_lastPosition)>( 4 ) )
+    , m_lastTime( row.load<decltype(m_lastTime)>( 5 ) )
+    , m_playCount( row.load<decltype(m_playCount)>( 6 ) )
+    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 7 ) )
     // skip real_last_played_date as we don't need it in memory
-    , m_insertionDate( row.load<decltype(m_insertionDate)>( 8 ) )
-    , m_releaseDate( row.load<decltype(m_releaseDate)>( 9 ) )
-    , m_title( row.load<decltype(m_title)>( 10 ) )
-    , m_filename( row.load<decltype(m_filename)>( 11 ) )
-    , m_isFavorite( row.load<decltype(m_isFavorite)>( 12 ) )
-    , m_isPresent( row.load<decltype(m_isPresent)>( 13 ) )
-    , m_deviceId( row.load<decltype(m_deviceId)>( 14 ) )
-    , m_nbPlaylists( row.load<unsigned int>( 15 ) )
-    , m_folderId( row.load<decltype(m_folderId)>( 16 ) )
-    , m_importType( row.load<decltype(m_importType)>( 17 ) )
-    , m_groupId( row.load<decltype(m_groupId)>( 18 ) )
-    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 19 ) )
+    , m_insertionDate( row.load<decltype(m_insertionDate)>( 9 ) )
+    , m_releaseDate( row.load<decltype(m_releaseDate)>( 10 ) )
+    , m_title( row.load<decltype(m_title)>( 11 ) )
+    , m_filename( row.load<decltype(m_filename)>( 12 ) )
+    , m_isFavorite( row.load<decltype(m_isFavorite)>( 13 ) )
+    , m_isPresent( row.load<decltype(m_isPresent)>( 14 ) )
+    , m_deviceId( row.load<decltype(m_deviceId)>( 15 ) )
+    , m_nbPlaylists( row.load<unsigned int>( 16 ) )
+    , m_folderId( row.load<decltype(m_folderId)>( 17 ) )
+    , m_importType( row.load<decltype(m_importType)>( 18 ) )
+    , m_groupId( row.load<decltype(m_groupId)>( 19 ) )
+    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 20 ) )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 20 );
+    assert( row.nbColumns() == 21 );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -104,7 +105,8 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_type( type )
     , m_subType( SubType::Unknown )
     , m_duration( duration )
-    , m_progress( -1.0f )
+    , m_lastPosition( -1.f )
+    , m_lastTime( -1 )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
@@ -132,7 +134,8 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_type( Type::Unknown )
     , m_subType( SubType::Unknown )
     , m_duration( duration )
-    , m_progress( -1.0f )
+    , m_lastPosition( -1.f )
+    , m_lastTime( -1 )
     , m_playCount( 0 )
     , m_lastPlayedDate( 0 )
     , m_insertionDate( time( nullptr ) )
@@ -233,9 +236,14 @@ int64_t Media::duration() const
     return m_duration;
 }
 
-float Media::progress() const
+int64_t Media::lastTime() const
 {
-    return m_progress;
+    return m_lastTime;
+}
+
+float Media::lastPosition() const
+{
+    return m_lastPosition;
 }
 
 void Media::setDuration( int64_t duration )
@@ -276,8 +284,11 @@ uint32_t Media::playCount() const
     return m_playCount;
 }
 
-bool Media::setProgress( float progress )
+
+Media::PositionTypes Media::computePositionType( float position ) const
 {
+    assert( m_duration > 0 );
+
     float margin;
     if ( m_duration < std::chrono::duration_cast<std::chrono::milliseconds>(
              std::chrono::hours{ 1 } ).count() )
@@ -293,54 +304,106 @@ bool Media::setProgress( float progress )
         margin = 0.02;
     else
         margin = 0.01;
-    float curatedProgress;
+
+    if ( position < margin )
+        return PositionTypes::Begin;
+    if ( position > ( 1.f - margin ) )
+        return PositionTypes::End;
+    return PositionTypes::Any;
+}
+
+bool Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
+                                    int64_t lastTime )
+{
     auto lastPlayedDate = time( nullptr );
+    float curatedPosition;
+    int64_t curatedTime;
     bool incrementPlaycount = false;
     std::string req;
-    if ( progress < margin )
+
+    switch ( positionType )
     {
+    case PositionTypes::Begin:
         /*
          * This is not far enough in the playback to update the progress, except
          * in case we had a progress saved before, then we want to reset it to
          * avoid offering to resume the playback at an old position.
          * In any case we want to bump the last played date.
          */
-        req = "UPDATE " + Table::Name + " SET progress = ?, last_played_date = ?"
-                " WHERE id_media = ?";
-        curatedProgress = -1.f;
-    }
-    else if ( progress > ( 1.f - margin ) )
-    {
+        req = "UPDATE " + Table::Name + " SET last_position = ?, last_time = ?,"
+              "last_played_date = ? WHERE id_media = ?";
+        curatedPosition = -1.f;
+        curatedTime = -1;
+        break;
+    case PositionTypes::End:
         /*
          * We consider this to have reached the end of the media, so we bump
          * the play count, reset the progress, and bump the last played date
          */
-        req = "UPDATE " + Table::Name + " SET progress = ?,"
+        req = "UPDATE " + Table::Name + " SET last_position = ?, last_time = ?,"
                 " play_count = ifnull(play_count, 0) + 1,"
                 " last_played_date = ? WHERE id_media = ?";
-        curatedProgress = -1.f;
+        curatedPosition = -1.f;
+        curatedTime = -1;
         incrementPlaycount = true;
-    }
-    else
-    {
+        break;
+    default:
         /*
          * Just bump the progress, the playback isn't completed but advanced
-         * enough for us to care about the current position
+         * enough for us to care about the current position or we don't know the
+         * duration and can't infere anything else
          */
-        req = "UPDATE " + Table::Name + " SET progress = ?, last_played_date = ?"
-                " WHERE id_media = ?";
-        curatedProgress = progress;
+        req = "UPDATE " + Table::Name + " SET last_position = ?, last_time = ?,"
+                "last_played_date = ? WHERE id_media = ?";
+        curatedPosition = lastPos;
+        curatedTime = lastTime;
     }
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, curatedProgress,
-                                       lastPlayedDate, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, curatedPosition,
+                                       curatedTime, lastPlayedDate, m_id ) == false )
         return false;
     if ( incrementPlaycount == true )
         m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
-    m_progress = curatedProgress;
+    m_lastPosition = curatedPosition;
+    m_lastTime = curatedTime;
     m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Media :
                                                   HistoryType::Network );
     return true;
+}
+
+bool Media::setLastPosition( float lastPosition )
+{
+    int64_t lastTime;
+    PositionTypes positionType;
+    if ( m_duration > 0 )
+    {
+        lastTime = lastPosition * static_cast<float>( m_duration );
+        positionType = computePositionType( lastPosition );
+    }
+    else
+    {
+        lastTime = -1;
+        positionType = PositionTypes::Any;
+    }
+    return setLastPositionAndTime( positionType, lastPosition, lastTime );
+}
+
+bool Media::setLastTime( int64_t lastTime )
+{
+    float position;
+    PositionTypes positionType;
+    if ( m_duration > 0 )
+    {
+        position = static_cast<float>( lastTime ) /
+                   static_cast<float>( m_duration );
+        positionType = computePositionType( position );
+    }
+    else
+    {
+        position = -1.f;
+        positionType = PositionTypes::Any;
+    }
+    return setLastPositionAndTime( positionType, position, lastTime );
 }
 
 bool Media::setPlayCount( uint32_t playCount )
@@ -361,15 +424,17 @@ time_t Media::lastPlayedDate() const
 bool Media::removeFromHistory()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "progress = ?, play_count = ?, last_played_date = ? WHERE id_media = ?";
+            "last_position = ?, last_time = ?, play_count = ?, "
+            "last_played_date = ? WHERE id_media = ?";
     auto dbConn = m_ml->getConn();
     auto t = dbConn->newTransaction();
 
-    if ( sqlite::Tools::executeUpdate( dbConn, req, -1.f, 0, nullptr, m_id ) == false )
+    if ( sqlite::Tools::executeUpdate( dbConn, req, -1.f, -1, 0, nullptr, m_id ) == false )
         return false;
 
     t->commit();
-    m_progress = -1.f;
+    m_lastPosition = -1.f;
+    m_lastTime = -1;
     m_lastPlayedDate = 0;
     m_playCount = 0;
     auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
@@ -1125,7 +1190,7 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
     std::string req = "FROM " + Media::Table::Name + " m ";
 
     req += addRequestJoin( params, false, false );
-    req += " WHERE m.progress >= 0.0";
+    req += " WHERE (m.last_position >= 0 OR m.last_time > 0)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     if ( type == IMedia::Type::Unknown )
@@ -1351,7 +1416,12 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
                                 SubType::Unknown ) ) + ","
         "duration INTEGER DEFAULT -1,";
 
-    if ( dbModel >= 27 )
+    if ( dbModel >= 31 )
+    {
+        req += "last_position REAL DEFAULT -1,"
+               "last_time INTEGER DEFAULT -1,";
+    }
+    else if ( dbModel >= 27 )
         req += "progress REAL DEFAULT -1,";
 
     req +=
@@ -1576,8 +1646,11 @@ std::string Media::index( Indexes index, uint32_t dbModel )
                         " ON " + Table::Name + "(group_id)";
         case Indexes::Progress:
             assert( dbModel >= 27 );
+            if ( dbModel < 31 )
+                return "CREATE INDEX " + indexName( index, dbModel ) +
+                       " ON " + Table::Name + "(progress)";
             return "CREATE INDEX " + indexName( index, dbModel ) +
-                    " ON " + Table::Name + "(progress)";
+                    " ON " + Table::Name + "(last_position, last_time)";
         default:
             assert( !"Invalid index provided" );
     }
@@ -1607,7 +1680,9 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
             return "media_group_id_idx";
         case Indexes::Progress:
             assert( dbModel >= 27 );
-            return "media_progress_idx";
+            if ( dbModel < 31 )
+                return "media_progress_idx";
+            return "media_last_pos_time_idx";
         default:
             assert( !"Invalid index provided" );
     }
@@ -1980,7 +2055,7 @@ bool Media::clearHistory( MediaLibraryPtr ml )
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "progress = -1, play_count = 0,"
+            "last_position = -1, last_time = -1, play_count = 0,"
             "last_played_date = NULL";
 
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )

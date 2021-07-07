@@ -580,6 +580,7 @@ media_tests = [
   'Duration',
   'GetThumbnail',
   'SetProgress',
+  'SetLastPositionNoDuration',
   'Rating',
   'Search',
   'SearchAndSort',

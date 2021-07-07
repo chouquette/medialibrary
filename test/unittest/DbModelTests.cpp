@@ -108,8 +108,8 @@ namespace
         "media_group_forced_singleton",
         "media_group_id_idx",
         "media_group_last_modification_date",
+        "media_last_pos_time_idx",
         "media_last_usage_dates_idx",
-        "media_progress_idx",
         "media_types_idx",
         "movie_media_idx",
         "parent_folder_id_idx",
@@ -676,6 +676,25 @@ static void Upgrade29to30( DbModel* T )
 static void Upgrade30to31( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v30.sql" );
+
+    /* Ensure we correctly computed the last_time based on last_position & duration */
+    auto m = T->ml->media( 1 );
+    /* We have a correct duration and a last_position, expect a correct last_time */
+    ASSERT_EQ( m->lastPosition(), 0.5f );
+    ASSERT_EQ( m->duration() / 2, m->lastTime() );
+
+    /*
+     * We have a last_position but no duration. last_time should be -1 since we
+     * can't deduce it, but we will keep whatever last_position was
+     */
+    m = T->ml->media( 2 );
+    ASSERT_EQ( 0.5f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
+
+    /* We have a duration but no last_position, we expect last_pos/time to be -1 */
+    m = T->ml->media( 3 );
+    ASSERT_EQ( -1.f, m->lastPosition() );
+    ASSERT_EQ( -1, m->lastTime() );
 }
 
 
