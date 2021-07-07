@@ -1395,6 +1395,11 @@ static void DontReturnExternalMedia( Tests* T )
     res = mg->add( m2->id() );
     ASSERT_TRUE( res );
 
+    /* The group contains discovered media, it should be listed */
+    auto groupsQuery = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 1u, groupsQuery->count() );
+    ASSERT_EQ( 1u, groupsQuery->all().size() );
+
     auto groupMediaQuery = mg->media( IMedia::Type::Video, nullptr );
     ASSERT_EQ( 2u, groupMediaQuery->count() );
     ASSERT_EQ( 2u, groupMediaQuery->all().size() );
@@ -1405,6 +1410,14 @@ static void DontReturnExternalMedia( Tests* T )
     res = m1->convertToExternal();
     ASSERT_TRUE( res );
 
+    /*
+     * We still have one discovered media in the group, and one external media
+     * that shouldn't be listed
+     */
+    groupsQuery = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 1u, groupsQuery->count() );
+    ASSERT_EQ( 1u, groupsQuery->all().size() );
+
     groupMediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 1u, groupMediaQuery->count() );
     ASSERT_EQ( 1u, groupMediaQuery->all().size() );
@@ -1414,6 +1427,15 @@ static void DontReturnExternalMedia( Tests* T )
 
     res = m2->convertToExternal();
     ASSERT_TRUE( res );
+
+    /*
+     * There are no discovered media left in the group, it shouldn't be listed
+     * anymore, and forcefully fetching its media should yield no result
+     */
+    groupsQuery = T->ml->mediaGroups( IMedia::Type::Unknown, nullptr );
+    ASSERT_EQ( 0u, groupsQuery->count() );
+    ASSERT_EQ( 0u, groupsQuery->all().size() );
+
     groupMediaQuery = mg->media( IMedia::Type::Unknown, nullptr );
     ASSERT_EQ( 0u, groupMediaQuery->count() );
     ASSERT_EQ( 0u, groupMediaQuery->all().size() );
