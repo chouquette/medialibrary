@@ -2236,6 +2236,13 @@ void MediaLibrary::migrateModel30to31()
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
 
+    std::string reqs[] = {
+#       include "database/migrations/migration30-31.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
     m_settings.setDbModelVersion( 31 );
     t->commit();
 }

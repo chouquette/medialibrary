@@ -199,19 +199,53 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                     "END";
         case Triggers::UpdateNbMediaOnUpdate:
             assert( dbModel >= 14 );
+            if ( dbModel <= 30 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                           " AFTER UPDATE ON " + Media::Table::Name +
+                           " WHEN new.folder_id IS NOT NULL AND old.type != new.type "
+                       "BEGIN "
+                           "UPDATE " + Table::Name + " SET "
+                           "nb_audio = nb_audio + "
+                               "(CASE old.type "
+                                   "WHEN " +
+                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                       IMedia::Type::Audio ) ) + " THEN -1 "
+                                   "ELSE 0 "
+                               "END)"
+                               "+"
+                               "(CASE new.type "
+                                   "WHEN " +
+                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                       IMedia::Type::Audio ) ) + " THEN 1 "
+                                   "ELSE 0 "
+                               "END)"
+                           ","
+                           "nb_video = nb_video + "
+                               "(CASE old.type "
+                                   "WHEN " +
+                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                           IMedia::Type::Video ) ) + " THEN -1 "
+                                   "ELSE 0 "
+                               "END)"
+                               "+"
+                               "(CASE new.type "
+                                   "WHEN " +
+                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                           IMedia::Type::Video ) ) + " THEN 1 "
+                                   "ELSE 0 "
+                               "END)"
+                           "WHERE id_folder = new.folder_id;"
+                       "END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-                       " AFTER UPDATE ON " + Media::Table::Name +
-                       " WHEN new.folder_id IS NOT NULL AND old.type != new.type "
-                   "BEGIN "
-                       "UPDATE " + Table::Name + " SET "
-                       "nb_audio = nb_audio + "
-                           "(CASE old.type "
-                               "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) + " THEN -1 "
-                               "ELSE 0 "
-                           "END)"
-                           "+"
+                   " AFTER UPDATE OF folder_id, type ON " + Media::Table::Name +
+                   " WHEN IFNULL(old.folder_id, 0) != IFNULL(new.folder_id, 0)"
+                       " OR old.type != new.type"
+                   " BEGIN"
+                      /* Increment the count for the new type/folder_id */
+                       " UPDATE " + Table::Name + " SET"
+                       " nb_audio = nb_audio + "
                            "(CASE new.type "
                                "WHEN " +
                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
@@ -220,21 +254,32 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                            "END)"
                        ","
                        "nb_video = nb_video + "
-                           "(CASE old.type "
-                               "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) + " THEN -1 "
-                               "ELSE 0 "
-                           "END)"
-                           "+"
                            "(CASE new.type "
                                "WHEN " +
                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
                                                        IMedia::Type::Video ) ) + " THEN 1 "
                                "ELSE 0 "
                            "END)"
-                       "WHERE id_folder = new.folder_id;"
-                   "END";
+                           "WHERE new.folder_id IS NOT NULL AND id_folder = new.folder_id;"
+                       /* And decrement the count for the old type/folder_id */
+                       "UPDATE " + Table::Name + " SET"
+                       " nb_audio = nb_audio - "
+                           "(CASE old.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                   IMedia::Type::Audio ) ) + " THEN -1 "
+                               "ELSE 0 "
+                           "END)"
+                       ","
+                       "nb_video = nb_video - "
+                           "(CASE old.type "
+                               "WHEN " +
+                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                                                       IMedia::Type::Video ) ) + " THEN 1 "
+                               "ELSE 0 "
+                           "END)"
+                           "WHERE old.folder_id IS NOT NULL AND id_folder = old.folder_id;"
+                   " END";
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +

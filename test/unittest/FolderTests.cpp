@@ -979,6 +979,35 @@ static void CheckDbModel( FolderTests* T )
     ASSERT_TRUE( res );
 }
 
+static void NbMediaAfterExternalInternalConversion( FolderTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    enforceFakeMediaTypes( T->ml.get() );
+
+    auto subFolder = T->ml->folder( 2 );
+    ASSERT_EQ( "file:///a/folder/", subFolder->mrl() );
+    auto media = subFolder->media( IMedia::Type::Video, nullptr )->all();
+    ASSERT_EQ( 1u, media.size() );
+    ASSERT_EQ( 1u, subFolder->nbVideo() );
+
+    auto m = std::static_pointer_cast<Media>( media[0] );
+    auto res = m->convertToExternal();
+    ASSERT_TRUE( res );
+
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 0u, subFolder->nbVideo() );
+
+    m->markAsInternal();
+    m->setFolderId( subFolder->id() );
+    m->save();
+
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 1u, subFolder->nbVideo() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( FolderTests );
@@ -1023,6 +1052,7 @@ int main( int ac, char** av )
     ADD_TEST( IsBanned );
     ADD_TEST( BannedEntryPoints );
     ADD_TEST( CheckDbModel );
+    ADD_TEST( NbMediaAfterExternalInternalConversion );
 
     END_TESTS
 }

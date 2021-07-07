@@ -408,6 +408,7 @@ folder_tests = [
   'IsBanned',
   'BannedEntryPoints',
   'CheckDbModel',
+  'NbMediaAfterExternalInternalConversion',
 ]
 
 foreach t : folder_tests
