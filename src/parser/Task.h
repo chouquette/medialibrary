@@ -213,7 +213,7 @@ public:
      * the required boilerplate of fetching parent folders, fs files, ...
      */
     static std::shared_ptr<Task> createMediaRefreshTask( MediaLibraryPtr ml,
-                                                         std::shared_ptr<Media> media );
+                                                         const Media& media );
     /**
      * @brief createLinkTask Create a link task with a known entity
      * @param ml A media library instance

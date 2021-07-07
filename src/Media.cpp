@@ -1159,7 +1159,7 @@ bool Media::setType( IMedia::Type type )
         return false;
     if ( m_type == IMedia::Type::Unknown )
     {
-        auto task = parser::Task::createMediaRefreshTask( m_ml, shared_from_this() );
+        auto task = parser::Task::createMediaRefreshTask( m_ml, *this );
         if ( task != nullptr )
         {
             auto parser = m_ml->getParser();
