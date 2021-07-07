@@ -323,7 +323,9 @@ std::string Folder::triggerName( Triggers trigger, uint32_t dbModel )
             return "update_folder_nb_media_on_insert";
         case Triggers::UpdateNbMediaOnUpdate:
             assert( dbModel >= 14 );
-            return "update_folder_nb_media_on_update";
+            if ( dbModel <= 30 )
+                return "update_folder_nb_media_on_update";
+            return "folder_update_nb_media_on_media_update";
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
             return "update_folder_nb_media_on_delete";
