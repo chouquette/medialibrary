@@ -652,7 +652,7 @@ bool Task::resetRetryCount( MediaLibraryPtr ml )
             "WHERE step & ?1 != ?1 AND type = ?";
     auto res = sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
                                              Type::Creation ) &&
-               sqlite::Tools::executeUpdate( ml->getConn(), req, Step::Completed,
+               sqlite::Tools::executeUpdate( ml->getConn(), linkReq, Step::Completed,
                                              Type::Link );
     if ( res == false )
         return false;
