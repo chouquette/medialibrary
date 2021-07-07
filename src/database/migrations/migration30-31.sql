@@ -154,3 +154,23 @@ MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 31 ),
 MediaGroup::index( MediaGroup::Indexes::Duration, 31 ),
 MediaGroup::index( MediaGroup::Indexes::CreationDate, 31 ),
 MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 31 ),
+
+#if defined(__ANDROID__)
+
+/*
+ * Recover play_count from the seen meta to work around a bug in previous vlc-android
+ * release. See #354
+ */
+"UPDATE " + Media::Table::Name + " AS m"
+" SET play_count = meta.number"
+" FROM (SELECT id_media, CAST(value AS decimal) AS number FROM " + Metadata::Table::Name +
+    " WHERE entity_type = " + std::to_string(
+        static_cast<std::underlying_type_t<IMetadata::EntityType>>(
+            IMetadata::EntityType::Media ) ) +
+        " AND type = " +
+            std::to_string( static_cast<std::underlying_type_t<IMedia::MetadataType>>(
+                IMedia::MetadataType::Seen ) ) +
+    ") AS meta"
+" WHERE m.id_media = meta.id_media",
+
+#endif
