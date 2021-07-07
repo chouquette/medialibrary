@@ -338,9 +338,8 @@ bool Media::setProgress( float progress )
         m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
     m_progress = curatedProgress;
-    auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
-                       HistoryType::Media : HistoryType::Network;
-    m_ml->getCb()->onHistoryChanged( historyType );
+    m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Media :
+                                                  HistoryType::Network );
     return true;
 }
 
