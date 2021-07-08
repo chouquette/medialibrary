@@ -207,6 +207,11 @@ std::shared_ptr<Media> File::media() const
     return media;
 }
 
+int64_t File::mediaId() const
+{
+    return m_mediaId;
+}
+
 bool File::setMediaId( int64_t mediaId )
 {
     if ( mediaId == m_mediaId )

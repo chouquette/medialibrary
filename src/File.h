@@ -69,6 +69,7 @@ public:
     virtual bool isMain() const override;
 
     std::shared_ptr<Media> media() const;
+    int64_t mediaId() const;
     /**
      * @brief setMediaId Associates this file with a different media
      *
