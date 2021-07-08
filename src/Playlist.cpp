@@ -165,10 +165,15 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
         int64_t playlistId;
         row >> rowId >> mrl >> playlistId;
         assert( row.hasRemainingColumns() == false );
-        auto media = ml->media( mrl );
-        if ( media == nullptr )
+        auto file = File::fromExternalMrl( ml, mrl );
+        if ( file == nullptr )
+            file = File::fromMrl( ml, mrl );
+        int64_t mediaId;
+        if ( file != nullptr )
+            mediaId = file->mediaId();
+        else
         {
-            media = Media::createExternal( ml, mrl, -1 );
+            auto media = Media::createExternal( ml, mrl, -1 );
             if ( media == nullptr )
             {
                 const std::string deleteReq = "DELETE FROM " + Playlist::MediaRelationTable::Name +
@@ -180,10 +185,11 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
                 }
                 continue;
             }
+            mediaId = media->id();
         }
         LOG_INFO( "Updating playlist item mediaId (playlist: ", playlistId,
                   "; mrl: ", mrl, ')' );
-        if ( sqlite::Tools::executeUpdate( dbConn, updateReq, media->id(),
+        if ( sqlite::Tools::executeUpdate( dbConn, updateReq, mediaId,
                                            rowId ) == false )
         {
             LOG_WARN( "Failed to currate NULL media_id from playlist" );
