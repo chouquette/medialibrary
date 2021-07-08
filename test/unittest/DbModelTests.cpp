@@ -36,6 +36,7 @@
 #include "ShowEpisode.h"
 #include "MediaGroup.h"
 #include "File.h"
+#include "utils/File.h"
 
 #include <fstream>
 
@@ -191,6 +192,7 @@ struct DbModel : public Tests
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
                                           const std::string& mlDir ) override
     {
+        utils::fs::remove( dbPath );
         ml.reset( new MediaLibraryTesterNoForceRescan( dbPath, mlDir ) );
     }
 
