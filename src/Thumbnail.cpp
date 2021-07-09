@@ -391,8 +391,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          * thumbnailer. In that case, we just need to ensure that the status
          * is set accordingly, since the thumbnail was overriden on disk
          */
-        if ( oldThumbnail->status() != ThumbnailStatus::Available )/*||
-             oldThumbnail->mrl() == newThumbnail->mrl() )*/
+        if ( oldThumbnail->status() != ThumbnailStatus::Available )
         {
             oldThumbnail->update( std::move( newThumbnail ) );
             res = std::move( oldThumbnail );
