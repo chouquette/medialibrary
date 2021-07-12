@@ -214,7 +214,7 @@ struct DbModel : public Tests
             auto dbConn = sqlite::Connection::connect( getDbPath() );
             ml->deleteAllTables( dbConn.get() );
             // The backup file already contains a transaction
-            char buff[2048];
+            char buff[4096];
             {
                 sqlite::Connection::WeakDbContext ctx{ dbConn.get() };
                 while( file.getline( buff, sizeof( buff ) ) )
