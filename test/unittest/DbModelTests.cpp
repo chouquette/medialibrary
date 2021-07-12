@@ -697,6 +697,10 @@ static void Upgrade30to31( DbModel* T )
     ASSERT_EQ( -1, m->lastTime() );
 }
 
+static void Upgrade31to32( DbModel* T )
+{
+    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v31.sql" );
+}
 
 int main( int ac, char** av )
 {
@@ -726,6 +730,7 @@ int main( int ac, char** av )
     ADD_TEST( Upgrade27to28 );
     ADD_TEST( Upgrade29to30 );
     ADD_TEST( Upgrade30to31 );
+    ADD_TEST( Upgrade31to32 );
 
     END_TESTS
 }
