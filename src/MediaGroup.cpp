@@ -1429,6 +1429,9 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
             check( ml->getConn(), Triggers::RenameForcedSingleton ) &&
             check( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
             check( ml->getConn(), Triggers::UpdateDurationOnMediaDeletion ) &&
+            check( ml->getConn(), Triggers::UpdateNbMediaPerType ) &&
+            check( ml->getConn(), Triggers::UpdateMediaCountOnPresenceChange ) &&
+            check( ml->getConn(), Triggers::UpdateNbMediaOnImportTypeChange ) &&
             checkIndex( ml->getConn(), Indexes::ForcedSingleton ) &&
             checkIndex( ml->getConn(), Indexes::Duration ) &&
             checkIndex( ml->getConn(), Indexes::CreationDate ) &&
