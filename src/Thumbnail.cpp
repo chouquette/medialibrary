@@ -165,7 +165,7 @@ bool Thumbnail::update( std::string mrl, bool isOwned )
         storedMrl = mrl;
     // Also include the current generated state to the request, in case this update
     // request came while the thumbnailer was also generating a thumbnail
-    static const std::string req = "UPDATE " + Thumbnail::Table::Name +
+    static const std::string req = "UPDATE " + Table::Name +
             " SET mrl = ?, status = ?, nb_attempts = 0, is_owned = ? "
             "WHERE id_thumbnail = ? AND is_owned = ?";
     if( sqlite::Tools::executeUpdate( m_ml->getConn(), req, storedMrl,
@@ -795,7 +795,7 @@ std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type
 int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );
-    static const std::string req = "INSERT INTO " + Thumbnail::Table::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(mrl, status, is_owned, file_size, hash) VALUES(?, ?, ?, ?, ?)";
     auto pKey = sqlite::Tools::executeInsert( m_ml->getConn(), req,
                             m_isOwned == true ? toRelativeMrl( m_mrl ) : m_mrl,
