@@ -636,6 +636,26 @@ static void Cleanup( Tests* T )
     ASSERT_TRUE( cleanupReqs.empty() );
 }
 
+static void RemoveCleanupRequests( Tests* T )
+{
+    auto mrl = T->ml->thumbnailPath() + "dummy.jpg";
+    mrl = utils::file::toMrl( mrl );
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), mrl,
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail, true );
+    auto thumbnailId = t->insert();
+    ASSERT_NE( 0, thumbnailId );
+
+    auto res = Thumbnail::destroy( T->ml.get(), t->id() );
+    ASSERT_TRUE( res );
+
+    res = Thumbnail::removeAllCleanupRequests( T->ml.get() );
+    ASSERT_TRUE( res );
+
+    auto cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+    ASSERT_TRUE( cleanupReqs.empty() );
+}
+
 int main( int ac, char **av )
 {
     INIT_TESTS( Thumbnail );
@@ -659,6 +679,7 @@ int main( int ac, char **av )
     ADD_TEST( ReplaceFailedThumbnail );
     ADD_TEST( GenerateThumbnailTwice );
     ADD_TEST( Cleanup );
+    ADD_TEST( RemoveCleanupRequests );
 
     END_TESTS;
 }

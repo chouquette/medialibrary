@@ -831,6 +831,12 @@ bool Thumbnail::removeCleanupRequest( MediaLibraryPtr ml, int64_t requestId )
     return sqlite::Tools::executeDelete( ml->getConn(), req, requestId );
 }
 
+bool Thumbnail::removeAllCleanupRequests( MediaLibraryPtr ml )
+{
+    const std::string req = "DELETE FROM " + CleanupTable::Name;
+    return sqlite::Tools::executeDelete( ml->getConn(), req );
+}
+
 int64_t Thumbnail::insert()
 {
     assert( m_id == 0 );

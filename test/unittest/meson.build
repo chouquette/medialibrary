@@ -808,6 +808,7 @@ thumbnail_tests = [
   'ReplaceFailedThumbnail',
   'GenerateThumbnailTwice',
   'Cleanup',
+  'RemoveCleanupRequests',
 ]
 
 foreach t : thumbnail_tests

@@ -253,6 +253,17 @@ public:
     static bool removeCleanupRequest( MediaLibraryPtr ml, int64_t requestId );
 
     /**
+     * @brief removeAllCleanupRequests Removes all thumbnail cleanup requests from the DB
+     * @param ml A media library instance
+     * @return true in case of success, false otherwise
+     *
+     * This is expected to be called before a rescan, as all thumbnails owned by
+     * the media library will explicitely deleted from the disk before being
+     * regenerated
+     */
+    static bool removeAllCleanupRequests( MediaLibraryPtr ml );
+
+    /**
      * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt
      *
      * This will delete all failure records

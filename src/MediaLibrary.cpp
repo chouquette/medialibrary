@@ -2808,7 +2808,8 @@ bool MediaLibrary::forceRescanLocked()
              Artist::createDefaultArtists( getConn() ) == false ||
              Show::createUnknownShow( getConn() ) == false ||
              Media::resetSubTypes( this ) == false ||
-             Thumbnail::deleteAll( this ) == false )
+             Thumbnail::deleteAll( this ) == false ||
+             Thumbnail::removeAllCleanupRequests( this ) == false )
         {
                 return false;
         }
