@@ -585,6 +585,57 @@ static void GenerateThumbnailTwice( Tests* T )
     ASSERT_EQ( t->id(), firstThumbnailId );
 }
 
+static void Cleanup( Tests* T )
+{
+    /*
+     * Insert an owned thumbnail and delete it from the DB, this should insert
+     * a corresponding record in the cleanup table
+     */
+    auto mrl = T->ml->thumbnailPath() + "dummy.jpg";
+    mrl = utils::file::toMrl( mrl );
+    auto t = std::make_shared<Thumbnail>( T->ml.get(), mrl,
+                                          Thumbnail::Origin::Media,
+                                          ThumbnailSizeType::Thumbnail, true );
+    auto thumbnailId = t->insert();
+    ASSERT_NE( 0, thumbnailId );
+
+    auto cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+
+    // The request shouldn't return any row for now.
+    ASSERT_TRUE( cleanupReqs.empty() );
+
+    auto res = Thumbnail::destroy( T->ml.get(), t->id() );
+    ASSERT_TRUE( res );
+
+    cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+    ASSERT_EQ( 1u, cleanupReqs.size() );
+    std::pair<int64_t, std::string> cleanupReq = *cleanupReqs.begin();
+
+    // We only store a relative MRL
+    ASSERT_EQ( utils::file::toMrl( T->ml->thumbnailPath() + cleanupReq.second ),
+               mrl );
+    res = Thumbnail::removeCleanupRequest( T->ml.get(), cleanupReq.first );
+    ASSERT_TRUE( res );
+
+    cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+    ASSERT_TRUE( cleanupReqs.empty() );
+
+    /* Insert a non-owned thumbnail and ensure we don't schedule it for cleanup */
+    t = std::make_shared<Thumbnail>( T->ml.get(), mrl,
+                                              Thumbnail::Origin::Media,
+                                              ThumbnailSizeType::Thumbnail, false );
+    thumbnailId = t->insert();
+    ASSERT_NE( thumbnailId, 0 );
+
+    cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+    ASSERT_TRUE( cleanupReqs.empty() );
+
+    Thumbnail::destroy( T->ml.get(), t->id() );
+
+    cleanupReqs = Thumbnail::fetchCleanups( T->ml.get() );
+    ASSERT_TRUE( cleanupReqs.empty() );
+}
+
 int main( int ac, char **av )
 {
     INIT_TESTS( Thumbnail );
@@ -607,6 +658,7 @@ int main( int ac, char **av )
     ADD_TEST( UpdateAfterSuccessAndFailure );
     ADD_TEST( ReplaceFailedThumbnail );
     ADD_TEST( GenerateThumbnailTwice );
+    ADD_TEST( Cleanup );
 
     END_TESTS;
 }

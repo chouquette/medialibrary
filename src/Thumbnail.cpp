@@ -41,6 +41,7 @@ const std::string Thumbnail::Table::Name = "Thumbnail";
 const std::string Thumbnail::Table::PrimaryKeyColumn = "id_thumbnail";
 int64_t Thumbnail::*const Thumbnail::Table::PrimaryKey = &Thumbnail::m_id;
 const std::string Thumbnail::LinkingTable::Name = "ThumbnailLinking";
+const std::string Thumbnail::CleanupTable::Name = "ThumbnailCleanup";
 
 const std::string Thumbnail::EmptyMrl;
 
@@ -475,7 +476,8 @@ void Thumbnail::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
         schema( Table::Name, Settings::DbModelVersion ),
-        schema( LinkingTable::Name, Settings::DbModelVersion )
+        schema( LinkingTable::Name, Settings::DbModelVersion ),
+        schema( CleanupTable::Name, Settings::DbModelVersion )
     };
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConnection, req );
@@ -497,6 +499,8 @@ void Thumbnail::createTriggers( sqlite::Connection* dbConnection )
                 trigger( Triggers::UpdateRefcount, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                 trigger( Triggers::DeleteUnused, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                trigger( Triggers::InsertCleanup, Settings::DbModelVersion ) );
 }
 
 void Thumbnail::createIndexes( sqlite::Connection* dbConnection )
@@ -527,6 +531,15 @@ std::string Thumbnail::schema( const std::string& tableName, uint32_t dbModel )
             "FOREIGN KEY(thumbnail_id) REFERENCES " +
                 Table::Name + "(id_thumbnail) ON DELETE CASCADE"
         ")";
+    }
+    if ( tableName == CleanupTable::Name )
+    {
+        assert( dbModel >= 32 );
+        return "CREATE TABLE " + CleanupTable::Name +
+               "("
+                   "id_request INTEGER PRIMARY KEY AUTOINCREMENT,"
+                   "mrl TEXT"
+               ")";
     }
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
@@ -670,6 +683,17 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                        " AND (SELECT COUNT(*) FROM " + LinkingTable::Name +
                            " WHERE thumbnail_id = old.thumbnail_id) = 0;"
                    "END";
+        case Triggers::InsertCleanup:
+            assert( dbModel >= 32 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER DELETE ON " + Table::Name +
+                   " WHEN old.is_owned != 0 AND old.status = " +
+                        std::to_string(
+                            static_cast<std::underlying_type_t<ThumbnailStatus>>(
+                                ThumbnailStatus::Available ) ) +
+                   " BEGIN"
+                       " INSERT INTO " + CleanupTable::Name + "(mrl) VALUES(old.mrl);"
+                   " END";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -701,6 +725,9 @@ std::string Thumbnail::triggerName( Thumbnail::Triggers trigger, uint32_t dbMode
                 return "auto_delete_thumbnails_after_update";
             return "delete_unused_thumbnail";
         }
+        case Triggers::InsertCleanup:
+            assert( dbModel >= 32 );
+            return "thumbnail_insert_cleanup";
         case Triggers::DeleteAfterLinkingDelete:
             assert( dbModel <= 17 );
             return "auto_delete_thumbnails_after_delete";
@@ -736,6 +763,9 @@ bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
          sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( LinkingTable::Name, Settings::DbModelVersion ),
                                        LinkingTable::Name ) == false ||
+         sqlite::Tools::checkTableSchema( ml->getConn(),
+                                       schema( CleanupTable::Name, Settings::DbModelVersion ),
+                                       CleanupTable::Name ) == false ||
          sqlite::Tools::checkIndexStatement( ml->getConn(),
                  index( Indexes::ThumbnailId, Settings::DbModelVersion ),
                  indexName( Indexes::ThumbnailId, Settings::DbModelVersion ) ) == false )
@@ -754,7 +784,8 @@ bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::IncrementRefcount ) &&
             checkTrigger( ml->getConn(), Triggers::DecrementRefcount ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateRefcount ) &&
-            checkTrigger( ml->getConn(), Triggers::DeleteUnused );
+            checkTrigger( ml->getConn(), Triggers::DeleteUnused ) &&
+            checkTrigger( ml->getConn(), Triggers::InsertCleanup );
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type,
@@ -768,6 +799,36 @@ std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type
                 "ON t.id_thumbnail = ent.thumbnail_id "
             "WHERE ent.entity_id = ? AND ent.entity_type = ? AND ent.size_type = ?";
     return DatabaseHelpers<Thumbnail>::fetch( ml, req, entityId, type, sizeType );
+}
+
+std::unordered_map<int64_t, std::string>
+Thumbnail::fetchCleanups( MediaLibraryPtr ml )
+{
+    const std::string req = "SELECT * FROM " + CleanupTable::Name +
+            " ORDER BY id_request";
+
+    sqlite::Connection::ReadContext ctx;
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        ctx = ml->getConn()->acquireReadContext();
+    sqlite::Statement stmt{ ml->getConn()->handle(), req };
+    stmt.execute();
+    sqlite::Row row;
+    std::unordered_map<int64_t, std::string> res;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        int64_t reqId;
+        std::string mrl;
+        row >> reqId >> mrl;
+        res.emplace( reqId, mrl );
+    }
+    return res;
+}
+
+bool Thumbnail::removeCleanupRequest( MediaLibraryPtr ml, int64_t requestId )
+{
+    const std::string req = "DELETE FROM " + CleanupTable::Name +
+            " WHERE id_request = ?";
+    return sqlite::Tools::executeDelete( ml->getConn(), req, requestId );
 }
 
 int64_t Thumbnail::insert()

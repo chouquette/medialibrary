@@ -45,6 +45,11 @@ public:
     {
         static const std::string Name;
     };
+    struct CleanupTable
+    {
+        static const std::string Name;
+    };
+
     enum class Triggers : uint8_t
     {
         AutoDeleteAlbum,
@@ -54,6 +59,7 @@ public:
         DecrementRefcount,
         UpdateRefcount,
         DeleteUnused,
+        InsertCleanup, // Introduced in v32
 
         // Deprecated since v18
         DeleteAfterLinkingDelete,
@@ -229,6 +235,22 @@ public:
                                              EntityType type,
                                              int64_t entityId,
                                              ThumbnailSizeType sizeType );
+    /**
+     * @brief fetchCleanups Fetch the currently scheduled cleanup requests
+     * @param ml A media library instance
+     * @return An unordered map with the request ID as key and the mrl to cleanup as value
+     *
+     * The request ID is to be passed to removeCleanupRequest() once it has been
+     * processed
+     */
+    static std::unordered_map<int64_t, std::string> fetchCleanups( MediaLibraryPtr ml );
+    /**
+     * @brief removeCleanupRequest Removes a cleanup request from the database
+     * @param ml A media library instance
+     * @param requestId
+     * @return
+     */
+    static bool removeCleanupRequest( MediaLibraryPtr ml, int64_t requestId );
 
     /**
      * @brief deleteFailureRecords Allow the thumbnail to retry any previously failed attempt
