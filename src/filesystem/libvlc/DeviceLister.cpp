@@ -86,6 +86,7 @@ void DeviceLister::stop()
             sd.discoverer.stop();
         }
     }
+    m_cb = nullptr;
 }
 
 void DeviceLister::addSD( const std::string& name )
