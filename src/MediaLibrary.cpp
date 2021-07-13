@@ -2956,28 +2956,43 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         VLCInstance::set( inst );
         return true;
     }
+    auto restartParser = false;
     if ( m_parser != nullptr )
     {
         m_parser->stop();
         m_parser.reset();
-        startParser();
+        restartParser = true;
     }
-    if ( m_discovererWorker == nullptr )
-        return true;
-    m_discovererWorker->stop();
-    m_discovererWorker.reset();
+    auto restartDiscoverer = false;
+    if ( m_discovererWorker != nullptr )
+    {
+        m_discovererWorker->stop();
+        m_discovererWorker.reset();
+        restartDiscoverer = true;
+    }
     /*
      * This assumes that all network device lister are using libvlc and therefor
      * they will need to be recreated
      */
     for ( auto& fsFactory : m_fsFactories )
     {
-        if ( fsFactory->isNetworkFileSystem() == false )
+        if ( fsFactory->isNetworkFileSystem() == false ||
+             fsFactory->isStarted() == false )
             continue;
         fsFactory->stop();
-        fsFactory->start( &m_fsFactoryCb );
     }
-    startDiscovererLocked();
+    /*
+     * All background services using libvlc are now stopped and won't use the old
+     * instance concurrently, we can update it
+     */
+    VLCInstance::set( inst );
+
+    if ( restartDiscoverer == true )
+        startDiscovererLocked();
+
+    if ( restartParser == true )
+        startParser();
+
     return true;
 #endif
 }
