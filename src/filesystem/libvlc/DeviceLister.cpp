@@ -79,7 +79,10 @@ bool DeviceLister::start( IDeviceListerCb *cb )
 void DeviceLister::stop()
 {
     for ( auto& sd : m_sds )
-        sd.discoverer.stop();
+    {
+        if ( sd.discoverer.isRunning() == true )
+            sd.discoverer.stop();
+    }
 }
 
 void DeviceLister::addSD( const std::string& name )
