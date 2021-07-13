@@ -81,7 +81,10 @@ void DeviceLister::stop()
     for ( auto& sd : m_sds )
     {
         if ( sd.discoverer.isRunning() == true )
+        {
+            LOG_DEBUG( "Stopping Service Discovery ", sd.name );
             sd.discoverer.stop();
+        }
     }
 }
 
