@@ -101,14 +101,36 @@ parts split( const std::string& url )
 
     const auto authorityBegin = url.cbegin() + schemePos + 3;
     auto authorityEnd = std::find( authorityBegin, url.cend(), '/' );
-    const auto queryBegin = std::find( authorityBegin, url.cend(), '?' );
+    auto queryBegin = std::find( authorityBegin, url.cend(), '?' );
     const auto fragmentBegin = std::find( authorityBegin, url.cend(), '#' );
 
+    /*
+     * The fragment must come after the query parameters. Since we use both
+     * values at a later point, sanitize them now.
+     */
+    if ( fragmentBegin != url.cend() && queryBegin != url.cend() &&
+         fragmentBegin < queryBegin )
+    {
+        queryBegin = url.cend();
+    }
+
+    /* RFC 3986 §3.2:
+     * The authority component is preceded by a double slash ("//") and is
+     * terminated by the next slash ("/"), question mark ("?"), or number
+     * sign ("#") character, or by the end of the URI.
+     */
     if ( authorityEnd == url.cend() )
     {
         if ( queryBegin != url.cend() )
             authorityEnd = queryBegin;
         else
+            authorityEnd = fragmentBegin;
+    }
+    else
+    {
+        if ( queryBegin != url.cend() && queryBegin < authorityEnd )
+            authorityEnd = queryBegin;
+        if ( fragmentBegin != url.cend() && fragmentBegin < authorityEnd )
             authorityEnd = fragmentBegin;
     }
 

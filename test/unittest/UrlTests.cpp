@@ -110,6 +110,9 @@ static void Split( Tests* )
     test( "scheme://@host:#foo", "scheme", "", "host", "", "", "", "foo" );
     test( "smb://útf8_hò§t/#fôõ", "smb", "", "útf8_hò§t", "", "/", "", "fôõ" );
     test( "scheme://foo:bar@baz?query", "scheme", "foo:bar", "baz", "", "", "query", "" );
+    test( "scheme://foo?bar/", "scheme", "", "foo", "", "", "bar/", "" );
+    test( "scheme://foo#bar/", "scheme", "", "foo", "", "", "", "bar/" );
+    test( "scheme://foo#bar?/", "scheme", "", "foo", "", "", "", "bar?/" );
 }
 
 static void toLocalPath( Tests* )
