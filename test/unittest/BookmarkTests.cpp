@@ -305,6 +305,32 @@ static void Fetch( BookmarkTests* T )
     ASSERT_EQ( nullptr, b2 );
 }
 
+static void FetchByTime( BookmarkTests* T )
+{
+    auto b = T->m->addBookmark( 123 );
+    ASSERT_NON_NULL( b );
+
+    auto m2 = T->ml->addMedia( "other.mkv", IMedia::Type::Video );
+    ASSERT_NON_NULL( m2 );
+    auto b2 = m2->addBookmark( 321 );
+    ASSERT_NON_NULL( b2 );
+
+    auto fetched = T->m->bookmark( 123 );
+    ASSERT_NON_NULL( fetched );
+
+    ASSERT_EQ( b->id(), fetched->id() );
+
+    fetched = T->m->bookmark( 321 );
+    ASSERT_EQ( nullptr, fetched );
+
+    fetched = m2->bookmark( 123 );
+    ASSERT_EQ( nullptr, fetched );
+
+    fetched = m2->bookmark( 321 );
+    ASSERT_NON_NULL( fetched );
+    ASSERT_EQ( b2->id(), fetched->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( BookmarkTests );
@@ -322,6 +348,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( OrderByCreationDate );
     ADD_TEST( Fetch );
+    ADD_TEST( FetchByTime );
 
     END_TESTS
 }

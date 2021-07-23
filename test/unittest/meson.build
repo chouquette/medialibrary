@@ -290,6 +290,7 @@ bookmark_tests = [
   'CheckDbModel',
   'OrderByCreationDate',
   'Fetch',
+  'FetchByTime',
 ]
 
 foreach t : bookmark_tests
