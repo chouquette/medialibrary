@@ -47,14 +47,16 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_isPresent( row.extract<decltype(m_isPresent)>() )
     , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
-    , m_lastSeen( row.extract<decltype(m_lastSeen)>() )
 {
+#ifndef NDEBUG
+    auto lastSeen = row.extract<int64_t>();
     assert( row.hasRemainingColumns() == false );
+    assert( lastSeen != 0 || m_isRemovable == false );
+#endif
 }
 
 Device::Device( MediaLibraryPtr ml, const std::string& uuid,
-                const std::string& scheme, bool isRemovable, bool isNetwork,
-                time_t lastSeen )
+                const std::string& scheme, bool isRemovable, bool isNetwork )
     : m_ml( ml )
     , m_id( 0 )
     , m_uuid( uuid )
@@ -63,7 +65,6 @@ Device::Device( MediaLibraryPtr ml, const std::string& uuid,
     // Assume we can't add an absent device
     , m_isPresent( true )
     , m_isNetwork( isNetwork )
-    , m_lastSeen( lastSeen )
 {
 }
 
@@ -152,8 +153,7 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
     auto lastSeen = isRemovable ? std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count() : 0;
-    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, isNetwork,
-                                          lastSeen );
+    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, isNetwork );
     if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(),
                  self->isNetwork(), lastSeen ) == false )
         return nullptr;

@@ -114,7 +114,7 @@ CREATE INDEX movie_media_idx ON Movie(media_id);
 CREATE INDEX task_parent_folder_id_idx ON Task(parent_folder_id);
 INSERT INTO Settings VALUES(24);
 INSERT INTO Device VALUES(1,'49665d40-73ae-4134-b2f6-b421411b9508','file://',0,1,0);
-INSERT INTO Device VALUES(2,'DOOP','smb://',1,1,0);
+INSERT INTO Device VALUES(2,'DOOP','smb://',1,1,1);
 INSERT INTO MediaGroup VALUES(1, NULL, 'test group', 0, 3, 0);
 INSERT INTO Folder VALUES(1,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/compilation_different_years/','compilation_different_years',NULL,0,1,0,3,0);
 INSERT INTO Media VALUES(1,2,3,10057,NULL,NULL,NULL,1579855228,2010,'Track 2','track_2.mp3',0,1,1,0,1,0,1,1,0);
