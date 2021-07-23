@@ -271,6 +271,7 @@ static void SearchArtists( GenreTests* T )
 
     auto a = T->ml->createArtist( "loutre 1" );
     auto a2 = T->ml->createArtist( "loutre 2" );
+    auto a3 = T->ml->createArtist( "loutre 3" );
     auto album = T->ml->createAlbum( "album" );
     auto album2 = T->ml->createAlbum( "album2" );
 
@@ -279,7 +280,14 @@ static void SearchArtists( GenreTests* T )
         auto m = std::static_pointer_cast<Media>(
                     T->ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto track = album->addTrack( m, i, 1, a->id(), T->g.get() );
+        ASSERT_NON_NULL( track );
         a->addMedia( *m );
+
+        m = std::static_pointer_cast<Media>(
+                    T->ml->addMedia( "dup_" + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
+        track = album->addTrack( m, i, 1, a3->id(), T->g.get() );
+        ASSERT_NON_NULL( track );
+        a3->addMedia( *m );
     }
     for ( auto i = 1u; i <= 5; ++i )
     {
@@ -289,11 +297,21 @@ static void SearchArtists( GenreTests* T )
         a2->addMedia( *m );
     }
     artists = T->ml->searchArtists( "loutre", ArtistIncluded::All, nullptr )->all();
-    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( 3u, artists.size() );
 
     artists = T->g->searchArtists( "loutre" )->all();
-    ASSERT_EQ( 1u, artists.size() );
+    ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( a->id(), artists[0]->id() );
+    ASSERT_EQ( a3->id(), artists[1]->id() );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::Alpha;
+    params.desc = true;
+    artists = T->g->searchArtists( "loutre", &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( a3->id(), artists[0]->id() );
+    ASSERT_EQ( a->id(), artists[1]->id() );
+
 }
 
 static void SearchTracks( GenreTests* T )
