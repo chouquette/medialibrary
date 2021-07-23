@@ -894,4 +894,6 @@ int main( int ac, char** av )
     ADD_TEST( NbDiscs );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByDuration );
+
+    END_TESTS
 }
