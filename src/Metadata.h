@@ -79,8 +79,6 @@ public:
     bool unset( uint32_t type );
     const std::vector<Record>& all() const;
 
-    static bool unset( sqlite::Connection* dbConn, IMetadata::EntityType entityType, uint32_t type );
-
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
