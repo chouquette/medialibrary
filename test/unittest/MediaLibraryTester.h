@@ -40,7 +40,6 @@ public:
     MediaLibraryTester( const std::string& dbPath,
                         const std::string& mlFolderPath );
     virtual void startParser() override { return; }
-    virtual void startDiscoverer() override {}
     virtual void startDeletionNotifier() override {}
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
     std::vector<MediaPtr> files();
@@ -78,7 +77,6 @@ public:
     bool setMediaInsertionDate( int64_t mediaId, time_t t );
     bool outdateAllExternalMedia();
     bool setMediaType( int64_t mediaId, IMedia::Type type );
-    bool setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId );
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
     virtual bool setupDummyFolder();

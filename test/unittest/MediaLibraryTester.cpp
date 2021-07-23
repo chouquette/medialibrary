@@ -220,13 +220,6 @@ bool MediaLibraryTester::setMediaType(int64_t mediaId, IMedia::Type type)
     return sqlite::Tools::executeUpdate( getConn(), req, type, mediaId );
 }
 
-bool MediaLibraryTester::setAlbumTrackGenre( int64_t albumTrackId, int64_t genreId )
-{
-    static const std::string req = "UPDATE " + AlbumTrack::Table::Name
-            + " SET genre_id = ? WHERE id_track = ?";
-    return sqlite::Tools::executeUpdate( getConn(), req, genreId, albumTrackId );
-}
-
 uint32_t MediaLibraryTester::countNbThumbnails()
 {
     sqlite::Statement stmt{
