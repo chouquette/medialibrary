@@ -752,6 +752,13 @@ static void GetMetadata( Tests* T )
     m = T->ml->media( m->id() );
     const auto& md = m->metadata( Media::MetadataType::Speed );
     ASSERT_EQ( "foo", md.asStr() );
+
+    res = m->setMetadata( Media::MetadataType::Speed, "12.34" );
+    ASSERT_TRUE( res );
+
+    const auto& mdDouble = m->metadata( Media::MetadataType::Speed );
+    ASSERT_EQ( 12.34, mdDouble.asDouble() );
+
 }
 
 static void MetadataOverride( Tests* T )
