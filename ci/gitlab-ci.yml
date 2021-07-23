@@ -23,6 +23,7 @@ linux:
       - >
         gcovr -r "$CI_PROJECT_DIR/"
         -e "$CI_PROJECT_DIR/libvlcpp"
+        -e "$CI_PROJECT_DIR/test"
         -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
         -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
         -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
