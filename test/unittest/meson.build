@@ -111,6 +111,7 @@ device_tests = [
   'DeleteRemovable',
   'Mountpoints',
   'FetchCachedMountpoint',
+  'UpdateLastSeen',
 ]
 
 foreach t : device_tests

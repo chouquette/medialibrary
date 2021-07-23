@@ -213,6 +213,16 @@ static void FetchCachedMountpoint( DeviceTests* T )
     ASSERT_EQ( "smb://1.2.3.4/", mountpoint );
 }
 
+static void UpdateLastSeen( DeviceTests* T )
+{
+    /*
+     * Simply call the method and check that it successfully runs.
+     * LastSeen isn't exposed outside of the database
+     */
+    auto d = Device::create( T->ml.get(), "{fake-uuid}", "smb://", true, true );
+    d->updateLastSeen();
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceTests );
@@ -225,6 +235,7 @@ int main( int ac, char** av )
     ADD_TEST( DeleteRemovable );
     ADD_TEST( Mountpoints );
     ADD_TEST( FetchCachedMountpoint );
+    ADD_TEST( UpdateLastSeen );
 
     END_TESTS
 }
