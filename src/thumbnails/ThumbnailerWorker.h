@@ -49,13 +49,14 @@ public:
     void requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
                            uint32_t desiredWidth, uint32_t desiredHeight,
                            float position );
+    void requestCleanupRun();
     void pause();
     void resume();
 
 private:
     struct Task
     {
-        int64_t mediaId;
+        int64_t mediaId; /* if 0, then this is a request to run the cleanup */
         MediaPtr media; /* may be null */
         ThumbnailSizeType sizeType;
         uint32_t desiredWidth;
@@ -73,6 +74,7 @@ private:
                                    uint32_t desiredWidth,
                                    uint32_t desiredHeight,
                                    float position );
+    void runCleanupRequests();
 
 private:
     MediaLibraryPtr m_ml;

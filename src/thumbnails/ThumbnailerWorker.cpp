@@ -32,6 +32,7 @@
 #include "MediaLibrary.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
+#include "utils/File.h"
 #include "medialibrary/IThumbnailer.h"
 
 #include <algorithm>
@@ -84,11 +85,48 @@ void ThumbnailerWorker::requestThumbnailInternal( int64_t mediaId, MediaPtr medi
         m_cond.notify_all();
 }
 
+void ThumbnailerWorker::runCleanupRequests()
+{
+    auto requests = Thumbnail::fetchCleanups( m_ml );
+    for ( const auto& r : requests )
+    {
+        auto path = m_ml->thumbnailPath() + r.second;
+        LOG_DEBUG( "Running cleanup request #", r.first, ": removing ", path );
+        if ( !utils::fs::remove( path ) )
+        {
+            try
+            {
+                utils::fs::fileSize( path );
+                /*
+                 * If we can compute the file size, the file still exists so we
+                 * should try to delete it again later
+                 */
+                continue;
+            }
+            catch ( const medialibrary::fs::errors::Exception& )
+            {
+                /*
+                 * Let's assume the file doesn't exist anymore so we can still
+                 * remove the cleanup request.
+                 */
+            }
+        }
+        if ( Thumbnail::removeCleanupRequest( m_ml, r.first ) == false )
+            LOG_WARN( "Failed to remove thumbnail cleanup request #", r.first );
+    }
+}
+
 void ThumbnailerWorker::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
                                           uint32_t desiredWidth, uint32_t desiredHeight,
                                           float position )
 {
     requestThumbnailInternal( mediaId, nullptr, sizeType, desiredWidth, desiredHeight, position );
+}
+
+void ThumbnailerWorker::requestCleanupRun()
+{
+    requestThumbnailInternal( 0, nullptr, ThumbnailSizeType::Thumbnail,
+                              0, 0, 0.f );
 }
 
 void ThumbnailerWorker::requestThumbnail( MediaPtr media, ThumbnailSizeType sizeType,
@@ -139,6 +177,8 @@ void ThumbnailerWorker::run()
                 m_queuedMedia.erase( t.mediaId );
                 assert( m_tasks.size() == m_queuedMedia.size() );
             }
+            if ( t.mediaId == 0 )
+                runCleanupRequests();
             if ( t.media == nullptr )
             {
                 t.media = m_ml->media( t.mediaId );
