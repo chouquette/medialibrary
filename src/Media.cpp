@@ -889,8 +889,8 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     assert( newThumbnail != nullptr );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
-    currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail,
+    currentThumbnail = Thumbnail::updateOrReplace( m_ml, std::move( currentThumbnail ),
+                                                   std::move( newThumbnail ),
                                                    Media::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Media );
     auto res = currentThumbnail != nullptr;
