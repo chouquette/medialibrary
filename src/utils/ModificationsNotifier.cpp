@@ -29,7 +29,9 @@
 #include "ModificationsNotifier.h"
 #include "MediaLibrary.h"
 #include "utils/File.h"
-#include "Thumbnail.h"
+#include "database/SqliteErrors.h"
+#include "Common.h"
+#include "thumbnails/ThumbnailerWorker.h"
 
 namespace medialibrary
 {
@@ -168,9 +170,16 @@ void ModificationNotifier::notifyBookmarkRemoval( int64_t bookmarkId )
     notifyRemoval( bookmarkId, m_bookmarks );
 }
 
-void ModificationNotifier::notifyThumbnailRemoval( int64_t thumbnailId )
+void ModificationNotifier::notifyThumbnailCleanupInserted( int64_t requestId )
 {
-    notifyRemoval( thumbnailId, m_thumbnails );
+    /*
+     * We are actually notifying an insertion, but the Queue specialization for
+     * void (ie without attached instance) only contains a removal queue.
+     * This doesn't really matter since all we care about is batching the requests
+     * in case multiple thumbnails need to be cleaned up at once, and avoid
+     * spamming the thumbnailer from a sqlite hook
+     */
+    notifyRemoval( requestId, m_thumbnailsCleanupRequests );
 }
 
 void ModificationNotifier::flush()
@@ -202,7 +211,7 @@ void ModificationNotifier::run()
     Queue<IGenre> genres;
     Queue<IMediaGroup> mediaGroups;
     Queue<IBookmark> bookmarks;
-    Queue<void> thumbnails;
+    Queue<void> thumbnailsCleanup;
     Queue<void> convertedMedia;
 
     while ( m_stop == false )
@@ -236,7 +245,7 @@ void ModificationNotifier::run()
                 checkQueue( m_playlists, playlists, nextTimeout, now );
                 checkQueue( m_genres, genres, nextTimeout, now );
                 checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now );
-                checkQueue( m_thumbnails, thumbnails, nextTimeout, now );
+                checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now );
                 checkQueue( m_bookmarks, bookmarks, nextTimeout, now );
                 checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now );
                 m_timeout = nextTimeout;
@@ -256,13 +265,15 @@ void ModificationNotifier::run()
             notify( std::move( bookmarks ), &IMediaLibraryCb::onBookmarksAdded,
                     &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
             notify( std::move( convertedMedia ), &IMediaLibraryCb::onMediaConvertedToExternal );
-            for ( auto thumbnailId : thumbnails.removed )
+
+            if ( thumbnailsCleanup.removed.empty() == false )
             {
-                auto path = Thumbnail::path( m_ml, thumbnailId );
-                utils::fs::remove( path );
+                auto t = m_ml->thumbnailer();
+                if ( t != nullptr )
+                    t->requestCleanupRun();
+                thumbnailsCleanup.removed.clear();
+                thumbnailsCleanup.timeout = ZeroTimeout;
             }
-            thumbnails.removed.clear();
-            thumbnails.timeout = ZeroTimeout;
         }
         ML_UNHANDLED_EXCEPTION_BODY( "ModificationNotifier" )
     }
