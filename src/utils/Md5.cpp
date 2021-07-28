@@ -44,6 +44,7 @@
 #include <memory>
 
 #include "Md5.h"
+#include "Common.h"
 
 #define rol(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
 
@@ -335,6 +336,8 @@ void Md5Hasher::final()
 
 std::string Md5Hasher::toString( const uint8_t* buff, size_t size )
 {
+    UNUSED_IN_RELEASE( size );
+
     assert( size == HashDigestSize );
 
     static const char hexchars[] = { "0123456789ABCDEF" };

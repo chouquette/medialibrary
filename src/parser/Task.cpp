@@ -449,6 +449,8 @@ void Task::createIndex( sqlite::Connection* dbConnection )
 
 std::string Task::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     if ( dbModel <= 17 )
     {
@@ -608,6 +610,9 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
 
 std::string Task::triggerName( Triggers trigger, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( trigger );
+    UNUSED_IN_RELEASE( dbModel );
+
     assert( trigger == Triggers::DeletePlaylistLinkingTask );
     assert( dbModel >= 18 );
     return "delete_playlist_linking_tasks";
@@ -623,6 +628,9 @@ std::string Task::index(Task::Indexes index, uint32_t dbModel)
 
 std::string Task::indexName( Task::Indexes index, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( index );
+    UNUSED_IN_RELEASE( dbModel );
+
     assert( index == Indexes::ParentFolderId );
     assert( dbModel >= 24 );
     return "task_parent_folder_id_idx";

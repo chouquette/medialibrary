@@ -104,6 +104,8 @@ void SubtitleTrack::createIndexes( sqlite::Connection* dbConnection )
 
 std::string SubtitleTrack::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     if ( dbModel < 27 )
     {
@@ -145,6 +147,8 @@ std::string SubtitleTrack::index( Indexes index, uint32_t dbModel )
 
 std::string SubtitleTrack::indexName( Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::MediaId );
     return "subtitle_track_media_idx";
 }

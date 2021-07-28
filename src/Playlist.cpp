@@ -662,6 +662,8 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
 
 std::string Playlist::triggerName(Playlist::Triggers trigger, uint32_t dbModel)
 {
+    UNUSED_IN_RELEASE( dbModel );
+
     switch ( trigger )
     {
         case Triggers::UpdateOrderOnInsert:

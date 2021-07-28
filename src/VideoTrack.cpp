@@ -169,6 +169,8 @@ void VideoTrack::createIndexes( sqlite::Connection* dbConnection )
 
 std::string VideoTrack::schema( const std::string& tableName, uint32_t )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     return "CREATE TABLE " + Table::Name +
     "(" +
@@ -198,6 +200,8 @@ std::string VideoTrack::index( Indexes index, uint32_t dbModel )
 
 std::string VideoTrack::indexName( Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::MediaId );
     return "video_track_media_idx";
 }

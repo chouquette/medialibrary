@@ -708,6 +708,8 @@ std::string Album::index( Indexes index, uint32_t dbModel )
 
 std::string Album::indexName( Album::Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::ArtistId );
     return "album_artist_id_idx";
 }

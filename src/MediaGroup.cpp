@@ -1303,6 +1303,8 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
 
 std::string MediaGroup::triggerName(MediaGroup::Triggers t, uint32_t dbModel)
 {
+    UNUSED_IN_RELEASE( dbModel );
+
     assert( dbModel >= 24 );
     switch ( t )
     {
@@ -1379,6 +1381,8 @@ std::string MediaGroup::index( Indexes i, uint32_t dbModel )
 
 std::string MediaGroup::indexName( Indexes i, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( dbModel );
+
     switch ( i )
     {
         case Indexes::ParentId:

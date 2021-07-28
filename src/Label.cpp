@@ -118,6 +118,8 @@ std::string Label::trigger( Triggers trigger, uint32_t dbModel )
 
 std::string Label::triggerName( Triggers trigger, uint32_t )
 {
+    UNUSED_IN_RELEASE( trigger );
+
     assert( trigger == Triggers::DeleteFts );
     return "delete_label_fts";
 }

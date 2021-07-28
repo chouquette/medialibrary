@@ -120,6 +120,8 @@ void AudioTrack::createIndexes(sqlite::Connection* dbConnection)
 
 std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
 
     if ( dbModel < 27 )
@@ -166,6 +168,8 @@ std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t dbModel )
 
 std::string AudioTrack::indexName( Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::MediaId );
     return "audio_track_media_idx";
 }

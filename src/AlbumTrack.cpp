@@ -101,6 +101,8 @@ void AlbumTrack::createIndexes( sqlite::Connection* dbConnection )
 
 std::string AlbumTrack::schema( const std::string& tableName, uint32_t )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     return "CREATE TABLE " + AlbumTrack::Table::Name +
     "("

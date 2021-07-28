@@ -45,6 +45,8 @@ void Chapter::createTable( sqlite::Connection* dbConn )
 
 std::string Chapter::schema( const std::string& tableName, uint32_t )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     return "CREATE TABLE " + Table::Name +
     "("

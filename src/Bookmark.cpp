@@ -147,6 +147,8 @@ void Bookmark::createTable(sqlite::Connection* dbConn)
 
 std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( dbModel >= 17 );
     assert( tableName == Table::Name );
     std::string req = "CREATE TABLE " + Table::Name +

@@ -296,6 +296,8 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
 
 std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( dbModel );
+
     switch ( trigger )
     {
         case Triggers::InsertFts:

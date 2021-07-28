@@ -136,6 +136,8 @@ void ShowEpisode::createIndexes( sqlite::Connection* dbConnection )
 
 std::string ShowEpisode::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     if ( dbModel <= 23 )
     {
@@ -180,6 +182,8 @@ std::string ShowEpisode::index( Indexes index, uint32_t dbModel )
 
 std::string ShowEpisode::indexName( Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::MediaIdShowId );
     return "show_episode_media_show_idx";
 }

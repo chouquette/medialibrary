@@ -278,6 +278,8 @@ void File::createIndexes( sqlite::Connection* dbConnection )
 
 std::string File::schema( const std::string& tableName, uint32_t )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     return "CREATE TABLE " + Table::Name +
     "("

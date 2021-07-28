@@ -101,6 +101,8 @@ void Movie::createIndexes(sqlite::Connection* dbConnection)
 
 std::string Movie::schema( const std::string& tableName, uint32_t )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     return "CREATE TABLE " + Table::Name +
     "("
@@ -122,6 +124,8 @@ std::string Movie::index( Indexes index, uint32_t dbModel )
 
 std::string Movie::indexName( Indexes index, uint32_t )
 {
+    UNUSED_IN_RELEASE( index );
+
     assert( index == Indexes::MediaId );
     return "movie_media_idx";
 }

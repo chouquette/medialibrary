@@ -212,6 +212,8 @@ void Metadata::createTable(sqlite::Connection* connection)
 
 std::string Metadata::schema( const std::string& tableName, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( tableName );
+
     assert( tableName == Table::Name );
     if ( dbModel < 14 )
     {

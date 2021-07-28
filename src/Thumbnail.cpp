@@ -743,6 +743,9 @@ std::string Thumbnail::index( Indexes index, uint32_t dbModel )
 
 std::string Thumbnail::indexName( Indexes index, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( index );
+    UNUSED_IN_RELEASE( dbModel );
+
     assert( index == Indexes::ThumbnailId );
     assert( dbModel >= 17 );
     return "thumbnail_link_index";
