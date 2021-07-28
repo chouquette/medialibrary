@@ -49,7 +49,7 @@ linux-novlc:
       - docker
       - amd64
     script:
-      - meson -Dlibvlc=disabled build
+      - meson -Dlibvlc=disabled --buildtype=release build
       - cd build && ninja
 
 win32:
