@@ -50,3 +50,9 @@
 # define ML_UNHANDLED_EXCEPTION_INIT
 # define ML_UNHANDLED_EXCEPTION_BODY(ctx)
 #endif
+
+#ifdef NDEBUG
+#define UNUSED_IN_RELEASE(x) (void)(x)
+#else
+#define UNUSED_IN_RELEASE(x)
+#endif
