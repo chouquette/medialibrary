@@ -344,6 +344,18 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
     std::shared_ptr<Thumbnail> res;
     std::unique_ptr<sqlite::Transaction> t;
     assert( newThumbnail != nullptr );
+
+    /*
+     * We might end up in situations where we assign the existing thumbnail to a
+     * media, for instance when rescanning we will fetch the existing media
+     * thumbnail, and will assign it down the line.
+     * It's easier to check here if the source thumbnail is equal to the target
+     * thumbnail rather than filtering in various callsites
+     */
+    if ( oldThumbnail != nullptr && newThumbnail->id() != 0 &&
+         oldThumbnail->id() == newThumbnail->id() )
+        return newThumbnail;
+
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = ml->getConn()->newTransaction();
     /**
