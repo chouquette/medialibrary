@@ -511,6 +511,80 @@ static void UpdateAfterSuccessAndFailure( Tests* T )
     ASSERT_EQ( mrl, t->mrl() );
 }
 
+static void ReplaceFailedThumbnail( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+
+    /* The media was just created, it shouldn't have any thumbnail */
+    auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_EQ( nullptr, t );
+
+    /* Now assign a crash record, as the thumbnail would do */
+    auto res = m->setThumbnail( std::make_shared<Thumbnail>( T->ml.get(), ThumbnailStatus::Crash,
+                    Thumbnail::Origin::Media, ThumbnailSizeType::Thumbnail ) );
+    ASSERT_TRUE( res );
+
+    t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( t );
+    ASSERT_EQ( t->status(), ThumbnailStatus::Crash );
+    /* The thumbnail should be inserted in database and have an ID */
+    ASSERT_NE( t->id(), 0 );
+    auto oldId = t->id();
+
+    /*
+     * Now let's replace the crash record by a regular thumbnail, as if the
+     * thumbnailer ran successfully
+     */
+    auto thumbMrl = utils::file::toMrl( T->ml->thumbnailPath() + "thumb.jpg" );
+    res = m->setThumbnail( std::make_shared<Thumbnail>( T->ml.get(), thumbMrl,
+            Thumbnail::Origin::Media, ThumbnailSizeType::Thumbnail, true ) );
+    ASSERT_TRUE( res );
+
+    /*
+     * The new thumbnail should have the same ID as it should have been
+     * modified in place
+     */
+    auto newThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( newThumbnail );
+    ASSERT_EQ( newThumbnail->id(), oldId );
+    ASSERT_EQ( newThumbnail->status(), ThumbnailStatus::Available );
+
+    /* Ensure we just didn't check the cached version and not the DB */
+    m = T->ml->media( m->id() );
+    newThumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( newThumbnail );
+    ASSERT_EQ( newThumbnail->id(), oldId );
+    ASSERT_EQ( newThumbnail->status(), ThumbnailStatus::Available );
+}
+
+static void GenerateThumbnailTwice( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
+    /* Generate the first thumbnail */
+    auto thumbMrl = utils::file::toMrl( T->ml->thumbnailPath() + "thumb.jpg" );
+    auto res = m->setThumbnail( std::make_shared<Thumbnail>( T->ml.get(), thumbMrl,
+            Thumbnail::Origin::Media, ThumbnailSizeType::Thumbnail, true ) );
+    ASSERT_TRUE( res );
+
+    auto t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( t );
+    ASSERT_EQ( t->mrl(), thumbMrl );
+    ASSERT_NE( t->id(), 0 );
+    auto firstThumbnailId = t->id(); // Save a copy in case we update in place
+
+    /* Generate a new one for the same media */
+    res = m->setThumbnail( std::make_shared<Thumbnail>( T->ml.get(), thumbMrl,
+            Thumbnail::Origin::Media, ThumbnailSizeType::Thumbnail, true ) );
+    ASSERT_TRUE( res );
+    t = m->thumbnail( ThumbnailSizeType::Thumbnail );
+    ASSERT_NON_NULL( t );
+    ASSERT_EQ( t->mrl(), thumbMrl );
+    ASSERT_NE( t->id(), 0 );
+
+    /* The thumbnail should have the same ID and same MRL as the first one */
+    ASSERT_EQ( t->id(), firstThumbnailId );
+}
+
 int main( int ac, char **av )
 {
     INIT_TESTS( Thumbnail );
@@ -531,6 +605,8 @@ int main( int ac, char **av )
     ADD_TEST( NbAttempts );
     ADD_TEST( OverridePersistentFailure );
     ADD_TEST( UpdateAfterSuccessAndFailure );
+    ADD_TEST( ReplaceFailedThumbnail );
+    ADD_TEST( GenerateThumbnailTwice );
 
     END_TESTS;
 }

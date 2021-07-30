@@ -804,6 +804,8 @@ thumbnail_tests = [
   'NbAttempts',
   'OverridePersistentFailure',
   'UpdateAfterSuccessAndFailure',
+  'ReplaceFailedThumbnail',
+  'GenerateThumbnailTwice',
 ]
 
 foreach t : thumbnail_tests

@@ -411,72 +411,38 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
         else if ( shouldUpdateCb( *oldThumbnail ) == true )
         {
             /*
-             * We need to replace the old thumbnail with the new one, for all
-             * entities that were using the old thumbnail.
-             * However, the old thumbnail might be a thumbnail that we own,
-             * and we need to ensure the file is gone from disk if its not used
-             * anymore.
-             * To summarize, if we update a thumbnail we need to:
-             * - Remove the file on disk when it was owned
-             * - Update the MRL for this thumbnail, so all entities start using
-             *   the new one
+             * We need to replace the old thumbnail with the new one.
+             * If we're trying to use a non-inserted thumbnail we can update the
+             * old thumbnail mrl in place directly. We potentially need to update
+             * the linking record to reflect the potential change of origin as well.
+             * If the thumbnail is already inserted, we need to update the linking
+             * records to point to the new thumbnail. If the old thumbnail becomes
+             * unused, it will be removed from the database and its file deleted.
              */
-
-            if ( newThumbnail->id() != 0 || newThumbnail->isOwned() == true )
+            if ( newThumbnail->id() == 0 )
             {
-                /*
-                 * If we need to update to another owned thumbnail, we simply
-                 * update all linking records to point to the new thumbnail and
-                 * let the old one be removed once its shared_counter reaches 0
-                 */
-                if ( newThumbnail->id() == 0 )
-                {
-                    if ( newThumbnail->insert() == 0 )
-                        return nullptr;
-                }
-                /*
-                 * If the new thumbnail is already inserted, we need
-                 * to update all linking records to point to this new thumbnail
-                 * This won't break the Origin relation, since we just update
-                 * the thumbnail_id. We will still be able to know why we are
-                 * sharing this thumbnail
-                 */
-                if ( oldThumbnail->updateAllLinkRecords( newThumbnail->id() ) == false )
-                {
+                auto newOrigin = newThumbnail->origin();
+                if ( oldThumbnail->update( std::move( newThumbnail ) ) == false )
                     return nullptr;
-                }
-                res = std::move( newThumbnail );
+                if ( oldThumbnail->origin() != newOrigin )
+                    oldThumbnail->updateLinkRecord( entityId, entityType, newOrigin );
+                res = std::move( oldThumbnail );
             }
             else
             {
                 /*
-                 * We are about to use a non-owned thumbnail. Since we are
-                 * keeping the same thumbnail entity, we need to cleanup the
-                 * previously generated thumbnail before updating the MRL
-                 * If we were switching to another thumbnail, this wouldn't be
-                 * required since owned thumbnail are cleaned up after they are
-                 * removed from DB
+                 * If both thumbnails share the same MRL and are inserted in
+                 * database, this will become troublesome as we will end up
+                 * deleting the file from disk once one of those 2 thumbnail gets
+                 * removed from the database.
+                 * See #356
                  */
-                if ( oldThumbnail->isOwned() )
-                {
-                    auto path = Thumbnail::path( ml, oldThumbnail->id() );
-                    utils::fs::remove( path );
-                }
-                /*
-                 * If the thumbnail was not inserted, we just have to update the
-                 * mrl in database
-                 */
-                oldThumbnail->update( newThumbnail );
-                /*
-                 * We update this linking record since we're updating a specific
-                 * entity's thumbnail.
-                 * All other entity sharing the same thumbnail will keep the same
-                 * origin, which should reflect how the thumbnail was linked with
-                 * the entity
-                 */
-                oldThumbnail->updateLinkRecord( entityId, entityType,
-                                                newThumbnail->origin() );
-                res = std::move( oldThumbnail );
+                assert( newThumbnail->m_embeddedThumbnail != nullptr ||
+                        oldThumbnail->m_embeddedThumbnail != nullptr ||
+                        newThumbnail->mrl() != oldThumbnail->mrl() );
+                if ( newThumbnail->updateLinkRecord( entityId, entityType, newThumbnail->origin() ) == false )
+                    return nullptr;
+                res = std::move( newThumbnail );
             }
         }
         else
