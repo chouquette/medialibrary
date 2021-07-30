@@ -15,6 +15,8 @@ Playlist::schema( Playlist::MediaRelationTable::Name, 30 ),
 "INSERT INTO " + Playlist::MediaRelationTable::Name +
     " SELECT * FROM " + Playlist::MediaRelationTable::Name + "_backup",
 
+"DROP TABLE " + Playlist::MediaRelationTable::Name + "_backup",
+
 Media::trigger( Media::Triggers::IncrementNbPlaylist, 30 ),
 Media::trigger( Media::Triggers::DecrementNbPlaylist, 30 ),
 Playlist::trigger( Playlist::Triggers::UpdateOrderOnInsert, 30 ),
