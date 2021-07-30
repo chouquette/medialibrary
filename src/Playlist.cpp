@@ -223,26 +223,6 @@ bool Playlist::addInternal(int64_t mediaId, uint32_t position, bool updateCount)
 
 bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCount )
 {
-    auto files = media.files();
-    assert( files.size() > 0 );
-    auto mainFile = std::find_if( begin( files ), end( files ), []( const FilePtr& f) {
-        return f->isMain();
-    });
-    if ( mainFile == end( files ) )
-    {
-        LOG_ERROR( "Can't add a media without any files to a playlist" );
-        return false;
-    }
-    std::string mrl;
-    try
-    {
-        mrl = (*mainFile)->mrl();
-    }
-    catch ( const fs::errors::DeviceRemoved& )
-    {
-        return false;
-    }
-
     std::unique_ptr<sqlite::Transaction> t;
     if ( sqlite::Transaction::transactionInProgress() == false )
         t = m_ml->getConn()->newTransaction();
@@ -251,20 +231,20 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
     if ( position == UINT32_MAX )
     {
         static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
-                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
+                "(media_id, playlist_id, position) VALUES(?1, ?2, "
                 "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-                " WHERE playlist_id = ?3))";
+                " WHERE playlist_id = ?2))";
         res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                             std::move( mrl ), m_id );
+                                            m_id );
     }
     else
     {
         static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
-                "(media_id, mrl, playlist_id, position) VALUES(?1, ?2, ?3,"
-                "min(?4, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-                " WHERE playlist_id = ?3)))";
+                "(media_id, playlist_id, position) VALUES(?1, ?2,"
+                "min(?3, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                " WHERE playlist_id = ?2)))";
         res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                           std::move( mrl ), m_id, position );
+                                           m_id, position );
     }
     if ( res == false )
         return false;
@@ -515,10 +495,23 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
                 + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
         ")";
     }
+    else if ( dbModel < 32 )
+    {
+        return "CREATE TABLE " + MediaRelationTable::Name +
+        "("
+            "media_id INTEGER,"
+            "mrl STRING,"
+            "playlist_id INTEGER,"
+            "position INTEGER,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
+                + Media::Table::PrimaryKeyColumn + ") ON DELETE NO ACTION,"
+            "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
+                + Playlist::Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
+        ")";
+    }
     return "CREATE TABLE " + MediaRelationTable::Name +
     "("
         "media_id INTEGER,"
-        "mrl STRING,"
         "playlist_id INTEGER,"
         "position INTEGER,"
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
