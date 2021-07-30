@@ -61,7 +61,8 @@ endif
 if host_machine.system() == 'windows'
     threads_dep = []
 else
-    threads_dep = dependency('threads')
+    pthreads = dependency('threads', required: true)
+    threads_dep = declare_dependency(link_args: '-lpthread', dependencies: pthreads)
 endif
 
 sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
