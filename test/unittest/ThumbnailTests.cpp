@@ -347,36 +347,6 @@ static void AutoDelete( Tests* T )
     ASSERT_EQ( ThumbnailStatus::Missing, m->thumbnailStatus( ThumbnailSizeType::Thumbnail ) );
 }
 
-static void AutoDeleteAfterUpdate( Tests* T )
-{
-    /**
-     * Checks that the thumbnail is correctly considered unused and gets deleted
-     * when we update an existing linking record (so we're not deleting it)
-     */
-    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
-    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
-
-    auto res = m->setThumbnail( "https://thumbnail.org/otter.gif",
-                                ThumbnailSizeType::Thumbnail );
-    ASSERT_TRUE( res );
-    res = m2->setThumbnail( "https://thumbnail.org/cutter_otter.gif",
-                            ThumbnailSizeType::Thumbnail );
-    ASSERT_TRUE( res );
-
-    ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
-
-    auto thumbnail = m->thumbnail( ThumbnailSizeType::Thumbnail );
-    ASSERT_NE( nullptr, thumbnail );
-
-    m2->setThumbnail( thumbnail );
-
-    auto thumbnail2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
-
-    ASSERT_EQ( thumbnail->id(), thumbnail2->id() );
-
-    ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
-}
-
 static void AutoDeleteAfterEntityRemoved( Tests* T )
 {
     /*
@@ -411,15 +381,18 @@ static void ShareThumbnail( Tests* T )
      */
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "test.mkv", IMedia::Type::Video ) );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "test2.mkv", IMedia::Type::Video ) );
-    m1->setThumbnail( "https://fluffy.org/otters.png", ThumbnailSizeType::Thumbnail );
-    m2->setThumbnail( "https://cute.org/otters.png", ThumbnailSizeType::Thumbnail );
+    auto res = m1->setThumbnail( "https://fluffy.org/otters.png", ThumbnailSizeType::Thumbnail );
+    ASSERT_TRUE( res );
+    res = m2->setThumbnail( "https://cute.org/otters.png", ThumbnailSizeType::Thumbnail );
+    ASSERT_TRUE( res );
 
     ASSERT_EQ( 2u, T->ml->countNbThumbnails() );
     auto t1 = m1->thumbnail( ThumbnailSizeType::Thumbnail );
     auto t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_NE( t1->id(), t2->id() );
 
-    m2->setThumbnail( t1 );
+    res = m2->setThumbnail( t1 );
+    ASSERT_TRUE( res );
 
     ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
     t2 = m2->thumbnail( ThumbnailSizeType::Thumbnail );
@@ -551,7 +524,6 @@ int main( int ac, char **av )
     ADD_TEST( UpdateIsOwned );
     ADD_TEST( CheckMultipleSizes );
     ADD_TEST( AutoDelete );
-    ADD_TEST( AutoDeleteAfterUpdate );
     ADD_TEST( AutoDeleteAfterEntityRemoved );
     ADD_TEST( ShareThumbnail );
     ADD_TEST( AutoDeleteAfterUnlink );

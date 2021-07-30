@@ -797,7 +797,6 @@ thumbnail_tests = [
   'UpdateIsOwned',
   'CheckMultipleSizes',
   'AutoDelete',
-  'AutoDeleteAfterUpdate',
   'AutoDeleteAfterEntityRemoved',
   'ShareThumbnail',
   'AutoDeleteAfterUnlink',
