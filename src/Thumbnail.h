@@ -314,4 +314,7 @@ private:
     friend Thumbnail::Table;
 };
 
+std::ostream& operator<<( std::ostream& s, Thumbnail::EntityType t );
+std::ostream& operator<<( std::ostream& s, Thumbnail::Origin o );
+
 }

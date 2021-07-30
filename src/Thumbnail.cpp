@@ -850,5 +850,48 @@ std::string Thumbnail::toRelativeMrl( const std::string& absoluteMrl )
     return utils::file::removePath( absoluteMrl, thumbnailDirMrl );
 }
 
+std::ostream& operator<<( std::ostream& s, Thumbnail::EntityType t )
+{
+    switch ( t )
+    {
+    case Thumbnail::EntityType::Media:
+        s << "Media";
+        break;
+    case Thumbnail::EntityType::Album:
+        s << "Album";
+        break;
+    case Thumbnail::EntityType::Artist:
+        s << "Artist";
+        break;
+    case Thumbnail::EntityType::Genre:
+        s << "Genre";
+        break;
+    }
+    return s;
+}
+
+std::ostream& operator<<( std::ostream& s, Thumbnail::Origin o )
+{
+    switch ( o )
+    {
+    case Thumbnail::Origin::Artist:
+        s << "Artist";
+        break;
+    case Thumbnail::Origin::AlbumArtist:
+        s << "AlbumArtist";
+        break;
+    case Thumbnail::Origin::Media:
+        s << "Media";
+        break;
+    case Thumbnail::Origin::UserProvided:
+        s << "UserProvided";
+        break;
+    case Thumbnail::Origin::CoverFile:
+        s << "CoverFile";
+        break;
+    }
+    return s;
+}
+
 
 }
