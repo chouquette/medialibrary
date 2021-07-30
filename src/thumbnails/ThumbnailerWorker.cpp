@@ -263,7 +263,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
      * status, so we still invoke setThumbnail and let it decide what needs
      * to be updated in db
      */
-    return m->setThumbnail( std::make_shared<Thumbnail>( m_ml, destMrl,
+    return m->setThumbnail( std::make_shared<Thumbnail>( m_ml, std::move( destMrl ),
                         Thumbnail::Origin::Media, task.sizeType, true ) );
 }
 
