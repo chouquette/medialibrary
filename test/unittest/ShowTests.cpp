@@ -255,9 +255,6 @@ static void Search( Tests* T )
     show2->setReleaseDate( 100 );
     media2->save();
 
-    auto query = T->ml->searchShows( "", nullptr );
-    ASSERT_EQ( nullptr, query );
-
     auto shows = T->ml->searchShows( "otters" )->all();
     ASSERT_EQ( 1u, shows.size() );
     ASSERT_EQ( show1->id(), shows[0]->id() );

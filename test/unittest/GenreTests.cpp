@@ -155,9 +155,6 @@ static void Search( GenreTests* T )
     T->ml->createGenre( "something" );
     T->ml->createGenre( "blork" );
 
-    auto query = T->ml->searchGenre( "", nullptr );
-    ASSERT_EQ( nullptr, query );
-
     auto genres = T->ml->searchGenre( "genr", nullptr )->all();
     ASSERT_EQ( 1u, genres.size() );
 }

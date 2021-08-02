@@ -271,9 +271,6 @@ static void Search( Tests* T )
         m->save();
     }
 
-    auto query = T->ml->searchMedia( "", nullptr );
-    ASSERT_EQ( nullptr, query );
-
     auto media = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, media.size() );
 

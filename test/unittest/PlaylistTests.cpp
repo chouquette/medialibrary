@@ -331,8 +331,6 @@ static void Search( PlaylistTests* T )
 
     QueryParameters params{};
     params.includeMissing = true;
-    auto query = T->ml->searchPlaylists( "", &params );
-    ASSERT_EQ( nullptr, query );
 
     auto playlists = T->ml->searchPlaylists( "play", &params )->all();
     ASSERT_EQ( 2u, playlists.size() );

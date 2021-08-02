@@ -505,11 +505,6 @@ void MediaLibrary::registerEntityHooks()
     });
 }
 
-bool MediaLibrary::validateSearchPattern( const std::string& pattern )
-{
-    return pattern.size() >= 3;
-}
-
 void MediaLibrary::removeThumbnails()
 {
     auto thumbnailsFolderMrl = utils::file::toMrl( m_thumbnailPath );
@@ -731,8 +726,6 @@ Query<IMediaGroup> MediaLibrary::mediaGroups( IMedia::Type mediaType,
 Query<IMediaGroup> MediaLibrary::searchMediaGroups( const std::string& pattern,
                                                     const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return MediaGroup::search( this, pattern, params );
 }
 
@@ -1037,46 +1030,34 @@ bool MediaLibrary::clearHistory()
 Query<IMedia> MediaLibrary::searchMedia( const std::string& title,
                                                 const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( title ) == false )
-        return {};
     return Media::search( this, title, params );
 }
 
 Query<IMedia> MediaLibrary::searchAudio( const std::string& pattern, const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return Media::search( this, pattern, IMedia::Type::Audio, params );
 }
 
 Query<IMedia> MediaLibrary::searchVideo( const std::string& pattern, const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return Media::search( this, pattern, IMedia::Type::Video, params );
 }
 
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
                                                 const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( name ) == false )
-        return {};
     return Playlist::search( this, name, params );
 }
 
 Query<IAlbum> MediaLibrary::searchAlbums( const std::string& pattern,
                                           const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return Album::search( this, pattern, params );
 }
 
 Query<IGenre> MediaLibrary::searchGenre( const std::string& genre,
                                          const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( genre ) == false )
-        return {};
     return Genre::search( this, genre, params );
 }
 
@@ -1084,16 +1065,12 @@ Query<IArtist> MediaLibrary::searchArtists( const std::string& name,
                                             ArtistIncluded included,
                                             const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( name ) == false )
-        return {};
     return Artist::search( this, name, included, params );
 }
 
 Query<IShow> MediaLibrary::searchShows( const std::string& pattern,
                                         const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return Show::search( this, pattern, params );
 }
 
@@ -2659,8 +2636,6 @@ Query<IFolder> MediaLibrary::searchFolders( const std::string& pattern,
                                             IMedia::Type type,
                                             const QueryParameters* params ) const
 {
-    if ( validateSearchPattern( pattern ) == false )
-        return {};
     return Folder::searchWithMedia( this, pattern, type, params );
 }
 

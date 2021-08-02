@@ -338,9 +338,6 @@ static void SearchByTitle( Tests* T )
     a2->addTrack( m2, 1, 0, 0, nullptr );
     m2->save();
 
-    auto query = T->ml->searchAlbums( "", nullptr );
-    ASSERT_EQ( nullptr, query );
-
     auto albums = T->ml->searchAlbums( "otte", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
 }

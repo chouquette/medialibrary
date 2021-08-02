@@ -345,7 +345,6 @@ private:
     void createAllTriggers();
     bool checkDatabaseIntegrity();
     void registerEntityHooks();
-    static bool validateSearchPattern( const std::string& pattern );
     void removeThumbnails();
     void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     void startThumbnailer() const;

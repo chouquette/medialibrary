@@ -278,9 +278,6 @@ static void Search( Tests* T )
     a1->addMedia( *m1 );
     a2->addMedia( *m2 );
 
-    auto query = T->ml->searchArtists( "", ArtistIncluded::All, nullptr );
-    ASSERT_EQ( nullptr, query );
-
     auto artists = T->ml->searchArtists( "artist", ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 2u, artists.size() );
     ASSERT_EQ( artists[0]->id(), a1->id() );

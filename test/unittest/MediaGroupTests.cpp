@@ -105,11 +105,8 @@ static void Search( Tests* T )
     res = mg2->add( *m2 );
     ASSERT_TRUE( res );
 
-    auto q = T->ml->searchMediaGroups( "12", nullptr );
-    ASSERT_EQ( nullptr, q );
-
     QueryParameters params { SortingCriteria::Alpha, false };
-    q = T->ml->searchMediaGroups( "group", &params );
+    auto q = T->ml->searchMediaGroups( "group", &params );
     ASSERT_NE( nullptr, q );
     ASSERT_EQ( 2u, q->count() );
     auto groups = q->all();
