@@ -69,33 +69,32 @@ const std::string Media::FtsTable::Name = "MediaFts";
 Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     // DB field extraction:
-    , m_id( row.load<decltype(m_id)>( 0 ) )
-    , m_type( row.load<decltype(m_type)>( 1 ) )
-    , m_subType( row.load<decltype(m_subType)>( 2 ) )
-    , m_duration( row.load<decltype(m_duration)>( 3 ) )
-    , m_lastPosition( row.load<decltype(m_lastPosition)>( 4 ) )
-    , m_lastTime( row.load<decltype(m_lastTime)>( 5 ) )
-    , m_playCount( row.load<decltype(m_playCount)>( 6 ) )
-    , m_lastPlayedDate( row.load<decltype(m_lastPlayedDate)>( 7 ) )
-    // skip real_last_played_date as we don't need it in memory
-    , m_insertionDate( row.load<decltype(m_insertionDate)>( 9 ) )
-    , m_releaseDate( row.load<decltype(m_releaseDate)>( 10 ) )
-    , m_title( row.load<decltype(m_title)>( 11 ) )
-    , m_filename( row.load<decltype(m_filename)>( 12 ) )
-    , m_isFavorite( row.load<decltype(m_isFavorite)>( 13 ) )
-    , m_isPresent( row.load<decltype(m_isPresent)>( 14 ) )
-    , m_deviceId( row.load<decltype(m_deviceId)>( 15 ) )
-    , m_nbPlaylists( row.load<unsigned int>( 16 ) )
-    , m_folderId( row.load<decltype(m_folderId)>( 17 ) )
-    , m_importType( row.load<decltype(m_importType)>( 18 ) )
-    , m_groupId( row.load<decltype(m_groupId)>( 19 ) )
-    , m_forcedTitle( row.load<decltype(m_forcedTitle)>( 20 ) )
+    , m_id( row.extract<decltype(m_id)>() )
+    , m_type( row.extract<decltype(m_type)>() )
+    , m_subType( row.extract<decltype(m_subType)>() )
+    , m_duration( row.extract<decltype(m_duration)>() )
+    , m_lastPosition( row.extract<decltype(m_lastPosition)>() )
+    , m_lastTime( row.extract<decltype(m_lastTime)>() )
+    , m_playCount( row.extract<decltype(m_playCount)>() )
+    , m_lastPlayedDate( row.extract<decltype(m_lastPlayedDate)>() )
+    , m_insertionDate( row.extract<decltype(m_insertionDate)>() )
+    , m_releaseDate( row.extract<decltype(m_releaseDate)>() )
+    , m_title( row.extract<decltype(m_title)>() )
+    , m_filename( row.extract<decltype(m_filename)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
+    , m_isPresent( row.extract<decltype(m_isPresent)>() )
+    , m_deviceId( row.extract<decltype(m_deviceId)>() )
+    , m_nbPlaylists( row.extract<unsigned int>() )
+    , m_folderId( row.extract<decltype(m_folderId)>() )
+    , m_importType( row.extract<decltype(m_importType)>() )
+    , m_groupId( row.extract<decltype(m_groupId)>() )
+    , m_forcedTitle( row.extract<decltype(m_forcedTitle)>() )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
-    assert( row.nbColumns() == 21 );
+    assert( row.hasRemainingColumns() == false );
 }
 
 Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
@@ -1422,8 +1421,12 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
 
     req +=
         "play_count UNSIGNED INTEGER,"
-        "last_played_date UNSIGNED INTEGER,"
-        "real_last_played_date UNSIGNED INTEGER,"
+        "last_played_date UNSIGNED INTEGER,";
+
+    if ( dbModel < 33 )
+        req += "real_last_played_date UNSIGNED INTEGER,";
+
+    req +=
         "insertion_date UNSIGNED INTEGER,"
         "release_date UNSIGNED INTEGER,";
 
@@ -1629,9 +1632,15 @@ std::string Media::index( Indexes index, uint32_t dbModel )
             assert( dbModel >= 14 );
             // Don't create this index before model 14, as the real_last_played_date
             // column was introduced in model version 14
+            if ( dbModel < 33 )
+            {
+                return "CREATE INDEX " + indexName( index, dbModel ) +
+                            " ON " + Table::Name + "(last_played_date, "
+                                "real_last_played_date, insertion_date)";
+            }
             return "CREATE INDEX " + indexName( index, dbModel ) +
-                        " ON " + Table::Name + "(last_played_date, "
-                            "real_last_played_date, insertion_date)";
+                    " ON " + Table::Name + "(last_played_date, "
+                        "insertion_date)";
         case Indexes::Folder:
             assert( dbModel >= 22 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
