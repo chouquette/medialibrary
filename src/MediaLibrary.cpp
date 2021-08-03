@@ -1397,6 +1397,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 previousVersion = 32;
                 needRescan = true;
             }
+            if ( previousVersion == 32 )
+            {
+                migrateModel32to33();
+                previousVersion = 33;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -2231,6 +2236,16 @@ void MediaLibrary::migrateModel31to32()
 
 
     m_settings.setDbModelVersion( 32 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel32to33()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    m_settings.setDbModelVersion( 33 );
     t->commit();
 }
 

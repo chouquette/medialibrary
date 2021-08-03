@@ -704,6 +704,11 @@ static void Upgrade31to32( DbModel* T )
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v31.sql" );
 }
 
+static void Upgrade32to33( DbModel* T )
+{
+    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v32.sql" );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DbModel )
@@ -733,6 +738,7 @@ int main( int ac, char** av )
     ADD_TEST( Upgrade29to30 );
     ADD_TEST( Upgrade30to31 );
     ADD_TEST( Upgrade31to32 );
+    ADD_TEST( Upgrade32to33 );
 
     END_TESTS
 }
