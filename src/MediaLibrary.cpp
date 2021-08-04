@@ -2387,6 +2387,7 @@ void MediaLibrary::pauseBackgroundOperationsLocked()
         m_discovererWorker->pause();
     if ( m_parser != nullptr )
         m_parser->pause();
+    std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->pause();
 }
@@ -2397,6 +2398,7 @@ void MediaLibrary::resumeBackgroundOperationsLocked()
         m_discovererWorker->resume();
     if ( m_parser != nullptr )
         m_parser->resume();
+    std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->resume();
 }
@@ -2486,7 +2488,7 @@ parser::Parser* MediaLibrary::getParser() const
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const
 {
-    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    std::unique_lock<compat::Mutex> lock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker == nullptr )
         startThumbnailer();
     return m_thumbnailerWorker.get();

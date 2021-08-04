@@ -414,6 +414,7 @@ protected:
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
     std::unique_ptr<DiscovererWorker> m_discovererWorker;
     std::shared_ptr<ModificationNotifier> m_modificationNotifier;
+    mutable compat::Mutex m_thumbnailerWorkerMutex;
     mutable std::unique_ptr<ThumbnailerWorker> m_thumbnailerWorker;
 };
 
