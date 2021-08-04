@@ -2958,6 +2958,8 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         return true;
     }
     auto restartParser = false;
+    auto restartDiscoverer = false;
+    {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     if ( m_parser != nullptr )
     {
@@ -2965,7 +2967,6 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         m_parser.reset();
         restartParser = true;
     }
-    auto restartDiscoverer = false;
     if ( m_discovererWorker != nullptr )
     {
         m_discovererWorker->stop();
@@ -2985,15 +2986,18 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
     }
     /*
      * All background services using libvlc are now stopped and won't use the old
-     * instance concurrently, we can update it
+     * instance concurrently, we can update it before releasing the lock.
+     * If we were to release the lock before, a concurrent user could recreate
+     * a background worker instance using the old libvlc instance.
      */
     VLCInstance::set( inst );
+    }
 
     if ( restartDiscoverer == true )
-        startDiscovererLocked();
+        startDiscoverer();
 
     if ( restartParser == true )
-        startParser();
+        getParser();
 
     return true;
 #endif
