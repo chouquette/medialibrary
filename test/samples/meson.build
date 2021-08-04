@@ -59,7 +59,8 @@ test_suites = [
   'ParseTwice',
   'Resume',
   'Rescan',
-  'Refresh'
+  'Refresh',
+  'ReplaceVlcInstance',
 ]
 
 foreach s : test_suites

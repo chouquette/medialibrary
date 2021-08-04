@@ -108,6 +108,17 @@ static void RunRefreshTests( RefreshTests* T )
     T->runChecks();
 }
 
+static void ReplaceVlcInstance( Tests* T )
+{
+    VLC::Instance inst{ 0, nullptr };
+    T->m_ml->setExternalLibvlcInstance( inst.get() );
+    /* Replacing the instance will stop the discoverer so let's resume it */
+    T->m_ml->reload();
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+
+    T->runChecks();
+}
+
 static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 {
     auto lock = T->m_cb->lock();
@@ -222,6 +233,10 @@ int main(int ac, char** av)
     else if ( testType == "Refresh" )
     {
         RUN_TEST( RefreshTests, RunRefreshTests );
+    }
+    else if ( testType == "ReplaceVlcInstance" )
+    {
+        RUN_TEST( Tests, ReplaceVlcInstance );
     }
     else if ( testType == "BackupRestorePlaylist" )
     {
