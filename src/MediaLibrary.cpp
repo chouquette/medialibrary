@@ -2948,7 +2948,6 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
     return false;
 #else
     LOG_INFO( "Setting external libvlc instance: ", inst );
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
     if ( VLCInstance::isSet() == false )
     {
         /*
@@ -2959,6 +2958,7 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         return true;
     }
     auto restartParser = false;
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
     if ( m_parser != nullptr )
     {
         m_parser->stop();
