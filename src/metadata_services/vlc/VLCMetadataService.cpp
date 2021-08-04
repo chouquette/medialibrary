@@ -47,7 +47,6 @@ namespace parser
 {
 
 VLCMetadataService::VLCMetadataService()
-    : m_instance( VLCInstance::get() )
 {
 }
 
@@ -77,7 +76,7 @@ Status VLCMetadataService::run( IItem& item )
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
-    VLC::Media vlcMedia{ m_instance, mrl, VLC::Media::FromType::FromLocation };
+    VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
 
     VLC::Media::ParsedStatus status;
     bool done = false;
