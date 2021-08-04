@@ -2978,10 +2978,17 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
             fsFactory->stop();
         }
         /*
-         * All background services using libvlc are now stopped and won't use the old
-         * instance concurrently, we can update it before releasing the lock.
-         * If we were to release the lock before, a concurrent user could recreate
-         * a background worker instance using the old libvlc instance.
+         * The VLCMetadataService will fetch the new instance during its next run
+         * The thumbnailer also fetches the instance before using it
+         * However the discoverer
+         * The discoverer and all FS related code is highly likely to use a
+         * cached/queued instance that will hold the old libvlc instance which
+         * we don't want, as the libvlc instance provided by an external user
+         * is our only way of leveraging libvlc's keystore and accessing password
+         * protected folders/shares
+         * Now that it is stopped, we can replace the old libvlc instance while
+         * holding the media library lock to avoid a concurrent call to a
+         * discovery related function to reuse the old instance behind our backs.
          */
         VLCInstance::set( inst );
     }
