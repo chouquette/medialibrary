@@ -2957,16 +2957,9 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         VLCInstance::set( inst );
         return true;
     }
-    auto restartParser = false;
     auto restartDiscoverer = false;
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
-        if ( m_parser != nullptr )
-        {
-            m_parser->stop();
-            m_parser.reset();
-            restartParser = true;
-        }
         if ( m_discovererWorker != nullptr )
         {
             m_discovererWorker->stop();
@@ -2995,9 +2988,6 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
 
     if ( restartDiscoverer == true )
         startDiscoverer();
-
-    if ( restartParser == true )
-        getParser();
 
     return true;
 #endif
