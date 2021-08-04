@@ -61,15 +61,21 @@ DiscovererWorker::~DiscovererWorker()
 
 void DiscovererWorker::stop()
 {
+    /*
+     * We need to execute all non running tasks before returning, otherwise the
+     * queued jobs will be lost.
+     * We don't mind losing a reload request since it's based on what's in the
+     * database, but we mind losing a request that would modify the database
+     * state
+     */
     bool running = true;
     if ( m_run.compare_exchange_strong( running, false ) )
     {
-        {
-            std::unique_lock<compat::Mutex> lock( m_mutex );
-            m_tasks.clear();
-        }
+        /* Interrupt the current long running task if any */
         m_discoverer->interrupt();
+        /* Wake the thread in case it was waiting for more things to do */
         m_cond.notify_all();
+        /* And wait for all short requests to be handled */
         m_thread.join();
     }
 }
@@ -381,7 +387,7 @@ void DiscovererWorker::run()
     LOG_INFO( "Entering DiscovererWorker thread" );
     m_ml->onDiscovererIdleChanged( false );
     runReloadAllDevices();
-    while ( m_run == true )
+    while ( true )
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
@@ -409,8 +415,17 @@ void DiscovererWorker::run()
                 }
                 task = m_tasks.front();
                 m_tasks.pop_front();
+                /*
+                 * If we are stopping, we only want to execute the short tasks
+                 * to update the database to reflect the user's actions.
+                 * The actual reload will be run next time.
+                 */
+                if ( task.isLongRunning() == true &&
+                     m_run.load( std::memory_order_acquire ) == false )
+                    continue;
                 m_currentTask = &task;
             }
+            LOG_DEBUG( "Running task of type ", task.type );
             auto needTaskRefresh = false;
             switch ( task.type )
             {
@@ -447,7 +462,8 @@ void DiscovererWorker::run()
             default:
                 assert(false);
             }
-            if ( needTaskRefresh == true )
+            if ( needTaskRefresh == true &&
+                 m_run.load( std::memory_order_acquire ) == true )
             {
                 auto parser = m_ml->tryGetParser();
                 if ( parser != nullptr )
