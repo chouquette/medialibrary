@@ -2960,37 +2960,37 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
     auto restartParser = false;
     auto restartDiscoverer = false;
     {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    if ( m_parser != nullptr )
-    {
-        m_parser->stop();
-        m_parser.reset();
-        restartParser = true;
-    }
-    if ( m_discovererWorker != nullptr )
-    {
-        m_discovererWorker->stop();
-        m_discovererWorker.reset();
-        restartDiscoverer = true;
-    }
-    /*
-     * This assumes that all network device lister are using libvlc and therefor
-     * they will need to be recreated
-     */
-    for ( auto& fsFactory : m_fsFactories )
-    {
-        if ( fsFactory->isNetworkFileSystem() == false ||
-             fsFactory->isStarted() == false )
-            continue;
-        fsFactory->stop();
-    }
-    /*
-     * All background services using libvlc are now stopped and won't use the old
-     * instance concurrently, we can update it before releasing the lock.
-     * If we were to release the lock before, a concurrent user could recreate
-     * a background worker instance using the old libvlc instance.
-     */
-    VLCInstance::set( inst );
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        if ( m_parser != nullptr )
+        {
+            m_parser->stop();
+            m_parser.reset();
+            restartParser = true;
+        }
+        if ( m_discovererWorker != nullptr )
+        {
+            m_discovererWorker->stop();
+            m_discovererWorker.reset();
+            restartDiscoverer = true;
+        }
+        /*
+         * This assumes that all network device lister are using libvlc and therefor
+         * they will need to be recreated
+         */
+        for ( auto& fsFactory : m_fsFactories )
+        {
+            if ( fsFactory->isNetworkFileSystem() == false ||
+                 fsFactory->isStarted() == false )
+                continue;
+            fsFactory->stop();
+        }
+        /*
+         * All background services using libvlc are now stopped and won't use the old
+         * instance concurrently, we can update it before releasing the lock.
+         * If we were to release the lock before, a concurrent user could recreate
+         * a background worker instance using the old libvlc instance.
+         */
+        VLCInstance::set( inst );
     }
 
     if ( restartDiscoverer == true )
