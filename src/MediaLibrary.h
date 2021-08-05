@@ -386,8 +386,8 @@ protected:
      */
     mutable FsFactoryCb m_fsFactoryCb;
 
-    std::string m_dbPath;
-    std::string m_mlFolderPath;
+    const std::string m_dbPath;
+    const std::string m_mlFolderPath;
 
     std::unique_ptr<LockFile> m_lockFile;
 
