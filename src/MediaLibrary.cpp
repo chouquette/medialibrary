@@ -1163,21 +1163,17 @@ void MediaLibrary::addLocalFsFactory()
 
 void MediaLibrary::addDefaultDeviceListers()
 {
-    if ( m_deviceListers.find( "file://" ) == cend( m_deviceListers ) )
-    {
-        auto devLister = factory::createDeviceLister();
-        if ( devLister != nullptr )
-            m_deviceListers["file://"] = std::move( devLister );
-    }
+    /* Called from the constructor, no locking required */
+    assert( m_deviceListers.empty() == true );
+    auto devLister = factory::createDeviceLister();
+    if ( devLister != nullptr )
+        m_deviceListers["file://"] = std::move( devLister );
 #ifdef HAVE_LIBVLC
-    if ( m_deviceListers.find( "smb://" ) == cend( m_deviceListers ) )
-    {
-        auto lanSds = VLCInstance::get().mediaDiscoverers( VLC::MediaDiscoverer::Category::Lan );
-        auto deviceLister = std::make_shared<fs::libvlc::DeviceLister>( "smb://" );
-        for ( const auto& sd : lanSds )
-            deviceLister->addSD( sd.name() );
-        m_deviceListers["smb://"] = std::move( deviceLister );
-    }
+    auto lanSds = VLCInstance::get().mediaDiscoverers( VLC::MediaDiscoverer::Category::Lan );
+    auto deviceLister = std::make_shared<fs::libvlc::DeviceLister>( "smb://" );
+    for ( const auto& sd : lanSds )
+        deviceLister->addSD( sd.name() );
+    m_deviceListers["smb://"] = std::move( deviceLister );
 #endif
 }
 
