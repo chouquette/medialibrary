@@ -388,11 +388,11 @@ protected:
 
     const std::string m_dbPath;
     const std::string m_mlFolderPath;
+    const std::string m_thumbnailPath;
+    const std::string m_playlistPath;
 
     std::unique_ptr<LockFile> m_lockFile;
 
-    std::string m_thumbnailPath;
-    std::string m_playlistPath;
     IMediaLibraryCb* m_callback;
 
     // External device lister

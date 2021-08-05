@@ -308,7 +308,9 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_parserIdle( true )
     , m_fsFactoryCb( this )
     , m_dbPath( dbPath )
-    , m_mlFolderPath( mlFolderPath )
+    , m_mlFolderPath( utils::file::toFolderPath( mlFolderPath ) )
+    , m_thumbnailPath( m_mlFolderPath + "thumbnails/" )
+    , m_playlistPath( m_mlFolderPath + "playlists/" )
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
 {
@@ -541,14 +543,12 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
     LOG_INFO( "Initializing medialibrary..." );
 
     auto mlFolder = utils::file::toFolderPath( m_mlFolderPath );
-    m_thumbnailPath = mlFolder + "thumbnails/";
     if ( utils::fs::mkdir( m_thumbnailPath ) == false )
     {
         LOG_ERROR( "Failed to create thumbnail directory (", m_thumbnailPath,
                     ": ", strerror( errno ) );
         return InitializeResult::Failed;
     }
-    m_playlistPath = mlFolder + "playlists/";
     if ( utils::fs::mkdir( m_playlistPath ) == false )
     {
         LOG_ERROR( "Failed to create playlist export directory (", m_playlistPath,
