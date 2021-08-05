@@ -374,7 +374,6 @@ protected:
     mutable compat::Mutex m_mutex;
     std::shared_ptr<sqlite::Connection> m_dbConnection;
 
-    LogLevel m_verbosity;
     Settings m_settings;
     bool m_initialized;
     bool m_networkDiscoveryEnabled;

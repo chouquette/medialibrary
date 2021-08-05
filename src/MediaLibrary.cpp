@@ -300,8 +300,7 @@ std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
 MediaLibrary::MediaLibrary( const std::string& dbPath,
                             const std::string& mlFolderPath,
                             std::unique_ptr<LockFile> lockFile )
-    : m_verbosity( LogLevel::Error )
-    , m_settings( this )
+    : m_settings( this )
     , m_initialized( false )
     , m_networkDiscoveryEnabled( false )
     , m_discovererIdle( true )
@@ -314,7 +313,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
 {
-    Log::setLogLevel( m_verbosity );
+    Log::setLogLevel( LogLevel::Error );
     addDefaultDeviceListers();
 }
 
@@ -635,7 +634,6 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
 
 void MediaLibrary::setVerbosity( LogLevel v )
 {
-    m_verbosity = v;
     Log::setLogLevel( v );
 }
 
