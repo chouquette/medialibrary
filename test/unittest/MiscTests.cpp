@@ -51,9 +51,8 @@ namespace
 
 struct MiscTests : public Tests
 {
-    virtual void SetUp( const std::string& testSuite, const std::string& testName ) override
+    virtual void SetUp( const std::string&, const std::string& ) override
     {
-        InitTestFolder( testSuite, testName );
         // No need to setup anything more than the media library instance,
         // those tests are not using the DB, we only need an instance for
         // accessing the supported extensions
