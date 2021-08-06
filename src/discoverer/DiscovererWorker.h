@@ -37,6 +37,7 @@ namespace medialibrary
 {
 
 class MediaLibrary;
+class FsHolder;
 
 namespace parser
 {
@@ -77,7 +78,8 @@ protected:
     DiscovererWorker() = default;
 
 public:
-    DiscovererWorker( MediaLibrary* ml, std::unique_ptr<FsDiscoverer> discoverer );
+    DiscovererWorker( MediaLibrary* ml, FsHolder* fsHolder,
+                      std::unique_ptr<FsDiscoverer> discoverer );
     virtual ~DiscovererWorker();
     void stop();
     void pause();
@@ -118,6 +120,7 @@ protected:
     MediaLibrary* m_ml;
     compat::Thread m_thread;
     bool m_discoveryNotified;
+    FsHolder* m_fsHolder;
 
     friend std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t );
 };

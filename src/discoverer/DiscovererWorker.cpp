@@ -43,7 +43,7 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
+DiscovererWorker::DiscovererWorker(MediaLibrary* ml, FsHolder* fsHolder,
                                     std::unique_ptr<FsDiscoverer> discoverer )
     : m_currentTask( nullptr )
     , m_run( true )
@@ -51,7 +51,13 @@ DiscovererWorker::DiscovererWorker( MediaLibrary* ml,
     , m_ml( ml )
     , m_thread( &DiscovererWorker::run, this )
     , m_discoveryNotified( false )
+    , m_fsHolder( fsHolder )
 {
+    /*
+     * We can't use a reference as we need a default constructor to be valid for
+     * the unit tests constructor
+     */
+    assert( fsHolder != nullptr );
 }
 
 DiscovererWorker::~DiscovererWorker()
@@ -574,7 +580,7 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
 
 void DiscovererWorker::runReloadAllDevices()
 {
-    m_ml->startFsFactoriesAndRefresh();
+    m_fsHolder->startFsFactoriesAndRefresh();
 
     MediaLibrary::removeOldEntities( m_ml );
 }

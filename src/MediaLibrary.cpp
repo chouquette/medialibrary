@@ -1112,7 +1112,7 @@ void MediaLibrary::startDiscovererLocked()
     if ( m_discovererWorker != nullptr )
         return;
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback );
-    m_discovererWorker.reset( new DiscovererWorker( this,
+    m_discovererWorker.reset( new DiscovererWorker( this, &m_fsHolder,
                                                     std::move( discoverer ) ) );
 }
 
@@ -2611,11 +2611,6 @@ DiscovererWorker* MediaLibrary::getDiscovererWorker()
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     return m_discovererWorker.get();
-}
-
-void MediaLibrary::startFsFactoriesAndRefresh()
-{
-    m_fsHolder.startFsFactoriesAndRefresh();
 }
 
 void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )

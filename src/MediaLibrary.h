@@ -343,7 +343,6 @@ private:
 public:
     void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     DiscovererWorker* getDiscovererWorker();
-    void startFsFactoriesAndRefresh();
 
 protected:
     virtual void addLocalFsFactory();
