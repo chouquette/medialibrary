@@ -40,11 +40,6 @@ namespace medialibrary
 class MediaLibrary;
 class FsHolder;
 
-namespace parser
-{
-    class IParserCb;
-}
-
 class DiscovererWorker : public IFsHolderCb
 {
 protected:
