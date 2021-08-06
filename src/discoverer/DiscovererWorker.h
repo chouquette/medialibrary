@@ -32,6 +32,7 @@
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
 #include "FsDiscoverer.h"
+#include "filesystem/FsHolder.h"
 
 namespace medialibrary
 {
@@ -44,7 +45,7 @@ namespace parser
     class IParserCb;
 }
 
-class DiscovererWorker
+class DiscovererWorker : public IFsHolderCb
 {
 protected:
     struct Task
@@ -108,6 +109,7 @@ private:
     void runReloadAllDevices();
     void runAddEntryPoint( const std::string& entryPoint );
     bool filter( const Task& newTask );
+    virtual void onDeviceReappearing( int64_t deviceId ) override;
 
 protected:
     std::list<Task> m_tasks;

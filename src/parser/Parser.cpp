@@ -142,6 +142,11 @@ void Parser::restore()
     m_serviceWorkers[0]->parse( std::move( tasks ) );
 }
 
+void Parser::onDeviceReappearing( int64_t )
+{
+    refreshTaskList();
+}
+
 void Parser::refreshTaskList()
 {
     /*

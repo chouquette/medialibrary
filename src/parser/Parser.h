@@ -26,6 +26,7 @@
 #include <atomic>
 #include <vector>
 #include "medialibrary/parser/Parser.h"
+#include "filesystem/FsHolder.h"
 
 namespace medialibrary
 {
@@ -57,7 +58,7 @@ public:
     virtual void refreshTaskList() = 0;
 };
 
-class Parser : public IParserCb
+class Parser : public IParserCb, public IFsHolderCb
 {
 public:
     using ServicePtr = std::shared_ptr<IParserService>;
@@ -95,6 +96,7 @@ private:
     virtual void onIdleChanged( bool idle ) override;
     // Queues all unparsed files for parsing.
     void restore();
+    virtual void onDeviceReappearing( int64_t deviceId ) override;
 
 private:
     std::vector<std::unique_ptr<Worker>> m_serviceWorkers;

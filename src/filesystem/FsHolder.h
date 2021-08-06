@@ -38,10 +38,18 @@ namespace medialibrary
 
 class Device;
 
+class IFsHolderCb
+{
+public:
+    virtual ~IFsHolderCb() = default;
+    virtual void onDeviceReappearing( int64_t deviceId ) = 0;
+};
+
 class FsHolder : public fs::IFileSystemFactoryCb
 {
 public:
     FsHolder( MediaLibrary* ml );
+    virtual ~FsHolder();
 
     bool addFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
     void registerDeviceLister( const std::string& scheme, DeviceListerPtr lister );
@@ -77,6 +85,9 @@ public:
 
     void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
+    void registerCallback( IFsHolderCb* cb );
+    void unregisterCallback( IFsHolderCb* cb );
+
 private:
     virtual void onDeviceMounted( const fs::IDevice& deviceFs,
                                   const std::string& newMountpoint ) override;
@@ -99,6 +110,8 @@ private:
     std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
     std::atomic_bool m_networkDiscoveryEnabled;
     std::atomic_bool m_started;
+
+    std::vector<IFsHolderCb*> m_callbacks;
 };
 
 }

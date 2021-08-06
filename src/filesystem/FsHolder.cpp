@@ -60,6 +60,11 @@ FsHolder::FsHolder( MediaLibrary* ml )
 #endif
 }
 
+FsHolder::~FsHolder()
+{
+    assert( m_callbacks.empty() == true );
+}
+
 bool FsHolder::addFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
@@ -241,8 +246,34 @@ void FsHolder::startFsFactory( fs::IFileSystemFactory& fsFactory ) const
     fsFactory.refreshDevices();
 }
 
+void FsHolder::registerCallback( IFsHolderCb* cb )
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+
+    auto it = std::find( cbegin( m_callbacks ), cend( m_callbacks ), cb );
+    if ( it != cend( m_callbacks ) )
+    {
+        assert( !"Double registration of IFsHolderCb" );
+        return;
+    }
+    m_callbacks.push_back( cb );
+}
+
+void FsHolder::unregisterCallback( IFsHolderCb* cb )
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+
+    auto it = std::find( cbegin( m_callbacks ), cend( m_callbacks ), cb );
+    if ( it == cend( m_callbacks ) )
+    {
+        assert( !"Unregistering unregistered callback" );
+        return;
+    }
+    m_callbacks.erase( it );
+}
+
 void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
-                                const std::string& newMountpoint )
+                                             const std::string& newMountpoint )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
@@ -274,13 +305,10 @@ void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
         // scanned.
         // We also want to resume any parsing tasks that were previously
         // started before the device went away
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
         assert( deviceFs.isPresent() == true );
-        auto discovererWorker = m_ml->getDiscovererWorker();
-        if ( discovererWorker != nullptr )
-            discovererWorker->reloadDevice( device->id() );
-        auto parser = m_ml->tryGetParser();
-        if ( parser != nullptr )
-            parser->refreshTaskList();
+        for ( const auto cb : m_callbacks )
+            cb->onDeviceReappearing( device->id() );
     }
 }
 

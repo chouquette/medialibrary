@@ -330,10 +330,6 @@ private:
     virtual bool forceRescanLocked();
     void startDiscovererLocked();
 
-    /* Temporary public accessors during refactoring */
-public:
-    DiscovererWorker* getDiscovererWorker();
-
 protected:
     virtual void addLocalFsFactory();
     void deleteAllTables( medialibrary::sqlite::Connection *dbConn );

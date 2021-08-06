@@ -282,6 +282,11 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
     return filterOut;
 }
 
+void DiscovererWorker::onDeviceReappearing( int64_t deviceId )
+{
+    reloadDevice( deviceId );
+}
+
 void DiscovererWorker::enqueue( DiscovererWorker::Task t )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );

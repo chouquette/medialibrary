@@ -319,9 +319,15 @@ MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     if ( m_discovererWorker != nullptr )
+    {
+        m_fsHolder.unregisterCallback( m_discovererWorker.get() );
         m_discovererWorker->stop();
+    }
     if ( m_parser != nullptr )
+    {
+        m_fsHolder.unregisterCallback( m_parser.get() );
         m_parser->stop();
+    }
 }
 
 bool MediaLibrary::createAllTables()
@@ -1103,6 +1109,7 @@ void MediaLibrary::startParser()
     }
     parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
     parser->addService( std::make_shared<parser::LinkService>() );
+    m_fsHolder.registerCallback( parser.get() );
     parser->start();
     m_parser = std::move( parser );
 }
@@ -1114,6 +1121,7 @@ void MediaLibrary::startDiscovererLocked()
     auto discoverer = std::make_unique<FsDiscoverer>( this, m_fsHolder, m_callback );
     m_discovererWorker.reset( new DiscovererWorker( this, &m_fsHolder,
                                                     std::move( discoverer ) ) );
+    m_fsHolder.registerCallback( m_discovererWorker.get() );
 }
 
 void MediaLibrary::startDiscoverer()
@@ -2589,12 +2597,6 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-DiscovererWorker* MediaLibrary::getDiscovererWorker()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    return m_discovererWorker.get();
-}
-
 void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 {
     m_fsHolder.startFsFactory( fsFactory );
@@ -2736,6 +2738,7 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         std::lock_guard<compat::Mutex> lock{ m_mutex };
         if ( m_discovererWorker != nullptr )
         {
+            m_fsHolder.unregisterCallback( m_discovererWorker.get() );
             m_discovererWorker->stop();
             m_discovererWorker.reset();
             restartDiscoverer = true;
