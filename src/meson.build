@@ -32,6 +32,7 @@ medialib_src = [
 	'filesystem/common/CommonDeviceLister.cpp',
 	'filesystem/common/CommonFile.cpp',
 	'filesystem/common/CommonDirectory.cpp',
+    'filesystem/FsHolder.cpp',
 	'logging/IostreamLogger.cpp',
 	'logging/Logger.cpp',
 	'metadata_services/MetadataParser.cpp',

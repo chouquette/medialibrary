@@ -32,6 +32,7 @@
 #include "compat/Mutex.h"
 #include "LockFile.h"
 #include "database/SqliteConnection.h"
+#include "filesystem/FsHolder.h"
 
 #include <atomic>
 
@@ -225,7 +226,6 @@ public:
     virtual void registerDeviceLister( DeviceListerPtr lister,
                                        const std::string& scheme ) override;
     virtual DeviceListerPtr deviceLister( const std::string& scheme ) const override;
-    DeviceListerPtr deviceListerLocked( const std::string& scheme ) const;
 
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;
 
@@ -237,17 +237,6 @@ public:
      * was plugged/unplugged.
      */
     void refreshDevices(fs::IFileSystemFactory& fsFactory);
-    /**
-     * @brief startFsFactoriesAndRefresh Starts fs factories & refreshes all known devices
-     *
-     * This will start all provided & required file system factories (ie. local
-     * ones, and network ones if network discovery is enabled), and refresh the
-     * presence & last seen date for all known devices we have in database.
-     * This operation must not be based on the available FsFactories, as we might
-     * not have a factory that was used to create a device before.
-     * We still need to mark all the associated devices as missing.
-     */
-    void startFsFactoriesAndRefresh();
 
     void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
@@ -260,7 +249,6 @@ public:
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) override;
 
     virtual bool addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) override;
-    bool addFileSystemFactoryLocked( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
 
     static void removeOldEntities( MediaLibraryPtr ml );
 
@@ -346,29 +334,20 @@ private:
     bool checkDatabaseIntegrity();
     void registerEntityHooks();
     void removeThumbnails();
-    void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     void startThumbnailer() const;
     parser::Parser* getParserLocked() const;
     virtual bool forceRescanLocked();
     void startDiscovererLocked();
-    void addDefaultDeviceListers();
+
+    /* Temporary public accessors during refactoring */
+public:
+    void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
+    DiscovererWorker* getDiscovererWorker();
+    void startFsFactoriesAndRefresh();
 
 protected:
     virtual void addLocalFsFactory();
     void deleteAllTables( medialibrary::sqlite::Connection *dbConn );
-
-    class FsFactoryCb : public fs::IFileSystemFactoryCb
-    {
-    public:
-        explicit FsFactoryCb( MediaLibrary* ml );
-    private:
-        virtual void onDeviceMounted( const fs::IDevice& deviceFs,
-                                      const std::string& newMountpoint ) override;
-        virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                        const std::string& removedMountpoint ) override;
-    private:
-        MediaLibrary* m_ml;
-    };
 
 protected:
     mutable compat::Mutex m_mutex;
@@ -376,14 +355,8 @@ protected:
 
     Settings m_settings;
     bool m_initialized;
-    bool m_networkDiscoveryEnabled;
     std::atomic_bool m_discovererIdle;
     std::atomic_bool m_parserIdle;
-
-    /* All fs factory callbacks must outlive the fs factory itself, since
-     * it might invoke some of the callback interface methods during teardown
-     */
-    mutable FsFactoryCb m_fsFactoryCb;
 
     const std::string m_dbPath;
     const std::string m_mlFolderPath;
@@ -394,11 +367,7 @@ protected:
 
     IMediaLibraryCb* m_callback;
 
-    // External device lister
-    std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
-    // Device lister will invoke fs factories through IDeviceListerCb so
-    // the device lister must be destroyed before the fs factories
-    std::unordered_map<std::string, DeviceListerPtr> m_deviceListers;
+    FsHolder m_fsHolder;
 
     // User provided parser services
     std::vector<std::shared_ptr<parser::IParserService>> m_services;

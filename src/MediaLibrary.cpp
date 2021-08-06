@@ -302,19 +302,17 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
                             std::unique_ptr<LockFile> lockFile )
     : m_settings( this )
     , m_initialized( false )
-    , m_networkDiscoveryEnabled( false )
     , m_discovererIdle( true )
     , m_parserIdle( true )
-    , m_fsFactoryCb( this )
     , m_dbPath( dbPath )
     , m_mlFolderPath( utils::file::toFolderPath( mlFolderPath ) )
     , m_thumbnailPath( m_mlFolderPath + "thumbnails/" )
     , m_playlistPath( m_mlFolderPath + "playlists/" )
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
+    , m_fsHolder( this )
 {
     Log::setLogLevel( LogLevel::Error );
-    addDefaultDeviceListers();
 }
 
 MediaLibrary::~MediaLibrary()
@@ -1146,7 +1144,7 @@ void MediaLibrary::startThumbnailer() const
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    addFileSystemFactoryLocked( std::make_shared<fs::libvlc::FileSystemFactory>( this, "smb://" ) );
+    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( this, "smb://" ) );
 #endif
 }
 
@@ -1157,23 +1155,7 @@ void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 void MediaLibrary::addLocalFsFactory()
 {
 #ifdef HAVE_LIBVLC
-    addFileSystemFactoryLocked( std::make_shared<fs::libvlc::FileSystemFactory>( this, "file://" ) );
-#endif
-}
-
-void MediaLibrary::addDefaultDeviceListers()
-{
-    /* Called from the constructor, no locking required */
-    assert( m_deviceListers.empty() == true );
-    auto devLister = factory::createDeviceLister();
-    if ( devLister != nullptr )
-        m_deviceListers["file://"] = std::move( devLister );
-#ifdef HAVE_LIBVLC
-    auto lanSds = VLCInstance::get().mediaDiscoverers( VLC::MediaDiscoverer::Category::Lan );
-    auto deviceLister = std::make_shared<fs::libvlc::DeviceLister>( "smb://" );
-    for ( const auto& sd : lanSds )
-        deviceLister->addSD( sd.name() );
-    m_deviceListers["smb://"] = std::move( deviceLister );
+    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( this, "file://" ) );
 #endif
 }
 
@@ -2492,36 +2474,17 @@ void MediaLibrary::registerDeviceLister( DeviceListerPtr lister,
                                          const std::string& scheme )
 {
     assert( m_initialized == false );
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    m_deviceListers[scheme] = std::move( lister );
+    m_fsHolder.registerDeviceLister( scheme, std::move( lister ) );
 }
 
 DeviceListerPtr MediaLibrary::deviceLister( const std::string& scheme ) const
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    return deviceListerLocked( scheme );
-}
-
-DeviceListerPtr MediaLibrary::deviceListerLocked(const std::string& scheme) const
-{
-    auto it = m_deviceListers.find( scheme );
-    if ( it == cend( m_deviceListers ) )
-        return nullptr;
-    return it->second;
+    return m_fsHolder.deviceLister( scheme );
 }
 
 std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std::string& mrl ) const
 {
-    for ( const auto& f : m_fsFactories )
-    {
-        if ( f->isMrlSupported( mrl ) )
-        {
-            if ( f->isNetworkFileSystem() && m_networkDiscoveryEnabled == false )
-                return nullptr;
-            return f;
-        }
-    }
-    return nullptr;
+    return m_fsHolder.fsFactoryForMrl( mrl );
 }
 
 void MediaLibrary::discover( const std::string& entryPoint )
@@ -2532,74 +2495,17 @@ void MediaLibrary::discover( const std::string& entryPoint )
 
 bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    return addFileSystemFactoryLocked( std::move( fsFactory ) );
-}
-
-bool MediaLibrary::addFileSystemFactoryLocked(std::shared_ptr<fs::IFileSystemFactory> fsFactory)
-{
-    assert( m_initialized == false );
-    auto it = std::find_if( cbegin( m_fsFactories  ),
-                            cend( m_fsFactories ),
-                            [&fsFactory]( const std::shared_ptr<fs::IFileSystemFactory>& fsf ) {
-        return fsFactory->scheme() == fsf->scheme();
-    });
-    if ( it != cend( m_fsFactories ) )
-        return false;
-    m_fsFactories.emplace_back( std::move( fsFactory ) );
-    return true;
+    return m_fsHolder.addFsFactory( std::move( fsFactory ) );
 }
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-
-    if ( enabled == m_networkDiscoveryEnabled )
-        return true;
-    if ( m_discovererWorker == nullptr )
-    {
-        m_networkDiscoveryEnabled = enabled;
-        return true;
-    }
-    auto affected = false;
-
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( enabled == false )
-        t = m_dbConnection->newTransaction();
-
-    for ( auto fsFactory : m_fsFactories )
-    {
-        if ( fsFactory->isNetworkFileSystem() == false )
-            continue;
-        if ( enabled == true )
-        {
-            if ( fsFactory->start( &m_fsFactoryCb ) == true )
-            {
-                fsFactory->refreshDevices();
-                affected = true;
-            }
-        }
-        else
-        {
-            auto devices = Device::fetchByScheme( this, fsFactory->scheme() );
-            for ( const auto& d : devices )
-                d->setPresent( false );
-            fsFactory->stop();
-            affected = true;
-        }
-    }
-
-    if ( t != nullptr )
-        t->commit();
-
-    m_networkDiscoveryEnabled = enabled;
-    return affected;
+    return m_fsHolder.setNetworkEnabled( enabled );
 }
 
 bool MediaLibrary::isDiscoverNetworkEnabled() const
 {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-    return m_networkDiscoveryEnabled;
+    return m_fsHolder.isNetworkEnabled();
 }
 
 Query<IFolder> MediaLibrary::entryPoints() const
@@ -2701,6 +2607,17 @@ void MediaLibrary::refreshDevice( Device& device, fs::IFileSystemFactory* fsFact
         device.updateLastSeen();
 }
 
+DiscovererWorker* MediaLibrary::getDiscovererWorker()
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    return m_discovererWorker.get();
+}
+
+void MediaLibrary::startFsFactoriesAndRefresh()
+{
+    m_fsHolder.startFsFactoriesAndRefresh();
+}
+
 void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
 {
     auto devices = Device::fetchByScheme( this, fsFactory.scheme() );
@@ -2711,35 +2628,9 @@ void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
     LOG_DEBUG( "Done refreshing devices in database." );
 }
 
-void MediaLibrary::startFsFactoriesAndRefresh()
-{
-    std::lock_guard<compat::Mutex> lock( m_mutex );
-
-    for ( const auto& fsFactory : m_fsFactories )
-    {
-        /*
-         * We only want to start the fs factory if it is a local one, or if
-         * it's a network one and network discovery is enabled
-         */
-        if ( m_networkDiscoveryEnabled == true ||
-             fsFactory->isNetworkFileSystem() == false )
-        {
-            fsFactory->start( &m_fsFactoryCb );
-            fsFactory->refreshDevices();
-        }
-    }
-    auto devices = Device::fetchAll( this );
-    for ( const auto& d : devices )
-    {
-        auto fsFactory = fsFactoryForMrl( d->scheme() );
-        refreshDevice( *d, fsFactory.get() );
-    }
-}
-
 void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 {
-    fsFactory.start( &m_fsFactoryCb );
-    fsFactory.refreshDevices();
+    m_fsHolder.startFsFactory( fsFactory );
 }
 
 bool MediaLibrary::forceRescan()
@@ -2830,84 +2721,6 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
     m_thumbnailer = std::move( thumbnailer );
 }
 
-MediaLibrary::FsFactoryCb::FsFactoryCb(MediaLibrary* ml)
-    : m_ml( ml )
-{
-}
-
-void MediaLibrary::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
-                                                 const std::string& newMountpoint )
-{
-    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
-    if ( device == nullptr )
-        return;
-    if ( device->isPresent() == deviceFs.isPresent() )
-    {
-        if ( deviceFs.isNetwork() == true )
-            device->addMountpoint( newMountpoint, time( nullptr ) );
-        return;
-    }
-
-    assert( device->isRemovable() == true );
-
-    LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
-              device->isPresent() ? "1" : "0", " -> ",
-              deviceFs.isPresent() ? "1" : "0" );
-    auto previousPresence = device->isPresent();
-    auto t = m_ml->getConn()->newTransaction();
-    device->setPresent( deviceFs.isPresent() );
-    if ( deviceFs.isNetwork() == true )
-        device->addMountpoint( newMountpoint, time( nullptr ) );
-    t->commit();
-    if ( previousPresence == false )
-    {
-        // We need to reload the entrypoint in case a previous discovery was
-        // interrupted before its end (causing the tasks that were spawned
-        // to be deleted when the device go away, requiring a new discovery)
-        // Also, there might be new content on the device since it was last
-        // scanned.
-        // We also want to resume any parsing tasks that were previously
-        // started before the device went away
-        assert( deviceFs.isPresent() == true );
-        if ( m_ml->m_discovererWorker != nullptr )
-            m_ml->m_discovererWorker->reloadDevice( device->id() );
-        if ( m_ml->m_parser != nullptr )
-            m_ml->m_parser->refreshTaskList();
-    }
-}
-
-void MediaLibrary::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                                   const std::string& )
-{
-    auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
-    if ( device == nullptr )
-    {
-        /*
-         * If we haven't added this device to the database, it means we never
-         * discovered anything on it, so we don't really care if it's mounted
-         * or not
-         */
-        return;
-    }
-
-    assert( device->isRemovable() == true );
-    if ( device->isPresent() == deviceFs.isPresent() )
-        return;
-
-    LOG_INFO( "Device ", deviceFs.uuid(), " changed presence state: ",
-              device->isPresent() ? "1" : "0", " -> ",
-              deviceFs.isPresent() ? "1" : "0" );
-    device->setPresent( deviceFs.isPresent() );
-    if ( deviceFs.isPresent() == false && m_ml->m_parser != nullptr )
-    {
-        /*
-         * The device went away, let's ensure we're not still trying to
-         * analyze its content
-         */
-        m_ml->m_parser->refreshTaskList();
-    }
-}
-
 const std::vector<const char*>& MediaLibrary::supportedMediaExtensions() const
 {
     return SupportedMediaExtensions;
@@ -2964,13 +2777,8 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
          * This assumes that all network device lister are using libvlc and therefor
          * they will need to be recreated
          */
-        for ( auto& fsFactory : m_fsFactories )
-        {
-            if ( fsFactory->isNetworkFileSystem() == false ||
-                 fsFactory->isStarted() == false )
-                continue;
-            fsFactory->stop();
-        }
+        m_fsHolder.stopNetworkFsFactories();
+
         /*
          * The VLCMetadataService will fetch the new instance during its next run
          * The thumbnailer also fetches the instance before using it

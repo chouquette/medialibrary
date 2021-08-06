@@ -49,7 +49,7 @@ namespace libvlc
 FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml,
                                       const std::string& scheme )
     : m_scheme( scheme )
-    , m_deviceLister( ml->deviceListerLocked( scheme ) )
+    , m_deviceLister( ml->deviceLister( scheme ) )
     , m_cb( nullptr )
 {
     m_isNetwork = strncasecmp( m_scheme.c_str(), "file://",
