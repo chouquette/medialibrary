@@ -45,7 +45,6 @@ namespace medialibrary
 
 FsHolder::FsHolder( MediaLibrary* ml )
     : m_ml( ml )
-    , m_fsFactoryCb( ml )
     , m_networkDiscoveryEnabled( false )
     , m_started( false )
 {
@@ -119,7 +118,7 @@ bool FsHolder::setNetworkEnabled( bool enabled )
 
         if ( enabled == true )
         {
-            if ( fsFactory->start( &m_fsFactoryCb ) == true )
+            if ( fsFactory->start( this ) == true )
             {
                 fsFactory->refreshDevices();
                 affected = true;
@@ -169,7 +168,7 @@ void FsHolder::startFsFactoriesAndRefresh()
         if ( m_networkDiscoveryEnabled == true ||
              fsFactory->isNetworkFileSystem() == false )
         {
-            fsFactory->start( &m_fsFactoryCb );
+            fsFactory->start( this );
             fsFactory->refreshDevices();
         }
     }
@@ -237,17 +236,13 @@ void FsHolder::refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory 
 
 void FsHolder::startFsFactory( fs::IFileSystemFactory& fsFactory ) const
 {
-    fsFactory.start( &m_fsFactoryCb );
+    auto fsCb = static_cast<const fs::IFileSystemFactoryCb*>( this );
+    fsFactory.start( const_cast<fs::IFileSystemFactoryCb*>( fsCb ) );
     fsFactory.refreshDevices();
 }
 
-FsHolder::FsFactoryCb::FsFactoryCb( MediaLibrary* ml )
-    : m_ml( ml )
-{
-}
-
-void FsHolder::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
-                                             const std::string& newMountpoint )
+void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
+                                const std::string& newMountpoint )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
@@ -289,8 +284,8 @@ void FsHolder::FsFactoryCb::onDeviceMounted( const fs::IDevice& deviceFs,
     }
 }
 
-void FsHolder::FsFactoryCb::onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                                   const std::string& )
+void FsHolder::onDeviceUnmounted( const fs::IDevice& deviceFs,
+                                  const std::string& )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )

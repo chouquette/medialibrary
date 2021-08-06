@@ -38,7 +38,7 @@ namespace medialibrary
 
 class Device;
 
-class FsHolder
+class FsHolder : public fs::IFileSystemFactoryCb
 {
 public:
     FsHolder( MediaLibrary* ml );
@@ -77,18 +77,11 @@ public:
 
     void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
-    class FsFactoryCb : public fs::IFileSystemFactoryCb
-    {
-    public:
-        explicit FsFactoryCb( MediaLibrary* ml );
-    private:
-        virtual void onDeviceMounted( const fs::IDevice& deviceFs,
-                                      const std::string& newMountpoint ) override;
-        virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
-                                        const std::string& removedMountpoint ) override;
-    private:
-        MediaLibrary* m_ml;
-    };
+private:
+    virtual void onDeviceMounted( const fs::IDevice& deviceFs,
+                                  const std::string& newMountpoint ) override;
+    virtual void onDeviceUnmounted( const fs::IDevice& deviceFs,
+                                    const std::string& removedMountpoint ) override;
 
 private:
     std::shared_ptr<fs::IFileSystemFactory>
@@ -99,11 +92,6 @@ private:
 private:
     MediaLibrary* m_ml;
     mutable compat::Mutex m_mutex;
-
-    /* All fs factory callbacks must outlive the fs factory itself, since
-     * it might invoke some of the callback interface methods during teardown
-     */
-    mutable FsFactoryCb m_fsFactoryCb;
 
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
     // Device lister will invoke fs factories through IDeviceListerCb so
