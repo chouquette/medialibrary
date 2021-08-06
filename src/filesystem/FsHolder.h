@@ -43,6 +43,7 @@ class IFsHolderCb
 public:
     virtual ~IFsHolderCb() = default;
     virtual void onDeviceReappearing( int64_t deviceId ) = 0;
+    virtual void onDeviceDisappearing( int64_t deviceId ) = 0;
 };
 
 class FsHolder : public fs::IFileSystemFactoryCb

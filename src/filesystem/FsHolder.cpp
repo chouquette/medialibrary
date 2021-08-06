@@ -334,13 +334,12 @@ void FsHolder::onDeviceUnmounted( const fs::IDevice& deviceFs,
               device->isPresent() ? "1" : "0", " -> ",
               deviceFs.isPresent() ? "1" : "0" );
     device->setPresent( deviceFs.isPresent() );
-    if ( deviceFs.isPresent() == false && m_ml->tryGetParser() != nullptr )
+    if ( deviceFs.isPresent() == false )
     {
-        /*
-         * The device went away, let's ensure we're not still trying to
-         * analyze its content
-         */
-        m_ml->tryGetParser()->refreshTaskList();
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        assert( deviceFs.isPresent() == false );
+        for ( const auto cb : m_callbacks )
+            cb->onDeviceReappearing( device->id() );
     }
 }
 

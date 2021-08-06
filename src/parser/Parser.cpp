@@ -147,6 +147,17 @@ void Parser::onDeviceReappearing( int64_t )
     refreshTaskList();
 }
 
+void Parser::onDeviceDisappearing( int64_t )
+{
+    /*
+     * If a device went away, let's ensure we're not still trying to
+     * analyze its content.
+     * By the time this callback is called, the database has been updated so
+     * the tasks associated with it will be filtered out due to `is_present = 0`
+     */
+    refreshTaskList();
+}
+
 void Parser::refreshTaskList()
 {
     /*

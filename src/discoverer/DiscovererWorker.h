@@ -110,6 +110,7 @@ private:
     void runAddEntryPoint( const std::string& entryPoint );
     bool filter( const Task& newTask );
     virtual void onDeviceReappearing( int64_t deviceId ) override;
+    virtual void onDeviceDisappearing( int64_t deviceId ) override;
 
 protected:
     std::list<Task> m_tasks;

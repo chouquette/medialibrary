@@ -97,6 +97,7 @@ private:
     // Queues all unparsed files for parsing.
     void restore();
     virtual void onDeviceReappearing( int64_t deviceId ) override;
+    virtual void onDeviceDisappearing( int64_t deviceId ) override;
 
 private:
     std::vector<std::unique_ptr<Worker>> m_serviceWorkers;

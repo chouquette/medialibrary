@@ -290,6 +290,14 @@ void DiscovererWorker::onDeviceReappearing( int64_t deviceId )
     reloadDevice( deviceId );
 }
 
+void DiscovererWorker::onDeviceDisappearing( int64_t )
+{
+    /*
+     * The FsDiscoverer will abort the discovery itself if the device can't be
+     * read from anymore
+     */
+}
+
 void DiscovererWorker::enqueue( DiscovererWorker::Task t )
 {
     std::unique_lock<compat::Mutex> lock( m_mutex );
