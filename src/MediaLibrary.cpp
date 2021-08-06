@@ -2743,11 +2743,6 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
             m_discovererWorker.reset();
             restartDiscoverer = true;
         }
-        /*
-         * This assumes that all network device lister are using libvlc and therefor
-         * they will need to be recreated
-         */
-        m_fsHolder.stopNetworkFsFactories();
 
         /*
          * The VLCMetadataService will fetch the new instance during its next run

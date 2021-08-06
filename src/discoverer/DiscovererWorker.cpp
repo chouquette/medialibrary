@@ -81,6 +81,9 @@ void DiscovererWorker::stop()
         m_discoverer->interrupt();
         /* Wake the thread in case it was waiting for more things to do */
         m_cond.notify_all();
+
+        m_fsHolder->stopNetworkFsFactories();
+
         /* And wait for all short requests to be handled */
         m_thread.join();
     }
