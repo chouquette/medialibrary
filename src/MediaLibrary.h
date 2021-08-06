@@ -229,15 +229,6 @@ public:
 
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;
 
-    /**
-     * @brief refreshDevices Refreshes the devices from a specific FS factory
-     * @param fsFactory The file system factory for which devices must be refreshed
-     *
-     * This is expected to be used when a specific factory signals that a device
-     * was plugged/unplugged.
-     */
-    void refreshDevices(fs::IFileSystemFactory& fsFactory);
-
     void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
     virtual bool forceRescan() override;
@@ -341,7 +332,6 @@ private:
 
     /* Temporary public accessors during refactoring */
 public:
-    void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
     DiscovererWorker* getDiscovererWorker();
 
 protected:

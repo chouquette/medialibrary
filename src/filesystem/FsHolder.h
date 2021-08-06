@@ -36,6 +36,8 @@
 namespace medialibrary
 {
 
+class Device;
+
 class FsHolder
 {
 public:
@@ -46,6 +48,15 @@ public:
     DeviceListerPtr deviceLister( const std::string& scheme ) const;
     bool setNetworkEnabled( bool enabled );
     bool isNetworkEnabled() const;
+
+    /**
+     * @brief refreshDevices Refreshes the devices from a specific FS factory
+     * @param fsFactory The file system factory for which devices must be refreshed
+     *
+     * This is expected to be used when a specific factory signals that a device
+     * was plugged/unplugged.
+     */
+    void refreshDevices( fs::IFileSystemFactory& fsFactory );
 
     /**
      * @brief startFsFactoriesAndRefresh Starts fs factories & refreshes all known devices
@@ -82,6 +93,8 @@ public:
 private:
     std::shared_ptr<fs::IFileSystemFactory>
     fsFactoryForMrlLocked( const std::string& mrl ) const;
+
+    void refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory );
 
 private:
     MediaLibrary* m_ml;

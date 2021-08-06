@@ -35,11 +35,12 @@ namespace medialibrary
 class MediaLibrary;
 class IMediaLibraryCb;
 class Folder;
+class FsHolder;
 
 class FsDiscoverer
 {
 public:
-    FsDiscoverer(MediaLibrary* ml , IMediaLibraryCb* cb);
+    FsDiscoverer( MediaLibrary* ml, FsHolder& fsHolder, IMediaLibraryCb* cb );
     bool reload();
     bool reload( const std::string& entryPoint );
     bool addEntryPoint(const std::string& entryPoint );
@@ -74,6 +75,7 @@ private:
     mutable compat::Mutex m_mutex;
     mutable compat::ConditionVariable m_cond;
     bool m_paused;
+    FsHolder& m_fsHolder;
 };
 
 }

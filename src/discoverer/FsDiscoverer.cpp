@@ -46,11 +46,12 @@
 namespace medialibrary
 {
 
-FsDiscoverer::FsDiscoverer( MediaLibrary* ml, IMediaLibraryCb* cb )
+FsDiscoverer::FsDiscoverer( MediaLibrary* ml, FsHolder& fsHolder, IMediaLibraryCb* cb )
     : m_ml( ml )
     , m_cb( cb )
     , m_isInterrupted( false )
     , m_paused( false )
+    , m_fsHolder( fsHolder )
 {
 }
 
@@ -117,7 +118,7 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
                   ". Refreshing device cache..." );
 
         fsFactory.refreshDevices();
-        m_ml->refreshDevices( fsFactory );
+        m_fsHolder.refreshDevices( fsFactory );
         // If the device was missing, refresh our list of devices in case
         // the device was plugged back and/or we missed a notification for it
         if ( device == nullptr )

@@ -1111,7 +1111,7 @@ void MediaLibrary::startDiscovererLocked()
 {
     if ( m_discovererWorker != nullptr )
         return;
-    auto discoverer = std::make_unique<FsDiscoverer>( this, m_callback );
+    auto discoverer = std::make_unique<FsDiscoverer>( this, m_fsHolder, m_callback );
     m_discovererWorker.reset( new DiscovererWorker( this, &m_fsHolder,
                                                     std::move( discoverer ) ) );
 }
@@ -2589,38 +2589,10 @@ void MediaLibrary::setLogger( ILogger* logger )
     Log::SetLogger( logger );
 }
 
-void MediaLibrary::refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory )
-{
-    auto deviceFs = fsFactory != nullptr ?
-                        fsFactory->createDevice( device.uuid() ) : nullptr;
-    auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
-    if ( device.isPresent() != fsDevicePresent )
-    {
-        LOG_INFO( "Device ", device.uuid(), " changed presence state: ",
-                  device.isPresent(), " -> ", fsDevicePresent );
-        device.setPresent( fsDevicePresent );
-    }
-    else
-        LOG_INFO( "Device ", device.uuid(), " presence is unchanged" );
-
-    if ( device.isRemovable() == true && device.isPresent() == true )
-        device.updateLastSeen();
-}
-
 DiscovererWorker* MediaLibrary::getDiscovererWorker()
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     return m_discovererWorker.get();
-}
-
-void MediaLibrary::refreshDevices( fs::IFileSystemFactory& fsFactory )
-{
-    auto devices = Device::fetchByScheme( this, fsFactory.scheme() );
-    for ( auto& d : devices )
-    {
-        refreshDevice( *d, &fsFactory );
-    }
-    LOG_DEBUG( "Done refreshing devices in database." );
 }
 
 void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const

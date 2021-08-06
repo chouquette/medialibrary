@@ -146,6 +146,16 @@ bool FsHolder::isNetworkEnabled() const
     return m_networkDiscoveryEnabled.load( std::memory_order_acquire );
 }
 
+void FsHolder::refreshDevices( fs::IFileSystemFactory& fsFactory )
+{
+    auto devices = Device::fetchByScheme( m_ml, fsFactory.scheme() );
+    for ( auto& d : devices )
+    {
+        refreshDevice( *d, &fsFactory );
+    }
+    LOG_DEBUG( "Done refreshing devices in database." );
+}
+
 void FsHolder::startFsFactoriesAndRefresh()
 {
     std::lock_guard<compat::Mutex> lock( m_mutex );
@@ -167,7 +177,7 @@ void FsHolder::startFsFactoriesAndRefresh()
     for ( const auto& d : devices )
     {
         auto fsFactory = fsFactoryForMrlLocked( d->scheme() );
-        m_ml->refreshDevice( *d, fsFactory.get() );
+        refreshDevice( *d, fsFactory.get() );
     }
 }
 
@@ -205,6 +215,24 @@ std::shared_ptr<fs::IFileSystemFactory> FsHolder::fsFactoryForMrlLocked(const st
         }
     }
     return nullptr;
+}
+
+void FsHolder::refreshDevice( Device& device, fs::IFileSystemFactory* fsFactory )
+{
+    auto deviceFs = fsFactory != nullptr ?
+                        fsFactory->createDevice( device.uuid() ) : nullptr;
+    auto fsDevicePresent = deviceFs != nullptr && deviceFs->isPresent();
+    if ( device.isPresent() != fsDevicePresent )
+    {
+        LOG_INFO( "Device ", device.uuid(), " changed presence state: ",
+                  device.isPresent(), " -> ", fsDevicePresent );
+        device.setPresent( fsDevicePresent );
+    }
+    else
+        LOG_INFO( "Device ", device.uuid(), " presence is unchanged" );
+
+    if ( device.isRemovable() == true && device.isPresent() == true )
+        device.updateLastSeen();
 }
 
 void FsHolder::startFsFactory( fs::IFileSystemFactory& fsFactory ) const
