@@ -108,6 +108,7 @@ private:
     virtual void onDeviceDisappearing( int64_t deviceId ) override;
 
 protected:
+    FsHolder* m_fsHolder;
     std::list<Task> m_tasks;
     Task* m_currentTask;
     compat::Mutex m_mutex;
@@ -118,7 +119,6 @@ protected:
     MediaLibrary* m_ml;
     compat::Thread m_thread;
     bool m_discoveryNotified;
-    FsHolder* m_fsHolder;
 
     friend std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t );
 };

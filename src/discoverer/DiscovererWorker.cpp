@@ -45,13 +45,13 @@ namespace medialibrary
 
 DiscovererWorker::DiscovererWorker(MediaLibrary* ml, FsHolder* fsHolder,
                                     std::unique_ptr<FsDiscoverer> discoverer )
-    : m_currentTask( nullptr )
+    : m_fsHolder( fsHolder )
+    , m_currentTask( nullptr )
     , m_run( true )
     , m_discoverer( std::move( discoverer ) )
     , m_ml( ml )
     , m_thread( &DiscovererWorker::run, this )
     , m_discoveryNotified( false )
-    , m_fsHolder( fsHolder )
 {
     /*
      * We can't use a reference as we need a default constructor to be valid for
