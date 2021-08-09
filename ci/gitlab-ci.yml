@@ -16,9 +16,12 @@ linux:
       - docker
       - amd64
     script:
-      - meson -Db_coverage=true build
+      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+      - export PATH=/tmp/meson:$PATH
+      - cd $CI_PROJECT_DIR
+      - meson.py -Db_coverage=true build
       - cd build && ninja
-      - meson test --no-stdsplit
+      - meson.py test --no-stdsplit
       - mkdir html/
       - >
         gcovr -r "$CI_PROJECT_DIR/"
