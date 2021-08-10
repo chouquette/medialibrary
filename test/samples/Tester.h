@@ -103,7 +103,7 @@ struct Tests
     std::unique_ptr<MockCallback> m_cb;
     std::unique_ptr<IMediaLibrary> m_ml;
 
-    std::unique_lock<compat::Mutex> lock;
+    std::unique_lock<compat::Mutex> m_lock;
     rapidjson::Document doc;
     rapidjson::GenericValue<rapidjson::UTF8<>> input;
 

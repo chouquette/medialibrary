@@ -36,14 +36,14 @@
 
 static void Parse( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }
 
 static void ParseTwice( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 
@@ -55,7 +55,7 @@ static void ParseTwice( Tests* T )
         T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForRemovalComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForRemovalComplete( T->m_lock ) );
 
     for ( auto i = 0u; i < T->input.Size(); ++i )
     {
@@ -64,46 +64,46 @@ static void ParseTwice( Tests* T )
         T->m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }
 
 static void RunResumeTests( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }
 
 static void Rescan( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->m_cb->reinit();
     T->m_ml->forceRescan();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }
 
 static void RunRefreshTests( RefreshTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->lock ) );
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 
     T->m_cb->reinit();
     T->forceRefresh();
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }
@@ -114,7 +114,7 @@ static void ReplaceVlcInstance( Tests* T )
     T->m_ml->setExternalLibvlcInstance( inst.get() );
     /* Replacing the instance will stop the discoverer so let's resume it */
     T->m_ml->reload();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
 
     T->runChecks();
 }

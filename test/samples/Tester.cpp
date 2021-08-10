@@ -209,7 +209,7 @@ void Tests::InitTestCase( const std::string& testName )
     buff[ret] = 0;
     doc.Parse( buff );
 
-    lock = m_cb->lock();
+    m_lock = m_cb->lock();
 
     if ( doc.HasMember( "banned" ) == true )
     {
