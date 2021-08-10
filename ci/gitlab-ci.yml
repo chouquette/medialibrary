@@ -1,6 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
-  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20210216210554
+  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20210810073026
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20210215200735
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20210216181601
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20210218132922
