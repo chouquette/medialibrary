@@ -252,6 +252,12 @@ void Tests::SetUp( const std::string& testSuite, const std::string& testName )
 
 void Tests::TearDown()
 {
+    /*
+     * Ensures we release the mutex to avoid joining threads deadlocking while
+     * potentially invoking their final callbacks
+     * See #362
+     */
+    m_lock.release();
     /* Ensure we are closing our database connection before we try to delete it */
     m_ml.reset();
     ASSERT_TRUE( utils::fs::rmdir( m_testDir ) );
