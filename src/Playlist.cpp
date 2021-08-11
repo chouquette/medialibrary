@@ -512,6 +512,14 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
         "media_id INTEGER,"
         "playlist_id INTEGER,"
         "position INTEGER,"
+        /*
+         * We do not want to use ON DELETE CASCADE here as it wouldn't simplify
+         * the triggers. We need to react on the media deletion itself, in order
+         * to be able to know the media presence state.
+         * If we were to use ON DELETE CASCADE and react to a deletion on the
+         * MediaRelationTable, there would be no way of knowing if the media was
+         * present or not since it would already be deleted from the Media table
+         */
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name + "("
             + Media::Table::PrimaryKeyColumn + ") ON DELETE NO ACTION,"
         "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name + "("
