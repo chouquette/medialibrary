@@ -44,19 +44,6 @@
 
 const std::string Tests::Directory = SRC_DIR "/test/samples/";
 
-/*
- * When running the tests on wine32, this sample fails:
- * ```
- *   compat::Mutex m;
- *   m.lock();
- *   assert( m.try_lock() == false );
- * ```
- * AFAICS we can't use try_lock reliably on wine32
- */
-#if !defined(_WIN32) || defined(__WIN64)
-# define CAN_USE_TRYLOCK
-#endif
-
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
     , m_thumbnailSuccess( false )
