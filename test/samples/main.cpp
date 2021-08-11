@@ -36,14 +36,14 @@
 
 static void Parse( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
 
 static void ParseTwice( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 
@@ -55,7 +55,8 @@ static void ParseTwice( Tests* T )
         T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForRemovalComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForRemovalComplete() );
+    T->m_cb->reinit();
 
     for ( auto i = 0u; i < T->input.Size(); ++i )
     {
@@ -64,46 +65,46 @@ static void ParseTwice( Tests* T )
         T->m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
 
 static void RunResumeTests( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
 
 static void Rescan( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->m_cb->reinit();
     T->m_ml->forceRescan();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
 
 static void RunRefreshTests( RefreshTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete( T->m_lock ) );
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 
     T->m_cb->reinit();
     T->forceRefresh();
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
@@ -114,19 +115,18 @@ static void ReplaceVlcInstance( Tests* T )
     T->m_ml->setExternalLibvlcInstance( inst.get() );
     /* Replacing the instance will stop the discoverer so let's resume it */
     T->m_ml->reload();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete( T->m_lock ) );
+    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
 
     T->runChecks();
 }
 
 static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
 {
-    auto lock = T->m_cb->lock();
     auto samplesFolder = std::string{ SRC_DIR "/test/samples/samples/playlist/tracks" };
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
     T->m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    auto res = T->m_cb->waitForParsingComplete( lock );
+    auto res = T->m_cb->waitForParsingComplete();
     ASSERT_TRUE( res );
     // Now we should have discovered some media
 
@@ -153,7 +153,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
     T->m_cb->prepareForPlaylistReload();
     T->m_ml->clearDatabase( true );
 
-    res = T->m_cb->waitForPlaylistReload( lock );
+    res = T->m_cb->waitForPlaylistReload();
     ASSERT_TRUE( res );
 
     auto playlists = T->m_ml->playlists( nullptr )->all();
@@ -175,8 +175,9 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
      * converted back to internal media, meaning they'll recover their titles
      * and duration among other information.
      */
+    T->m_cb->reinit();
     T->m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    res = T->m_cb->waitForParsingComplete( lock );
+    res = T->m_cb->waitForParsingComplete();
     ASSERT_TRUE( res );
     media = playlist1->media( nullptr )->all();
     ASSERT_EQ( m1->title(), media[0]->title() );

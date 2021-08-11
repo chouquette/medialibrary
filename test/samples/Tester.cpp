@@ -67,35 +67,28 @@ MockCallback::MockCallback()
 {
 }
 
-std::unique_lock<compat::Mutex> MockCallback::lock()
+bool MockCallback::waitForParsingComplete()
 {
-    return std::unique_lock<compat::Mutex>{ m_parsingMutex };
-}
-
-bool MockCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock )
-{
-#ifdef CAN_USE_TRYLOCK
-    assert( m_parsingMutex.try_lock() == false );
-#endif
-    m_done = false;
-    m_discoveryCompleted = false;
+    std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
     });
 }
 
-bool MockCallback::waitForRemovalComplete( std::unique_lock<compat::Mutex>& lock )
+bool MockCallback::waitForRemovalComplete()
 {
-#ifdef CAN_USE_TRYLOCK
-    assert( m_parsingMutex.try_lock() == false );
-#endif
-    assert( m_done == true );
-    assert( m_discoveryCompleted == true );
-    m_removalCompleted = false;
+    std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_removalCompleted;
     });
+}
+
+void MockCallback::reinit()
+{
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
+    m_discoveryCompleted = false;
+    m_done = false;
 }
 
 void MockCallback::prepareWaitForThumbnail( MediaPtr media )
@@ -173,25 +166,25 @@ void MockResumeCallback::onDiscoveryCompleted()
 
 void MockResumeCallback::reinit()
 {
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
     m_done = false;
 }
 
-bool MockResumeCallback::waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock )
+bool MockResumeCallback::waitForDiscoveryComplete()
 {
-    assert( m_discoveryCompleted == false );
-    // Wait for a while, generating snapshots can be heavy...
+    std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_discoveryCompleted;
     });
 }
 
-bool MockResumeCallback::waitForParsingComplete( std::unique_lock<compat::Mutex>& lock )
+bool MockResumeCallback::waitForParsingComplete()
 {
+    std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Reimplement without checking for discovery complete. This class is meant to be used
     // in 2 steps: waiting for discovery completed, then for parsing completed
     assert( m_discoveryCompleted == true );
-    m_done = false;
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
@@ -208,8 +201,6 @@ void Tests::InitTestCase( const std::string& testName )
     ASSERT_NE( 0u, ret );
     buff[ret] = 0;
     doc.Parse( buff );
-
-    m_lock = m_cb->lock();
 
     if ( doc.HasMember( "banned" ) == true )
     {
@@ -252,12 +243,6 @@ void Tests::SetUp( const std::string& testSuite, const std::string& testName )
 
 void Tests::TearDown()
 {
-    /*
-     * Ensures we release the mutex to avoid joining threads deadlocking while
-     * potentially invoking their final callbacks
-     * See #362
-     */
-    m_lock.release();
     /* Ensure we are closing our database connection before we try to delete it */
     m_ml.reset();
     ASSERT_TRUE( utils::fs::rmdir( m_testDir ) );
@@ -920,12 +905,14 @@ void MockCallback::prepareForPlaylistReload()
     // We need to force the discover to appear as complete, as we won't do any
     // discovery for this test. Otherwise, we'd receive the parsing completed
     // event and just ignore it.
+    std::lock_guard<compat::Mutex> lock{ m_parsingMutex };
     m_discoveryCompleted = true;
+    m_done = false;
 }
 
-bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock )
+bool MockCallback::waitForPlaylistReload()
 {
-    m_done = false;
+    std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
         return m_done;
@@ -934,8 +921,7 @@ bool MockCallback::waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock 
 
 void MockCallback::prepareForRemoval( uint32_t nbEntryPointsRemovalExpected )
 {
-#ifdef CAN_USE_TRYLOCK
-    assert( m_parsingMutex.try_lock() == false );
-#endif
+    std::lock_guard<compat::Mutex> lock{ m_parsingMutex };
     m_nbEntryPointsRemovalExpected = nbEntryPointsRemovalExpected;
+    m_removalCompleted = false;
 }

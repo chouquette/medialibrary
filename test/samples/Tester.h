@@ -50,15 +50,14 @@ class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback();
-    virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock );
-    virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& ) { return true; }
-    virtual bool waitForRemovalComplete( std::unique_lock<compat::Mutex>& );
-    virtual void reinit() {}
+    virtual bool waitForParsingComplete();
+    virtual bool waitForDiscoveryComplete() { return true; }
+    virtual bool waitForRemovalComplete();
+    virtual void reinit();
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
-    std::unique_lock<compat::Mutex> lock();
     void prepareForPlaylistReload();
-    bool waitForPlaylistReload( std::unique_lock<compat::Mutex>& lock );
+    bool waitForPlaylistReload();
     void prepareForDiscovery( uint32_t nbEntryPointsExpected );
     void prepareForRemoval( uint32_t nbEntryPointsRemovalExpected );
 
@@ -86,8 +85,8 @@ protected:
 class MockResumeCallback : public MockCallback
 {
 public:
-    virtual bool waitForDiscoveryComplete( std::unique_lock<compat::Mutex>& lock ) override;
-    virtual bool waitForParsingComplete( std::unique_lock<compat::Mutex>& lock ) override;
+    virtual bool waitForDiscoveryComplete() override;
+    virtual bool waitForParsingComplete() override;
     virtual void onDiscoveryCompleted() override;
     virtual void reinit() override;
 
@@ -103,7 +102,6 @@ struct Tests
     std::unique_ptr<MockCallback> m_cb;
     std::unique_ptr<IMediaLibrary> m_ml;
 
-    std::unique_lock<compat::Mutex> m_lock;
     rapidjson::Document doc;
     rapidjson::GenericValue<rapidjson::UTF8<>> input;
 
