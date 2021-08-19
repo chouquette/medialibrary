@@ -61,7 +61,7 @@ foreach t : album_tests
 endforeach
 
 device_fs_test_exe = executable('device_fs_tests', 'DeviceFsTests.cpp',
-  objects: [common_test_code.extract_all_objects()],
+  objects: common_test_code.extract_all_objects(),
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -363,7 +363,7 @@ foreach t : file_tests
 endforeach
 
 folder_test_exe = executable('folder_tests', 'FolderTests.cpp',
-  objects: [common_test_code.extract_all_objects()],
+  objects: common_test_code.extract_all_objects(),
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -552,7 +552,7 @@ foreach t : media_group_tests
 endforeach
 
 fetch_media_test_exe = executable('fetch_media_tests', 'FetchMediaTests.cpp',
-  objects: [common_test_code.extract_all_objects()],
+  objects: common_test_code.extract_all_objects(),
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
