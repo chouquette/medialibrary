@@ -252,11 +252,12 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
         const std::string updateCountReq = "UPDATE " + Table::Name +
                 " SET nb_media = nb_media + 1, nb_present_media = nb_present_media + ?"
                 " WHERE id_playlist = ?";
+        auto isPresent = media.isPresent();
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
-                                           media.isPresent() ? 1 : 0, m_id ) == false )
+                                           isPresent ? 1 : 0, m_id ) == false )
             return false;
         ++m_nbMedia;
-        if ( media.isPresent() )
+        if ( isPresent )
             ++m_nbPresentMedia;
     }
     t->commit();
