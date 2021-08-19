@@ -781,6 +781,8 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateFts ) &&
             checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaDeletion ) &&
+            checkTrigger( ml->getConn(), Triggers::UpdateNbPresentMediaOnPresenceChange ) &&
             checkIndex( ml->getConn(), Indexes::FileId ) &&
             checkIndex( ml->getConn(), Indexes::PlaylistIdPosition );
 }
