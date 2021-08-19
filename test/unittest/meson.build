@@ -15,8 +15,10 @@ common_test_code = static_library('common_test_code',
   dependencies: [sqlite_dep],
 )
 
+common_test_objs = common_test_code.extract_all_objects()
+
 album_test_exe = executable('album_tests', 'AlbumTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -61,7 +63,7 @@ foreach t : album_tests
 endforeach
 
 device_fs_test_exe = executable('device_fs_tests', 'DeviceFsTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -95,7 +97,7 @@ foreach t : device_fs_tests
 endforeach
 
 device_test_exe = executable('device_tests', 'DeviceTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -126,7 +128,7 @@ album_track_tests = [
 ]
 
 album_track_test_exe = executable('album_track_tests', 'AlbumTrackTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -138,7 +140,7 @@ foreach t : album_track_tests
 endforeach
 
 misc_test_exe = executable('misc_tests', 'MiscTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   cpp_args: '-DSRC_DIR="' + meson.source_root() + '"',
   include_directories: [includes, test_include_dir],
@@ -168,7 +170,7 @@ foreach t : misc_tests
 endforeach
 
 db_model_test_exe = executable('db_model_tests', 'DbModelTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   cpp_args: '-DSRC_DIR="' + meson.source_root() + '"',
   include_directories: [includes, test_include_dir],
@@ -209,7 +211,7 @@ foreach t : db_model_tests
 endforeach
 
 artist_test_exe = executable('artist_tests', 'ArtistTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -249,7 +251,7 @@ foreach t : artist_tests
 endforeach
 
 audio_track_test_exe = executable('audio_track_tests', 'AudioTrackTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -270,7 +272,7 @@ foreach t : audio_track_tests
 endforeach
 
 bookmark_test_exe = executable('bookmark_tests', 'BookmarkTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -299,7 +301,7 @@ foreach t : bookmark_tests
 endforeach
 
 chapter_test_exe = executable('chapter_tests', 'ChapterTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -317,7 +319,7 @@ foreach t : chapter_tests
 endforeach
 
 discoverer_test_exe = executable('discoverer_tests', 'DiscovererTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -339,7 +341,7 @@ foreach t : discoverer_tests
 endforeach
 
 file_test_exe = executable('file_tests', 'FileTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -363,7 +365,7 @@ foreach t : file_tests
 endforeach
 
 folder_test_exe = executable('folder_tests', 'FolderTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -419,7 +421,7 @@ foreach t : folder_tests
 endforeach
 
 fs_utils_test_exe = executable('fs_utils_tests', 'FsUtilsTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -445,7 +447,7 @@ foreach t : fs_utils_tests
 endforeach
 
 genre_test_exe = executable('genre_tests', 'GenreTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -477,7 +479,7 @@ foreach t : genre_tests
 endforeach
 
 label_test_exe = executable('label_tests', 'LabelTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -497,7 +499,7 @@ foreach t : label_tests
 endforeach
 
 media_group_test_exe = executable('media_groups_tests', 'MediaGroupTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -552,7 +554,7 @@ foreach t : media_group_tests
 endforeach
 
 fetch_media_test_exe = executable('fetch_media_tests', 'FetchMediaTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -571,7 +573,7 @@ endforeach
 
 media_test_exe = executable('media_tests', 'MediaTests.cpp',
   link_with: [medialib],
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
   build_by_default: false,
@@ -643,7 +645,7 @@ foreach t : media_tests
 endforeach
 
 movie_test_exe = executable('movie_tests', 'MovieTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -665,7 +667,7 @@ foreach t : movie_tests
 endforeach
 
 playlist_test_exe = executable('playlist_tests', 'PlaylistTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -708,7 +710,7 @@ foreach t : playlist_tests
 endforeach
 
 removal_notifier_test_exe = executable('removal_notifier_tests', 'RemovalNotifierTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep, threads_dep],
@@ -726,7 +728,7 @@ foreach t : removal_notifier_tests
 endforeach
 
 show_test_exe = executable('show_tests', 'ShowTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -761,7 +763,7 @@ foreach t : show_tests
 endforeach
 
 subtitle_track_test_exe = executable('subtitle_track_tests', 'SubtitleTrackTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -781,7 +783,7 @@ foreach t : subtitle_track_tests
 endforeach
 
 thumbnail_test_exe = executable('thumbnail_tests', 'ThumbnailTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -816,7 +818,7 @@ foreach t : thumbnail_tests
 endforeach
 
 title_analyzer_test_exe = executable('title_analyzer_tests', 'TitleAnalyzerTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -835,7 +837,7 @@ foreach t : title_analyzer_tests
 endforeach
 
 url_test_exe = executable('url_tests', 'UrlTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
@@ -857,7 +859,7 @@ foreach t : url_tests
 endforeach
 
 video_track_test_exe = executable('video_track_tests', 'VideoTrackTests.cpp',
-  objects: common_test_code.extract_all_objects(),
+  objects: common_test_objs,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
   dependencies: [sqlite_dep],
