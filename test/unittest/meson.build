@@ -15,7 +15,7 @@ common_test_code = static_library('common_test_code',
   dependencies: [sqlite_dep],
 )
 
-common_test_objs = common_test_code.extract_all_objects()
+common_test_objs = common_test_code.extract_all_objects(recursive: false)
 
 album_test_exe = executable('album_tests', 'AlbumTests.cpp',
   objects: common_test_objs,
