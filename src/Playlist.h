@@ -59,6 +59,7 @@ public:
         DeleteFts,
         UpdateNbMediaOnMediaDeletion,
         UpdateNbPresentMediaOnPresenceChange,
+        UpdateDurationOnMediaChange,
 
         // Deprecated since model 16
         Append,
@@ -85,6 +86,7 @@ public:
     virtual const std::string& artworkMrl() const override;
     virtual uint32_t nbMedia() const override;
     virtual uint32_t nbPresentMedia() const override;
+    virtual int64_t duration() const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params ) const override;
@@ -155,6 +157,7 @@ private:
     std::string m_artworkMrl;
     uint32_t m_nbMedia;
     uint32_t m_nbPresentMedia;
+    int64_t m_duration;
 
     friend Playlist::Table;
 };

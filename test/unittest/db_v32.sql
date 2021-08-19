@@ -136,9 +136,9 @@ INSERT INTO Folder VALUES(4,'file:///home/chouquette/dev/medialibrary/test/sampl
 INSERT INTO Folder VALUES(5,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/','artist1',3,0,1,0,0,0);
 INSERT INTO Folder VALUES(6,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album2/','album2',5,0,1,0,3,0);
 INSERT INTO Folder VALUES(7,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album1/','album1',5,0,1,0,3,0);
-INSERT INTO Media VALUES(1,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997947,0,'ep1-album1-track1','track1.mp3',0,1,1,0,4,0,NULL,0);
-INSERT INTO Media VALUES(2,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997947,0,'ep1-album1-track2','track2.mp3',0,1,1,0,4,0,NULL,0);
-INSERT INTO Media VALUES(3,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep1-album1-track3','track3.mp3',0,1,1,0,4,0,NULL,0);
+INSERT INTO Media VALUES(1,2,3,11,-1.0,-1,NULL,NULL,NULL,1627997947,0,'ep1-album1-track1','track1.mp3',0,1,1,0,4,0,NULL,0);
+INSERT INTO Media VALUES(2,2,3,-1,-1.0,-1,NULL,NULL,NULL,1627997947,0,'ep1-album1-track2','track2.mp3',0,1,1,0,4,0,NULL,0);
+INSERT INTO Media VALUES(3,2,3,22,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep1-album1-track3','track3.mp3',0,1,1,0,4,0,NULL,0);
 INSERT INTO Media VALUES(4,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track1','track1.mp3',0,1,1,0,6,0,NULL,0);
 INSERT INTO Media VALUES(5,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track2','track2.mp3',0,1,1,0,6,0,NULL,0);
 INSERT INTO Media VALUES(6,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track3','track3.mp3',0,1,1,0,6,0,NULL,0);
@@ -198,4 +198,8 @@ INSERT INTO Task VALUES(6,3,2,0,'file:///home/chouquette/dev/medialibrary/test/s
 INSERT INTO Task VALUES(7,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album1/track1.mp3',1,7,7,0,0,0,'');
 INSERT INTO Task VALUES(8,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album1/track2.mp3',1,8,7,0,0,0,'');
 INSERT INTO Task VALUES(9,3,2,0,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album1/track3.mp3',1,9,7,0,0,0,'');
+INSERT INTO Playlist VALUES(1, 'test playlist', NULL, 0, NULL, 2, 2);
+INSERT INTO PlaylistMediaRelation VALUES(1, 1, 0);
+INSERT INTO PlaylistMediaRelation VALUES(2, 1, 1);
+INSERT INTO PlaylistMediaRelation VALUES(3, 1, 2);
 COMMIT;

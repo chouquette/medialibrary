@@ -38,6 +38,32 @@ Media::schema( Media::Table::Name, 33 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+"CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
+"("
+    "id_playlist PRIMARY KEY,"
+    "name TEXT,"
+    "file_id UNSIGNED INT,"
+    "creation_date UNSIGNED INT,"
+    "artwork_mrl TEXT,"
+    "nb_media UNSIGNED INT,"
+    "nb_present_media UNSIGNED INT"
+")",
+
+"INSERT INTO " + Playlist::Table::Name + "_backup "
+    " SELECT * FROM " + Playlist::Table::Name,
+
+"DROP TABLE " + Playlist::Table::Name,
+Playlist::schema( Playlist::Table::Name, 33 ),
+
+"INSERT INTO " + Playlist::Table::Name + " SELECT *,"
+    " (SELECT TOTAL(IIF(m.duration > 0, m.duration, 0)) "
+        " FROM " + Playlist::MediaRelationTable::Name + " mrt"
+        " INNER JOIN " + Media::Table::Name + " m ON m.id_media = mrt.media_id "
+        " WHERE mrt.playlist_id = id_playlist)"
+    " FROM " + Playlist::Table::Name + "_backup",
+
+"DROP TABLE " + Playlist::Table::Name + "_backup",
+
 Media::trigger( Media::Triggers::InsertFts, 33 ),
 Media::trigger( Media::Triggers::UpdateFts, 33 ),
 Media::trigger( Media::Triggers::DeleteFts, 33 ),
@@ -67,3 +93,11 @@ MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 33 ),
+
+Playlist::trigger( Playlist::Triggers::UpdateDurationOnMediaChange, 33 ),
+Playlist::trigger( Playlist::Triggers::InsertFts, 33 ),
+Playlist::trigger( Playlist::Triggers::UpdateFts, 33 ),
+Playlist::trigger( Playlist::Triggers::DeleteFts, 33 ),
+
+Playlist::index( Playlist::Indexes::FileId, 33 ),
+parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 33 ),

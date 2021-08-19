@@ -731,6 +731,107 @@ static void NbMedia( PlaylistTests* T )
     ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
 }
 
+static void Duration( PlaylistTests* T )
+{
+    ASSERT_EQ( 0, T->pl->duration() );
+
+    // Add a media with a known duration
+    auto m1 = T->ml->addExternalMedia( "http://media.org/test.mkv", 1300 );
+    ASSERT_EQ( m1->duration(), 1300 );
+
+    auto res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( T->pl->duration(), 1300 );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1300 );
+
+    // Now add a media with an unknown duration (-1) and check that it didn't
+    // decrement the playlist duration
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file://path/to/media.mkv", IMedia::Type::Video ) );
+    ASSERT_EQ( m2->duration(), -1 );
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( T->pl->duration(), 1300 );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1300 );
+
+    // Now remove the media with the unknown duration and check that we still
+    // didn't update the playlist duration
+
+    res = T->pl->remove( 1 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( T->pl->duration(), 1300 );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1300 );
+
+    // Now reinsert the unknown duration media
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+
+    // And update its duration
+    m2->setDuration( 12 );
+    res = m2->save();
+    ASSERT_TRUE( res );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1312 );
+
+    // Ensure that if for whatever reason the duration goes back to unknown, we
+    // don't end up adding '-1' to the playlist duration
+    m2->setDuration( -1 );
+    res = m2->save();
+    ASSERT_TRUE( res );
+
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1300 );
+
+    // Now remove both media one after another
+    res = T->pl->remove( 1 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( T->pl->duration(), 1300 );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 1300 );
+
+    res = T->pl->remove( 0 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( T->pl->duration(), 0 );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( T->pl->duration(), 0 );
+
+    /*
+     * Now insert the same media twice and check that it behaves properly when
+     * removing and that media.
+     */
+    res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 3 * m1->duration(), T->pl->duration() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 3 * m1->duration(), T->pl->duration() );
+
+    /* Remove the media only once from the playlist */
+    res = T->pl->remove( 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2 * m1->duration(), T->pl->duration() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 2 * m1->duration(), T->pl->duration() );
+
+    /* Now delete the media and ensure we removed its duration twice */
+    T->ml->deleteMedia( m1->id() );
+    T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
+    ASSERT_EQ( 0, T->pl->duration() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -763,6 +864,7 @@ int main( int ac, char** av )
     ADD_TEST( IsReadOnly );
     ADD_TEST( SortByCreationDate );
     ADD_TEST( NbMedia );
+    ADD_TEST( Duration );
 
     END_TESTS
 }

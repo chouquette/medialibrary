@@ -71,6 +71,12 @@ public:
     ///
     virtual uint32_t nbPresentMedia() const = 0;
     ///
+    /// \brief duration Returns the duration of the playlist
+    /// This is equal to the sum of the duration for all media belonging to
+    /// that playlist
+    ///
+    virtual int64_t duration() const = 0;
+    ///
     /// \brief media Returns the media contained in this playlist
     /// \param params A QueryParameters object or nullptr for the default params
     /// \return A query object representing the media in this playlist

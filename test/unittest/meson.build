@@ -704,6 +704,7 @@ playlist_tests = [
   'IsReadOnly',
   'SortByCreationDate',
   'NbMedia',
+  'Duration',
 ]
 
 foreach t : playlist_tests

@@ -79,6 +79,7 @@ namespace
         "media_group_update_nb_media_types",
         "media_group_update_nb_media_types_presence",
         "media_update_device_presence",
+        "playlist_update_duration_on_media_change",
         "playlist_update_nb_media_on_media_deletion",
         "playlist_update_nb_present_media",
         "show_decrement_nb_episode",
@@ -707,6 +708,10 @@ static void Upgrade31to32( DbModel* T )
 static void Upgrade32to33( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v32.sql" );
+
+    auto pl = T->ml->playlist( 1 );
+    ASSERT_NON_NULL( pl );
+    ASSERT_EQ( pl->duration(), 33 );
 }
 
 int main( int ac, char** av )
