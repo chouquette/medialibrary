@@ -141,9 +141,9 @@ private:
      * position is out of range
      */
     int64_t mediaAt( uint32_t position );
-    bool addInternal( int64_t mediaId, uint32_t position, bool updateCount );
-    bool addInternal( const IMedia& media, uint32_t position, bool updateCount );
-    bool removeInternal( uint32_t position, int64_t mediaId, bool updateCount );
+    bool addInternal( int64_t mediaId, uint32_t position, bool updateCounters );
+    bool addInternal( const IMedia& media, uint32_t position, bool updateCounters );
+    bool removeInternal( uint32_t position, int64_t mediaId, bool updateCounters );
 
 private:
     MediaLibraryPtr m_ml;

@@ -214,15 +214,15 @@ int64_t Playlist::mediaAt( uint32_t position )
     return row.extract<int64_t>();
 }
 
-bool Playlist::addInternal(int64_t mediaId, uint32_t position, bool updateCount)
+bool Playlist::addInternal( int64_t mediaId, uint32_t position, bool updateCounters )
 {
     auto media = m_ml->media( mediaId );
     if ( media == nullptr )
         return false;
-    return addInternal( *media, position, updateCount );
+    return addInternal( *media, position, updateCounters );
 }
 
-bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCount )
+bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCounters )
 {
     auto t = m_ml->getConn()->newTransaction();
 
@@ -247,7 +247,7 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
     }
     if ( res == false )
         return false;
-    if ( updateCount == true )
+    if ( updateCounters == true )
     {
         const std::string updateCountReq = "UPDATE " + Table::Name +
                 " SET nb_media = nb_media + 1, nb_present_media = nb_present_media + ?"
@@ -263,17 +263,17 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
     return true;
 }
 
-bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateCount )
+bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateCounters )
 {
     std::unique_ptr<sqlite::Transaction> t;
-    if ( updateCount == true )
+    if ( updateCounters == true )
         t = m_ml->getConn()->newTransaction();
     static const std::string req = "DELETE FROM " + MediaRelationTable::Name +
             " WHERE playlist_id = ? AND position = ?";
     if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
         return false;
 
-    if ( updateCount == false )
+    if ( updateCounters == false )
         return true;
 
     const std::string updateCountReq = "UPDATE " + Table::Name +
