@@ -286,12 +286,13 @@ void Tests::runChecks()
     }
     if ( expected.HasMember( "nbPlaylists" ) == true )
     {
-        const auto playlists = m_ml->playlists( nullptr )->all();
+        const auto playlists = m_ml->playlists( PlaylistType::All, nullptr )->all();
         ASSERT_EQ( expected["nbPlaylists"].GetUint(), playlists.size() );
     }
     if ( expected.HasMember( "playlists" ) == true )
     {
-      checkPlaylists( expected["playlists"], m_ml->playlists( nullptr )->all() );
+        checkPlaylists( expected["playlists"], m_ml->playlists( PlaylistType::All,
+                                                                nullptr )->all() );
     }
     if ( expected.HasMember( "artists" ) )
     {

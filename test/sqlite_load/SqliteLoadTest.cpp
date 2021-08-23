@@ -167,7 +167,7 @@ struct Tester
                 }
                 case 5:
                 {
-                    auto pl = ml->playlists( nullptr )->all();
+                    auto pl = ml->playlists( PlaylistType::All, nullptr )->all();
                     break;
                 }
                 case 6:

@@ -1084,9 +1084,32 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                             sqlite::Tools::sanitizePattern( name ) );
 }
 
-Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, const QueryParameters* params )
+Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
+                                    const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name;
+    auto includeMissing = params != nullptr && params->includeMissing == true;
+    switch ( type )
+    {
+    case PlaylistType::VideoOnly:
+        if ( includeMissing == true )
+            req += " WHERE (nb_video > 0 OR nb_unknown > 0) AND nb_audio = 0";
+        else
+            req += " WHERE (nb_present_video > 0 OR nb_present_unknown > 0)"
+                   " AND nb_present_audio = 0";
+        break;
+    case PlaylistType::AudioOnly:
+        if ( includeMissing == true )
+            req += " WHERE nb_video = 0 AND nb_unknown = 0 AND nb_audio > 0";
+        else
+            req += " WHERE nb_present_video = 0 AND nb_present_unknown = 0"
+                   " AND nb_present_audio > 0";
+        break;
+    case PlaylistType::All:
+    default:
+        break;
+    }
+
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ) );
 }

@@ -403,7 +403,7 @@ static void Upgrade13to14( DbModel* T )
     auto& meta = m->metadata( static_cast<IMedia::MetadataType>( 50 ) );
     ASSERT_EQ( "fake progress", meta.asStr() );
 
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     auto playlistMedia = playlists[0]->media( nullptr )->all();
     ASSERT_EQ( 3u, playlistMedia.size() );
@@ -648,7 +648,7 @@ static void Upgrade29to30( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v29.sql" );
 
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     auto pl = playlists[0];
     QueryParameters params{};
@@ -713,7 +713,7 @@ static void Upgrade32to33( DbModel* T )
     ASSERT_NON_NULL( pl );
     ASSERT_EQ( pl->duration(), 33 );
 
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 3u, playlists.size() );
     ASSERT_EQ( "audio playlist", playlists[0]->name() );
     ASSERT_EQ( 0u, playlists[0]->nbVideo() );

@@ -144,7 +144,8 @@ public:
                                     const QueryParameters* params ) const override;
 
     virtual PlaylistPtr createPlaylist( std::string name ) override;
-    virtual Query<IPlaylist> playlists( const QueryParameters* params ) override;
+    virtual Query<IPlaylist> playlists( PlaylistType type,
+                                        const QueryParameters* params ) override;
     virtual PlaylistPtr playlist( int64_t id ) const override;
     virtual bool deletePlaylist( int64_t playlistId ) override;
 

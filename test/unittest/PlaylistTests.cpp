@@ -87,7 +87,7 @@ static void Fetch( PlaylistTests* T )
     ASSERT_NE( nullptr, pl2 );
     ASSERT_EQ( T->pl->id(), pl2->id() );
 
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
 }
@@ -96,7 +96,7 @@ static void DeletePlaylist( PlaylistTests* T )
 {
     auto res = T->ml->deletePlaylist( T->pl->id() );
     ASSERT_TRUE( res );
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 0u, playlists.size() );
 }
 
@@ -119,7 +119,7 @@ static void FetchAll( PlaylistTests* T )
     T->ml->createPlaylist( "T->pl 3" );
     T->ml->createPlaylist( "T->pl 4" );
 
-    auto playlists = T->ml->playlists( nullptr )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 4u, playlists.size() );
     for ( auto& p : playlists )
     {
@@ -404,20 +404,20 @@ static void Sort( PlaylistTests* T )
 {
     auto pl2 = T->ml->createPlaylist( "A playlist" );
 
-    auto pls = T->ml->playlists( nullptr )->all();
+    auto pls = T->ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[0]->id() );
     ASSERT_EQ( T->pl->id(), pls[1]->id() );
 
     QueryParameters params { SortingCriteria::Default, true };
-    pls = T->ml->playlists( &params )->all();
+    pls = T->ml->playlists( PlaylistType::All, &params )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( pl2->id(), pls[1]->id() );
     ASSERT_EQ( T->pl->id(), pls[0]->id() );
 
     params.sort = SortingCriteria::NbAudio;
     params.desc = true;
-    pls = T->ml->playlists( &params )->all();
+    pls = T->ml->playlists( PlaylistType::All, &params )->all();
     ASSERT_EQ( 2u, pls.size() );
     ASSERT_EQ( T->pl->id(), pls[0]->id() );
     ASSERT_EQ( pl2->id(), pls[1]->id() );
@@ -671,14 +671,14 @@ static void SortByCreationDate( PlaylistTests* T )
     QueryParameters params{};
     params.sort = SortingCriteria::InsertionDate;
     params.desc = false;
-    auto playlists = T->ml->playlists( &params )->all();
+    auto playlists = T->ml->playlists( PlaylistType::All, &params )->all();
     ASSERT_EQ( 3u, playlists.size() );
     ASSERT_EQ( pl2->id(), playlists[0]->id() );
     ASSERT_EQ( pl3->id(), playlists[1]->id() );
     ASSERT_EQ( T->pl->id(), playlists[2]->id() );
 
     params.desc = true;
-    playlists = T->ml->playlists( &params )->all();
+    playlists = T->ml->playlists( PlaylistType::All, &params )->all();
     ASSERT_EQ( 3u, playlists.size() );
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
     ASSERT_EQ( pl3->id(), playlists[1]->id() );
@@ -1013,6 +1013,49 @@ static void UpdateNbMediaOnMediaTypeChange( PlaylistTests* T )
     ASSERT_EQ( 0u, pl2->nbUnknown() );
 }
 
+static void FilterByMediaType( PlaylistTests* T )
+{
+    auto empty = T->ml->createPlaylist( "empty" );
+    ASSERT_NON_NULL( empty );
+    auto videoOnly = T->ml->createPlaylist( "video only" );
+    ASSERT_NON_NULL( videoOnly );
+
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file://media.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file://media.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file://media.ts", IMedia::Type::Unknown ) );
+
+    /* Check that all playlists are returned when not filtering by media type */
+    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
+    ASSERT_EQ( 3u, playlists.size() );
+
+    /*
+     * Insert the unknown media and check that it's considered as a video when
+     * filtering by media type
+     */
+    auto res = videoOnly->append( *m3 );
+    ASSERT_TRUE( res );
+    playlists = T->ml->playlists( PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
+
+    /* Insert a video to the playlist and check that it's still returned */
+    res = videoOnly->append( *m1 );
+    ASSERT_TRUE( res );
+    playlists = T->ml->playlists( PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
+
+    /* Add an audio media to a playlist and check that it's now returned */
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+    playlists = T->ml->playlists( PlaylistType::AudioOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( T->pl->id(), playlists[0]->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -1049,6 +1092,7 @@ int main( int ac, char** av )
     ADD_TEST( UpdateNbMediaOnInsertAndDelete );
     ADD_TEST( UpdateNbMediaOnMediaRemoval );
     ADD_TEST( UpdateNbMediaOnMediaTypeChange );
+    ADD_TEST( FilterByMediaType );
 
     END_TESTS
 }

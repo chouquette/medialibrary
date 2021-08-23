@@ -167,6 +167,16 @@ enum class ArtistIncluded : uint8_t
     AlbumArtistOnly,
 };
 
+enum class PlaylistType : uint8_t
+{
+    /// Include all kind of playlist, regarding of the media types
+    All,
+    /// Only include audio playlists
+    AudioOnly,
+    /// Only include video playlist
+    VideoOnly,
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -549,7 +559,25 @@ public:
      *  Playlists
      */
     virtual PlaylistPtr createPlaylist( std::string name ) = 0;
-    virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) = 0;
+    /**
+     * @brief playlists List all playlists known to the media library
+     * @param type The type of playlist to return
+     * @param params Some query parameters
+     * @return A Query object
+     *
+     * The provided playlist type allows the application to fetch the playlist containing
+     * only Video/Audio media. Depending on QueryParameters::includeMissing
+     * missing media will or will not be included.
+     * This means that at a given time, a playlist might be considered an audio
+     * playlist if all the video it contains are on a remove device. When the
+     * device comes back, the playlist will turn back to a non-audio playlist.
+     *
+     * If a playlist contains a media of unknown type, it is assumed to be a video.
+     *
+     * If a playlist is empty, it will only be returned for PlaylistType::All
+     */
+    virtual Query<IPlaylist> playlists( PlaylistType type,
+                                        const QueryParameters* params = nullptr ) = 0;
     virtual PlaylistPtr playlist( int64_t id ) const = 0;
     virtual bool deletePlaylist( int64_t playlistId ) = 0;
 

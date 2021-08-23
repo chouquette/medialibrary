@@ -156,7 +156,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
     res = T->m_cb->waitForPlaylistReload();
     ASSERT_TRUE( res );
 
-    auto playlists = T->m_ml->playlists( nullptr )->all();
+    auto playlists = T->m_ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
     auto playlist1 = playlists[0];
     media = playlist1->media( nullptr )->all();

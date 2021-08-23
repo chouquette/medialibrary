@@ -814,8 +814,10 @@ static void PlaylistPresence( DeviceFsTests* T )
 
     auto pl = T->ml->createPlaylist( "test playlist" );
     auto pl2 = T->ml->createPlaylist( "test playlist 2" );
+    auto pl3 = T->ml->createPlaylist( "video playlist" );
     auto media1 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
     auto media2 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
+    auto media3 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" ) );
 
     auto res = pl->append( *media1 );
     ASSERT_TRUE( res );
@@ -825,6 +827,9 @@ static void PlaylistPresence( DeviceFsTests* T )
     res = pl2->append( *media1 );
     ASSERT_TRUE( res );
 
+    res = pl3->append( *media3 );
+    ASSERT_TRUE( res );
+
     ASSERT_EQ( 2u, pl->nbMedia() );
     ASSERT_EQ( 2u, pl->nbPresentMedia() );
     ASSERT_EQ( 2u, pl->nbAudio() );
@@ -833,9 +838,14 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
     ASSERT_EQ( 1u, pl2->nbAudio() );
     ASSERT_EQ( 1u, pl2->nbPresentAudio() );
+    ASSERT_EQ( 1u, pl3->nbMedia() );
+    ASSERT_EQ( 1u, pl3->nbVideo() );
+    ASSERT_EQ( 1u, pl3->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl3->nbPresentVideo() );
 
     pl = std::static_pointer_cast<Playlist>( T->ml->playlist( pl->id() ) );
     pl2 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl2->id() ) );
+    pl3 = std::static_pointer_cast<Playlist>( T->ml->playlist( pl3->id() ) );
 
     ASSERT_EQ( 2u, pl->nbMedia() );
     ASSERT_EQ( 2u, pl->nbPresentMedia() );
@@ -845,6 +855,14 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, pl2->nbPresentMedia() );
     ASSERT_EQ( 1u, pl2->nbAudio() );
     ASSERT_EQ( 1u, pl2->nbPresentAudio() );
+    ASSERT_EQ( 1u, pl3->nbMedia() );
+    ASSERT_EQ( 1u, pl3->nbVideo() );
+    ASSERT_EQ( 1u, pl3->nbPresentMedia() );
+    ASSERT_EQ( 1u, pl3->nbPresentVideo() );
+
+    auto videoPlaylists = T->ml->playlists( PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, videoPlaylists.size() );
+    ASSERT_EQ( pl3->id(), videoPlaylists[0]->id() );
 
     auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
     T->Reload();
@@ -872,6 +890,9 @@ static void PlaylistPresence( DeviceFsTests* T )
     nbMedia = pl2->media( &params )->count();
     ASSERT_EQ( 1u, nbMedia );
 
+    videoPlaylists = T->ml->playlists( PlaylistType::VideoOnly, &params )->all();
+    ASSERT_EQ( 0u, videoPlaylists.size() );
+
     params.includeMissing = true;
     plMedia = pl->media( &params )->all();
     ASSERT_EQ( 2u, plMedia.size() );
@@ -882,6 +903,10 @@ static void PlaylistPresence( DeviceFsTests* T )
     ASSERT_EQ( 1u, plMedia.size() );
     nbMedia = pl2->media( &params )->count();
     ASSERT_EQ( 1u, nbMedia );
+
+    videoPlaylists = T->ml->playlists( PlaylistType::VideoOnly, &params )->all();
+    ASSERT_EQ( 1u, videoPlaylists.size() );
+    ASSERT_EQ( pl3->id(), videoPlaylists[0]->id() );
 
     T->fsMock->addDevice( device );
     T->Reload();

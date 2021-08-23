@@ -708,6 +708,7 @@ playlist_tests = [
   'UpdateNbMediaOnInsertAndDelete',
   'UpdateNbMediaOnMediaRemoval',
   'UpdateNbMediaOnMediaTypeChange',
+  'FilterByMediaType',
 ]
 
 foreach t : playlist_tests

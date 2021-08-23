@@ -979,9 +979,10 @@ PlaylistPtr MediaLibrary::createPlaylist( std::string name )
     }
 }
 
-Query<IPlaylist> MediaLibrary::playlists( const QueryParameters* params )
+Query<IPlaylist> MediaLibrary::playlists( PlaylistType type,
+                                          const QueryParameters* params )
 {
-    return Playlist::listAll( this, params );
+    return Playlist::listAll( this, type, params );
 }
 
 PlaylistPtr MediaLibrary::playlist( int64_t id ) const

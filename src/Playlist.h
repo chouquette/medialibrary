@@ -122,7 +122,8 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
                                     const QueryParameters* params );
-    static Query<IPlaylist> listAll( MediaLibraryPtr ml, const QueryParameters* params );
+    static Query<IPlaylist> listAll( MediaLibraryPtr ml, PlaylistType type,
+                                     const QueryParameters* params );
 
     /**
      * @brief deleteAllExternal Delete all external playlists, ie. all playlist
