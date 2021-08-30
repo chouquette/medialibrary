@@ -206,7 +206,8 @@ FsHolder::fsFactoryForMrl( const std::string& mrl ) const
     return fsFactoryForMrlLocked( mrl );
 }
 
-std::shared_ptr<fs::IFileSystemFactory> FsHolder::fsFactoryForMrlLocked(const std::string& mrl) const
+std::shared_ptr<fs::IFileSystemFactory>
+FsHolder::fsFactoryForMrlLocked( const std::string& mrl ) const
 {
     for ( const auto& f : m_fsFactories )
     {
@@ -273,7 +274,7 @@ void FsHolder::unregisterCallback( IFsHolderCb* cb )
 }
 
 void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
-                                             const std::string& newMountpoint )
+                                const std::string& newMountpoint )
 {
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
