@@ -806,26 +806,26 @@ static void MetadataGetBatch( Tests* T )
 
     m->setMetadata( IMedia::MetadataType::Crop, "crop" );
     m->setMetadata( IMedia::MetadataType::Gain, "gain" );
-    m->setMetadata( IMedia::MetadataType::Seen, "seen" );
+    m->setMetadata( IMedia::MetadataType::Rating, "five stars" );
 
     metas = m->metadata();
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "five stars" );
 
     m = T->ml->media( m->id() );
     metas = m->metadata();
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "five stars" );
 
     m->unsetMetadata( IMedia::MetadataType::Gain );
     metas = m->metadata();
     ASSERT_EQ( 2u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "five stars" );
 }
 
 static void SetBatch( Tests* T )
@@ -837,7 +837,7 @@ static void SetBatch( Tests* T )
     auto res = m->setMetadata( {
         { IMedia::MetadataType::Crop, "crop" },
         { IMedia::MetadataType::Gain, "gain" },
-        { IMedia::MetadataType::Seen, "seen" },
+        { IMedia::MetadataType::Rating, "five stars" },
     });
     ASSERT_TRUE( res );
 
@@ -845,25 +845,25 @@ static void SetBatch( Tests* T )
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "five stars" );
 
     m = T->ml->media( m->id() );
     metas = m->metadata();
     ASSERT_EQ( 3u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "seen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "five stars" );
 
     // Partial override
     m->setMetadata( {
-        { IMedia::MetadataType::Seen, "unseen" },
+        { IMedia::MetadataType::Rating, "une étoile" },
         { IMedia::MetadataType::Zoom, "zoom"  }
     });
     metas = m->metadata();
     ASSERT_EQ( 4u, metas.size() );
     ASSERT_EQ( metas[IMedia::MetadataType::Crop], "crop" );
     ASSERT_EQ( metas[IMedia::MetadataType::Gain], "gain" );
-    ASSERT_EQ( metas[IMedia::MetadataType::Seen], "unseen" );
+    ASSERT_EQ( metas[IMedia::MetadataType::Rating], "une étoile" );
     ASSERT_EQ( metas[IMedia::MetadataType::Zoom], "zoom" );
 }
 

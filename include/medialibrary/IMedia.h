@@ -82,7 +82,7 @@ public:
         Title,
         Chapter,
         Program,
-        Seen,
+        // Seen, // Replaced by the media playcount
 
         // Video:
         VideoTrack = 100,
