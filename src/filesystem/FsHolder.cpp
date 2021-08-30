@@ -166,6 +166,7 @@ void FsHolder::startFsFactoriesAndRefresh()
     if ( m_started.compare_exchange_strong( expected, true ) == false )
         return;
 
+    {
     std::lock_guard<compat::Mutex> lock( m_mutex );
 
     for ( const auto& fsFactory : m_fsFactories )
@@ -181,6 +182,9 @@ void FsHolder::startFsFactoriesAndRefresh()
             fsFactory->refreshDevices();
         }
     }
+    }
+
+    std::lock_guard<compat::Mutex> lock{ m_cbMutex };
     auto devices = Device::fetchAll( m_ml );
     for ( const auto& d : devices )
     {
@@ -257,7 +261,7 @@ void FsHolder::startFsFactory( fs::IFileSystemFactory& fsFactory ) const
 
 void FsHolder::registerCallback( IFsHolderCb* cb )
 {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    std::lock_guard<compat::Mutex> lock{ m_cbMutex };
 
     auto it = std::find( cbegin( m_callbacks ), cend( m_callbacks ), cb );
     if ( it != cend( m_callbacks ) )
@@ -270,7 +274,7 @@ void FsHolder::registerCallback( IFsHolderCb* cb )
 
 void FsHolder::unregisterCallback( IFsHolderCb* cb )
 {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    std::lock_guard<compat::Mutex> lock{ m_cbMutex };
 
     auto it = std::find( cbegin( m_callbacks ), cend( m_callbacks ), cb );
     if ( it == cend( m_callbacks ) )
@@ -284,6 +288,12 @@ void FsHolder::unregisterCallback( IFsHolderCb* cb )
 void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
                                 const std::string& newMountpoint )
 {
+    /*
+     * This callback might be called synchronously by an external device lister
+     * upon a call to fsFactory->refreshDevices()
+     * This means we must not acquire m_mutex from here as it would most likely
+     * already be held.
+     */
     auto device = Device::fromUuid( m_ml, deviceFs.uuid(), deviceFs.scheme() );
     if ( device == nullptr )
         return;
@@ -314,7 +324,7 @@ void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
         // scanned.
         // We also want to resume any parsing tasks that were previously
         // started before the device went away
-        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        std::lock_guard<compat::Mutex> lock{ m_cbMutex };
         assert( deviceFs.isPresent() == true );
         for ( const auto cb : m_callbacks )
             cb->onDeviceReappearing( device->id() );
@@ -345,7 +355,7 @@ void FsHolder::onDeviceUnmounted( const fs::IDevice& deviceFs,
     device->setPresent( deviceFs.isPresent() );
     if ( deviceFs.isPresent() == false )
     {
-        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        std::lock_guard<compat::Mutex> lock{ m_cbMutex };
         assert( deviceFs.isPresent() == false );
         for ( const auto cb : m_callbacks )
             cb->onDeviceReappearing( device->id() );

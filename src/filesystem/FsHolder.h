@@ -103,6 +103,7 @@ private:
 
 private:
     MediaLibrary* m_ml;
+    // This lock protects both fs factories & device listers
     mutable compat::Mutex m_mutex;
 
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> m_fsFactories;
@@ -112,6 +113,7 @@ private:
     std::atomic_bool m_networkDiscoveryEnabled;
     std::atomic_bool m_started;
 
+    mutable compat::Mutex m_cbMutex;
     std::vector<IFsHolderCb*> m_callbacks;
 };
 
