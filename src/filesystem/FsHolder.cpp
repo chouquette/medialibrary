@@ -162,6 +162,10 @@ void FsHolder::refreshDevices( fs::IFileSystemFactory& fsFactory )
 
 void FsHolder::startFsFactoriesAndRefresh()
 {
+    auto expected = false;
+    if ( m_started.compare_exchange_strong( expected, true ) == false )
+        return;
+
     std::lock_guard<compat::Mutex> lock( m_mutex );
 
     for ( const auto& fsFactory : m_fsFactories )
@@ -187,6 +191,10 @@ void FsHolder::startFsFactoriesAndRefresh()
 
 void FsHolder::stopNetworkFsFactories()
 {
+    auto expected = true;
+    if ( m_started.compare_exchange_strong( expected, false ) == false )
+        return;
+
     std::lock_guard<compat::Mutex> lock( m_mutex );
 
     for ( auto& fsFactory : m_fsFactories )
