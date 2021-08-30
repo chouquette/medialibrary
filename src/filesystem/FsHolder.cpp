@@ -167,21 +167,21 @@ void FsHolder::startFsFactoriesAndRefresh()
         return;
 
     {
-    std::lock_guard<compat::Mutex> lock( m_mutex );
+        std::lock_guard<compat::Mutex> lock( m_mutex );
 
-    for ( const auto& fsFactory : m_fsFactories )
-    {
-        /*
-         * We only want to start the fs factory if it is a local one, or if
-         * it's a network one and network discovery is enabled
-         */
-        if ( m_networkDiscoveryEnabled == true ||
-             fsFactory->isNetworkFileSystem() == false )
+        for ( const auto& fsFactory : m_fsFactories )
         {
-            fsFactory->start( this );
-            fsFactory->refreshDevices();
+            /*
+             * We only want to start the fs factory if it is a local one, or if
+             * it's a network one and network discovery is enabled
+             */
+            if ( m_networkDiscoveryEnabled == true ||
+                 fsFactory->isNetworkFileSystem() == false )
+            {
+                fsFactory->start( this );
+                fsFactory->refreshDevices();
+            }
         }
-    }
     }
 
     std::lock_guard<compat::Mutex> lock{ m_cbMutex };
