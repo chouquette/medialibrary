@@ -356,7 +356,6 @@ void FsHolder::onDeviceUnmounted( const fs::IDevice& deviceFs,
     if ( deviceFs.isPresent() == false )
     {
         std::lock_guard<compat::Mutex> lock{ m_cbMutex };
-        assert( deviceFs.isPresent() == false );
         for ( const auto cb : m_callbacks )
             cb->onDeviceReappearing( device->id() );
     }
