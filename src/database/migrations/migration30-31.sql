@@ -167,9 +167,9 @@ MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 31 ),
     " WHERE entity_type = " + std::to_string(
         static_cast<std::underlying_type_t<IMetadata::EntityType>>(
             IMetadata::EntityType::Media ) ) +
-        " AND type = " +
-            std::to_string( static_cast<std::underlying_type_t<IMedia::MetadataType>>(
-                IMedia::MetadataType::Seen ) ) +
+        " AND type = 55"
+            /* std::to_string( static_cast<std::underlying_type_t<IMedia::MetadataType>>(
+                IMedia::MetadataType::Seen ) ) */
     ") AS meta"
 " WHERE m.id_media = meta.id_media",
 
