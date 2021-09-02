@@ -337,7 +337,7 @@ bool Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
          * the play count, reset the progress, and bump the last played date
          */
         req = "UPDATE " + Table::Name + " SET last_position = ?, last_time = ?,"
-                " play_count = ifnull(play_count, 0) + 1,"
+                " play_count = play_count + 1,"
                 " last_played_date = ? WHERE id_media = ?";
         curatedPosition = -1.f;
         curatedTime = -1;
@@ -1419,9 +1419,11 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
     else if ( dbModel >= 27 )
         req += "progress REAL DEFAULT -1,";
 
-    req +=
-        "play_count UNSIGNED INTEGER,"
-        "last_played_date UNSIGNED INTEGER,";
+    if ( dbModel < 33 )
+        req += "play_count UNSIGNED INTEGER,";
+    else
+        req += "play_count UNSIGNED INTEGER NOT NULL DEFAULT 0,";
+    req += "last_played_date UNSIGNED INTEGER,";
 
     if ( dbModel < 33 )
         req += "real_last_played_date UNSIGNED INTEGER,";

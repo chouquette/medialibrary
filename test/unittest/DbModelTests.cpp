@@ -729,6 +729,9 @@ static void Upgrade32to33( DbModel* T )
     ASSERT_EQ( 0u, playlists[2]->nbVideo() );
     ASSERT_EQ( 0u, playlists[2]->nbAudio() );
     ASSERT_EQ( 0u, playlists[2]->nbUnknown() );
+
+    auto m = T->ml->media( 1 );
+    ASSERT_EQ( 123u, m->playCount() );
 }
 
 int main( int ac, char** av )

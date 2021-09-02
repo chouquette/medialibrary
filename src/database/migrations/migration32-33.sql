@@ -24,7 +24,7 @@
 
 "INSERT INTO " + Media::Table::Name + "_backup "
 "SELECT id_media, type, subtype, duration, last_position, last_time,"
-    "play_count, last_played_date, insertion_date, release_date,"
+    "IFNULL(play_count, 0), last_played_date, insertion_date, release_date,"
     "title, filename, is_favorite, is_present, device_id, nb_playlists, folder_id,"
     "import_type, group_id, forced_title FROM " + Media::Table::Name,
 
