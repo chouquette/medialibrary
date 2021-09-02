@@ -25,6 +25,8 @@
 #include <cassert>
 #include <sys/file.h>
 #include <unistd.h>
+#include <fcntl.h>
+
 #include "LockFile.h"
 #include "logging/Logger.h"
 #include "utils/Charsets.h"
