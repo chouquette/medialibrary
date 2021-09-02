@@ -4,6 +4,7 @@ variables:
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20210215200735
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20210216181601
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20210218132922
+  MEDIALIBRARY_ALPINE_IMG: registry.videolan.org/medialibrary-alpine:20210902074848
   MEDIALIB_TEST_FOLDER: $CI_PROJECT_DIR/medialib_tests/
 
 linux:
@@ -53,6 +54,17 @@ linux-novlc:
       - amd64
     script:
       - meson -Dlibvlc=disabled --buildtype=release build
+      - cd build && ninja
+
+alpine:
+    image: $MEDIALIBRARY_ALPINE_IMG
+    rules:
+      - if: $CI_MERGE_REQUEST_IID
+    tags:
+      - docker
+      - amd64
+    script:
+      - meson build
       - cd build && ninja
 
 win32:
