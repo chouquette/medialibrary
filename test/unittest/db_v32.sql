@@ -128,6 +128,8 @@ CREATE INDEX media_group_last_modification_date ON MediaGroup(last_modification_
 CREATE INDEX movie_media_idx ON Movie(media_id);
 CREATE INDEX task_parent_folder_id_idx ON Task(parent_folder_id);
 INSERT INTO Settings VALUES(32,2,6);
+INSERT INTO MediaGroup VALUES(1,'test group',0,2,0,0,0,2,0,33,0,0,0,0);
+INSERT INTO MediaGroup VALUES(2,'test group',0,2,0,0,0,2,0,20114,0,0,0,0);
 INSERT INTO Device VALUES(1,'720f7152-67b7-41da-89cf-bf22cef92095','file://',0,1,0,0);
 INSERT INTO Folder VALUES(1,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint1/banned/',NULL,NULL,1,1,0,0,0);
 INSERT INTO Folder VALUES(2,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint1/','entrypoint1',NULL,0,1,0,0,0);
@@ -136,11 +138,11 @@ INSERT INTO Folder VALUES(4,'file:///home/chouquette/dev/medialibrary/test/sampl
 INSERT INTO Folder VALUES(5,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/','artist1',3,0,1,0,0,0);
 INSERT INTO Folder VALUES(6,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album2/','album2',5,0,1,0,3,0);
 INSERT INTO Folder VALUES(7,'file:///home/chouquette/dev/medialibrary/test/samples/samples/music/various/entrypoint2/artist1/album1/','album1',5,0,1,0,3,0);
-INSERT INTO Media VALUES(1,2,3,11,-1.0,-1,123,NULL,NULL,1627997947,0,'ep1-album1-track1','track1.mp3',0,1,1,0,4,0,NULL,0);
+INSERT INTO Media VALUES(1,2,3,11,-1.0,-1,123,NULL,NULL,1627997947,0,'ep1-album1-track1','track1.mp3',0,1,1,0,4,0,1,0);
 INSERT INTO Media VALUES(2,2,3,-1,-1.0,-1,NULL,NULL,NULL,1627997947,0,'ep1-album1-track2','track2.mp3',0,1,1,0,4,0,NULL,0);
-INSERT INTO Media VALUES(3,2,3,22,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep1-album1-track3','track3.mp3',0,1,1,0,4,0,NULL,0);
-INSERT INTO Media VALUES(4,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track1','track1.mp3',0,1,1,0,6,0,NULL,0);
-INSERT INTO Media VALUES(5,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track2','track2.mp3',0,1,1,0,6,0,NULL,0);
+INSERT INTO Media VALUES(3,2,3,22,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep1-album1-track3','track3.mp3',0,1,1,0,4,0,1,0);
+INSERT INTO Media VALUES(4,2,3,10057,-1.0,-1,1,NULL,NULL,1627997948,0,'ep2-album2-track1','track1.mp3',0,1,1,0,6,0,2,0);
+INSERT INTO Media VALUES(5,2,3,10057,-1.0,-1,1,NULL,NULL,1627997948,0,'ep2-album2-track2','track2.mp3',0,1,1,0,6,0,2,0);
 INSERT INTO Media VALUES(6,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album2-track3','track3.mp3',0,1,1,0,6,0,NULL,0);
 INSERT INTO Media VALUES(7,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album1-track1','track1.mp3',0,1,1,0,7,0,NULL,0);
 INSERT INTO Media VALUES(8,2,3,10057,-1.0,-1,NULL,NULL,NULL,1627997948,0,'ep2-album1-track2','track2.mp3',0,1,1,0,7,0,NULL,0);

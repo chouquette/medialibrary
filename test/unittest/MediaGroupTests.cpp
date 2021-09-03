@@ -1628,6 +1628,74 @@ static void ChangeExternalMediaGroup( Tests* T )
     ASSERT_EQ( 1u, g2->nbAudio() );
 }
 
+static void NbSeen( Tests* T )
+{
+    auto g = T->ml->createMediaGroup( "first" );
+    auto m1 = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
+    auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    /* Add a media that will not be seen in order to prevent the media group from
+     * being deleted when we try to remove/delete all the seen media */
+    auto m3 = T->ml->addMedia( "keepalive.mp4", IMedia::Type::Video );
+
+    ASSERT_EQ( 0u, g->nbSeen() );
+
+    auto res = g->add( *m1 );
+    ASSERT_TRUE( res );
+
+    res = g->add( *m2 );
+    ASSERT_TRUE( res );
+
+    res = g->add( *m3 );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 0u, g->nbSeen() );
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 0u, g->nbSeen() );
+
+    /* Increase the member media play count and check that it reflects on the group */
+    res = m1->setPlayCount( 2 );
+    ASSERT_TRUE( res );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 1u, g->nbSeen() );
+
+    res = m2->setPlayCount( 1 );
+    ASSERT_TRUE( res );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 2u, g->nbSeen() );
+    ASSERT_EQ( 2u, g->nbPresentSeen() );
+
+    /* Check for playcount decrement */
+    res = m1->setPlayCount( 0 );
+    ASSERT_TRUE( res );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 1u, g->nbSeen() );
+
+    /* Now re-bump the nb seen to check for media deletion / media group removal */
+    res = m1->setPlayCount( 1 );
+    ASSERT_TRUE( res );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 2u, g->nbSeen() );
+    ASSERT_EQ( 2u, g->nbPresentSeen() );
+
+    /* Check that removing the media from the group will update the nb seen */
+    res = g->remove( *m1 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, g->nbSeen() );
+    ASSERT_EQ( 1u, g->nbPresentSeen() );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 1u, g->nbSeen() );
+
+    T->ml->deleteMedia( m2->id() );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_EQ( 0u, g->nbSeen() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( MediaGroup );
@@ -1672,6 +1740,7 @@ int main( int ac, char** av )
     ADD_TEST( ConvertMediaToExternal );
     ADD_TEST( ConvertExternalMediaType );
     ADD_TEST( ChangeExternalMediaGroup );
+    ADD_TEST( NbSeen );
 
     END_TESTS;
 }

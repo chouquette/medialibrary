@@ -99,6 +99,51 @@ Playlist::schema( Playlist::Table::Name, 33 ),
     " GROUP BY mrt.playlist_id) AS sub"
 " WHERE id_playlist = sub.playlist_id",
 
+"CREATE TEMPORARY TABLE " + MediaGroup::Table::Name + "_backup"
+"("
+    "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "name TEXT COLLATE NOCASE,"
+    "nb_video UNSIGNED INTEGER DEFAULT 0,"
+    "nb_audio UNSIGNED INTEGER DEFAULT 0,"
+    "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+    "nb_external UNSIGNED INTEGER DEFAULT 0,"
+    "nb_present_video UNSIGNED INTEGER DEFAULT 0,"
+    "nb_present_audio UNSIGNED INTEGER DEFAULT 0,"
+    "nb_present_unknown UNSIGNED INTEGER DEFAULT 0,"
+    "duration INTEGER DEFAULT 0,"
+    "creation_date INTEGER NOT NULL,"
+    "last_modification_date INTEGER NOT NULL,"
+    "user_interacted BOOLEAN,"
+    "forced_singleton BOOLEAN"
+")",
+
+"INSERT INTO " + MediaGroup::Table::Name + "_backup "
+    "SELECT * FROM " + MediaGroup::Table::Name,
+
+"DROP TABLE " + MediaGroup::Table::Name,
+
+MediaGroup::schema( MediaGroup::Table::Name, 33 ),
+
+"INSERT INTO " + MediaGroup::Table::Name +
+" SELECT id_group, name, nb_video, nb_audio, nb_unknown, 0, nb_external, "
+    "nb_present_video, nb_present_audio, nb_present_unknown, 0, duration, "
+    "creation_date, last_modification_date, user_interacted, forced_singleton"
+" FROM " + MediaGroup::Table::Name + "_backup",
+
+/*
+ * Now compute both nb_seen & nb_present_seen as one request instead of 2
+ * subqueries inlined in the previous request
+ */
+"UPDATE " + MediaGroup::Table::Name +
+    " SET nb_seen = sub.nb_seen, nb_present_seen = sub.nb_present_seen"
+" FROM (SELECT"
+    " group_id,"
+    " TOTAL(IIF(play_count > 0, 1, 0)) AS nb_seen,"
+    " TOTAL(IIF(play_count > 0 AND is_present != 0, 1, 0)) AS nb_present_seen"
+    " FROM " + Media::Table::Name +
+    " GROUP BY group_id) AS sub"
+" WHERE id_group = sub.group_id",
+
 Media::trigger( Media::Triggers::InsertFts, 33 ),
 Media::trigger( Media::Triggers::UpdateFts, 33 ),
 Media::trigger( Media::Triggers::DeleteFts, 33 ),
@@ -120,6 +165,9 @@ Folder::trigger( Folder::Triggers::UpdateNbMediaOnUpdate, 33 ),
 Folder::trigger( Folder::Triggers::UpdateNbMediaOnDelete, 33 ),
 Genre::trigger( Genre::Triggers::UpdateIsPresent, 33 ),
 Playlist::trigger( Playlist::Triggers::UpdateNbMediaOnMediaDeletion, 33 ),
+MediaGroup::trigger( MediaGroup::Triggers::InsertFts, 33 ),
+MediaGroup::trigger( MediaGroup::Triggers::DeleteFts, 33 ),
+MediaGroup::trigger( MediaGroup::Triggers::DeleteEmptyGroups, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaPerType, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateMediaCountOnPresenceChange, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::DecrementNbMediaOnDeletion, 33 ),
@@ -127,6 +175,11 @@ MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 33 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 33 ),
+
+MediaGroup::index( MediaGroup::Indexes::ForcedSingleton, 33 ),
+MediaGroup::index( MediaGroup::Indexes::Duration, 33 ),
+MediaGroup::index( MediaGroup::Indexes::CreationDate, 33 ),
+MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 33 ),
 
 Playlist::trigger( Playlist::Triggers::UpdateDurationOnMediaChange, 33 ),
 Playlist::trigger( Playlist::Triggers::UpdateNbMediaOnMediaChange, 33 ),

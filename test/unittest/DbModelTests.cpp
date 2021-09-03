@@ -732,6 +732,12 @@ static void Upgrade32to33( DbModel* T )
 
     auto m = T->ml->media( 1 );
     ASSERT_EQ( 123u, m->playCount() );
+
+    auto mg1 = T->ml->mediaGroup( 1 );
+    ASSERT_EQ( 1u, mg1->nbSeen() );
+
+    auto mg2 = T->ml->mediaGroup( 2 );
+    ASSERT_EQ( 2u, mg2->nbSeen() );
 }
 
 int main( int ac, char** av )

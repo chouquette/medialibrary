@@ -70,6 +70,10 @@ public:
      */
     virtual uint32_t nbPresentUnknown() const = 0;
     /**
+     * @brief nbPresentSeen Returns the number of present seen media in this group
+     */
+    virtual uint32_t nbPresentSeen() const = 0;
+    /**
      * @brief nbVideo Returns the number of video (present or not ) media in this group
      */
     virtual uint32_t nbVideo() const = 0;
@@ -82,6 +86,10 @@ public:
      *                  in this group
      */
     virtual uint32_t nbUnknown() const = 0;
+    /**
+     * @brief nbSeen Returns the number of seen media (present or not) in this group
+     */
+    virtual uint32_t nbSeen() const = 0;
     /**
      * @brief duration Returns this group duration
      *

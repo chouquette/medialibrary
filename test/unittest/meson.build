@@ -548,6 +548,7 @@ media_group_tests = [
   'ConvertMediaToExternal',
   'ConvertExternalMediaType',
   'ChangeExternalMediaGroup',
+  'NbSeen',
 ]
 
 foreach t : media_group_tests
