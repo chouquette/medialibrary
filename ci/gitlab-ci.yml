@@ -80,6 +80,7 @@ win32:
       - docker
       - amd64
     script:
+      - wineserver -p && wine wineboot
       - >
         meson -Dpkg_config_path=/prefix/lib/pkgconfig
         --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
@@ -112,6 +113,7 @@ win64:
       - docker
       - amd64
     script:
+      - wineserver -p && wine wineboot
       - >
         PKG_CONFIG_PATH=/prefix/lib/pkgconfig 
         meson 
