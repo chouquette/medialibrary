@@ -30,44 +30,6 @@ build:debian:
         - $CI_PROJECT_DIR/build
       when: on_success
 
-test:debian:
-    image: $MEDIALIBRARY_IMG
-    rules:
-      - if: $CI_MERGE_REQUEST_IID
-      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    stage: test
-    needs: 
-      - job: "build:debian"
-        artifacts: true
-    tags:
-      - docker
-      - amd64
-    script:
-      - cd build
-      - meson test --no-stdsplit
-      - mkdir html/
-      - >
-        gcovr -r "$CI_PROJECT_DIR/"
-        -e "$CI_PROJECT_DIR/libvlcpp"
-        -e "$CI_PROJECT_DIR/test"
-        -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
-        -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
-        -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
-        --xml cobertura.xml --html=html/medialibrary.html --html-details
-        -s
-        -j 4
-    artifacts:
-      reports:
-        cobertura: build/cobertura.xml
-        junit: build/meson-logs/testlog.junit.xml
-      name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
-      paths:
-        - build/html/
-        - $MEDIALIB_TEST_FOLDER/**/test.db
-        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
-      when: always
-
 
 build:novlc:
     image: $MEDIALIBRARY_IMG
@@ -120,6 +82,68 @@ build:win32:
 #      expire_in: 1h
 #      when: on_success
 
+build:win64:
+    image: $MEDIALIBRARY_WIN64_IMG
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
+    stage: build
+    tags:
+      - docker
+      - amd64
+    script:
+      - >
+        PKG_CONFIG_PATH=/prefix/lib/pkgconfig
+        meson
+        --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson
+        build
+      - cd build && ninja
+    artifacts:
+      expire_in: 1h
+      paths:
+        - $CI_PROJECT_DIR/build
+      when: on_success
+
+test:debian:
+    image: $MEDIALIBRARY_IMG
+    rules:
+      - if: $CI_MERGE_REQUEST_IID
+      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    stage: test
+    needs:
+      - job: "build:debian"
+        artifacts: true
+    tags:
+      - docker
+      - amd64
+    script:
+      - cd build
+      - meson test --no-stdsplit
+      - mkdir html/
+      - >
+        gcovr -r "$CI_PROJECT_DIR/"
+        -e "$CI_PROJECT_DIR/libvlcpp"
+        -e "$CI_PROJECT_DIR/test"
+        -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
+        -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
+        -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
+        --xml cobertura.xml --html=html/medialibrary.html --html-details
+        -s
+        -j 4
+    artifacts:
+      reports:
+        cobertura: build/cobertura.xml
+        junit: build/meson-logs/testlog.junit.xml
+      name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
+      paths:
+        - build/html/
+        - $MEDIALIB_TEST_FOLDER/**/test.db
+        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+      when: always
+
 test:win32:
     image: $MEDIALIBRARY_WIN32_IMG
     variables:
@@ -156,30 +180,6 @@ test:win32:
         - $MEDIALIB_TEST_FOLDER/**/test.db
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
-
-build:win64:
-    image: $MEDIALIBRARY_WIN64_IMG
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
-    stage: build
-    tags:
-      - docker
-      - amd64
-    script:
-      - >
-        PKG_CONFIG_PATH=/prefix/lib/pkgconfig 
-        meson 
-        --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson 
-        build
-      - cd build && ninja
-    artifacts:
-      expire_in: 1h
-      paths:
-        - $CI_PROJECT_DIR/build
-      when: on_success
 
 test:win64:
     image: $MEDIALIBRARY_WIN64_IMG
