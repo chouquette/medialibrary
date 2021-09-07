@@ -7,18 +7,44 @@ variables:
   MEDIALIBRARY_ALPINE_IMG: registry.videolan.org/medialibrary-alpine:20210902074848
   MEDIALIB_TEST_FOLDER: $CI_PROJECT_DIR/medialib_tests/
 
-linux:
+stages:
+  - build
+  - test
+
+build:debian:
     image: $MEDIALIBRARY_IMG
     rules:
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    stage: build
     tags:
       - docker
       - amd64
     script:
       - meson -Db_coverage=true build
       - cd build && ninja
+    artifacts:
+      expire_in: 1h
+      paths:
+        - $CI_PROJECT_DIR/build
+      when: on_success
+
+test:debian:
+    image: $MEDIALIBRARY_IMG
+    rules:
+      - if: $CI_MERGE_REQUEST_IID
+      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    stage: test
+    needs: 
+      - job: "build:debian"
+        artifacts: true
+    tags:
+      - docker
+      - amd64
+    script:
+      - cd build
       - meson test --no-stdsplit
       - mkdir html/
       - >
@@ -42,8 +68,10 @@ linux:
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       when: always
 
-linux-novlc:
+
+build:novlc:
     image: $MEDIALIBRARY_IMG
+    stage: build
     rules:
       - if: $CI_MERGE_REQUEST_IID
     tags:
@@ -53,8 +81,9 @@ linux-novlc:
       - meson -Dlibvlc=disabled --buildtype=release build
       - cd build && ninja
 
-alpine:
+build:alpine:
     image: $MEDIALIBRARY_ALPINE_IMG
+    stage: build
     rules:
       - if: $CI_MERGE_REQUEST_IID
     tags:
@@ -64,10 +93,41 @@ alpine:
       - meson build
       - cd build && ninja
 
-win32:
+build:win32:
+    image: $MEDIALIBRARY_WIN32_IMG
+    stage: build
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
+    tags:
+      - docker
+      - amd64
+    script:
+      - >
+        meson -Dpkg_config_path=/prefix/lib/pkgconfig
+        --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
+        -Ddefault_library=static
+        build
+      - cd build && ninja
+# Until the dynamic build behave properly, we'll just rebuild everything
+# before the tests. Otherwise the archive is >500MB which seems overkill just
+# to split build & tests
+#    artifacts:
+#      paths:
+#        - $CI_PROJECT_DIR/build
+#      expire_in: 1h
+#      when: on_success
+
+test:win32:
     image: $MEDIALIBRARY_WIN32_IMG
     variables:
       MESON_TESTTHREADS: 8
+    stage: test
+    needs: 
+      - job: "build:win32"
+        artifacts: false
     rules:
       - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
@@ -97,26 +157,49 @@ win32:
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
 
-win64:
+build:win64:
     image: $MEDIALIBRARY_WIN64_IMG
-    variables:
-      MESON_TESTTHREADS: 8
     rules:
       - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
         when: never
+    stage: build
     tags:
       - docker
       - amd64
     script:
-      - wineserver -p && wine wineboot
       - >
         PKG_CONFIG_PATH=/prefix/lib/pkgconfig 
         meson 
         --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson 
         build
       - cd build && ninja
+    artifacts:
+      expire_in: 1h
+      paths:
+        - $CI_PROJECT_DIR/build
+      when: on_success
+
+test:win64:
+    image: $MEDIALIBRARY_WIN64_IMG
+    variables:
+      MESON_TESTTHREADS: 8
+    stage: test
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: never
+    needs: 
+      - job: "build:win64"
+        artifacts: true
+    tags:
+      - docker
+      - amd64
+    script:
+      - cd build
+      - wineserver -p && wine wineboot
       - cp /prefix/dll/libvlc.dll .
       - cp /prefix/dll/libvlccore.dll .
       - ln -s /prefix/lib/vlc/plugins/ .
@@ -136,6 +219,7 @@ asan-ubsan:
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
         when: on_success
       - when: never
+    stage: build
     tags:
       - docker
       - amd64
