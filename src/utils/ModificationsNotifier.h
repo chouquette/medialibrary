@@ -212,7 +212,7 @@ private:
     compat::ConditionVariable m_cond;
     compat::ConditionVariable m_flushedCond;
     compat::Thread m_notifierThread;
-    std::atomic_bool m_stop;
+    bool m_stop;
     std::chrono::time_point<std::chrono::steady_clock> m_timeout;
     bool m_flushing;
 };

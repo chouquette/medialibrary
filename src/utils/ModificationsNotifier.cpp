@@ -46,12 +46,14 @@ ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
 
 ModificationNotifier::~ModificationNotifier()
 {
-    if ( m_notifierThread.joinable() == true )
     {
+        std::unique_lock<compat::Mutex> lock( m_lock );
+        if ( m_notifierThread.joinable() == false )
+            return;
         m_stop = true;
-        m_cond.notify_all();
-        m_notifierThread.join();
     }
+    m_cond.notify_all();
+    m_notifierThread.join();
 }
 
 void ModificationNotifier::start()
@@ -214,12 +216,14 @@ void ModificationNotifier::run()
     Queue<void> thumbnailsCleanup;
     Queue<void> convertedMedia;
 
-    while ( m_stop == false )
+    while ( true )
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
             {
                 std::unique_lock<compat::Mutex> lock( m_lock );
+                if ( m_stop == true )
+                    break;
                 if ( m_flushing == true )
                 {
                     m_flushing = false;
