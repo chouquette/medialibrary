@@ -69,7 +69,7 @@ void ModificationNotifier::notifyMediaCreation( MediaPtr media )
 
 void ModificationNotifier::notifyMediaModification( int64_t media )
 {
-    notifyModification( std::move( media ), m_media );
+    notifyModification( media, m_media );
 }
 
 void ModificationNotifier::notifyMediaRemoval( int64_t mediaId )
@@ -89,12 +89,12 @@ void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
 
 void ModificationNotifier::notifyArtistModification( int64_t artist )
 {
-    notifyModification( std::move( artist ), m_artists );
+    notifyModification( artist, m_artists );
 }
 
 void ModificationNotifier::notifyArtistRemoval( int64_t artist )
 {
-    notifyRemoval( std::move( artist ), m_artists );
+    notifyRemoval( artist, m_artists );
 }
 
 void ModificationNotifier::notifyAlbumCreation( AlbumPtr album )
@@ -104,7 +104,7 @@ void ModificationNotifier::notifyAlbumCreation( AlbumPtr album )
 
 void ModificationNotifier::notifyAlbumModification( int64_t album )
 {
-    notifyModification( std::move( album ), m_albums );
+    notifyModification( album, m_albums );
 }
 
 void ModificationNotifier::notifyAlbumRemoval( int64_t albumId )
@@ -119,7 +119,7 @@ void ModificationNotifier::notifyPlaylistCreation( PlaylistPtr playlist )
 
 void ModificationNotifier::notifyPlaylistModification( int64_t playlist )
 {
-    notifyModification( std::move( playlist ), m_playlists );
+    notifyModification( playlist, m_playlists );
 }
 
 void ModificationNotifier::notifyPlaylistRemoval( int64_t playlistId )
@@ -134,7 +134,7 @@ void ModificationNotifier::notifyGenreCreation( GenrePtr genre )
 
 void ModificationNotifier::notifyGenreModification( int64_t genre )
 {
-    notifyModification( std::move( genre ), m_genres );
+    notifyModification( genre, m_genres );
 }
 
 void ModificationNotifier::notifyGenreRemoval( int64_t genreId )
