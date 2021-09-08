@@ -38,6 +38,10 @@ namespace medialibrary
 
 class ModificationNotifier
 {
+private:
+    using TimeoutChrono = std::chrono::time_point<std::chrono::steady_clock>;
+    static const TimeoutChrono ZeroTimeout;
+
 public:
     explicit ModificationNotifier( MediaLibraryPtr ml );
     ~ModificationNotifier();
@@ -96,14 +100,14 @@ private:
         std::vector<std::shared_ptr<T>> added;
         std::set<int64_t> modified;
         std::set<int64_t> removed;
-        std::chrono::time_point<std::chrono::steady_clock> timeout;
+        TimeoutChrono timeout;
     };
 
     template <typename DUMMY>
     struct Queue<void, DUMMY>
     {
         std::set<int64_t> removed;
-        std::chrono::time_point<std::chrono::steady_clock> timeout;
+        TimeoutChrono timeout;
     };
 
     template <typename T, typename AddedCb, typename ModifiedCb, typename RemovedCb>
@@ -115,7 +119,7 @@ private:
             (*m_cb.*modifiedCb)( std::move( queue.modified ) );
         if ( queue.removed.size() > 0 )
             (*m_cb.*removedCb)( std::move( queue.removed ) );
-        queue.timeout = std::chrono::time_point<std::chrono::steady_clock>{};
+        queue.timeout = ZeroTimeout;
     }
 
     template <typename RemovedCb>
@@ -123,7 +127,7 @@ private:
     {
         if ( queue.removed.size() > 0 )
             (*m_cb.*removedCb)( std::move( queue.removed ) );
-        queue.timeout = std::chrono::time_point<std::chrono::steady_clock>{};
+        queue.timeout = ZeroTimeout;
     }
 
     template <typename T>
@@ -153,12 +157,12 @@ private:
     template <typename T>
     void updateTimeout( Queue<T>& queue )
     {
-        if ( queue.timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
+        if ( queue.timeout == ZeroTimeout )
         {
             queue.timeout = std::chrono::steady_clock::now() +
                     std::chrono::milliseconds{ 1000 };
         }
-        if ( m_timeout == std::chrono::time_point<std::chrono::steady_clock>{} )
+        if ( m_timeout == ZeroTimeout )
         {
             // If no wake up has been scheduled, or if we need to wake up faster
             // than expected, update the timeout now
@@ -169,14 +173,8 @@ private:
 
     template <typename T>
     void checkQueue( Queue<T>& input, Queue<T>& output,
-                     std::chrono::time_point<std::chrono::steady_clock>& nextTimeout,
-                     std::chrono::time_point<std::chrono::steady_clock> now )
+                     TimeoutChrono& nextTimeout, TimeoutChrono now )
     {
-#if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
-        constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
-#else
-        const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
-#endif
         // If this queue has no timeout setup, there's nothing to do with it.
         if ( input.timeout == ZeroTimeout )
             return;
@@ -213,7 +211,7 @@ private:
     compat::ConditionVariable m_flushedCond;
     compat::Thread m_notifierThread;
     bool m_stop;
-    std::chrono::time_point<std::chrono::steady_clock> m_timeout;
+    TimeoutChrono m_timeout;
     bool m_flushing;
 };
 

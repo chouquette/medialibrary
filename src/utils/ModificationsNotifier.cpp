@@ -36,6 +36,9 @@
 namespace medialibrary
 {
 
+const ModificationNotifier::TimeoutChrono ModificationNotifier::ZeroTimeout =
+        std::chrono::time_point<std::chrono::steady_clock>{};
+
 ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
@@ -197,11 +200,7 @@ void ModificationNotifier::flush()
 
 void ModificationNotifier::run()
 {
-#if !defined(_LIBCPP_STD_VER) || (_LIBCPP_STD_VER > 11 && !defined(_LIBCPP_HAS_NO_CXX14_CONSTEXPR))
-    constexpr auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
-#else
-    const auto ZeroTimeout = std::chrono::time_point<std::chrono::steady_clock>{};
-#endif
+
 
     // Create some other queue to swap with the ones that are used
     // by other threads. That way we can release those early and allow
@@ -231,7 +230,7 @@ void ModificationNotifier::run()
                 }
                 if ( m_timeout == ZeroTimeout )
                 {
-                    m_cond.wait( lock, [this, ZeroTimeout](){
+                    m_cond.wait( lock, [this](){
                         return m_timeout != ZeroTimeout || m_stop == true ||
                                m_flushing == true;
                     });
