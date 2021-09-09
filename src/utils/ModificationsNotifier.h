@@ -98,6 +98,7 @@ private:
     template <typename T, typename DUMMY = void>
     struct Queue
     {
+        compat::Mutex lock;
         std::vector<std::shared_ptr<T>> added;
         std::set<int64_t> modified;
         std::set<int64_t> removed;
@@ -107,6 +108,7 @@ private:
     template <typename DUMMY>
     struct Queue<void, DUMMY>
     {
+        compat::Mutex lock;
         std::set<int64_t> removed;
         TimeoutChrono timeout;
     };
@@ -151,7 +153,7 @@ private:
     template <typename T>
     void notifyCreation( std::shared_ptr<T> entity, Queue<T>& queue )
     {
-        std::lock_guard<compat::Mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( queue.lock );
         queue.added.push_back( std::move( entity ) );
         updateTimeout( queue );
     }
@@ -159,7 +161,7 @@ private:
     template <typename T>
     void notifyModification( int64_t rowId, Queue<T>& queue )
     {
-        std::lock_guard<compat::Mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( queue.lock );
         queue.modified.insert( rowId );
         updateTimeout( queue );
     }
@@ -167,7 +169,7 @@ private:
     template <typename T>
     void notifyRemoval( int64_t rowId, Queue<T>& queue )
     {
-        std::lock_guard<compat::Mutex> lock( m_lock );
+        std::lock_guard<compat::Mutex> lock( queue.lock );
         queue.removed.insert( rowId );
         updateTimeout( queue );
     }
@@ -195,6 +197,7 @@ private:
     void checkQueue( Queue<T>& input, Queue<T>& output,
                      TimeoutChrono& nextTimeout, TimeoutChrono now )
     {
+        std::lock_guard<compat::Mutex> lock{ input.lock };
         // If this queue has no timeout setup, there's nothing to do with it.
         if ( input.timeout == ZeroTimeout )
             return;
