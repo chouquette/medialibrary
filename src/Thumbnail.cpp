@@ -343,7 +343,6 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
                             EntityType entityType )
 {
     std::shared_ptr<Thumbnail> res;
-    std::unique_ptr<sqlite::Transaction> t;
     assert( newThumbnail != nullptr );
 
     /*
@@ -357,8 +356,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          oldThumbnail->id() == newThumbnail->id() )
         return newThumbnail;
 
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = ml->getConn()->newTransaction();
+    auto t = ml->getConn()->newTransaction();
     /**
      * We are trying to assign the values from newThumbnail to oldThumbnail.
      * Multiple cases exist:
@@ -467,8 +465,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
         }
     }
 
-    if ( t != nullptr )
-        t->commit();
+    t->commit();
     return res;
 }
 

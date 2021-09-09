@@ -179,9 +179,7 @@ std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
                                                    ImportType importType,
                                                    int64_t duration )
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = ml->getConn()->newTransaction();
+    auto t = ml->getConn()->newTransaction();
 
     if ( duration <= 0 )
         duration = -1;
@@ -198,8 +196,7 @@ std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
     if ( self->addExternalMrl( mrl, IFile::Type::Main ) == nullptr )
         return nullptr;
 
-    if ( t != nullptr )
-        t->commit();
+    t->commit();
     return self;
 }
 
@@ -826,9 +823,7 @@ void Media::markAsInternal()
 
 bool Media::convertToExternal()
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
     for ( const auto& fptr : files() )
     {
         auto f = static_cast<File*>( fptr.get() );
@@ -860,8 +855,7 @@ bool Media::convertToExternal()
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, IMedia::SubType::Unknown,
                                        Media::ImportType::External, m_id ) == false )
         return false;
-    if ( t != nullptr )
-        t->commit();
+    t->commit();
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifyMediaConvertedToExternal( m_id );

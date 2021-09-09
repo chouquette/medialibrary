@@ -342,9 +342,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     LOG_DEBUG( "Trying to add ", mrl, " to the playlist ", playlistMrl,
                " at index ", itemIdx );
 
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
 
     std::shared_ptr<Media> media;
     auto file = File::fromMrl( m_ml, mrl );

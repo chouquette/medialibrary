@@ -223,9 +223,7 @@ bool Playlist::addInternal(int64_t mediaId, uint32_t position, bool updateCount)
 
 bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCount )
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
 
     bool res;
     if ( position == UINT32_MAX )
@@ -260,15 +258,14 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
         if ( media.isPresent() )
             ++m_nbPresentMedia;
     }
-    if ( t != nullptr )
-        t->commit();
+    t->commit();
     return true;
 }
 
 bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateCount )
 {
     std::unique_ptr<sqlite::Transaction> t;
-    if ( updateCount == true && sqlite::Transaction::transactionInProgress() == false )
+    if ( updateCount == true )
         t = m_ml->getConn()->newTransaction();
     static const std::string req = "DELETE FROM " + MediaRelationTable::Name +
             " WHERE playlist_id = ? AND position = ?";

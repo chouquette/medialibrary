@@ -215,8 +215,7 @@ bool MediaGroup::add( IMedia& media, bool initForceSingleton )
 bool MediaGroup::add( int64_t mediaId, bool initForceSingleton )
 {
     std::unique_ptr<sqlite::Transaction> t;
-    if ( m_forcedSingleton == true && initForceSingleton == false &&
-         sqlite::Transaction::transactionInProgress() == false )
+    if ( m_forcedSingleton == true && initForceSingleton == false )
         t = m_ml->getConn()->newTransaction();
     if ( Media::setMediaGroup( m_ml, mediaId, m_id ) == false )
         return false;
@@ -236,9 +235,7 @@ bool MediaGroup::add( int64_t mediaId, bool initForceSingleton )
 
 bool MediaGroup::remove( IMedia& media )
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( sqlite::Transaction::transactionInProgress() == false )
-        t = m_ml->getConn()->newTransaction();
+    auto t = m_ml->getConn()->newTransaction();
 
     auto group = MediaGroup::create( m_ml, media.title(), false, true );
     if ( group == nullptr )
@@ -247,8 +244,7 @@ bool MediaGroup::remove( IMedia& media )
     if ( res == false )
         return false;
 
-    if ( t != nullptr )
-        t->commit();
+    t->commit();
 
     auto& m = static_cast<Media&>( media );
     m.setMediaGroupId( group->id() );
