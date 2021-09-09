@@ -1223,36 +1223,37 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
     std::shared_ptr<Artist> artist;
     static const std::string req = "SELECT * FROM " + Artist::Table::Name + " WHERE name = ?";
 
-    const auto& albumArtistStr = item.meta( IItem::Metadata::AlbumArtist );
-    const auto& artistStr = item.meta( IItem::Metadata::Artist );
+    auto albumArtistStr = item.meta( IItem::Metadata::AlbumArtist );
+    auto artistStr = item.meta( IItem::Metadata::Artist );
     if ( albumArtistStr.empty() == true && artistStr.empty() == true )
     {
         return {m_unknownArtist, m_unknownArtist};
     }
 
+    bool isDifferent = albumArtistStr != artistStr;
     if ( albumArtistStr.empty() == false )
     {
         albumArtist = Artist::fetch( m_ml, req, albumArtistStr );
         if ( albumArtist == nullptr )
         {
-            albumArtist = m_ml->createArtist( albumArtistStr );
+            albumArtist = m_ml->createArtist( std::move( albumArtistStr ) );
             if ( albumArtist == nullptr )
             {
-                LOG_ERROR( "Failed to create new artist ", albumArtistStr );
+                LOG_ERROR( "Failed to create new artist" );
                 return {nullptr, nullptr};
             }
             m_notifier->notifyArtistCreation( albumArtist );
         }
     }
-    if ( artistStr.empty() == false && artistStr != albumArtistStr )
+    if ( artistStr.empty() == false && isDifferent )
     {
         artist = Artist::fetch( m_ml, req, artistStr );
         if ( artist == nullptr )
         {
-            artist = m_ml->createArtist( artistStr );
+            artist = m_ml->createArtist( std::move( artistStr ) );
             if ( artist == nullptr )
             {
-                LOG_ERROR( "Failed to create new artist ", artistStr );
+                LOG_ERROR( "Failed to create new artist" );
                 return {nullptr, nullptr};
             }
             m_notifier->notifyArtistCreation( artist );

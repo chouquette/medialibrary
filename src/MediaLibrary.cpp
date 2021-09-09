@@ -951,9 +951,9 @@ ArtistPtr MediaLibrary::artist( int64_t id ) const
     return Artist::fetch( this, id );
 }
 
-std::shared_ptr<Artist> MediaLibrary::createArtist( const std::string& name )
+std::shared_ptr<Artist> MediaLibrary::createArtist( std::string name )
 {
-    return Artist::create( this, name );
+    return Artist::create( this, std::move( name ) );
 }
 
 Query<IArtist> MediaLibrary::artists( ArtistIncluded included,

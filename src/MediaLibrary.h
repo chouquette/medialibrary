@@ -139,7 +139,7 @@ public:
     std::shared_ptr<Movie> createMovie( Media& media );
 
     virtual ArtistPtr artist( int64_t id ) const override;
-    std::shared_ptr<Artist> createArtist( const std::string& name );
+    std::shared_ptr<Artist> createArtist( std::string name );
     virtual Query<IArtist> artists( ArtistIncluded included,
                                     const QueryParameters* params ) const override;
 

@@ -54,10 +54,10 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Artist::Artist( MediaLibraryPtr ml, const std::string& name )
+Artist::Artist( MediaLibraryPtr ml, std::string name )
     : m_ml( ml )
     , m_id( 0 )
-    , m_name( name )
+    , m_name( std::move( name ) )
     , m_nbAlbums( 0 )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
@@ -633,12 +633,12 @@ bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
                                          VariousArtistID ) != 0;
 }
 
-std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, const std::string& name )
+std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, std::string name )
 {
-    auto artist = std::make_shared<Artist>( ml, name );
+    auto artist = std::make_shared<Artist>( ml, std::move( name ) );
     static const std::string req = "INSERT INTO " + Artist::Table::Name +
             "(id_artist, name) VALUES(NULL, ?)";
-    if ( insert( ml, artist, req, name ) == false )
+    if ( insert( ml, artist, req, artist->m_name ) == false )
         return nullptr;
     return artist;
 }

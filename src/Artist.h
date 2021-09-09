@@ -65,7 +65,7 @@ public:
     };
 
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
-    Artist( MediaLibraryPtr ml, const std::string& name );
+    Artist( MediaLibraryPtr ml, std::string name );
 
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
@@ -115,7 +115,7 @@ public:
     static std::string triggerName( Triggers trigger, uint32_t dbModelVersion );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
-    static std::shared_ptr<Artist> create( MediaLibraryPtr ml, const std::string& name );
+    static std::shared_ptr<Artist> create( MediaLibraryPtr ml, std::string name );
     static Query<IArtist> search( MediaLibraryPtr ml, const std::string& name,
                                   ArtistIncluded included, const QueryParameters* params );
     static Query<IArtist> listAll( MediaLibraryPtr ml, ArtistIncluded included,
