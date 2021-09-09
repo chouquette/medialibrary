@@ -198,7 +198,7 @@ bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail,
+                                                   std::move( newThumbnail ),
                                                    Album::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Album );
     auto res = currentThumbnail != nullptr;
