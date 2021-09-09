@@ -41,6 +41,7 @@ class ModificationNotifier
 private:
     using TimeoutChrono = std::chrono::time_point<std::chrono::steady_clock>;
     static const TimeoutChrono ZeroTimeout;
+    static const std::chrono::milliseconds BatchDelay;
 
 public:
     explicit ModificationNotifier( MediaLibraryPtr ml );
@@ -159,16 +160,18 @@ private:
     {
         if ( queue.timeout == ZeroTimeout )
         {
-            queue.timeout = std::chrono::steady_clock::now() +
-                    std::chrono::milliseconds{ 1000 };
+            queue.timeout = std::chrono::steady_clock::now() + BatchDelay;
         }
-        if ( m_timeout == ZeroTimeout )
-        {
-            // If no wake up has been scheduled, or if we need to wake up faster
-            // than expected, update the timeout now
-            m_timeout = queue.timeout;
+        /*
+         * If no wake up was already expected, we need to enforce a timeout
+         * refresh from the notifier thread.
+         * Otherwise, the next event is guaranteed to happen before the one we're
+         * currently scheduling, since we always schedule the task 1s in the
+         * future.
+         */
+        auto expected = false;
+        if ( m_wakeUpScheduled.compare_exchange_strong( expected, true ) == true )
             m_cond.notify_all();
-        }
     }
 
     template <typename T>
@@ -211,8 +214,10 @@ private:
     compat::ConditionVariable m_flushedCond;
     compat::Thread m_notifierThread;
     bool m_stop;
-    TimeoutChrono m_timeout;
     bool m_flushing;
+    // Will be set to true if the worker needs to woken up due to new tasks being
+    // queued
+    std::atomic_bool m_wakeUpScheduled;
 };
 
 }

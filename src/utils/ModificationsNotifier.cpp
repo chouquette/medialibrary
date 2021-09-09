@@ -38,12 +38,15 @@ namespace medialibrary
 
 const ModificationNotifier::TimeoutChrono ModificationNotifier::ZeroTimeout =
         std::chrono::time_point<std::chrono::steady_clock>{};
+const std::chrono::milliseconds ModificationNotifier::BatchDelay =
+        std::chrono::milliseconds{ 1000 };
 
 ModificationNotifier::ModificationNotifier( MediaLibraryPtr ml )
     : m_ml( ml )
     , m_cb( ml->getCb() )
     , m_stop( false )
     , m_flushing( false )
+    , m_wakeUpScheduled( false )
 {
 }
 
@@ -190,7 +193,6 @@ void ModificationNotifier::notifyThumbnailCleanupInserted( int64_t requestId )
 void ModificationNotifier::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
-    m_timeout = std::chrono::steady_clock::now();
     m_flushing = true;
     m_cond.notify_all();
     m_flushedCond.wait( lock, [this](){
@@ -200,8 +202,6 @@ void ModificationNotifier::flush()
 
 void ModificationNotifier::run()
 {
-
-
     // Create some other queue to swap with the ones that are used
     // by other threads. That way we can release those early and allow
     // more insertions to proceed
@@ -214,6 +214,8 @@ void ModificationNotifier::run()
     Queue<IBookmark> bookmarks;
     Queue<void> thumbnailsCleanup;
     Queue<void> convertedMedia;
+
+    TimeoutChrono timeout = ZeroTimeout;
 
     while ( true )
     {
@@ -228,14 +230,28 @@ void ModificationNotifier::run()
                     m_flushing = false;
                     m_flushedCond.notify_all();
                 }
-                if ( m_timeout == ZeroTimeout )
+                if ( timeout == ZeroTimeout )
                 {
                     m_cond.wait( lock, [this](){
-                        return m_timeout != ZeroTimeout || m_stop == true ||
-                               m_flushing == true;
+                        return m_wakeUpScheduled.load( std::memory_order_relaxed ) == true ||
+                                m_stop == true || m_flushing == true;
                     });
+                    /*
+                     * We are woken up because a queue will need to be notified.
+                     * The accurate way would be to iterate over all queues and
+                     * probe their timeout, but we know that before being woken
+                     * up, all queues were empty, so we can take a shortcut and
+                     * assume that a single queue was scheduled to be notified,
+                     * which will happen in BatchDelay.
+                     */
+                    bool expected = true;
+                    if ( m_wakeUpScheduled.compare_exchange_strong(
+                             expected, false ) == true )
+                    {
+                        timeout = std::chrono::steady_clock::now() + BatchDelay;
+                    }
                 }
-                m_cond.wait_until( lock, m_timeout, [this]() {
+                m_cond.wait_until( lock, timeout, [this]() {
                     return m_stop == true || m_flushing == true;
                 });
                 if ( m_stop == true )
@@ -251,7 +267,7 @@ void ModificationNotifier::run()
                 checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now );
                 checkQueue( m_bookmarks, bookmarks, nextTimeout, now );
                 checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now );
-                m_timeout = nextTimeout;
+                timeout = nextTimeout;
             }
             notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
                     &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
