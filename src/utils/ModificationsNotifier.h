@@ -111,6 +111,23 @@ private:
         TimeoutChrono timeout;
     };
 
+    template <typename T>
+    static void swap( Queue<T>& rhs, Queue<T>& lhs )
+    {
+        using std::swap;
+        swap( rhs.added,    lhs.added );
+        swap( rhs.modified, lhs.modified );
+        swap( rhs.removed,  lhs.removed );
+        swap( rhs.timeout,  lhs.timeout );
+    }
+
+    static void swap( Queue<void>& rhs, Queue<void>& lhs )
+    {
+        using std::swap;
+        swap( rhs.removed,  lhs.removed );
+        swap( rhs.timeout,  lhs.timeout );
+    }
+
     template <typename T, typename AddedCb, typename ModifiedCb, typename RemovedCb>
     void notify( Queue<T>&& queue, AddedCb addedCb, ModifiedCb modifiedCb, RemovedCb removedCb )
     {
@@ -184,7 +201,6 @@ private:
         // Otherwise, check if this queue is due for signaling now
         if ( input.timeout <= now || m_flushing == true )
         {
-            using std::swap;
             swap( input, output );
             assert( input.timeout == ZeroTimeout );
         }
