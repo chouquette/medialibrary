@@ -194,15 +194,16 @@ private:
     }
 
     template <typename T>
-    void checkQueue( Queue<T>& input, Queue<T>& output,
-                     TimeoutChrono& nextTimeout, TimeoutChrono now )
+    static void checkQueue( Queue<T>& input, Queue<T>& output,
+                            TimeoutChrono& nextTimeout, TimeoutChrono now,
+                            bool flushing )
     {
         std::lock_guard<compat::Mutex> lock{ input.lock };
         // If this queue has no timeout setup, there's nothing to do with it.
         if ( input.timeout == ZeroTimeout )
             return;
         // Otherwise, check if this queue is due for signaling now
-        if ( input.timeout <= now || m_flushing == true )
+        if ( input.timeout <= now || flushing == true )
         {
             swap( input, output );
             assert( input.timeout == ZeroTimeout );

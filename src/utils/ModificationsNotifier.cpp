@@ -221,6 +221,7 @@ void ModificationNotifier::run()
     {
         ML_UNHANDLED_EXCEPTION_INIT
         {
+            bool flushing;
             {
                 std::unique_lock<compat::Mutex> lock( m_lock );
                 if ( m_stop == true )
@@ -256,19 +257,21 @@ void ModificationNotifier::run()
                 });
                 if ( m_stop == true )
                     break;
+                flushing = m_flushing;
+            }
                 const auto now = std::chrono::steady_clock::now();
                 auto nextTimeout = ZeroTimeout;
-                checkQueue( m_media, media, nextTimeout, now );
-                checkQueue( m_artists, artists, nextTimeout, now );
-                checkQueue( m_albums, albums, nextTimeout, now );
-                checkQueue( m_playlists, playlists, nextTimeout, now );
-                checkQueue( m_genres, genres, nextTimeout, now );
-                checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now );
-                checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now );
-                checkQueue( m_bookmarks, bookmarks, nextTimeout, now );
-                checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now );
+                checkQueue( m_media, media, nextTimeout, now, flushing );
+                checkQueue( m_artists, artists, nextTimeout, now, flushing );
+                checkQueue( m_albums, albums, nextTimeout, now, flushing );
+                checkQueue( m_playlists, playlists, nextTimeout, now, flushing );
+                checkQueue( m_genres, genres, nextTimeout, now, flushing );
+                checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now, flushing );
+                checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now, flushing );
+                checkQueue( m_bookmarks, bookmarks, nextTimeout, now, flushing );
+                checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now, flushing );
                 timeout = nextTimeout;
-            }
+
             notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
                     &IMediaLibraryCb::onMediaModified, &IMediaLibraryCb::onMediaDeleted );
             notify( std::move( artists ), &IMediaLibraryCb::onArtistsAdded,
