@@ -224,13 +224,13 @@ void ModificationNotifier::run()
             bool flushing;
             {
                 std::unique_lock<compat::Mutex> lock( m_lock );
-                if ( m_stop == true )
-                    break;
                 if ( m_flushing == true )
                 {
                     m_flushing = false;
                     m_flushedCond.notify_all();
                 }
+                if ( m_stop == true )
+                    break;
                 if ( timeout == ZeroTimeout )
                 {
                     m_cond.wait( lock, [this](){
