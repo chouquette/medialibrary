@@ -145,7 +145,9 @@ Connection::Handle Connection::handle()
 
 std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 {
-    return std::unique_ptr<sqlite::Transaction>{ new sqlite::Transaction( this ) };
+    if ( sqlite::Transaction::transactionInProgress() == false )
+        return std::unique_ptr<sqlite::Transaction>{ new sqlite::ActualTransaction( this ) };
+    return std::unique_ptr<sqlite::Transaction>{ new sqlite::NoopTransaction() };
 }
 
 Connection::ReadContext Connection::acquireReadContext()

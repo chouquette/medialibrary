@@ -36,7 +36,7 @@ namespace sqlite
 
 thread_local Transaction* Transaction::CurrentTransaction = nullptr;
 
-Transaction::Transaction( sqlite::Connection* dbConn)
+ActualTransaction::ActualTransaction( sqlite::Connection* dbConn)
     : m_dbConn( dbConn )
     , m_ctx( dbConn->acquireWriteContext() )
 {
@@ -49,7 +49,7 @@ Transaction::Transaction( sqlite::Connection* dbConn)
     CurrentTransaction = this;
 }
 
-void Transaction::commit()
+void ActualTransaction::commit()
 {
     assert( CurrentTransaction != nullptr );
     auto chrono = std::chrono::steady_clock::now();
@@ -69,7 +69,7 @@ bool Transaction::transactionInProgress()
     return CurrentTransaction != nullptr;
 }
 
-Transaction::~Transaction()
+ActualTransaction::~ActualTransaction()
 {
     if ( CurrentTransaction != nullptr )
     {
@@ -88,6 +88,20 @@ Transaction::~Transaction()
         }
         CurrentTransaction = nullptr;
     }
+}
+
+NoopTransaction::NoopTransaction()
+{
+    assert( Transaction::transactionInProgress() == true );
+}
+
+NoopTransaction::~NoopTransaction()
+{
+    assert( Transaction::transactionInProgress() == true );
+}
+
+void NoopTransaction::commit()
+{
 }
 
 }

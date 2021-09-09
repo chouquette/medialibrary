@@ -37,21 +37,39 @@ namespace sqlite
 class Transaction
 {
 public:
-    explicit Transaction( sqlite::Connection* dbConn );
+    Transaction() = default;
+    virtual ~Transaction() = default;
+    virtual void commit() = 0;
+
+    static bool transactionInProgress();
+
     Transaction( const Transaction& ) = delete;
     Transaction( Transaction&& ) = delete;
     Transaction& operator=( const Transaction& ) = delete;
     Transaction& operator=( Transaction&& ) = delete;
-    void commit();
 
-    static bool transactionInProgress();
-    ~Transaction();
+    static thread_local Transaction* CurrentTransaction;
+};
+
+class ActualTransaction : public Transaction
+{
+public:
+    explicit ActualTransaction( sqlite::Connection* dbConn );
+    virtual void commit() override;
+
+    virtual ~ActualTransaction();
 
 private:
     sqlite::Connection* m_dbConn;
     Connection::WriteContext m_ctx;
+};
 
-    static thread_local Transaction* CurrentTransaction;
+class NoopTransaction : public Transaction
+{
+public:
+    NoopTransaction();
+    virtual ~NoopTransaction();
+    virtual void commit() override;
 };
 
 }
