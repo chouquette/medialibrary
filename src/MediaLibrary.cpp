@@ -377,7 +377,7 @@ bool MediaLibrary::createAllTables()
 void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
 {
     auto tables = sqlite::Tools::listTables( dbConn );
-    assert( sqlite::Transaction::transactionInProgress() == false );
+    assert( sqlite::Transaction::isInProgress() == false );
     sqlite::Connection::WeakDbContext ctx{ dbConn };
     auto t = dbConn->newTransaction();
     for ( const auto& table : tables )

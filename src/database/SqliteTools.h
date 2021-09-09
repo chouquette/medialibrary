@@ -195,7 +195,7 @@ public:
                 return Row( m_stmt.get() );
             else if ( res == SQLITE_DONE )
                 return Row{};
-            else if ( ( Transaction::transactionInProgress() == false ||
+            else if ( ( Transaction::isInProgress() == false ||
                         m_isCommit == true ) &&
                      errors::isInnocuous( res ) && maxRetries-- > 0 )
                 continue;
@@ -269,7 +269,7 @@ class Tools
         {
             auto dbConnection = ml->getConn();
             Connection::ReadContext ctx;
-            if (Transaction::transactionInProgress() == false)
+            if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
@@ -294,7 +294,7 @@ class Tools
         {
             auto dbConnection = ml->getConn();
             Connection::ReadContext ctx;
-            if (Transaction::transactionInProgress() == false)
+            if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
@@ -315,7 +315,7 @@ class Tools
                                     const std::string& req, Args&&... args )
         {
             Connection::WriteContext ctx;
-            if (Transaction::transactionInProgress() == false)
+            if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
         }
@@ -326,7 +326,7 @@ class Tools
                                                  Args&&... args )
         {
             Connection::WriteContext ctx;
-            if (Transaction::transactionInProgress() == false)
+            if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             try
             {
@@ -363,7 +363,7 @@ class Tools
                                                     Args&&... args )
         {
             Connection::WriteContext ctx;
-            if (Transaction::transactionInProgress() == false)
+            if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
             try
             {

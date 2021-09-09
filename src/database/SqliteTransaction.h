@@ -41,7 +41,7 @@ public:
     virtual ~Transaction() = default;
     virtual void commit() = 0;
 
-    static bool transactionInProgress();
+    static bool isInProgress();
 
     Transaction( const Transaction& ) = delete;
     Transaction( Transaction&& ) = delete;

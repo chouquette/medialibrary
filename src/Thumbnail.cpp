@@ -196,7 +196,7 @@ bool Thumbnail::updateLinkRecord( int64_t entityId, EntityType type,
         " WHERE entity_id = ? AND entity_type = ? AND size_type = ?";
     // This needs to be run in a transaction, as we insert the new thumbnail
     // record or update the linked thumbnail
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_id, origin,
                                        entityId, type, m_sizeType ) == false )
         return false;
@@ -805,7 +805,7 @@ Thumbnail::fetchCleanups( MediaLibraryPtr ml )
             " ORDER BY id_request";
 
     sqlite::Connection::ReadContext ctx;
-    if ( sqlite::Transaction::transactionInProgress() == false )
+    if ( sqlite::Transaction::isInProgress() == false )
         ctx = ml->getConn()->acquireReadContext();
     sqlite::Statement stmt{ ml->getConn()->handle(), req };
     stmt.execute();

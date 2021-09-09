@@ -670,7 +670,7 @@ bool Task::resetRetryCount( MediaLibraryPtr ml )
 
 bool Task::resetParsing( MediaLibraryPtr ml )
 {
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     static const std::string resetReq = "UPDATE " + Table::Name + " SET "
             "attempts_left = (SELECT max_task_attempts FROM Settings), "
             "step = ? WHERE type != ?";

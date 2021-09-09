@@ -290,7 +290,7 @@ Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
         "WHERE d.scheme = ? ORDER BY mt.last_seen DESC";
     auto dbConn = ml->getConn();
     sqlite::Connection::ReadContext ctx;
-    if ( sqlite::Transaction::transactionInProgress() == false )
+    if ( sqlite::Transaction::isInProgress() == false )
         ctx = dbConn->acquireReadContext();
     sqlite::Statement stmt{ dbConn->handle(), req };
     stmt.execute( utils::url::scheme( mrl ) );

@@ -150,7 +150,7 @@ Query<IMedia> Playlist::searchMedia( const std::string& pattern,
 void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
 {
     auto dbConn = ml->getConn();
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     std::string req = "SELECT rowid, mrl, playlist_id FROM " + Playlist::MediaRelationTable::Name + " "
             "WHERE media_id IS NULL";
     sqlite::Statement stmt{ dbConn->handle(), req };
@@ -324,7 +324,7 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
                                          bool isFolderFsRemovable )
 {
     assert( m_fileId == 0 );
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
 
     auto file = File::createFromPlaylist( m_ml, m_id, fileFs, parentFolderId, isFolderFsRemovable);
     if ( file == nullptr )

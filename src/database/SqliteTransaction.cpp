@@ -64,7 +64,7 @@ void ActualTransaction::commit()
     m_ctx.unlock();
 }
 
-bool Transaction::transactionInProgress()
+bool Transaction::isInProgress()
 {
     return CurrentTransaction != nullptr;
 }
@@ -92,12 +92,12 @@ ActualTransaction::~ActualTransaction()
 
 NoopTransaction::NoopTransaction()
 {
-    assert( Transaction::transactionInProgress() == true );
+    assert( Transaction::isInProgress() == true );
 }
 
 NoopTransaction::~NoopTransaction()
 {
-    assert( Transaction::transactionInProgress() == true );
+    assert( Transaction::isInProgress() == true );
 }
 
 void NoopTransaction::commit()

@@ -145,7 +145,7 @@ Connection::Handle Connection::handle()
 
 std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 {
-    if ( sqlite::Transaction::transactionInProgress() == false )
+    if ( sqlite::Transaction::isInProgress() == false )
         return std::unique_ptr<sqlite::Transaction>{ new sqlite::ActualTransaction( this ) };
     return std::unique_ptr<sqlite::Transaction>{ new sqlite::NoopTransaction() };
 }
@@ -189,7 +189,7 @@ void Connection::setForeignKeyEnabled( bool value )
 {
     // Changing this pragma during a transaction is a no-op (silently ignored by
     // sqlite), so ensure we're doing something usefull here:
-    assert( sqlite::Transaction::transactionInProgress() == false );
+    assert( sqlite::Transaction::isInProgress() == false );
     // Ensure no transaction will be started during the pragma change
     auto ctx = acquireWriteContext();
     setPragma( handle(), "foreign_keys", value ? "1" : "0" );

@@ -290,7 +290,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         {
             // Attempt to recover from some potentially invalid tasks records
             // See https://code.videolan.org/videolan/medialibrary/issues/166
-            assert( sqlite::Transaction::transactionInProgress() == false );
+            assert( sqlite::Transaction::isInProgress() == false );
             auto t = m_ml->getConn()->newTransaction();
             auto f = File::fromMrl( m_ml, mrl );
             if ( f != nullptr )
@@ -639,7 +639,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
 {
     LOG_DEBUG( "Converting media ", item.mrl(), " from external to internal" );
     // If the file is on a removable device, we need to update its mrl
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     auto fsDir = item.parentFolderFs();
     auto deviceFs = fsDir->device();
     if ( deviceFs == nullptr )
@@ -664,7 +664,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
 
 void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const
 {
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     for ( const auto& track : tracks )
     {
         if ( track.type == IItem::Track::Type::Video )
@@ -1266,7 +1266,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
 std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album> album, IItem& item,
                                                          std::shared_ptr<Artist> artist, Genre* genre ) const
 {
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
 
     auto title = item.meta( IItem::Metadata::Title );
     const auto trackNumber = toInt( item, IItem::Metadata::TrackNumber );
@@ -1433,7 +1433,7 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
                                          Artist& albumArtist, bool newAlbum,
                                          std::shared_ptr<Thumbnail> thumbnail )
 {
-    assert( sqlite::Transaction::transactionInProgress() == true );
+    assert( sqlite::Transaction::isInProgress() == true );
     assert( thumbnail != nullptr );
     assert( thumbnail->origin() == Thumbnail::Origin::Media ||
             thumbnail->origin() == Thumbnail::Origin::CoverFile );
