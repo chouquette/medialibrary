@@ -43,14 +43,14 @@ medialibrary::fs::CommonDirectory::CommonDirectory( fs::IFileSystemFactory& fsFa
 
 const std::vector<std::shared_ptr<IFile>>& CommonDirectory::files() const
 {
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
+    if ( m_dirs.empty() == true && m_files.empty() == true )
         read();
     return m_files;
 }
 
 const std::vector<std::shared_ptr<IDirectory>>& CommonDirectory::dirs() const
 {
-    if ( m_dirs.size() == 0 && m_files.size() == 0 )
+    if ( m_dirs.empty() == true && m_files.empty() == true )
         read();
     return m_dirs;
 }
