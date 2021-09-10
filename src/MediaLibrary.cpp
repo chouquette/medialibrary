@@ -1846,7 +1846,7 @@ void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
                     row >> taskId >> mrl;
                     auto newMrl = utils::url::encode( utils::url::decode( mrl ) );
                     if ( newMrl != mrl )
-                        parser::Task::setMrl( this, taskId, std::move( newMrl ) );
+                        parser::Task::setMrl( this, taskId, newMrl );
                     nbRow++;
                 }
                 if ( nbRow < batchSize )
