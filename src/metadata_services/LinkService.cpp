@@ -81,9 +81,9 @@ void LinkService::stop()
 {
 }
 
-Status LinkService::linkToPlaylist(IItem& item)
+Status LinkService::linkToPlaylist( IItem& item )
 {
-    auto mrl = item.mrl();
+    const auto& mrl = item.mrl();
     auto file = File::fromExternalMrl( m_ml, mrl );
     // If the file isn't present yet, we assume it wasn't created yet. Let's
     // try to link it later
