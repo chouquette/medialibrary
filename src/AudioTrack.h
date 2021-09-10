@@ -44,9 +44,9 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         };
 
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
-        AudioTrack( MediaLibraryPtr ml, const std::string& codec, unsigned int bitrate,
-                    unsigned int sampleRate, unsigned int nbChannels, const std::string& language,
-                    const std::string& desc, int64_t mediaId, int64_t attachedFileId );
+        AudioTrack( MediaLibraryPtr ml, std::string codec, unsigned int bitrate,
+                    unsigned int sampleRate, unsigned int nbChannels, std::string language,
+                    std::string desc, int64_t mediaId, int64_t attachedFileId );
 
         virtual int64_t id() const override;
         virtual const std::string&codec() const override;
@@ -63,9 +63,9 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         static std::string index( Indexes index, uint32_t dbModel );
         static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
-        static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, const std::string& codec,
+        static std::shared_ptr<AudioTrack> create( MediaLibraryPtr ml, std::string codec,
                                                    unsigned int bitrate, unsigned int sampleRate, unsigned int nbChannels,
-                                                   const std::string& language, const std::string& desc,
+                                                   std::string language, std::string desc,
                                                    int64_t mediaId, int64_t attachedFileId );
         static bool removeFromMedia( MediaLibraryPtr ml, int64_t mediaId,
                                      bool internalTracksOnly );

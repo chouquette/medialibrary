@@ -505,13 +505,14 @@ Query<IVideoTrack> Media::videoTracks() const
     return make_query<VideoTrack, IVideoTrack>( m_ml, "*", req, "", m_id );
 }
 
-bool Media::addAudioTrack( const std::string& codec, unsigned int bitrate,
+bool Media::addAudioTrack( std::string codec, unsigned int bitrate,
                            unsigned int sampleRate, unsigned int nbChannels,
-                           const std::string& language, const std::string& desc,
+                           std::string language, std::string desc,
                            int64_t attachedFileId )
 {
-    return AudioTrack::create( m_ml, codec, bitrate, sampleRate, nbChannels,
-                               language, desc, m_id, attachedFileId ) != nullptr;
+    return AudioTrack::create( m_ml, std::move( codec ), bitrate, sampleRate, nbChannels,
+                               std::move( language ), std::move( desc ), m_id,
+                               attachedFileId ) != nullptr;
 }
 
 bool Media::addSubtitleTrack( std::string codec, std::string language,
