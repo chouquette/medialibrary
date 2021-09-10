@@ -898,7 +898,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
     std::shared_ptr<Album> album;
     if ( albumName.empty() == false )
-        album = findAlbum( item, albumName, artists.first, artists.second );
+        album = findAlbum( item, albumName, artists.first.get(), artists.second.get() );
     else
         album = handleUnknownAlbum( artists.first.get(), artists.second.get() );
     auto newAlbum = album == nullptr;
@@ -1037,8 +1037,8 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item ) const
 
 std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
                                                     const std::string& albumName,
-                                                    std::shared_ptr<Artist> albumArtist,
-                                                    std::shared_ptr<Artist> trackArtist )
+                                                    Artist* albumArtist,
+                                                    Artist* trackArtist )
 {
     assert( albumName.empty() == false );
     auto file = static_cast<File*>( item.file().get() );
