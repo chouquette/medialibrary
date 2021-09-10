@@ -116,7 +116,7 @@ bool FsHolder::setNetworkEnabled( bool enabled )
     if ( enabled == false )
         t = m_ml->getConn()->newTransaction();
 
-    for ( auto fsFactory : m_fsFactories )
+    for ( auto& fsFactory : m_fsFactories )
     {
         if ( fsFactory->isNetworkFileSystem() == false )
             continue;
