@@ -364,7 +364,7 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
 
 std::vector<MediaPtr> Album::cachedTracks() const
 {
-    if ( m_tracks.size() == 0 )
+    if ( m_tracks.empty() == true )
         m_tracks = tracks( nullptr )->all();
     return m_tracks;
 }
