@@ -746,7 +746,7 @@ Task::createRefreshTask( MediaLibraryPtr ml, std::shared_ptr<File> file,
 std::shared_ptr<Task>
 Task::createMediaRefreshTask( MediaLibraryPtr ml, const Media& media )
 {
-    auto files = media.files();
+    const auto& files = media.files();
     auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
                                   []( const std::shared_ptr<IFile>& f ) {
         return f->isMain();
