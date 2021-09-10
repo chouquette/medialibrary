@@ -467,7 +467,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                 else if ( m_ml->isPlaylistExtensionSupported( ext.c_str() ) == true )
                     fileType = IFile::Type::Playlist;
                 if ( fileType != IFile::Type::Unknown )
-                    filesToAdd.emplace_back( std::move( fileFs ), fileType );
+                    filesToAdd.emplace_back( fileFs, fileType );
             }
             else
             {
@@ -485,7 +485,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
                         break;
                 }
                 if ( fileType != IFile::Type::Unknown )
-                    linkedFilesToAdd.emplace_back( std::move( fileFs ), fileType );
+                    linkedFilesToAdd.emplace_back( fileFs, fileType );
             }
             continue;
         }
