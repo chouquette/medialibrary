@@ -164,7 +164,7 @@ void ThumbnailerWorker::run()
             {
                 std::unique_lock<compat::Mutex> lock( m_mutex );
                 m_cond.wait( lock, [this]() {
-                    return ( m_tasks.size() > 0 && m_paused == false ) ||
+                    return ( m_tasks.empty() == false && m_paused == false ) ||
                             m_run == false;
                 });
                 if ( m_run == false )
