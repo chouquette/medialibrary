@@ -220,7 +220,7 @@ bool ThumbnailerWorker::generateThumbnail( Task task )
         return false;
     }
     auto mainFileIt = std::find_if( files.cbegin(), files.cend(),
-                                    [](FilePtr f) {
+                                    [](const FilePtr& f) {
                                         return f->isMain();
                                    });
     if ( mainFileIt == files.cend() )
