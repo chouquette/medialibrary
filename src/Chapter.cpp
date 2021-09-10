@@ -39,8 +39,8 @@ int64_t Chapter::* const Chapter::Table::PrimaryKey = &Chapter::m_id;
 
 void Chapter::createTable( sqlite::Connection* dbConn )
 {
-    return sqlite::Tools::executeRequest( dbConn,
-                                          schema( Table::Name, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn, schema( Table::Name,
+                                                   Settings::DbModelVersion ) );
 }
 
 std::string Chapter::schema( const std::string& tableName, uint32_t )
