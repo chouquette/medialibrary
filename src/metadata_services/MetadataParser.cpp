@@ -480,7 +480,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         auto show = findShow( showName );
         if ( show == nullptr )
         {
-            show = m_ml->createShow( showName );
+            show = m_ml->createShow( std::move( showName ) );
             if ( show == nullptr )
                 return false;
         }

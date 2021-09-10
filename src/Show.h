@@ -54,7 +54,7 @@ public:
     };
 
     Show( MediaLibraryPtr ml, sqlite::Row& row );
-    Show( MediaLibraryPtr ml, const std::string& title );
+    Show( MediaLibraryPtr ml, std::string title );
 
     virtual int64_t id() const override;
     virtual const std::string& title() const override;
@@ -80,7 +80,7 @@ public:
     static std::string trigger( Triggers trigger, uint32_t dbModel );
     static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<Show> create( MediaLibraryPtr ml, const std::string& title );
+    static std::shared_ptr<Show> create( MediaLibraryPtr ml, std::string title );
 
     static Query<IShow> listAll( MediaLibraryPtr ml, const QueryParameters* params );
     static Query<IShow> search( MediaLibraryPtr ml, const std::string& pattern,

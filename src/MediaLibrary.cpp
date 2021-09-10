@@ -924,9 +924,9 @@ ShowPtr MediaLibrary::show( int64_t id ) const
     return Show::fetch( this, id );
 }
 
-std::shared_ptr<Show> MediaLibrary::createShow( const std::string& name )
+std::shared_ptr<Show> MediaLibrary::createShow( std::string name )
 {
-    return Show::create( this, name );
+    return Show::create( this, std::move( name ) );
 }
 
 Query<IShow> MediaLibrary::shows(const QueryParameters* params) const

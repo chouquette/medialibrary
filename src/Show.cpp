@@ -55,10 +55,10 @@ Show::Show( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.nbColumns() == 8 );
 }
 
-Show::Show( MediaLibraryPtr ml, const std::string& name )
+Show::Show( MediaLibraryPtr ml, std::string name )
     : m_ml( ml )
     , m_id( 0 )
-    , m_title( name )
+    , m_title( std::move( name ) )
     , m_nbEpisodes( 0 )
     , m_releaseDate( 0 )
 {
@@ -378,12 +378,12 @@ bool Show::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::UpdateIsPresent );
 }
 
-std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, const std::string& name )
+std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, std::string name )
 {
-    auto show = std::make_shared<Show>( ml, name );
+    auto show = std::make_shared<Show>( ml, std::move( name ) );
     static const std::string req = "INSERT INTO " + Show::Table::Name
             + "(title) VALUES(?)";
-    if ( insert( ml, show, req, name ) == false )
+    if ( insert( ml, show, req, show->m_title ) == false )
         return nullptr;
     return show;
 }
