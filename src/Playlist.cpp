@@ -65,10 +65,10 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
+Playlist::Playlist( MediaLibraryPtr ml, std::string name )
     : m_ml( ml )
     , m_id( 0 )
-    , m_name( name )
+    , m_name( std::move( name ) )
     , m_fileId( 0 )
     , m_creationDate( time( nullptr ) )
     , m_nbMedia( 0 )
@@ -76,12 +76,13 @@ Playlist::Playlist( MediaLibraryPtr ml, const std::string& name )
 {
 }
 
-std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, const std::string& name )
+std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, std::string name )
 {
-    auto self = std::make_shared<Playlist>( ml, name );
+    auto self = std::make_shared<Playlist>( ml, std::move( name ) );
     static const std::string req = "INSERT INTO " + Playlist::Table::Name +
             "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, name, nullptr, self->m_creationDate, self->m_artworkMrl ) == false )
+    if ( insert( ml, self, req, self->m_name, nullptr, self->m_creationDate,
+                 self->m_artworkMrl ) == false )
         return nullptr;
     return self;
 }

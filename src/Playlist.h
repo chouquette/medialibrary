@@ -74,9 +74,9 @@ public:
     using Backups = std::map<time_t, std::vector<std::string>>;
 
     Playlist( MediaLibraryPtr ml, sqlite::Row& row );
-    Playlist( MediaLibraryPtr ml, const std::string& name );
+    Playlist( MediaLibraryPtr ml, std::string name );
 
-    static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, const std::string& name );
+    static std::shared_ptr<Playlist> create( MediaLibraryPtr ml, std::string name );
 
     virtual int64_t id() const override;
     virtual const std::string& name() const override;

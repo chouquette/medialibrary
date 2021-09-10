@@ -255,7 +255,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         try
         {
             auto t = m_ml->getConn()->newTransaction();
-            playlistPtr = Playlist::create( m_ml, playlistName );
+            playlistPtr = Playlist::create( m_ml, std::move( playlistName ) );
             if ( playlistPtr == nullptr )
             {
                 LOG_ERROR( "Failed to create playlist ", mrl, " to the media library" );

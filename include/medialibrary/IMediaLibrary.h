@@ -548,7 +548,7 @@ public:
     /***
      *  Playlists
      */
-    virtual PlaylistPtr createPlaylist( const std::string& name ) = 0;
+    virtual PlaylistPtr createPlaylist( std::string name ) = 0;
     virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) = 0;
     virtual PlaylistPtr playlist( int64_t id ) const = 0;
     virtual bool deletePlaylist( int64_t playlistId ) = 0;

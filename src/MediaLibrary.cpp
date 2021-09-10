@@ -963,11 +963,11 @@ Query<IArtist> MediaLibrary::artists( ArtistIncluded included,
     return Artist::listAll( this, included, params );
 }
 
-PlaylistPtr MediaLibrary::createPlaylist( const std::string& name )
+PlaylistPtr MediaLibrary::createPlaylist( std::string name )
 {
     try
     {
-        auto pl = Playlist::create( this, name );
+        auto pl = Playlist::create( this, std::move( name ) );
         if ( pl != nullptr && m_modificationNotifier != nullptr )
             m_modificationNotifier->notifyPlaylistCreation( pl );
         return pl;
