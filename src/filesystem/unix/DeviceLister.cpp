@@ -39,7 +39,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <cstring>
-#include <limits.h>
+#include <climits>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
