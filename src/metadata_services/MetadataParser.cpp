@@ -647,7 +647,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, Media& media,
     auto device = Device::fromUuid( m_ml, deviceFs->uuid(), deviceFs->scheme() );
     if ( device == nullptr )
         return Status::Fatal;
-    if ( file->update( *item.fileFs(), item.parentFolder()->id(),
+    if ( file.update( *item.fileFs(), item.parentFolder()->id(),
                        deviceFs->isRemovable() ) == false )
         return Status::Fatal;
     auto updatedTitle = item.meta( Task::IItem::Metadata::Title );
@@ -926,7 +926,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     try
     {
         // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-        if ( handleTrack( album, item, artists.second ? artists.second : artists.first,
+        if ( handleTrack( *album, item, artists.second ? artists.second : artists.first,
                           genre.get() ) == nullptr )
             return Status::Fatal;
     }
@@ -1267,7 +1267,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album> album, IItem& item,
+std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
                                                          std::shared_ptr<Artist> artist, Genre* genre ) const
 {
     assert( sqlite::Transaction::isInProgress() == true );
@@ -1287,7 +1287,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
     if ( title.empty() == false )
         media->setTitleBuffered( title );
 
-    auto track = std::static_pointer_cast<AlbumTrack>( album->addTrack( media, trackNumber,
+    auto track = std::static_pointer_cast<AlbumTrack>( album.addTrack( media, trackNumber,
                                                                         discNumber, artist->id(),
                                                                         genre ) );
     if ( track == nullptr )
@@ -1304,7 +1304,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( std::shared_ptr<Album
         // Let the album handle multiple dates. In order to do this properly, we need
         // to know if the date has been changed before, which can be known only by
         // using Album class internals.
-        album->setReleaseYear( releaseYear, false );
+        album.setReleaseYear( releaseYear, false );
     }
     return track;
 }
