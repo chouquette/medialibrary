@@ -234,6 +234,8 @@ std::vector<std::string> DeviceLister::getAllowedFsTypes() const
     std::vector<std::string> res;
     size_t buffSize = 128u;
     auto buff = static_cast<char*>( malloc( buffSize ) );
+    if ( !buff )
+        return res;
     std::unique_ptr<char, decltype(&free)> buffPtr( buff, &free );
     while ( getline( &buff, &buffSize, fsFile.get() ) != -1 )
     {
