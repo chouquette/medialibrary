@@ -39,8 +39,8 @@ namespace fs
 namespace libvlc
 {
 
-DeviceLister::DeviceLister( const std::string &protocol )
-    : m_protocol( protocol )
+DeviceLister::DeviceLister( std::string protocol )
+    : m_protocol( std::move( protocol ) )
     , m_cb( nullptr )
 {
 }

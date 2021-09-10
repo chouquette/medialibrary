@@ -44,7 +44,7 @@ private:
         VLC::MediaDiscoverer discoverer;
     };
 public:
-    DeviceLister(const std::string& protocol);
+    DeviceLister( std::string protocol );
     virtual ~DeviceLister() = default;
 
     virtual void refresh() override;
