@@ -294,7 +294,7 @@ std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
             return {};
     }
 
-    return std::unique_ptr<MediaLibrary>( new MediaLibrary( dbPath, mlFolderPath, std::move( lock ) ) );
+    return std::make_unique<MediaLibrary>( dbPath, mlFolderPath, std::move( lock ) );
 }
 
 MediaLibrary::MediaLibrary( const std::string& dbPath,
