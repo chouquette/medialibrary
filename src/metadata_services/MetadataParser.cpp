@@ -1469,7 +1469,7 @@ void MetadataAnalyzer::assignThumbnails( Media& media, Album& album,
              * Since we just assigned a thumbnail to the album, check if
              * other tracks from this album require a thumbnail
              */
-            for ( auto t : album.cachedTracks() )
+            for ( auto& t : album.cachedTracks() )
             {
                 if ( t->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
                      ThumbnailStatus::Missing )
