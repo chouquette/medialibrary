@@ -326,7 +326,7 @@ public:
     ///
     /// If this function returns false, no meta will have been updated.
     ///
-    virtual bool setMetadata( std::unordered_map<MetadataType, std::string> meta ) = 0;
+    virtual bool setMetadata( const std::unordered_map<MetadataType, std::string>& meta ) = 0;
 
     ///
     /// \brief removeFromHistory Removes a media from the history.

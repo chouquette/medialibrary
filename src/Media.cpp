@@ -648,7 +648,7 @@ bool Media::unsetMetadata(IMedia::MetadataType type)
     return m_metadata.unset( static_cast<MDType>( type ) );
 }
 
-bool Media::setMetadata( std::unordered_map<IMedia::MetadataType, std::string> metadata )
+bool Media::setMetadata( const std::unordered_map<IMedia::MetadataType, std::string>& metadata )
 {
     if ( m_metadata.isReady() == false )
         m_metadata.init( m_id, IMedia::NbMeta );

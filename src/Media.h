@@ -232,7 +232,7 @@ class Media : public IMedia,
         virtual bool setMetadata( MetadataType type, const std::string& value ) override;
         virtual bool setMetadata( MetadataType type, int64_t value ) override;
         virtual bool unsetMetadata( MetadataType type ) override;
-        virtual bool setMetadata( std::unordered_map<MetadataType, std::string> metadata ) override;
+        virtual bool setMetadata( const std::unordered_map<MetadataType, std::string>& metadata ) override;
 
         virtual bool requestThumbnail( ThumbnailSizeType sizeType, uint32_t desiredWidth,
                                        uint32_t desiredHeight, float position ) override;
