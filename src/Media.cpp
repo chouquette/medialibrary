@@ -223,7 +223,7 @@ AlbumTrackPtr Media::albumTrack() const
 
 void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
 {
-    m_albumTrack = albumTrack;
+    m_albumTrack = std::move( albumTrack );
     m_subType = SubType::AlbumTrack;
     m_changed = true;
 }
@@ -263,7 +263,7 @@ ShowEpisodePtr Media::showEpisode() const
 
 void Media::setShowEpisode( ShowEpisodePtr episode )
 {
-    m_showEpisode = episode;
+    m_showEpisode = std::move( episode );
     m_subType = SubType::ShowEpisode;
     m_changed = true;
 }
@@ -482,9 +482,9 @@ MoviePtr Media::movie() const
     return m_movie;
 }
 
-void Media::setMovie(MoviePtr movie)
+void Media::setMovie( MoviePtr movie )
 {
-    m_movie = movie;
+    m_movie = std::move( movie );
     m_subType = SubType::Movie;
     m_changed = true;
 }
