@@ -83,7 +83,7 @@ private:
 class VLCMetadataService : public IParserService
 {
 public:
-    explicit VLCMetadataService();
+    VLCMetadataService() = default;
 
 private:
     virtual bool initialize( IMediaLibrary* ml ) override;

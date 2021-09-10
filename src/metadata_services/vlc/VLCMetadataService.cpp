@@ -46,10 +46,6 @@ namespace medialibrary
 namespace parser
 {
 
-VLCMetadataService::VLCMetadataService()
-{
-}
-
 bool VLCMetadataService::initialize( IMediaLibrary* )
 {
     return true;
