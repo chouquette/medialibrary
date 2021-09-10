@@ -187,7 +187,7 @@ Status LinkService::linkToMedia( IItem &item )
                 if ( file == nullptr )
                 {
                     file = std::static_pointer_cast<File>(
-                                media->addFile( std::move( mrl ), item.fileType() ) );
+                                media->addFile( mrl, item.fileType() ) );
                     if ( file == nullptr )
                         return Status::Fatal;
                 }
