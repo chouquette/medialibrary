@@ -215,7 +215,7 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     auto thumbnailIdx = Thumbnail::SizeToInt( newThumbnail->sizeType() );
     auto currentThumbnail = thumbnail( newThumbnail->sizeType() );
     currentThumbnail = Thumbnail::updateOrReplace( m_ml, currentThumbnail,
-                                                   newThumbnail,
+                                                   std::move( newThumbnail ),
                                                    Artist::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Artist );
     auto res = currentThumbnail != nullptr;
