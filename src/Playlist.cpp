@@ -899,7 +899,7 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
     stmt.execute();
     sqlite::Row row;
     while ( ( row = stmt.row() ) != nullptr )
-        pls.push_back( { row.load<int64_t>( 0 ), row.load<std::string>( 1 ) } );
+        pls.emplace_back( row.load<int64_t>( 0 ), row.load<std::string>( 1 ) );
 
     auto backupFolder = utils::file::toFolderPath( ml->playlistPath() +
                                                    std::to_string( backupDate ) );
