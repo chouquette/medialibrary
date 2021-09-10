@@ -978,7 +978,10 @@ std::shared_ptr<Genre> MetadataAnalyzer::handleGenre( IItem& item ) const
     {
         genre = Genre::create( m_ml, std::move( genreStr ) );
         if ( genre == nullptr )
+        {
             LOG_ERROR( "Failed to get/create Genre" );
+            return nullptr;
+        }
         m_notifier->notifyGenreCreation( genre );
     }
     return genre;
