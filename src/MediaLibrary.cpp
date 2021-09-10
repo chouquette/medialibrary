@@ -898,9 +898,9 @@ AlbumPtr MediaLibrary::album( int64_t id ) const
     return Album::fetch( this, id );
 }
 
-std::shared_ptr<Album> MediaLibrary::createAlbum( const std::string& title )
+std::shared_ptr<Album> MediaLibrary::createAlbum( std::string title )
 {
-    return Album::create( this, title );
+    return Album::create( this, std::move( title ) );
 }
 
 Query<IAlbum> MediaLibrary::albums( const QueryParameters* params ) const

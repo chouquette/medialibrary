@@ -59,10 +59,10 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     assert( row.hasRemainingColumns() == false );
 }
 
-Album::Album( MediaLibraryPtr ml, const std::string& title )
+Album::Album( MediaLibraryPtr ml, std::string title )
     : m_ml( ml )
     , m_id( 0 )
-    , m_title( title )
+    , m_title( std::move( title ) )
     , m_artistId( 0 )
     , m_releaseYear( ~0u )
     , m_nbTracks( 0 )
@@ -741,12 +741,12 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
             check( ml->getConn(), Triggers::DeleteFts );
 }
 
-std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, const std::string& title )
+std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, std::string title )
 {
-    auto album = std::make_shared<Album>( ml, title );
+    auto album = std::make_shared<Album>( ml, std::move( title ) );
     static const std::string req = "INSERT INTO " + Table::Name +
             "(id_album, title) VALUES(NULL, ?)";
-    if ( insert( ml, album, req, title ) == false )
+    if ( insert( ml, album, req, album->m_title ) == false )
         return nullptr;
     return album;
 }

@@ -125,7 +125,7 @@ public:
     virtual bool deleteLabel( LabelPtr label ) override;
 
     virtual AlbumPtr album( int64_t id ) const override;
-    std::shared_ptr<Album> createAlbum( const std::string& title );
+    std::shared_ptr<Album> createAlbum( std::string title );
     virtual Query<IAlbum> albums( const QueryParameters* params ) const override;
 
     virtual Query<IGenre> genres( const QueryParameters* params ) const override;

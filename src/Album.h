@@ -65,7 +65,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         };
 
         Album( MediaLibraryPtr ml, sqlite::Row& row );
-        Album( MediaLibraryPtr ml, const std::string& title );
+        Album( MediaLibraryPtr ml, std::string title );
         /**
          * @brief Album Constructs an unknown album for the provided artist
          */
@@ -129,7 +129,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         static std::string index( Indexes index, uint32_t dbModel );
         static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
-        static std::shared_ptr<Album> create( MediaLibraryPtr ml, const std::string& title );
+        static std::shared_ptr<Album> create( MediaLibraryPtr ml, std::string title );
         static std::shared_ptr<Album> createUnknownAlbum( MediaLibraryPtr ml, const Artist* artist );
         ///
         /// \brief search search for an album, through its albumartist or title

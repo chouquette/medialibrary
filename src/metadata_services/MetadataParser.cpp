@@ -894,7 +894,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     auto artists = findOrCreateArtist( item );
     if ( artists.first == nullptr && artists.second == nullptr )
         return Status::Fatal;
-    const auto& albumName = item.meta( IItem::Metadata::Album );
+    auto albumName = item.meta( IItem::Metadata::Album );
 
     std::shared_ptr<Album> album;
     if ( albumName.empty() == false )
@@ -916,7 +916,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     if ( album == nullptr )
     {
         if ( albumName.empty() == false )
-            album = m_ml->createAlbum( albumName );
+            album = m_ml->createAlbum( std::move( albumName ) );
         else
             album = createUnknownAlbum( artists.first.get(), artists.second.get() );
         if ( album == nullptr )
