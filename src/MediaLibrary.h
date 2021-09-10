@@ -116,7 +116,7 @@ public:
                                    std::shared_ptr<Folder> parentFolder,
                                    std::shared_ptr<fs::IDirectory> parentFolderFs,
                                    IFile::Type fileType );
-    void onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs, IFile::Type fileType );
+    void onDiscoveredLinkedFile( const fs::IFile& fileFs, IFile::Type fileType );
     void onUpdatedFile( std::shared_ptr<File> file, std::shared_ptr<fs::IFile> fileFs,
                         std::shared_ptr<Folder> parentFolder,
                         std::shared_ptr<fs::IDirectory> parentFolderFs );

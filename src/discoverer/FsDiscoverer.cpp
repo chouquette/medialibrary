@@ -553,7 +553,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             break;
         waitIfPaused();
 
-        m_ml->onDiscoveredLinkedFile( std::move( p.file ), p.type );
+        m_ml->onDiscoveredLinkedFile( *p.file, p.type );
     }
     LOG_DEBUG( "Done checking files in ", parentFolderFs->mrl() );
 }

@@ -818,12 +818,13 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
     }
 }
 
-void MediaLibrary::onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs,
+void MediaLibrary::onDiscoveredLinkedFile( const fs::IFile& fileFs,
                                            IFile::Type fileType )
 {
     try
     {
-        auto task = parser::Task::createLinkTask( this, fileFs->mrl(), fileType, fileFs->linkedWith(),
+        auto task = parser::Task::createLinkTask( this, fileFs.mrl(), fileType,
+                                                  fileFs.linkedWith(),
                                                   parser::Task::LinkType::Media, 0 );
         if ( task != nullptr )
         {
@@ -834,7 +835,7 @@ void MediaLibrary::onDiscoveredLinkedFile( std::shared_ptr<fs::IFile> fileFs,
     }
     catch ( const sqlite::errors::ConstraintUnique& ex )
     {
-        LOG_INFO( "Failed to create link task for ", fileFs->mrl(), ": ",
+        LOG_INFO( "Failed to create link task for ", fileFs.mrl(), ": ",
                   ex.what(), ". Assuming it was already created before" );
     }
 }
