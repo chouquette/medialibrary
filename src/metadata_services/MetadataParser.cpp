@@ -562,7 +562,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
             assert( !"An external main file must be associated with an external media" );
             return Status::Fatal;
         }
-        auto res = overrideExternalMedia( item, media, file, mediaType );
+        auto res = overrideExternalMedia( item, *media, *file, mediaType );
         // IItem::setFile will update the task in db, so run it as part of
         // the transation
         item.setFile( std::move( file ) );
@@ -633,8 +633,8 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
     return Status::Success;
 }
 
-Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Media> media,
-                                                std::shared_ptr<File> file,
+Status MetadataAnalyzer::overrideExternalMedia( IItem& item, Media& media,
+                                                File& file,
                                                 IMedia::Type newType ) const
 {
     LOG_DEBUG( "Converting media ", item.mrl(), " from external to internal" );
@@ -652,13 +652,13 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, std::shared_ptr<Med
         return Status::Fatal;
     auto updatedTitle = item.meta( Task::IItem::Metadata::Title );
     if ( updatedTitle.empty() == false )
-        media->setTitleBuffered( updatedTitle );
-    media->setTypeBuffered( newType );
-    media->setDuration( item.duration() );
-    media->setDeviceId( device->id() );
-    media->setFolderId( item.parentFolder()->id() );
-    media->markAsInternal();
-    media->save();
+        media.setTitleBuffered( updatedTitle );
+    media.setTypeBuffered( newType );
+    media.setDuration( item.duration() );
+    media.setDeviceId( device->id() );
+    media.setFolderId( item.parentFolder()->id() );
+    media.markAsInternal();
+    media.save();
     return Status::Success;
 }
 

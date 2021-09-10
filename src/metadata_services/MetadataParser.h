@@ -69,8 +69,8 @@ protected:
     Status parseAudioFile( IItem& task );
     bool parseVideoFile( IItem& task ) const;
     Status createFileAndMedia( IItem& item ) const;
-    Status overrideExternalMedia(IItem& item, std::shared_ptr<Media> media,
-                                  std::shared_ptr<File> file, IMedia::Type newType ) const;
+    Status overrideExternalMedia( IItem& item, Media& media,
+                                  File& file, IMedia::Type newType ) const;
     void createTracks( Media& m, const std::vector<IItem::Track>& tracks ) const;
     std::tuple<bool, bool> refreshFile( IItem& item ) const;
     std::tuple<bool, bool> refreshMedia( IItem& item ) const;
