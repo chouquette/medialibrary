@@ -69,7 +69,7 @@ std::shared_ptr<IFile> CommonDirectory::file( const std::string& mrl ) const
     // device has multiple mountpoints.
     auto fileName = utils::file::fileName( mrl );
     auto it = std::find_if( cbegin( fs ), cend( fs ),
-                            [&fileName]( const std::shared_ptr<fs::IFile> f ) {
+                            [&fileName]( const std::shared_ptr<fs::IFile>& f ) {
                                 return f->name() == fileName;
                             });
     if ( it == cend( fs ) )
@@ -81,7 +81,7 @@ bool CommonDirectory::contains( const std::string& fileName ) const
 {
     auto fs = files();
     return std::find_if( cbegin( fs ), cend( fs ),
-        [&fileName]( const std::shared_ptr<fs::IFile> f ) {
+        [&fileName]( const std::shared_ptr<fs::IFile>& f ) {
             return f->name() == fileName;
     }) != cend( fs );
 }
