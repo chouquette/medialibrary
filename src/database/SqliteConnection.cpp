@@ -204,7 +204,7 @@ void Connection::setRecursiveTriggersEnabled( bool value )
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )
 {
-    m_hooks.emplace( table, cb );
+    m_hooks.emplace( table, std::move( cb ) );
 }
 
 bool Connection::checkSchemaIntegrity()
