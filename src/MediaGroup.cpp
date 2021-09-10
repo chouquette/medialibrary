@@ -400,7 +400,7 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
             name = commonPattern( name, m->title() );
         media.push_back( std::move( m ) );
     }
-    if ( media.size() == 0 )
+    if ( media.empty() == true )
         return nullptr;
     static const std::string req = "INSERT INTO " + Table::Name +
             "(name, user_interacted, forced_singleton, creation_date, last_modification_date) "
