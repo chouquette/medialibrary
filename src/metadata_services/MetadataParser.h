@@ -62,7 +62,7 @@ protected:
     virtual void stop() override;
 
     Status parsePlaylist( IItem& item ) const;
-    void addPlaylistElement( IItem& item, std::shared_ptr<Playlist> playlistPtr,
+    void addPlaylistElement(IItem& item, int64_t playlistId,
                              const std::string& mrl, const std::string& itemTitle,
                              int64_t itemIdx ) const;
     void addFolderToPlaylist(IItem& item, std::shared_ptr<Playlist> playlistPtr , const IItem& subitem) const;

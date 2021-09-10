@@ -324,7 +324,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                 continue;
             }
         }
-        addPlaylistElement( item, playlistPtr, subItem.mrl(),
+        addPlaylistElement( item, playlistPtr->id(), subItem.mrl(),
                             subItem.meta( Task::IItem::Metadata::Title ),
                             subItem.linkExtra() );
     }
@@ -333,7 +333,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
 }
 
 void MetadataAnalyzer::addPlaylistElement( IItem& item,
-                                           std::shared_ptr<Playlist> playlistPtr,
+                                           int64_t playlistId,
                                            const std::string& mrl,
                                            const std::string& itemTitle,
                                            int64_t itemIdx ) const
@@ -375,7 +375,7 @@ void MetadataAnalyzer::addPlaylistElement( IItem& item,
     }
     try
     {
-        auto task = Task::createLinkTask( m_ml, mrl, playlistPtr->id(),
+        auto task = Task::createLinkTask( m_ml, mrl, playlistId,
                                           Task::LinkType::Playlist,
                                           itemIdx );
         if ( task == nullptr )
@@ -437,7 +437,7 @@ void MetadataAnalyzer::addFolderToPlaylist( IItem& item,
         auto t = m_ml->getConn()->newTransaction();
         for ( auto& f : subFiles )
         {
-            addPlaylistElement( item, playlistPtr, f->mrl(), {}, itemIdx++ );
+            addPlaylistElement( item, playlistPtr->id(), f->mrl(), {}, itemIdx++ );
         }
         t->commit();
     }
