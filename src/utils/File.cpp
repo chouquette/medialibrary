@@ -31,7 +31,7 @@
 #include <memory>
 #include <cstdio>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 #include <sys/types.h>
 #include <sys/stat.h>
 
