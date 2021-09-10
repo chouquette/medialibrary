@@ -48,10 +48,10 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
         };
 
         VideoTrack( MediaLibraryPtr, sqlite::Row& row );
-        VideoTrack( MediaLibraryPtr, const std::string& codec,
+        VideoTrack( MediaLibraryPtr, std::string codec,
                     unsigned int width, unsigned int height, uint32_t fpsNum,
                     uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum, uint32_t sarDen,
-                    int64_t mediaId, const std::string& language, const std::string& description );
+                    int64_t mediaId, std::string language, std::string description );
 
         virtual int64_t id() const override;
         virtual const std::string& codec() const override;
@@ -72,11 +72,11 @@ class VideoTrack : public IVideoTrack, public DatabaseHelpers<VideoTrack>
         static std::string index( Indexes index, uint32_t dbModel );
         static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
-        static std::shared_ptr<VideoTrack> create( MediaLibraryPtr ml, const std::string& codec,
+        static std::shared_ptr<VideoTrack> create(MediaLibraryPtr ml, std::string codec,
                                     unsigned int width, unsigned int height, uint32_t fpsNum,
                                     uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum,
-                                    uint32_t sarDen, int64_t mediaId, const std::string& language,
-                                    const std::string& description );
+                                    uint32_t sarDen, int64_t mediaId, std::string language,
+                                    std::string description );
         /**
          * @brief removeFromMedia Remove all video tracks from a media
          */

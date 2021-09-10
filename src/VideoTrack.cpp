@@ -51,12 +51,12 @@ VideoTrack::VideoTrack( MediaLibraryPtr, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int width,
+VideoTrack::VideoTrack( MediaLibraryPtr, std::string codec, unsigned int width,
                         unsigned int height, uint32_t fpsNum, uint32_t fpsDen,
                         uint32_t bitrate, uint32_t sarNum, uint32_t sarDen, int64_t mediaId,
-                        const std::string& language, const std::string& description )
+                        std::string language, std::string description )
     : m_id( 0 )
-    , m_codec( codec )
+    , m_codec( std::move( codec ) )
     , m_width( width )
     , m_height( height )
     , m_fpsNum( fpsNum )
@@ -65,8 +65,8 @@ VideoTrack::VideoTrack( MediaLibraryPtr, const std::string& codec, unsigned int 
     , m_sarNum( sarNum )
     , m_sarDen( sarDen )
     , m_mediaId( mediaId )
-    , m_language( language )
-    , m_description( description )
+    , m_language( std::move( language ) )
+    , m_description( std::move( description ) )
 {
 }
 
@@ -130,20 +130,23 @@ const std::string& VideoTrack::description() const
     return m_description;
 }
 
-std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, const std::string& codec, unsigned int width,
+std::shared_ptr<VideoTrack> VideoTrack::create( MediaLibraryPtr ml, std::string codec, unsigned int width,
                                                 unsigned int height, uint32_t fpsNum, uint32_t fpsDen,
                                                 uint32_t bitrate, uint32_t sarNum, uint32_t sarDen,
-                                                int64_t mediaId, const std::string& language,
-                                                const std::string& description )
+                                                int64_t mediaId, std::string language,
+                                                std::string description )
 {
     static const std::string req  = "INSERT INTO " + VideoTrack::Table::Name
             + "(codec, width, height, fps_num, fps_den, bitrate, sar_num, sar_den,"
                "media_id, language, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    auto track = std::make_shared<VideoTrack>( ml, codec, width, height, fpsNum,
-                                               fpsDen, bitrate, sarNum, sarDen,
-                                               mediaId, language, description );
-    if ( insert( ml, track, req, codec, width, height, fpsNum, fpsDen, bitrate,
-                 sarNum, sarDen, mediaId, language, description ) == false )
+    auto track = std::make_shared<VideoTrack>( ml, std::move( codec ), width,
+                                               height, fpsNum, fpsDen, bitrate,
+                                               sarNum, sarDen, mediaId,
+                                               std::move( language ),
+                                               std::move( description ) );
+    if ( insert( ml, track, req, track->m_codec, width, height, fpsNum, fpsDen,
+                 bitrate, sarNum, sarDen, mediaId, track->m_language,
+                 track->m_description ) == false )
         return nullptr;
     return track;
 }
