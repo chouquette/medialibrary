@@ -77,7 +77,7 @@ public:
      */
     bool setMediaId( int64_t mediaId );
     bool destroy();
-    int64_t folderId();
+    int64_t folderId() const;
 
     bool update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable );
     bool convertToExternal();

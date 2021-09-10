@@ -229,7 +229,7 @@ bool File::destroy()
     return DatabaseHelpers::destroy( m_ml, m_id );
 }
 
-int64_t File::folderId()
+int64_t File::folderId() const
 {
     return m_folderId;
 }
