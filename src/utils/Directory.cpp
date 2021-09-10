@@ -43,7 +43,7 @@
 #else
 # include <cerrno>
 # include <sys/stat.h>
-# include <limits.h>
+# include <climits>
 # include <cstdlib>
 # include <unistd.h>
 # include <dirent.h>
