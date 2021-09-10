@@ -325,7 +325,7 @@ std::string VLCEmbeddedThumbnail4_0::extension() const
         return "png";
     }
     assert( !"Invalid thumbnail type" );
-    return nullptr;
+    return {};
 }
 
 #elif defined(FORCE_ATTACHMENTS_API)
