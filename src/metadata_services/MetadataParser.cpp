@@ -1054,7 +1054,7 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
             " WHERE title = ?";
     auto albums = Album::fetchAll<Album>( m_ml, req, albumName );
 
-    if ( albums.size() == 0 )
+    if ( albums.empty() == true )
         return nullptr;
 
     const auto discTotal = toInt( item, IItem::Metadata::DiscTotal );
@@ -1098,7 +1098,7 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
         const auto tracks = a->cachedTracks();
         // If there is no tracks to compare with, we just have to hope this will be the only valid
         // album match
-        if ( tracks.size() == 0 )
+        if ( tracks.empty() == true )
         {
             ++it;
             continue;
@@ -1183,7 +1183,7 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
         // Assume it's a negative match.
         it = albums.erase( it );
     }
-    if ( albums.size() == 0 )
+    if ( albums.empty() == true )
         return nullptr;
     if ( albums.size() > 1 )
     {
