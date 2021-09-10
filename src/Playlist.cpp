@@ -828,6 +828,7 @@ Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
         for ( const auto& folder : plFolder->dirs() )
         {
             std::vector<std::string> mrls;
+            mrls.reserve( folder->files().size() );
             for ( const auto& f : folder->files() )
                 mrls.push_back( f->mrl() );
             auto backupDate = std::stol( utils::file::directoryName( folder->mrl() ) );
