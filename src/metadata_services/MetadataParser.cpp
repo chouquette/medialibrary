@@ -970,15 +970,15 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
 std::shared_ptr<Genre> MetadataAnalyzer::handleGenre( IItem& item ) const
 {
-    const auto& genreStr = item.meta( IItem::Metadata::Genre );
+    auto genreStr = item.meta( IItem::Metadata::Genre );
     if ( genreStr.length() == 0 )
         return nullptr;
     auto genre = Genre::fromName( m_ml, genreStr );
     if ( genre == nullptr )
     {
-        genre = Genre::create( m_ml, genreStr );
+        genre = Genre::create( m_ml, std::move( genreStr ) );
         if ( genre == nullptr )
-            LOG_ERROR( "Failed to get/create Genre", genreStr );
+            LOG_ERROR( "Failed to get/create Genre" );
         m_notifier->notifyGenreCreation( genre );
     }
     return genre;

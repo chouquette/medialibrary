@@ -53,7 +53,7 @@ public:
     };
 
     Genre( MediaLibraryPtr ml, sqlite::Row& row );
-    Genre( MediaLibraryPtr ml, const std::string& name );
+    Genre( MediaLibraryPtr ml, std::string name );
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
     virtual uint32_t nbTracks() const override;
@@ -82,7 +82,7 @@ public:
     static std::string trigger( Triggers trigger, uint32_t dbModel );
     static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static std::shared_ptr<Genre> create( MediaLibraryPtr ml, const std::string& name );
+    static std::shared_ptr<Genre> create( MediaLibraryPtr ml, std::string name );
     static std::shared_ptr<Genre> fromName( MediaLibraryPtr ml, const std::string& name );
     static Query<IGenre> search( MediaLibraryPtr ml, const std::string& name, const QueryParameters* params );
     static Query<IGenre> listAll( MediaLibraryPtr ml, const QueryParameters* params );

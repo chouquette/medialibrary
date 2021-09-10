@@ -50,10 +50,10 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Genre::Genre( MediaLibraryPtr ml, const std::string& name )
+Genre::Genre( MediaLibraryPtr ml, std::string name )
     : m_ml( ml )
     , m_id( 0 )
-    , m_name( name )
+    , m_name( std::move( name ) )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
 {
@@ -338,12 +338,12 @@ bool Genre::checkDbModel(MediaLibraryPtr ml)
             check( ml->getConn(), Triggers::UpdateIsPresent );
 }
 
-std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, const std::string& name )
+std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, std::string name )
 {
     static const std::string req = "INSERT INTO " + Table::Name + "(name)"
             "VALUES(?)";
-    auto self = std::make_shared<Genre>( ml, name );
-    if ( insert( ml, self, req, name ) == false )
+    auto self = std::make_shared<Genre>( ml, std::move( name ) );
+    if ( insert( ml, self, req, self->m_name ) == false )
         return nullptr;
     return self;
 }
