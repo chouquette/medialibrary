@@ -759,7 +759,7 @@ bool MediaLibrary::isDeviceKnown( const std::string &uuid,
     auto isNetwork = scheme != "file://";
     try
     {
-        Device::create( this, uuid, scheme, isRemovable, isNetwork );
+        Device::create( this, uuid, std::move( scheme ), isRemovable, isNetwork );
     }
     catch ( const sqlite::errors::ConstraintUnique& )
     {

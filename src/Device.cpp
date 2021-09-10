@@ -55,12 +55,12 @@ Device::Device( MediaLibraryPtr ml, sqlite::Row& row )
 #endif
 }
 
-Device::Device( MediaLibraryPtr ml, const std::string& uuid,
-                const std::string& scheme, bool isRemovable, bool isNetwork )
+Device::Device( MediaLibraryPtr ml, std::string uuid, std::string scheme,
+                bool isRemovable, bool isNetwork )
     : m_ml( ml )
     , m_id( 0 )
-    , m_uuid( uuid )
-    , m_scheme( scheme )
+    , m_uuid( std::move( uuid ) )
+    , m_scheme( std::move( scheme ) )
     , m_isRemovable( isRemovable )
     // Assume we can't add an absent device
     , m_isPresent( true )
@@ -143,8 +143,8 @@ bool Device::addMountpoint( const std::string& mrl, int64_t seenDate )
                                          seenDate ) != 0;
 }
 
-std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& uuid,
-                                        const std::string& scheme, bool isRemovable,
+std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, std::string uuid,
+                                        std::string scheme, bool isRemovable,
                                         bool isNetwork )
 {
     static const std::string req = "INSERT INTO " + Device::Table::Name
@@ -153,9 +153,11 @@ std::shared_ptr<Device> Device::create( MediaLibraryPtr ml, const std::string& u
     auto lastSeen = isRemovable ? std::chrono::duration_cast<std::chrono::seconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count() : 0;
-    auto self = std::make_shared<Device>( ml, uuid, scheme, isRemovable, isNetwork );
-    if ( insert( ml, self, req, uuid, scheme, isRemovable, self->isPresent(),
-                 self->isNetwork(), lastSeen ) == false )
+    auto self = std::make_shared<Device>( ml, std::move( uuid ),
+                                          std::move( scheme ), isRemovable,
+                                          isNetwork );
+    if ( insert( ml, self, req, self->m_uuid, self->m_scheme, isRemovable,
+                 self->isPresent(), self->isNetwork(), lastSeen ) == false )
         return nullptr;
     return self;
 }

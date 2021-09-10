@@ -43,7 +43,7 @@ public:
         static const std::string Name;
     };
 
-    Device( MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme,
+    Device(MediaLibraryPtr ml, std::string uuid, std::string scheme,
             bool isRemovable, bool isNetwork );
     Device( MediaLibraryPtr ml, sqlite::Row& row );
     int64_t id() const;
@@ -80,7 +80,9 @@ public:
      */
     std::string cachedMountpoint() const;
 
-    static std::shared_ptr<Device> create(MediaLibraryPtr ml, const std::string& uuid, const std::string& scheme, bool isRemovable , bool isNetwork);
+    static std::shared_ptr<Device> create( MediaLibraryPtr ml, std::string uuid,
+                                           std::string scheme, bool isRemovable,
+                                           bool isNetwork );
     static void createTable( sqlite::Connection* connection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
