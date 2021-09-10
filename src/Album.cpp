@@ -407,7 +407,7 @@ bool Album::removeTrack( Media& media, AlbumTrack& track )
     auto genre = std::static_pointer_cast<Genre>( track.genre() );
     if ( genre != nullptr )
         genre->updateCachedNbTracks( -1 );
-    auto it = std::find_if( begin( m_tracks ), end( m_tracks ), [&media]( MediaPtr m ) {
+    auto it = std::find_if( begin( m_tracks ), end( m_tracks ), [&media]( MediaPtr& m ) {
         return m->id() == media.id();
     });
     if ( it != end( m_tracks ) )
