@@ -999,7 +999,7 @@ bool Playlist::writeBackup( const std::string& name,
                 "</location></track>\n";
     doc += "</trackList>\n</playlist>";
 
-    auto buff = doc.c_str();
+    const auto* buff = doc.c_str();
     auto length = doc.size();
     auto i = 0u;
     constexpr auto ChunkSize = 4096u;
