@@ -926,7 +926,8 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     try
     {
         // If we know a track artist, specify it, otherwise, fallback to the album/unknown artist
-        if ( handleTrack( *album, item, artists.second ? artists.second : artists.first,
+        if ( handleTrack( *album, item,
+                          artists.second ? artists.second->id() : artists.first->id(),
                           genre.get() ) == nullptr )
             return Status::Fatal;
     }
@@ -1268,7 +1269,7 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
 /* Tracks handling */
 
 std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
-                                                         std::shared_ptr<Artist> artist, Genre* genre ) const
+                                                         int64_t artistId, Genre* genre ) const
 {
     assert( sqlite::Transaction::isInProgress() == true );
 
@@ -1288,7 +1289,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& 
         media->setTitleBuffered( title );
 
     auto track = std::static_pointer_cast<AlbumTrack>( album.addTrack( media, trackNumber,
-                                                                        discNumber, artist->id(),
+                                                                        discNumber, artistId,
                                                                         genre ) );
     if ( track == nullptr )
     {

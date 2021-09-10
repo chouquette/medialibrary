@@ -76,8 +76,8 @@ protected:
     std::tuple<bool, bool> refreshMedia( IItem& item ) const;
     std::tuple<bool, bool> refreshPlaylist( IItem& item ) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( IItem& item ) const;
-    std::shared_ptr<AlbumTrack> handleTrack( Album& album, IItem& item,
-                                             std::shared_ptr<Artist> artist, Genre* genre ) const;
+    std::shared_ptr<AlbumTrack> handleTrack(Album& album, IItem& item,
+                                             int64_t artistId, Genre* genre ) const;
     void link( IItem& item, Album& album, std::shared_ptr<Artist> albumArtist,
                std::shared_ptr<Artist> artist, bool newAlbum,
                std::shared_ptr<Thumbnail> thumbnail );
