@@ -266,7 +266,7 @@ std::vector<DeviceLister::Device> DeviceLister::devices() const
             LOG_WARN( "Failed to detect any device" );
             return res;
         }
-        for ( const auto& p : mountpoints )
+        for ( auto& p : mountpoints )
         {
             assert( p.second.empty() == false );
 
