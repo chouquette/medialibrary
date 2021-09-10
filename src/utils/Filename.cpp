@@ -32,7 +32,7 @@
 # include <algorithm>
 # define DIR_SEPARATOR "\\/"
 #else
-# define DIR_SEPARATOR "/"
+# define DIR_SEPARATOR '/'
 #endif
 
 namespace medialibrary
