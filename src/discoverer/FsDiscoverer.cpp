@@ -544,7 +544,7 @@ void FsDiscoverer::checkFiles( std::shared_ptr<fs::IDirectory> parentFolderFs,
             break;
         waitIfPaused();
 
-        m_ml->onDiscoveredFile( p.file, parentFolder, parentFolderFs,
+        m_ml->onDiscoveredFile( std::move( p.file ), parentFolder, parentFolderFs,
                                 p.type );
     }
     for ( const auto& p : linkedFilesToAdd )
