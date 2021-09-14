@@ -35,6 +35,7 @@
 #include "logging/Logger.h"
 #include "utils/Url.h"
 #include "utils/Md5.h"
+#include "utils/XxHasher.h"
 #include "utils/Defer.h"
 
 #ifndef USE_EMBEDDED_THUMBNAIL_API
@@ -310,7 +311,7 @@ std::string VLCEmbeddedThumbnail4_0::hash() const
 {
     size_t size;
     auto buff = m_pic.buffer( &size );
-    return utils::Md5Hasher::fromBuff( buff, size );
+    return utils::hash::toString( utils::hash::xxFromBuff( buff, size ) );
 }
 
 std::string VLCEmbeddedThumbnail4_0::extension() const
@@ -357,7 +358,7 @@ std::string VLCEmbeddedThumbnailForced::hash() const
 {
     size_t size;
     auto buff = libvlc_picture_get_buffer( m_pic, &size );
-    return utils::Md5Hasher::fromBuff( buff, size );
+    return utils::hash::toString( utils::hash::xxFromBuff( buff, size ) );
 }
 
 std::string VLCEmbeddedThumbnailForced::extension() const
@@ -394,7 +395,7 @@ size_t VLCEmbeddedThumbnail3_0::size() const
 
 std::string VLCEmbeddedThumbnail3_0::hash() const
 {
-    return utils::Md5Hasher::fromFile( m_thumbnailPath );
+    return utils::hash::toString( utils::hash::xxFromFile( m_thumbnailPath ) );
 }
 
 std::string VLCEmbeddedThumbnail3_0::extension() const
