@@ -31,7 +31,6 @@
 #include "database/SqliteConnection.h"
 #include "utils/Strings.h"
 #include "utils/Defer.h"
-#include "utils/Md5.h"
 #include "utils/Xml.h"
 #include "utils/XxHasher.h"
 
@@ -154,19 +153,6 @@ static void Defer( MiscTests* )
     ASSERT_EQ( 1u, i );
 }
 
-static void Md5Buffer( MiscTests* )
-{
-    ASSERT_EQ( "F96B697D7CB7938D525A2F31AAF161D0",
-               utils::Md5Hasher::fromBuff( (const uint8_t*)"message digest",
-                                                strlen( "message digest" ) ) );
-}
-
-static void Md5File( MiscTests* )
-{
-    ASSERT_EQ( "5BF2922FB1FF5800D533AE34785953F1",
-               utils::Md5Hasher::fromFile( SRC_DIR "/test/unittest/md5_input.bin" ) );
-}
-
 static void XxHashBuffer( MiscTests* )
 {
     auto hash = utils::hash::xxFromBuff( (const uint8_t*)"message digest",
@@ -214,8 +200,6 @@ int test_without_ml_init( int ac, char** av )
     ADD_TEST( Utf8NbBytes );
     ADD_TEST( XmlEncode );
     ADD_TEST( Defer );
-    ADD_TEST( Md5Buffer );
-    ADD_TEST( Md5File );
     ADD_TEST( XxHashBuffer );
     ADD_TEST( XxHashFile );
 

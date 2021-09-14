@@ -158,8 +158,6 @@ misc_tests = [
   'Utf8NbBytes',
   'XmlEncode',
   'Defer',
-  'Md5Buffer',
-  'Md5File',
   'XxHashBuffer',
   'XxHashFile',
   'CheckTaskDbModel',
