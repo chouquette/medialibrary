@@ -160,6 +160,8 @@ misc_tests = [
   'Defer',
   'Md5Buffer',
   'Md5File',
+  'XxHashBuffer',
+  'XxHashFile',
   'CheckTaskDbModel',
   'ClearDatabaseKeepPlaylist',
   'ClearDatabase',

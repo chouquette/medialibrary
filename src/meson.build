@@ -53,7 +53,13 @@ medialib_src = [
 	'utils/SWMRLock.cpp',
 	'Bookmark.cpp',
 	'MediaGroup.cpp',
+	'utils/XxHasher.cpp',
 ]
+
+if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
+  medialib_src += ['utils/xxhash/xxh_x86dispatch.cpp']
+  add_project_arguments('-DXXHASH_DYNAMIC_DISPATCH=1', language: ['cpp'])
+endif
 
 if libvlc_dep.found()
   if libvlc_dep.version().version_compare('>=4.0')

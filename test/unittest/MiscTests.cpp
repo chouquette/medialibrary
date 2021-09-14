@@ -33,6 +33,7 @@
 #include "utils/Defer.h"
 #include "utils/Md5.h"
 #include "utils/Xml.h"
+#include "utils/XxHasher.h"
 
 #include "parser/Task.h"
 
@@ -166,6 +167,22 @@ static void Md5File( MiscTests* )
                utils::Md5Hasher::fromFile( SRC_DIR "/test/unittest/md5_input.bin" ) );
 }
 
+static void XxHashBuffer( MiscTests* )
+{
+    auto hash = utils::hash::xxFromBuff( (const uint8_t*)"message digest",
+                                         strlen( "message digest" ) );
+    ASSERT_EQ( hash, 0x160D8E9329BE94F9u );
+    ASSERT_EQ( "160D8E9329BE94F9", utils::hash::toString( hash ) );
+}
+
+static void XxHashFile( MiscTests* )
+{
+    auto hash = utils::hash::xxFromFile( SRC_DIR "/test/unittest/md5_input.bin" );
+    ASSERT_EQ( hash, 0x5AF0124E1F8A891u );
+    ASSERT_EQ( "5AF0124E1F8A891", utils::hash::toString( hash ) );
+}
+
+
 static void CheckTaskDbModel( Tests* T )
 {
     auto res = parser::Task::checkDbModel( T->ml.get() );
@@ -199,6 +216,8 @@ int test_without_ml_init( int ac, char** av )
     ADD_TEST( Defer );
     ADD_TEST( Md5Buffer );
     ADD_TEST( Md5File );
+    ADD_TEST( XxHashBuffer );
+    ADD_TEST( XxHashFile );
 
     END_TESTS
 }
