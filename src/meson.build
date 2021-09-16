@@ -53,6 +53,8 @@ medialib_src = [
 	'Bookmark.cpp',
 	'MediaGroup.cpp',
 	'utils/XxHasher.cpp',
+	'utils/xxhash/xxh_x86dispatch.cpp',
+	'utils/StringKey.cpp',
 ]
 
 if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
