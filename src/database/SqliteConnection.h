@@ -31,6 +31,7 @@
 #include "utils/SWMRLock.h"
 #include "compat/Mutex.h"
 #include "compat/Thread.h"
+#include "utils/StringKey.h"
 
 namespace medialibrary
 {
@@ -145,7 +146,7 @@ private:
     utils::ReadLocker m_readLock;
     utils::WriteLocker m_writeLock;
     utils::PriorityLocker m_priorityLock;
-    std::unordered_map<std::string, UpdateHookCb> m_hooks;
+    std::unordered_map<utils::StringKey, UpdateHookCb> m_hooks;
 };
 
 }
