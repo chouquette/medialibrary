@@ -29,7 +29,6 @@
 #include "medialibrary/filesystem/Errors.h"
 
 #include <stdexcept>
-#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 
@@ -68,6 +67,17 @@ std::string::const_iterator encodeSegment( std::string& res,
             res.append({ '%', "0123456789ABCDEF"[c >> 4], "0123456789ABCDEF"[c & 0xF] });
     }
     return end;
+}
+
+inline uint16_t charToVal( char c )
+{
+    if ( c >= '0' && c <= '9' )
+        return c - '0';
+    if ( c >= 'a' && c <= 'f' )
+        return c - 'a' + 10;
+    if ( c >= 'A' && c <= 'F' )
+        return c - 'A' + 10;
+    throw std::runtime_error( "Incomplete/invalid character sequence" );
 }
 
 }
@@ -182,7 +192,6 @@ parts split( const std::string& url )
     return res;
 }
 
-
 std::string decode( const std::string& str )
 {
     std::string res;
@@ -194,11 +203,9 @@ std::string decode( const std::string& str )
         if ( *it == '%' )
         {
             ++it;
-            char hex[3];
-            if ( ( hex[0] = *it) == 0 || ( hex[1] = *(it + 1) ) == 0 )
-                throw std::runtime_error( str + ": Incomplete character sequence" );
-            hex[2] = 0;
-            auto val = strtoul( hex, nullptr, 16 );
+            const auto c1 = charToVal( *it );
+            const auto c2 = charToVal( *( it + 1 ) );
+            auto val = c1 * 16 + c2;
             res.push_back( static_cast<std::string::value_type>( val ) );
             ++it;
         }
