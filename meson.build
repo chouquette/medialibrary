@@ -131,6 +131,11 @@ if libvlc_dep.found() and not get_option('tests').disabled()
   subdir('test')
 endif
 
+benchmark_dep = dependency('benchmark', required: false, static: true)
+if benchmark_dep.found()
+  subdir('benchmark')
+endif
+
 pkg = import('pkgconfig')
 pkg.generate(libraries: medialib,
     version: meson.project_version(),
