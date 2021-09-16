@@ -852,6 +852,7 @@ url_tests = [
   'Split',
   'toLocalPath',
   'Path',
+  'Decode',
 ]
 
 foreach t : url_tests

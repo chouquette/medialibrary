@@ -142,6 +142,15 @@ static void Path( Tests* )
     ASSERT_THROW( utils::url::path( "" ), fs::errors::UnhandledScheme );
 }
 
+static void Decode( Tests* )
+{
+    ASSERT_EQ( "\"url\" !benchmark# with sp€ci@l c!!$#%aracters",
+               utils::url::decode( "%22url%22%20%21benchmark%23%20with%20sp%E2%82%ACci%40l%20c%21%21%24%23%25aracters" ) );
+    ASSERT_THROW( utils::url::decode( "%%%%" ), std::runtime_error );
+    ASSERT_THROW( utils::url::decode( "%" ), std::runtime_error );
+    ASSERT_EQ( "", utils::url::decode( "" ) );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS(Url);
@@ -153,6 +162,7 @@ int main( int ac, char** av )
     ADD_TEST( Split );
     ADD_TEST( toLocalPath );
     ADD_TEST( Path );
+    ADD_TEST( Decode );
 
     END_TESTS;
 }
