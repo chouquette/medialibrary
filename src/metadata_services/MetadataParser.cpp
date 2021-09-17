@@ -957,7 +957,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     t->commit();
 
     if ( newAlbum == true )
-        m_notifier->notifyAlbumCreation( album );
+        m_notifier->notifyAlbumCreation( std::move( album ) );
 
     if ( thumbnail != nullptr && thumbnail->id() != 0 &&
          thumbnail->isOwned() == false )
