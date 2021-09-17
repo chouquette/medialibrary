@@ -951,7 +951,8 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
         return Status::Completed;
     }
 
-    link( item, *album, artists.first, artists.second, newAlbum, thumbnail );
+    link( item, *album, std::move( artists.first ), std::move( artists.second ),
+          newAlbum, thumbnail );
     media->save();
     t->commit();
 
