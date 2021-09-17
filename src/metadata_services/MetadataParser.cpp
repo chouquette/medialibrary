@@ -956,8 +956,6 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
     media->save();
     t->commit();
 
-    /* We won't retry anymore, so send any notification now, as the outer
-     * scope doesn't know we modified the passed instance */
     if ( newAlbum == true )
         m_notifier->notifyAlbumCreation( album );
 
