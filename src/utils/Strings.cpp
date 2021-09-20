@@ -37,22 +37,15 @@ namespace utils
 namespace str
 {
 
-std::string& trim( std::string& value )
+std::string trim( std::string value )
 {
-    value.erase( begin( value ), std::find_if( begin( value ), end( value ), []( char c ) {
+    value.erase( begin( value ), std::find_if( cbegin( value ), cend( value ), []( char c ) {
             return isspace( c ) == false;
         }));
-    value.erase( std::find_if( value.rbegin(), value.rend(), []( char c ) {
+    value.erase( std::find_if( value.crbegin(), value.crend(), []( char c ) {
             return isspace( c ) == false;
         }).base(), value.end() );
     return value;
-}
-
-std::string trim( const std::string& value )
-{
-    std::string v = value;
-    trim( v );
-    return v;
 }
 
 namespace utf8

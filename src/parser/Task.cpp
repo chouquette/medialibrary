@@ -868,7 +868,7 @@ std::string Task::meta( Task::Metadata type ) const
 
 void Task::setMeta( Task::Metadata type, std::string value )
 {
-    utils::str::trim( value );
+    value = utils::str::trim( std::move( value ) );
     m_metadata[type] = std::move( value );
 }
 

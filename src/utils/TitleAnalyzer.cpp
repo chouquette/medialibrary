@@ -237,10 +237,8 @@ analyze( const std::string& title )
 
         auto seasonStr = parts[p.seasonGroupIdx].str();
         auto episodeStr = parts[p.episodeGroupIdx].str();
-        std::string showName = parts.prefix();
-        std::string episodeTitle = parts.suffix();
-        utils::str::trim( showName );
-        utils::str::trim( episodeTitle );
+        auto showName = utils::str::trim( parts.prefix() );
+        auto episodeTitle = utils::str::trim( parts.suffix() );
         return std::make_tuple( true, std::stoul( seasonStr ),
                                 std::stoul( episodeStr ), showName, episodeTitle );
     }

@@ -34,12 +34,7 @@ namespace str
 /**
  * @brief trim Trim the provided string in place
  */
-std::string& trim(std::string& value );
-
-/**
- * @brief trim Returns a copy of the trimmed provided string
- */
-std::string trim( const std::string& value );
+std::string trim( std::string value );
 
 namespace utf8
 {
