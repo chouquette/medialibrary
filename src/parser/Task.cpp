@@ -860,16 +860,14 @@ bool Task::recoverUnscannedFiles( MediaLibraryPtr ml )
 
 std::string Task::meta( Task::Metadata type ) const
 {
-    auto it = m_metadata.find( type );
-    if ( it == end( m_metadata ) )
-        return std::string{};
-    return it->second;
+    return m_metadata[static_cast<std::underlying_type_t<Task::Metadata>>(type)];
 }
 
 void Task::setMeta( Task::Metadata type, std::string value )
 {
-    value = utils::str::trim( std::move( value ) );
-    m_metadata[type] = std::move( value );
+    assert( type < Task::Metadata::NbValues );
+    m_metadata[static_cast<std::underlying_type_t<Task::Metadata>>(type)] =
+            utils::str::trim( std::move( value ) );
 }
 
 const std::string& Task::mrl() const

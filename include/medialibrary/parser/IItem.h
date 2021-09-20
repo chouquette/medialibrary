@@ -71,6 +71,9 @@ public:
         TrackNumber,
         DiscNumber,
         DiscTotal,
+
+        /* for convenience, please keep this last */
+        NbValues,
     };
 
     struct Track

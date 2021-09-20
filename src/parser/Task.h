@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <vector>
 #include <string>
@@ -70,14 +71,6 @@ public:
     enum class Indexes : uint8_t
     {
         ParentFolderId,
-    };
-
-    struct MetadataHash
-    {
-        size_t operator()(IItem::Metadata m) const
-        {
-            return static_cast<size_t>( m );
-        }
     };
 
     enum class Type : uint8_t
@@ -331,7 +324,10 @@ private:
     std::string m_linkToMrl;
 
     unsigned int m_currentService = 0;
-    std::unordered_map<Metadata, std::string, MetadataHash> m_metadata;
+    using MetadataArray = std::array<std::string,
+                                static_cast<std::underlying_type_t<Metadata>>(
+                                    Metadata::NbValues )>;
+    MetadataArray m_metadata;
     std::vector<Task> m_linkedItems;
     std::vector<Track> m_tracks;
     int64_t m_duration = 0;
