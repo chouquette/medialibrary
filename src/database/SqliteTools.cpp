@@ -32,7 +32,7 @@ namespace medialibrary
 namespace sqlite
 {
 std::unordered_map<Connection::Handle,
-                    std::unordered_map<std::string, Statement::CachedStmtPtr>> Statement::StatementsCache;
+                   Statement::StatementsCacheMap> Statement::StatementsCache;
 
 compat::Mutex Statement::StatementsCacheLock;
 

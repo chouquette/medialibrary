@@ -248,8 +248,8 @@ private:
     int m_bindIdx;
     bool m_isCommit;
     static compat::Mutex StatementsCacheLock;
-    static std::unordered_map<Connection::Handle,
-                            std::unordered_map<std::string, CachedStmtPtr>> StatementsCache;
+    using StatementsCacheMap = std::unordered_map<std::string, CachedStmtPtr,utils::hash::xxhasher>;
+    static std::unordered_map<Connection::Handle, StatementsCacheMap> StatementsCache;
 };
 
 class Tools
