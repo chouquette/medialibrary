@@ -39,6 +39,15 @@ namespace hash
     uint64_t xxFromBuff( const uint8_t* buff, size_t size );
     uint64_t xxFromFile( const std::string& path );
     std::string toString( uint64_t hash );
+
+    struct xxhasher
+    {
+        size_t operator()( const std::string& str ) const noexcept
+        {
+            return hash::xxFromBuff( reinterpret_cast<const uint8_t*>( str.c_str() ),
+                                     str.length() );
+        }
+    };
 }
 }
 }
