@@ -117,12 +117,18 @@ int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
-        std::cerr << "usage: " << argv[0] << " <entrypoint>" << std::endl;
+        std::cerr << "usage: " << argv[0] << " <entrypoint> [nb_runs]" << std::endl;
         return 1;
     }
 
     auto mlDir = getTempPath( "discoverer_test" );
     auto dbPath = mlDir + "/test.db";
+    auto nbRuns = 1;
+    if ( argc > 2 )
+    {
+        nbRuns = atoi( argv[2] );
+    }
+
 
     unlink( dbPath.c_str() );
 
@@ -135,8 +141,14 @@ int main( int argc, char** argv )
     ml->initialize( testCb.get() );
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
-    ml->discover( argv[1] );
-
-    res = testCb->waitForCompletion();
-    return res == true ? 0 : 1;
+    for ( auto i = 0; i < nbRuns; ++i )
+    {
+        ml->discover( argv[1] );
+        res = testCb->waitForCompletion();
+        if ( res == false )
+            return 1;
+        if ( i < nbRuns - 1 )
+            ml->forceRescan();
+    }
+    return 0;
 }
