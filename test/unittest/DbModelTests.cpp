@@ -733,11 +733,19 @@ static void Upgrade32to33( DbModel* T )
     auto m = T->ml->media( 1 );
     ASSERT_EQ( 123u, m->playCount() );
 
-    auto mg1 = T->ml->mediaGroup( 1 );
+    auto mg1 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( 1 ) );
     ASSERT_EQ( 1u, mg1->nbSeen() );
+    ASSERT_EQ( 0u, mg1->nbVideo() );
+    ASSERT_EQ( 2u, mg1->nbAudio() );
+    ASSERT_EQ( 0u, mg1->nbUnknown() );
+    ASSERT_EQ( 0u, mg1->nbExternalMedia() );
 
-    auto mg2 = T->ml->mediaGroup( 2 );
+    auto mg2 = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( 2 ) );
     ASSERT_EQ( 2u, mg2->nbSeen() );
+    ASSERT_EQ( 0u, mg2->nbVideo() );
+    ASSERT_EQ( 2u, mg2->nbAudio() );
+    ASSERT_EQ( 0u, mg2->nbUnknown() );
+    ASSERT_EQ( 1u, mg2->nbExternalMedia() );
 }
 
 int main( int ac, char** av )

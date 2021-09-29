@@ -125,8 +125,8 @@ Playlist::schema( Playlist::Table::Name, 33 ),
 MediaGroup::schema( MediaGroup::Table::Name, 33 ),
 
 "INSERT INTO " + MediaGroup::Table::Name +
-" SELECT id_group, name, nb_video, nb_audio, nb_unknown, 0, nb_external, "
-    "nb_present_video, nb_present_audio, nb_present_unknown, 0, duration, "
+" SELECT id_group, name, 0, 0, 0, 0, nb_external, "
+    "0, 0, 0, 0, duration, "
     "creation_date, last_modification_date, user_interacted, forced_singleton"
 " FROM " + MediaGroup::Table::Name + "_backup",
 
@@ -135,13 +135,55 @@ MediaGroup::schema( MediaGroup::Table::Name, 33 ),
  * subqueries inlined in the previous request
  */
 "UPDATE " + MediaGroup::Table::Name +
-    " SET nb_seen = sub.nb_seen, nb_present_seen = sub.nb_present_seen"
+" SET nb_video = sub.nb_video, nb_audio = sub.nb_audio,"
+    " nb_unknown = sub.nb_unknown, nb_present_video = sub.nb_present_video,"
+    " nb_present_audio = sub.nb_present_audio, nb_present_unknown = sub.nb_present_unknown,"
+    " nb_seen = sub.nb_seen, nb_present_seen = sub.nb_present_seen"
 " FROM (SELECT"
     " group_id,"
+    " TOTAL(IIF(type = " +
+        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Video ) ) +
+        ", 1, 0)) AS nb_video,"
+    " TOTAL(IIF(type = " +
+        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Video ) ) + " AND is_present != 0"
+        ", 1, 0)) AS nb_present_video,"
+    " TOTAL(IIF(type = " +
+        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Audio ) ) +
+        ", 1, 0)) AS nb_audio,"
+    " TOTAL(IIF(type = " +
+        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+            IMedia::Type::Audio ) ) + " AND is_present != 0"
+        ", 1, 0)) AS nb_present_audio,"
+        " TOTAL(IIF(type = " +
+            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                IMedia::Type::Unknown ) ) +
+            ", 1, 0)) AS nb_unknown,"
+        " TOTAL(IIF(type = " +
+            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
+                IMedia::Type::Unknown ) ) + " AND is_present != 0"
+            ", 1, 0)) AS nb_present_unknown,"
     " TOTAL(IIF(play_count > 0, 1, 0)) AS nb_seen,"
     " TOTAL(IIF(play_count > 0 AND is_present != 0, 1, 0)) AS nb_present_seen"
     " FROM " + Media::Table::Name +
+    " WHERE import_type = "
+        + std::to_string( static_cast<std::underlying_type_t<Media::ImportType>>(
+        Media::ImportType::Internal) ) +
     " GROUP BY group_id) AS sub"
+" WHERE id_group = sub.group_id",
+
+/* Now recompute the number of external media for this group, see #368 */
+"UPDATE " + MediaGroup::Table::Name +
+" SET nb_external = sub.nb_external "
+" FROM (SELECT group_id, COUNT(id_media) AS nb_external"
+    " FROM " + Media::Table::Name +
+    " WHERE import_type != "
+        + std::to_string( static_cast<std::underlying_type_t<Media::ImportType>>(
+        Media::ImportType::Internal) ) +
+    " GROUP BY group_id"
+    ") AS sub "
 " WHERE id_group = sub.group_id",
 
 Media::trigger( Media::Triggers::InsertFts, 33 ),
