@@ -1019,6 +1019,9 @@ static void SearchExternal( Tests* T )
 
     media = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
+
+    media = T->ml->searchVideo( "otter", nullptr )->all();
+    ASSERT_EQ( 0u, media.size() );
 }
 
 static void VacuumOldExternal( Tests* T )
