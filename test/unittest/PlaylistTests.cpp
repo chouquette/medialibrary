@@ -313,10 +313,9 @@ static void DeleteFile( PlaylistTests* T )
     auto ms = T->ml->files();
     for ( auto &mptr : ms )
     {
-        auto m = std::static_pointer_cast<Media>( mptr );
-        auto fs = m->files();
-        ASSERT_EQ( 1u, fs.size() );
-        m->removeFile( static_cast<File&>( *fs[0] ) );
+        auto files = mptr->files();
+        ASSERT_EQ( 1u, files.size() );
+        std::static_pointer_cast<Media>( mptr )->removeFile( static_cast<File&>( *files[0] ) );
     }
     media = T->pl->media( nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
