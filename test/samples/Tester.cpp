@@ -524,25 +524,25 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
         {
             ASSERT_TRUE( expectedPlaylist["items"].IsArray() );
             ASSERT_EQ( items.size(), expectedPlaylist["items"].Size() );
-            for ( auto i = 0u; i < items.size(); ++i )
+            for ( auto j = 0u; j < items.size(); ++j )
             {
-                if ( expectedPlaylist["items"][i].HasMember( "index" ) )
+                if ( expectedPlaylist["items"][j].HasMember( "index" ) )
                 {
-                    ASSERT_EQ( expectedPlaylist["items"][i]["index"].GetUint(), i );
+                    ASSERT_EQ( expectedPlaylist["items"][j]["index"].GetUint(), j );
                 }
-                if ( expectedPlaylist["items"][i].HasMember( "title" ) )
+                if ( expectedPlaylist["items"][j].HasMember( "title" ) )
                 {
-                    ASSERT_EQ( expectedPlaylist["items"][i]["title"].GetString(), items[i]->title() );
+                    ASSERT_EQ( expectedPlaylist["items"][j]["title"].GetString(), items[j]->title() );
                 }
-                if ( expectedPlaylist["items"][i].HasMember( "mrl" ) )
+                if ( expectedPlaylist["items"][j].HasMember( "mrl" ) )
                 {
-                    auto files = items[i]->files();
+                    auto files = items[j]->files();
                     auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
                         [](const FilePtr& f ) {
                             return f->isMain() == true;
                     });
                     ASSERT_TRUE( mainFileIt != cend( files ) );
-                    ASSERT_EQ( expectedPlaylist["items"][i]["mrl"].GetString(),
+                    ASSERT_EQ( expectedPlaylist["items"][j]["mrl"].GetString(),
                             (*mainFileIt)->mrl() );
                 }
             }
