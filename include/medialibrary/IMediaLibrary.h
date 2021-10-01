@@ -830,7 +830,7 @@ public:
      * @param restorePlaylists If true, the media library will attempt to keep
      *                         the user created playlists
      */
-    virtual void clearDatabase( bool restorePlaylists ) = 0;
+    virtual bool clearDatabase( bool restorePlaylists ) = 0;
 
     /**
      * @brief supportedMediaExtensions Returns the supported media extensions

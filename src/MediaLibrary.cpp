@@ -2282,7 +2282,7 @@ bool MediaLibrary::forceParserRetry()
     return parser::Task::resetRetryCount( this );
 }
 
-void MediaLibrary::clearDatabase( bool restorePlaylists )
+bool MediaLibrary::clearDatabase( bool restorePlaylists )
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     pauseBackgroundOperationsLocked();
@@ -2294,7 +2294,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
     {
         recreateDatabase();
         resumeBackgroundOperationsLocked();
-        return;
+        return true;
     }
 
     auto playlistsBackups = Playlist::loadBackups( this );
@@ -2352,6 +2352,7 @@ void MediaLibrary::clearDatabase( bool restorePlaylists )
         }
     }
     resumeBackgroundOperationsLocked();
+    return true;
 }
 
 void MediaLibrary::pauseBackgroundOperations()
