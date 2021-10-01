@@ -206,6 +206,7 @@ static void FetchAlbumFromTrack( Tests* T )
     auto f = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( f, 1, 0, 0, nullptr );
+    ASSERT_NON_NULL( t );
     f->save();
 
     f = T->ml->media( f->id() );
@@ -428,6 +429,7 @@ static void AutoDelete( Tests* T )
     auto a = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( m, 1, 1, 0, nullptr );
+    ASSERT_NON_NULL( t );
 
     auto album = T->ml->album( a->id() );
     ASSERT_NE( nullptr, album );
@@ -539,9 +541,11 @@ static void SortByPlayCount( Tests* T )
     auto a1 = T->ml->createAlbum( "North" );
     auto f1 = std::static_pointer_cast<Media>( T->ml->addMedia( "first.opus", IMedia::Type::Audio ) );
     auto t1 = a1->addTrack( f1, 1, 0, 0, nullptr );
+    ASSERT_NON_NULL( t1 );
     f1->save();
     auto f2 = std::static_pointer_cast<Media>( T->ml->addMedia( "second.opus", IMedia::Type::Audio ) );
     auto t2 = a1->addTrack( f2, 2, 0, 0, nullptr );
+    ASSERT_NON_NULL( t2 );
     f2->save();
 
     ASSERT_TRUE( f1->setPlayCount( 2 ) );
@@ -551,6 +555,7 @@ static void SortByPlayCount( Tests* T )
     auto a2 = T->ml->createAlbum( "East" );
     auto f3 = std::static_pointer_cast<Media>( T->ml->addMedia( "third.opus", IMedia::Type::Audio ) );
     auto t3 = a2->addTrack( f3, 1, 0, 0, nullptr );
+    ASSERT_NON_NULL( t3 );
     f3->save();
 
     ASSERT_TRUE( f3->setPlayCount( 4 ) );
@@ -558,6 +563,7 @@ static void SortByPlayCount( Tests* T )
     auto a3 = T->ml->createAlbum( "South" );
     auto f4 = std::static_pointer_cast<Media>( T->ml->addMedia( "fourth.opus", IMedia::Type::Audio ) );
     auto t4 = a3->addTrack( f4, 1, 0, 0, nullptr );
+    ASSERT_NON_NULL( t4 );
     f4->save();
 
     ASSERT_TRUE( f4->setPlayCount( 1 ) );
@@ -565,6 +571,7 @@ static void SortByPlayCount( Tests* T )
     auto a4 = T->ml->createAlbum( "West" );
     auto f5 = std::static_pointer_cast<Media>( T->ml->addMedia( "fifth.opus", IMedia::Type::Audio ) );
     auto t5 = a4->addTrack( f5, 1, 0, 0, nullptr );
+    ASSERT_NON_NULL( t5 );
     f5->save();
 
     ASSERT_TRUE( f5->setPlayCount( 1 ) );
@@ -700,6 +707,7 @@ static void Duration( Tests* T )
     m2->setDuration( 200 );
     m2->save();
     auto t2 = a->addTrack( m2, 1, 1, 0, nullptr );
+    ASSERT_NON_NULL( t2 );
     ASSERT_EQ( 300u, a->duration() );
 
     // Check that we don't add negative durations (default sqlite duration is -1)
