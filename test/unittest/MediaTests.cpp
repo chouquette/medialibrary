@@ -726,7 +726,7 @@ static void SetSubType( Tests* T )
     ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
 
     auto m2 = T->ml->media( m1->id() );
-    ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
+    ASSERT_EQ( IMedia::SubType::Movie, m2->subType() );
 }
 
 static void GetMetadata( Tests* T )
