@@ -136,7 +136,7 @@ static void RemoveDisk( DeviceFsTests* T )
     auto media = T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" );
     ASSERT_NE( nullptr, media );
 
-    auto device = T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
+    T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
 
     T->Reload();
 
@@ -515,7 +515,7 @@ static void ChangeDevice( DeviceFsTests* T )
     ASSERT_EQ( firstRemovableFilePath, files[0]->mrl() );
     ASSERT_NE( firstRemovableFileId, f->id() );
 
-    auto device = T->fsMock->removeDevice( "{another-removable-device}" );
+    T->fsMock->removeDevice( "{another-removable-device}" );
     T->fsMock->addDevice( oldRemovableDevice );
 
     T->Reload();
@@ -947,7 +947,7 @@ static void FolderPresence( DeviceFsTests* T )
     folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
     ASSERT_EQ( 3u, folders.size() );
 
-    auto device = T->fsMock->removeDevice( T->RemovableDeviceUuid );
+    T->fsMock->removeDevice( T->RemovableDeviceUuid );
     T->Reload();
 
     folders = T->ml->folders( IMedia::Type::Unknown, &params )->all();
