@@ -272,9 +272,9 @@ bool MediaLibraryTester::setupDummyFolder()
         return true;
     }
     dummyFolder = Folder::create( this, "./", 0, *device, *dummyDevice );
-    if ( dummyFolder->id() != 1 )
+    if ( dummyFolder == nullptr || dummyFolder->id() != 1 )
         return false;
-    return dummyFolder != nullptr;
+    return true;
 }
 
 void MediaLibraryTester::deleteAllTables( sqlite::Connection* dbConn )
