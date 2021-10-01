@@ -1441,6 +1441,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 bool MediaLibrary::recreateDatabase()
 {
     deleteAllTables( m_dbConnection.get() );
+    sqlite::Statement::FlushStatementCache();
     auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
     if ( createAllTables() == false )
