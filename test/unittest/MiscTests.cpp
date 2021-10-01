@@ -174,12 +174,14 @@ static void CheckTaskDbModel( Tests* T )
 
 static void ClearDatabaseKeepPlaylist( Tests* T )
 {
-    T->ml->clearDatabase( true );
+    auto res = T->ml->clearDatabase( true );
+    ASSERT_TRUE( res );
 }
 
 static void ClearDatabase( Tests* T )
 {
-    T->ml->clearDatabase( false );
+    auto res = T->ml->clearDatabase( false );
+    ASSERT_TRUE( res );
 }
 
 int test_without_ml_init( int ac, char** av )
