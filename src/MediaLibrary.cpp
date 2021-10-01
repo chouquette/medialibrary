@@ -2292,7 +2292,8 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
     // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
     {
-        recreateDatabase();
+        if ( recreateDatabase() == false )
+            return false;
         resumeBackgroundOperationsLocked();
         return true;
     }
@@ -2324,7 +2325,8 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
 
     // Create a new playlist backups
 
-    recreateDatabase();
+    if ( recreateDatabase() == false )
+        return false;
 
     if ( playlistsBackups.empty() == false )
     {
