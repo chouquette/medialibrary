@@ -83,6 +83,8 @@ static void DeleteByMediaId( Tests *T )
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     auto track = album->addTrack( m, 1, 1, 0, nullptr );
     auto track2 = album->addTrack( m2, 2, 1, 0, nullptr );
+    ASSERT_NON_NULL( track );
+    ASSERT_NON_NULL( track2 );
     m->save();
     m2->save();
 
