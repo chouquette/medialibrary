@@ -123,10 +123,10 @@ static void ListAlbums( GenreTests* T )
     // Now we create more albums with "random" genre, all of them should have 1 album
     for ( auto i = 1u; i <= 5u; ++i )
     {
-        auto m = std::static_pointer_cast<Media>(
+        auto media = std::static_pointer_cast<Media>(
                     T->ml->addMedia( std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         auto g = T->ml->createGenre( std::to_string( i ) );
-        auto track = album->addTrack( m, i, 1, 0, g.get() );
+        auto track = album->addTrack( std::move( media ), i, 1, 0, g.get() );
     }
 
     auto genres = T->ml->genres( nullptr )->all();
