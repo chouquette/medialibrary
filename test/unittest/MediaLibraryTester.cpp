@@ -267,8 +267,6 @@ bool MediaLibraryTester::setupDummyFolder()
     {
         // Most test cases call Reload() which will end up calling setupDummyFolder
         // again. We don't want the UNIQUE constraint to terminate the test.
-        device = Device::fromUuid( this, mock::FileSystemFactory::NoopDeviceUuid,
-                                   "file://" );
         // Let's assume that this folder will be the first create folder
         dummyFolder = Folder::fetch( this, 1 );
         return true;
