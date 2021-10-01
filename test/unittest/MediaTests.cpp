@@ -295,6 +295,7 @@ static void SearchAndSort( Tests* T )
     }
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia(
                     "this pattern doesn't match.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m );
 
     auto media = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 3u, media.size() );
@@ -1403,6 +1404,7 @@ static void ConvertToExternal( Tests* T )
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     auto movie = T->ml->createMovie( *m1 );
+    ASSERT_NON_NULL( movie );
     m1->save();
 
     auto videos = T->ml->videoFiles( nullptr )->all();
