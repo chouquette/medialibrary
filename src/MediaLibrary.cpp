@@ -1458,7 +1458,7 @@ bool MediaLibrary::recreateDatabase()
      */
     removeThumbnails();
 
-    return true;
+    return checkDatabaseIntegrity();
 }
 
 void MediaLibrary::migrateModel3to5()
