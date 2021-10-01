@@ -631,6 +631,7 @@ static void AutoRemoveTask( PlaylistTests* T )
     auto t = parser::Task::createLinkTask( T->ml.get(), "file:///tmp/playlist.m3u",
                                            T->pl->id(), parser::Task::LinkType::Playlist,
                                            0 );
+    ASSERT_NON_NULL( t );
     ASSERT_EQ( 1u, T->ml->countNbTasks() );
     Playlist::destroy( T->ml.get(), T->pl->id() );
     ASSERT_EQ( 0u, T->ml->countNbTasks() );
