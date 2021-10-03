@@ -53,7 +53,6 @@ medialib_src = [
 	'Bookmark.cpp',
 	'MediaGroup.cpp',
 	'utils/XxHasher.cpp',
-	'utils/xxhash/xxh_x86dispatch.cpp',
 	'utils/StringKey.cpp',
 ]
 
