@@ -20,3 +20,4 @@
 #mesondefine HAVE_JPEG
 #mesondefine FORCE_ATTACHMENTS_API
 
+#include "Fixup.h"
