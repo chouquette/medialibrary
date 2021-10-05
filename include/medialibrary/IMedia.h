@@ -104,7 +104,7 @@ public:
         // Various
         ApplicationSpecific = 250,
     };
-    static constexpr size_t NbMeta = 19;
+    static constexpr size_t NbMeta = 17;
 
     virtual ~IMedia() = default;
 
