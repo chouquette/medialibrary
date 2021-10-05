@@ -106,6 +106,28 @@ public:
     };
     static constexpr size_t NbMeta = 17;
 
+    /**
+     * @brief The ProgressResult enum describes the result for setLastPosition
+     * and setLastTime operations
+     */
+    enum class ProgressResult : uint8_t
+    {
+        /// An error occured and the progress wasn't changed
+        Error,
+        /// The provided position/time was interpreted as the beginning of the
+        /// media and has been reset to -1. This nedia playback is now not
+        /// considered started.
+        Begin,
+        /// The provided position/time was not interpreted as a special position
+        /// and was updated as provided in the database. The playback will be
+        /// considered in progress
+        AsIs,
+        /// The provided position/time was interpreted as the end of the media.
+        /// The playback will not be considered in progress anymore and the
+        /// play count has been incremented.
+        End,
+    };
+
     virtual ~IMedia() = default;
 
     virtual int64_t id() const = 0;
@@ -150,6 +172,8 @@ public:
      * @brief setLastPosition updates the last playback position
      *
      * @param lastPosition The current playback position expressed by a number in the range [0;1]
+     * @return a ProgressResult value indicating how the value was intepreted and
+     *         if the operation succeeded
      *
      * The media library will interpret the value to determine if the playback
      * is completed and the media should be marked as watched (therefor increasing
@@ -166,7 +190,6 @@ public:
      * database but the playcount will not be updated, nor will the position be
      * clamped in the [0;1] range.
      *
-     * This returns true in case of success, false otherwise.
      * Calling lastPosition() or playCount() afterward will fetch the curated values.
      * This will also bump the media last played date, causing it to appear at
      * the top of the history.
@@ -174,7 +197,7 @@ public:
      * If the duration is unknown, lastTime will be set to -1 when this function
      * is called.
      */
-    virtual bool setLastPosition( float lastPosition ) = 0;
+    virtual IMedia::ProgressResult setLastPosition( float lastPosition ) = 0;
     /**
      * @brief lastTime Returns the last playback time as provided by the application
      *
@@ -186,14 +209,15 @@ public:
     /**
      * @brief setLastTime Sets the last playback time.
      * @param lastTime A time in millisecond
-     * @return true in case of success, false otherwise.
+     * @return a ProgressResult value indicating how the value was intepreted and
+     *         if the operation succeeded
      *
      * This is similar to setLastPosition but works with a time in
      * milliseconds rather than a percentage.
      * If the duration is unknown, calling this function will reset the lastProgress
      * to -1.
      */
-    virtual bool setLastTime( int64_t lastTime ) = 0;
+    virtual IMedia::ProgressResult setLastTime( int64_t lastTime ) = 0;
     /**
      * @brief setPlayCount Set a specific value to this media's play count
      *

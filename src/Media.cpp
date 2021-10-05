@@ -309,8 +309,9 @@ Media::PositionTypes Media::computePositionType( float position ) const
     return PositionTypes::Any;
 }
 
-bool Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
-                                    int64_t lastTime )
+IMedia::ProgressResult
+Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
+                               int64_t lastTime )
 {
     auto lastPlayedDate = time( nullptr );
     float curatedPosition;
@@ -357,7 +358,7 @@ bool Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
     }
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, curatedPosition,
                                        curatedTime, lastPlayedDate, m_id ) == false )
-        return false;
+        return ProgressResult::Error;
     if ( incrementPlaycount == true )
         m_playCount++;
     m_lastPlayedDate = lastPlayedDate;
@@ -365,10 +366,18 @@ bool Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
     m_lastTime = curatedTime;
     m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Media :
                                                   HistoryType::Network );
-    return true;
+    switch ( positionType )
+    {
+    case PositionTypes::Begin:
+        return ProgressResult::Begin;
+    case PositionTypes::End:
+        return ProgressResult::End;
+    default:
+        return ProgressResult::AsIs;
+    }
 }
 
-bool Media::setLastPosition( float lastPosition )
+IMedia::ProgressResult Media::setLastPosition( float lastPosition )
 {
     int64_t lastTime;
     PositionTypes positionType;
@@ -385,7 +394,7 @@ bool Media::setLastPosition( float lastPosition )
     return setLastPositionAndTime( positionType, lastPosition, lastTime );
 }
 
-bool Media::setLastTime( int64_t lastTime )
+IMedia::ProgressResult Media::setLastTime( int64_t lastTime )
 {
     float position;
     PositionTypes positionType;

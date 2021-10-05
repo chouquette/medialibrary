@@ -171,8 +171,8 @@ class Media : public IMedia,
         virtual bool removeLabel( LabelPtr label ) override;
         virtual Query<ILabel> labels() const override;
         virtual uint32_t playCount() const override;
-        virtual bool setLastPosition( float lastPosition ) override;
-        virtual bool setLastTime( int64_t lastTime ) override;
+        virtual ProgressResult setLastPosition( float lastPosition ) override;
+        virtual ProgressResult setLastTime( int64_t lastTime ) override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
         virtual bool removeFromHistory() override;
@@ -353,8 +353,8 @@ private:
                                                            int64_t duration );
         std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
         PositionTypes computePositionType( float position ) const;
-        bool setLastPositionAndTime( PositionTypes positionType, float lastPos,
-                                     int64_t lastTime );
+        ProgressResult setLastPositionAndTime( PositionTypes positionType,
+                                               float lastPos, int64_t lastTime );
 
         /*
          * Marked as private so that it can only be used through IMedia interface

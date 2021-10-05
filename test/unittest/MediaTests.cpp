@@ -124,7 +124,7 @@ static void SetProgress( Tests* T )
      */
     auto expectedPosition = 0.5f;
     auto res = m1->setLastPosition( expectedPosition );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( expectedPosition, m1->lastPosition() );
     ASSERT_EQ( m1->duration() / 2, m1->lastTime() );
     ASSERT_EQ( 0u, m1->playCount() );
@@ -136,7 +136,7 @@ static void SetProgress( Tests* T )
     /* Then update to a progress to 3%. This should reset it to -1 */
 
     res = m1->setLastTime( 54000 ); //3% of 30 minutes in milliseconds
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::Begin, res );
     ASSERT_EQ( -1, m1->lastTime() );
     ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 0u, m1->playCount() );
@@ -147,7 +147,7 @@ static void SetProgress( Tests* T )
 
     /* Then again at 4% and ensure the progress is still -1 */
     res = m1->setLastPosition( 0.04 );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::Begin, res );
     ASSERT_EQ( -1, m1->lastTime() );
     ASSERT_EQ( -1.f, m1->lastPosition() );
     m1 = T->ml->media( m1->id() );
@@ -159,7 +159,7 @@ static void SetProgress( Tests* T )
      * progress reset
      */
     res = m1->setLastTime( 1782000 );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::End, res );
     ASSERT_EQ( -1, m1->lastTime() );
     ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( 1u, m1->playCount() );
@@ -171,7 +171,7 @@ static void SetProgress( Tests* T )
     /* Now do the same with a longer media to ensure the "margin" are updated */
     expectedPosition = 0.5f;
     res = m2->setLastPosition( expectedPosition );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( expectedPosition, m2->lastPosition() );
     ASSERT_EQ( m2->duration() / 2, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
@@ -182,7 +182,7 @@ static void SetProgress( Tests* T )
 
     /* This media should only ignore the first & last percent */
     res = m2->setLastPosition( 0.009f );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::Begin, res );
     ASSERT_EQ( -1.f, m2->lastPosition() );
     ASSERT_EQ( -1, m2->lastTime() );
     ASSERT_EQ( 0u, m2->playCount() );
@@ -194,7 +194,7 @@ static void SetProgress( Tests* T )
     /* So check 0.01 is not ignored */
     expectedPosition = 0.01f;
     res = m2->setLastPosition( expectedPosition );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( expectedPosition, m2->lastPosition() );
     /* Don't fail the tests because of a rounding error */
     ASSERT_TRUE( m2->lastTime() >= 180000 - 1 &&
@@ -212,7 +212,7 @@ static void SetProgress( Tests* T )
      */
     expectedPosition = 0.98;
     res = m2->setLastPosition( expectedPosition );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( expectedPosition, m2->lastPosition() );
     ASSERT_TRUE( m2->lastTime() >= 17640000 - 1 &&
                  m2->lastTime() <= 17640000 );
@@ -229,7 +229,7 @@ static void SetLastPositionNoDuration( Tests* T )
     auto m = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
     /* Check that we accept any value when no duration is provided */
     auto res = m->setLastPosition( 123.456f );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( 123.456f, m->lastPosition() );
     /* And ensure we didn't infer the last_time value since we can't compute it */
     ASSERT_EQ( -1, m->lastTime() );
@@ -242,7 +242,7 @@ static void SetLastPositionNoDuration( Tests* T )
      * position back
      */
     res = m->setLastTime( 123456 );
-    ASSERT_TRUE( res );
+    ASSERT_EQ( IMedia::ProgressResult::AsIs, res );
     ASSERT_EQ( 123456, m->lastTime() );
     ASSERT_EQ( -1.f, m->lastPosition() );
     m = T->ml->media( m->id() );
