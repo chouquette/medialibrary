@@ -75,6 +75,7 @@ public:
     void deleteMedia( int64_t mediaId );
     bool outdateAllDevices();
     bool setMediaInsertionDate( int64_t mediaId, time_t t );
+    bool setMediaLastPlayedDate( int64_t mediaId, time_t lastPlayedDate );
     bool outdateAllExternalMedia();
     bool setMediaType( int64_t mediaId, IMedia::Type type );
     uint32_t countNbThumbnails();
