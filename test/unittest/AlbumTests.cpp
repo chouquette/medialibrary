@@ -865,6 +865,70 @@ static void SortByDuration( Tests* T )
     ASSERT_EQ( long1->id(), tracks[1]->id() );
 }
 
+static void SortByInsertionDate( Tests* T )
+{
+    auto alb1 = T->ml->createAlbum( "album 1" );
+    auto alb2 = T->ml->createAlbum( "album 2" );
+    ASSERT_NON_NULL( alb1 );
+    ASSERT_NON_NULL( alb2 );
+
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m1 );
+    ASSERT_NON_NULL( m2 );
+
+    auto res = T->ml->setMediaInsertionDate( m1->id(), 987 );
+    ASSERT_TRUE( res );
+    res = T->ml->setMediaInsertionDate( m2->id(), 123 );
+    ASSERT_TRUE( res );
+
+    alb1->addTrack( m1, 1, 1, 0, nullptr );
+    res = m1->save();
+    ASSERT_TRUE( res );
+    alb2->addTrack( m2, 1, 1, 0, nullptr );
+    res = m1->save();
+    ASSERT_TRUE( res );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::InsertionDate;
+    params.desc = false;
+    auto albums = T->ml->albums( &params )->all();
+    ASSERT_EQ( albums.size(), 2u );
+    ASSERT_EQ( albums[0]->id(), alb2->id() );
+    ASSERT_EQ( albums[1]->id(), alb1->id() );
+
+    params.desc = true;
+    albums = T->ml->albums( &params )->all();
+    ASSERT_EQ( albums.size(), 2u );
+    ASSERT_EQ( albums[0]->id(), alb1->id() );
+    ASSERT_EQ( albums[1]->id(), alb2->id() );
+
+    auto m3 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m3 );
+
+    // Now insert a new track to album2 and force its insertion date before album1's media
+    res = T->ml->setMediaInsertionDate( m3->id(), 12 );
+    ASSERT_TRUE( res );
+    alb1->addTrack( m3, 2, 1, 0, nullptr );
+    res = m3->save();
+    ASSERT_TRUE( res );
+
+    params.desc = false;
+    albums = T->ml->albums( &params )->all();
+    ASSERT_EQ( albums.size(), 2u );
+    ASSERT_EQ( albums[0]->id(), alb1->id() );
+    ASSERT_EQ( albums[1]->id(), alb2->id() );
+
+    params.desc = true;
+    albums = T->ml->albums( &params )->all();
+    ASSERT_EQ( albums.size(), 2u );
+    ASSERT_EQ( albums[0]->id(), alb2->id() );
+    ASSERT_EQ( albums[1]->id(), alb1->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Album )
@@ -899,6 +963,7 @@ int main( int ac, char** av )
     ADD_TEST( NbDiscs );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByDuration );
+    ADD_TEST( SortByInsertionDate );
 
     END_TESTS
 }

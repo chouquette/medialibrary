@@ -57,6 +57,7 @@ album_tests = [
   'NbDiscs',
   'CheckDbModel',
   'SortByDuration',
+  'SortByInsertionDate',
 ]
 foreach t : album_tests 
   test('Album.' + t, album_test_exe, args: t, suite: ['unittest', 'Album'])

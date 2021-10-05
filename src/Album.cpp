@@ -221,6 +221,7 @@ std::string Album::addRequestJoin( const QueryParameters* params,
             /* No other tables required for this criterias */
             break;
         case SortingCriteria::PlayCount:
+        case SortingCriteria::InsertionDate:
             albumTrack = true;
             media = true;
             break;
@@ -318,6 +319,12 @@ std::string Album::orderBy( const QueryParameters* params )
         if ( desc == false )
             req += "DESC "; // Most played first by default
         req += ", alb.title";
+        break;
+    case SortingCriteria::InsertionDate:
+        req = "GROUP BY alb.id_album "
+              "ORDER BY MIN(m.insertion_date) ";
+        if ( desc == true )
+            req += "DESC ";
         break;
     default:
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Alpha)" );
