@@ -724,6 +724,9 @@ std::string Artist::sortRequest( const QueryParameters* params )
         case SortingCriteria::NbAlbum:
             req += "nb_albums";
             break;
+        case SortingCriteria::TrackNumber:
+            req += "nb_tracks";
+            break;
     }
     if ( desc == true )
         req +=  " DESC";

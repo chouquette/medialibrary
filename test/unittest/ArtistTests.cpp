@@ -734,6 +734,47 @@ static void SortByNbAlbums( Tests* T )
     ASSERT_EQ( artist1->id(), artists[1]->id() );
 }
 
+static void SortByNbTracks( Tests* T )
+{
+    auto artist1 = T->ml->createArtist( "A artist" );
+    auto artist2 = T->ml->createArtist( "Z artist" );
+    ASSERT_NON_NULL( artist1 );
+    ASSERT_NON_NULL( artist2 );
+
+    auto album = T->ml->createAlbum( "compilation" );
+
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
+
+    album->addTrack( m1, 1, 1, artist1->id(), nullptr );
+    m1->save();
+    artist1->addMedia( *m1 );
+    album->addTrack( m2, 2, 1, artist1->id(), nullptr );
+    m2->save();
+    artist1->addMedia( *m2 );
+    album->addTrack( m3, 3, 1, artist2->id(), nullptr );
+    m3->save();
+    artist2->addMedia( *m3 );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::TrackNumber;
+    params.desc = false;
+    auto artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist2->id(), artists[0]->id() );
+    ASSERT_EQ( artist1->id(), artists[1]->id() );
+
+    params.desc = true;
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist1->id(), artists[0]->id() );
+    ASSERT_EQ( artist2->id(), artists[1]->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Artist )
@@ -764,6 +805,7 @@ int main( int ac, char** av )
     ADD_TEST( SearchAll );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByNbAlbums );
+    ADD_TEST( SortByNbTracks );
 
     END_TESTS
 }
