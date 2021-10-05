@@ -208,6 +208,16 @@ bool Artist::shouldUpdateThumbnail( const Thumbnail& currentThumbnail )
     return currentThumbnail.isShared() == false;
 }
 
+std::string Artist::addRequestJoin(const QueryParameters* params)
+{
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    switch ( sort )
+    {
+    default:
+        return std::string{};
+    }
+}
+
 bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
@@ -646,17 +656,19 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, std::string name )
 Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                ArtistIncluded included, const QueryParameters* params )
 {
-    std::string req = "FROM " + Artist::Table::Name + " WHERE id_artist IN "
+    std::string req = "FROM " + Artist::Table::Name + " art";
+    req += addRequestJoin( params );
+    req += " WHERE id_artist IN "
             "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)";
     if ( params == nullptr || params->includeMissing == false )
-        req += " AND is_present != 0";
+        req += " AND art.is_present != 0";
     // We are searching based on the name, so we're ignoring unknown/various artist
     // This means all artist we find has at least one track associated with it, so
     // we can simply filter out based on the number of associated albums
     if ( included == ArtistIncluded::AlbumArtistOnly )
-        req += " AND nb_albums > 0";
+        req += " AND art.nb_albums > 0";
     else
-        req += " AND nb_tracks > 0";
+        req += " AND art.nb_tracks > 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( name ) );
@@ -665,13 +677,15 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
                                 const QueryParameters* params )
 {
-    std::string req = "FROM " + Artist::Table::Name + " WHERE ";
+    std::string req = "FROM " + Artist::Table::Name + " art";
+    req += addRequestJoin( params );
+    req += " WHERE ";
     if ( included == ArtistIncluded::AlbumArtistOnly )
-        req += "nb_albums > 0";
+        req += "art.nb_albums > 0";
     else
-        req += "nb_tracks > 0";
+        req += "art.nb_tracks > 0";
     if ( params == nullptr || params->includeMissing == false )
-        req += " AND is_present != 0";
+        req += " AND art.is_present != 0";
     return make_query<Artist, IArtist>( ml, "*", std::move( req ),
                                         sortRequest( params ) );
 }
@@ -719,13 +733,13 @@ std::string Artist::sortRequest( const QueryParameters* params )
             /* fall-through */
         case SortingCriteria::Default:
         case SortingCriteria::Alpha:
-            req += "name";
+            req += "art.name";
             break;
         case SortingCriteria::NbAlbum:
-            req += "nb_albums";
+            req += "art.nb_albums";
             break;
         case SortingCriteria::TrackNumber:
-            req += "nb_tracks";
+            req += "art.nb_tracks";
             break;
     }
     if ( desc == true )

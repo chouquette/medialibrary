@@ -148,6 +148,7 @@ public:
 private:
     static std::string sortRequest( const QueryParameters* params );
     static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
+    static std::string addRequestJoin( const QueryParameters* params );
 
 private:
     MediaLibraryPtr m_ml;
