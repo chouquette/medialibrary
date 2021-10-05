@@ -81,7 +81,7 @@ const std::string& Artist::shortBio() const
 
 bool Artist::setShortBio(const std::string& shortBio)
 {
-    static const std::string req = "UPDATE " + Artist::Table::Name
+    static const std::string req = "UPDATE " + Table::Name
             + " SET shortbio = ? WHERE id_artist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, shortBio, m_id ) == false )
         return false;
@@ -267,7 +267,7 @@ const std::string& Artist::musicBrainzId() const
 
 bool Artist::setMusicBrainzId( const std::string& mbId )
 {
-    static const std::string req = "UPDATE " + Artist::Table::Name
+    static const std::string req = "UPDATE " + Table::Name
             + " SET mb_id = ? WHERE id_artist = ?";
     if ( mbId == m_mbId )
         return true;
@@ -572,7 +572,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
     return "<invalid request>";
 }
 
-std::string Artist::triggerName(Artist::Triggers trigger, uint32_t dbModelVersion)
+std::string Artist::triggerName( Triggers trigger, uint32_t dbModelVersion )
 {
     switch ( trigger )
     {
@@ -642,7 +642,7 @@ bool Artist::checkDbModel(MediaLibraryPtr ml)
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 {
-    static const std::string req = "INSERT INTO " + Artist::Table::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(id_artist) VALUES(?),(?)";
     return sqlite::Tools::executeInsert( dbConnection, req, UnknownArtistID,
                                          VariousArtistID ) != 0;
@@ -651,7 +651,7 @@ bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )
 std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, std::string name )
 {
     auto artist = std::make_shared<Artist>( ml, std::move( name ) );
-    static const std::string req = "INSERT INTO " + Artist::Table::Name +
+    static const std::string req = "INSERT INTO " + Table::Name +
             "(id_artist, name) VALUES(NULL, ?)";
     if ( insert( ml, artist, req, artist->m_name ) == false )
         return nullptr;
@@ -661,10 +661,10 @@ std::shared_ptr<Artist> Artist::create( MediaLibraryPtr ml, std::string name )
 Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
                                ArtistIncluded included, const QueryParameters* params )
 {
-    std::string req = "FROM " + Artist::Table::Name + " art";
+    std::string req = "FROM " + Table::Name + " art";
     req += addRequestJoin( params );
     req += " WHERE id_artist IN "
-            "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)";
+            "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND art.is_present != 0";
     // We are searching based on the name, so we're ignoring unknown/various artist
@@ -682,7 +682,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
                                 const QueryParameters* params )
 {
-    std::string req = "FROM " + Artist::Table::Name + " art";
+    std::string req = "FROM " + Table::Name + " art";
     req += addRequestJoin( params );
     req += " WHERE ";
     if ( included == ArtistIncluded::AlbumArtistOnly )
@@ -698,10 +698,10 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                       const QueryParameters* params, int64_t genreId )
 {
-    std::string req = "FROM " + Artist::Table::Name + " a "
+    std::string req = "FROM " + Table::Name + " a "
                 "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
                 "WHERE id_artist IN "
-                    "(SELECT rowid FROM " + Artist::FtsTable::Name + " WHERE name MATCH ?)"
+                    "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)"
                 "AND att.genre_id = ? ";
 
     std::string groupBy = "GROUP BY att.artist_id "
@@ -759,8 +759,7 @@ std::string Artist::sortRequest( const QueryParameters* params )
 bool Artist::checkDBConsistency( MediaLibraryPtr ml )
 {
     sqlite::Statement stmt{ ml->getConn()->handle(),
-                "SELECT nb_tracks, is_present FROM " +
-                    Artist::Table::Name
+                "SELECT nb_tracks, is_present FROM " + Table::Name
     };
     stmt.execute();
     sqlite::Row row;
