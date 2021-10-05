@@ -248,6 +248,7 @@ artist_tests = [
   'CheckDbModel',
   'SortByNbAlbums',
   'SortByNbTracks',
+  'SortByLastPlayedDate',
 ]
 
 foreach t : artist_tests

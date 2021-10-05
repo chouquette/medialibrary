@@ -215,6 +215,11 @@ std::string Artist::addRequestJoin(const QueryParameters* params)
     {
     default:
         return std::string{};
+    case SortingCriteria::LastPlaybackDate:
+        return std::string{ " INNER JOIN " } + MediaRelationTable::Name +
+                " mrt ON art.id_artist = mrt.artist_id"
+                " INNER JOIN " + Media::Table::Name +
+                " m ON mrt.media_id = m.id_media";
     }
 }
 
@@ -740,6 +745,10 @@ std::string Artist::sortRequest( const QueryParameters* params )
             break;
         case SortingCriteria::TrackNumber:
             req += "art.nb_tracks";
+            break;
+    case SortingCriteria::LastPlaybackDate:
+            req = " GROUP BY art.id_artist"
+                  " ORDER BY MAX(IFNULL(m.last_played_date, 0))";
             break;
     }
     if ( desc == true )

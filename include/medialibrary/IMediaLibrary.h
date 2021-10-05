@@ -91,6 +91,7 @@ enum class SortingCriteria
     NbMedia,
     // Only valid for artists for now
     NbAlbum,
+    LastPlaybackDate,
 };
 
 

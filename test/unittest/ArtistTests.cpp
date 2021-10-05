@@ -775,6 +775,75 @@ static void SortByNbTracks( Tests* T )
     ASSERT_EQ( artist2->id(), artists[1]->id() );
 }
 
+static void SortByLastPlayedDate( Tests* T )
+{
+    auto artist1 = T->ml->createArtist( "A artist" );
+    auto artist2 = T->ml->createArtist( "Z artist" );
+
+    auto a1m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "a1m1.mp3", IMedia::Type::Audio ) );
+    auto a1m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "a1m2.mp3", IMedia::Type::Audio ) );
+    auto a2m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "a2m1.mp3", IMedia::Type::Audio ) );
+    auto a2m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "a2m2.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( a1m1 );
+    ASSERT_NON_NULL( a1m2 );
+    ASSERT_NON_NULL( a2m1 );
+    ASSERT_NON_NULL( a2m2 );
+
+    auto res = artist1->addMedia( *a1m1 );
+    ASSERT_TRUE( res );
+    res = artist1->addMedia( *a1m2 );
+    ASSERT_TRUE( res );
+    res = artist2->addMedia( *a2m1 );
+    ASSERT_TRUE( res );
+    res = artist2->addMedia( *a2m2 );
+    ASSERT_TRUE( res );
+
+    res = T->ml->setMediaLastPlayedDate( a1m1->id(), 0 );
+    ASSERT_TRUE( res );
+    res = T->ml->setMediaLastPlayedDate( a1m2->id(), 1 );
+    ASSERT_TRUE( res );
+    res = T->ml->setMediaLastPlayedDate( a2m1->id(), 0 );
+    ASSERT_TRUE( res );
+    res = T->ml->setMediaLastPlayedDate( a2m2->id(), 0 );
+    ASSERT_TRUE( res );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::LastPlaybackDate;
+    params.desc = false;
+
+    auto artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist2->id(), artists[0]->id() );
+    ASSERT_EQ( artist1->id(), artists[1]->id() );
+
+    params.desc = true;
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist1->id(), artists[0]->id() );
+    ASSERT_EQ( artist2->id(), artists[1]->id() );
+
+    res = T->ml->setMediaLastPlayedDate( a2m1->id(), 10 );
+    ASSERT_TRUE( res );
+
+    params.desc = false;
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist1->id(), artists[0]->id() );
+    ASSERT_EQ( artist2->id(), artists[1]->id() );
+
+    res = T->ml->setMediaLastPlayedDate( a1m1->id(), 100 );
+    ASSERT_TRUE( res );
+
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist2->id(), artists[0]->id() );
+    ASSERT_EQ( artist1->id(), artists[1]->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Artist )
@@ -806,6 +875,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByNbAlbums );
     ADD_TEST( SortByNbTracks );
+    ADD_TEST( SortByLastPlayedDate );
 
     END_TESTS
 }
