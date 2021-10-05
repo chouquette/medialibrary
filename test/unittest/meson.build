@@ -246,6 +246,7 @@ artist_tests = [
   'SearchTracks',
   'SearchAll',
   'CheckDbModel',
+  'SortByNbAlbums',
 ]
 
 foreach t : artist_tests

@@ -89,6 +89,8 @@ enum class SortingCriteria
     NbAudio,
     // Valid for folders & media groups
     NbMedia,
+    // Only valid for artists for now
+    NbAlbum,
 };
 
 

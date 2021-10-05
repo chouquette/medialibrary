@@ -709,14 +709,24 @@ bool Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
 
 std::string Artist::sortRequest( const QueryParameters* params )
 {
-    std::string req = " ORDER BY name";
-    if ( params != nullptr )
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
+    std::string req = " ORDER BY ";
+    switch ( sort )
     {
-        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+        default:
             LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
-        if ( params->desc == true )
-            req +=  " DESC";
+            /* fall-through */
+        case SortingCriteria::Default:
+        case SortingCriteria::Alpha:
+            req += "name";
+            break;
+        case SortingCriteria::NbAlbum:
+            req += "nb_albums";
+            break;
     }
+    if ( desc == true )
+        req +=  " DESC";
     return req;
 }
 

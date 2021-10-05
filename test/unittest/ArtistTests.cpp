@@ -696,6 +696,44 @@ static void CheckDbModel( Tests* T )
     ASSERT_TRUE( res );
 }
 
+static void SortByNbAlbums( Tests* T )
+{
+    auto artist1 = T->ml->createArtist( "Z artist" );
+    auto artist2 = T->ml->createArtist( "A artist" );
+    ASSERT_NON_NULL( artist1 );
+    ASSERT_NON_NULL( artist2 );
+
+    auto art1alb1 = T->ml->createAlbum( "art1alb1" );
+    auto art2alb1 = T->ml->createAlbum( "art2alb1" );
+    auto art2alb2 = T->ml->createAlbum( "art2alb2" );
+    ASSERT_NON_NULL( art1alb1 );
+    ASSERT_NON_NULL( art2alb1 );
+    ASSERT_NON_NULL( art2alb2 );
+
+    auto res = art1alb1->setAlbumArtist( artist1 );
+    ASSERT_TRUE( res );
+    res = art2alb1->setAlbumArtist( artist2 );
+    ASSERT_TRUE( res );
+    res = art2alb2->setAlbumArtist( artist2 );
+    ASSERT_TRUE( res );
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::NbAlbum;
+    params.desc = false;
+    // Bypass the is_present check, since there are no track present
+    params.includeMissing = true;
+    auto artists = T->ml->artists( ArtistIncluded::AlbumArtistOnly, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist1->id(), artists[0]->id() );
+    ASSERT_EQ( artist2->id(), artists[1]->id() );
+
+    params.desc = true;
+    artists = T->ml->artists( ArtistIncluded::AlbumArtistOnly, &params )->all();
+    ASSERT_EQ( 2u, artists.size() );
+    ASSERT_EQ( artist2->id(), artists[0]->id() );
+    ASSERT_EQ( artist1->id(), artists[1]->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Artist )
@@ -725,6 +763,7 @@ int main( int ac, char** av )
     ADD_TEST( SearchTracks );
     ADD_TEST( SearchAll );
     ADD_TEST( CheckDbModel );
+    ADD_TEST( SortByNbAlbums );
 
     END_TESTS
 }
