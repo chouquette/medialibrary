@@ -669,7 +669,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
         req += " AND art.nb_albums > 0";
     else
         req += " AND art.nb_tracks > 0";
-    return make_query<Artist, IArtist>( ml, "*", std::move( req ),
+    return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
                                         sortRequest( params ),
                                         sqlite::Tools::sanitizePattern( name ) );
 }
@@ -686,7 +686,7 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
         req += "art.nb_tracks > 0";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND art.is_present != 0";
-    return make_query<Artist, IArtist>( ml, "*", std::move( req ),
+    return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
                                         sortRequest( params ) );
 }
 
