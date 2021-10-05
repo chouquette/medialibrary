@@ -1065,10 +1065,7 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
             album = true;
             albumTrack = true;
             break;
-        case SortingCriteria::NbAudio:
-        case SortingCriteria::NbVideo:
-        case SortingCriteria::NbMedia:
-        case SortingCriteria::TrackNumber:
+        default:
             // Unrelated to media requests
             break;
     }
