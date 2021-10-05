@@ -203,7 +203,7 @@ bool MediaLibraryTester::setMediaInsertionDate( int64_t mediaId, time_t t )
 {
     std::string req = "UPDATE " + Media::Table::Name + " SET insertion_date = ? "
             "WHERE id_media = ?";
-    return sqlite::Tools::executeUpdate( getConn(), req, mediaId, t );
+    return sqlite::Tools::executeUpdate( getConn(), req, t, mediaId );
 }
 
 bool MediaLibraryTester::outdateAllExternalMedia()
