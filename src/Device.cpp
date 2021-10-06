@@ -186,17 +186,6 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
                ")";
     }
     assert( tableName == Table::Name );
-    if ( dbModel <= 13 )
-    {
-        return "CREATE TABLE " + Device::Table::Name +
-        "("
-            "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "uuid TEXT UNIQUE ON CONFLICT FAIL,"
-            "scheme TEXT,"
-            "is_removable BOOLEAN,"
-            "is_present BOOLEAN"
-        ")";
-    }
     if ( dbModel < 24 )
     {
         return "CREATE TABLE " + Device::Table::Name +

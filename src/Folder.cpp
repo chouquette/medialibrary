@@ -825,17 +825,6 @@ const std::string&Folder::name() const
     return m_name;
 }
 
-void Folder::setName( std::string name )
-{
-    assert( m_name.empty() == true );
-    static const std::string req = "UPDATE " + Table::Name +
-            " SET name = ? WHERE id_folder = ?";
-    auto dbConn = m_ml->getConn();
-    if ( sqlite::Tools::executeUpdate( dbConn, req, name, m_id ) == false )
-        return;
-    m_name = std::move( name );
-}
-
 const std::string& Folder::rawMrl() const
 {
     return m_path;

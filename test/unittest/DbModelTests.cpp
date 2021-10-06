@@ -342,94 +342,20 @@ static void NbTriggers( DbModel* T )
     T->CheckTables( expectedTables );
 }
 
+/*
+ * Even though we don't support a proper migration from old models, keep a
+ * migration from a really old model to check that we properly recreate the
+ * entire database
+ */
 static void Upgrade3to5( DbModel* T )
 {
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v3.sql" );
-}
-
-static void Upgrade4to5( DbModel* T )
-{
-    T->LoadFakeDB( SRC_DIR "/test/unittest/db_v4.sql" );
+    T->LoadFakeDB( SRC_DIR "/test/unittest/db_v3.sql" );
     auto res = T->ml->initialize( T->cbMock.get() );
     ASSERT_EQ( InitializeResult::DbReset, res );
 
-    // The culprit  with V4 was an invalid migration, leading to missing fields
-    // in File and most likely Playlist tables. Simply try to create/fetch a file
-    auto m = T->ml->addExternalMedia( "test.mkv", -1 );
-    ASSERT_NE( m, nullptr );
-    auto files = T->ml->files();
-    ASSERT_NE( files.size(), 0u );
-
+    T->CheckTriggers( expectedTriggers );
+    T->CheckIndexes( expectedIndexes );
     T->CheckTables( expectedTables );
-}
-
-static void Upgrade7to8( DbModel* T )
-{
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v7.sql" );
-}
-
-static void Upgrade8to9( DbModel* T )
-{
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v8.sql" );
-
-    // We expect the file-orphaned media to have been deleted
-    auto media = T->ml->files();
-    ASSERT_EQ( 1u, media.size() );
-}
-
-static void Upgrade12to13( DbModel* T )
-{
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v12.sql" );
-}
-
-static void Upgrade13to14( DbModel* T )
-{
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v13.sql" );
-    auto media = T->ml->files();
-    ASSERT_EQ( 4u, media.size() );
-    auto m = media[0];
-#if 0
-    // Since 16 to 17 migration, we flush the thumbnails, so this will fail
-    ASSERT_EQ( m->thumbnailMrl(), T->ml->thumbnailPath() + "/path/to/thumbnail" );
-    ASSERT_TRUE( m->isThumbnailGenerated() );
-#endif
-    ASSERT_EQ( m->fileName(), "file with space.avi" );
-
-    m = media[1];
-
-    // Ensure we're probing the correct fake media
-    ASSERT_EQ( m->id(), 2 );
-    // Was IMedia::MetadataType::Progress
-    auto& meta = m->metadata( static_cast<IMedia::MetadataType>( 50 ) );
-    ASSERT_EQ( "fake progress", meta.asStr() );
-
-    auto playlists = T->ml->playlists( PlaylistType::All, nullptr )->all();
-    ASSERT_EQ( 1u, playlists.size() );
-    auto playlistMedia = playlists[0]->media( nullptr )->all();
-    ASSERT_EQ( 3u, playlistMedia.size() );
-    ASSERT_EQ( media[0]->id(), playlistMedia[0]->id() );
-    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[0] )->nbPlaylists() );
-    ASSERT_EQ( media[1]->id(), playlistMedia[1]->id() );
-    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[1] )->nbPlaylists() );
-    ASSERT_EQ( media[2]->id(), playlistMedia[2]->id() );
-    ASSERT_EQ( 1u, std::static_pointer_cast<Media>( playlistMedia[2] )->nbPlaylists() );
-
-    ASSERT_TRUE( media[2]->isExternalMedia() );
-
-    auto externalMedia = T->ml->media( 99 );
-    ASSERT_NE( nullptr, externalMedia );
-    ASSERT_EQ( IMedia::Type::Unknown, externalMedia->type() );
-    ASSERT_EQ( 0u, std::static_pointer_cast<Media>( externalMedia )->nbPlaylists() );
-
-    auto folder = T->ml->folder( 1 );
-    ASSERT_NE( nullptr, folder );
-    ASSERT_EQ( 2u, folder->media( IMedia::Type::Unknown, nullptr )->count() );
-    ASSERT_EQ( "folder", folder->name() );
-}
-
-static void Upgrade14to15( DbModel* T )
-{
-    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v14.sql" );
 }
 
 static void Upgrade15to16( DbModel* T )
@@ -754,12 +680,6 @@ int main( int ac, char** av )
 
     ADD_TEST( NbTriggers );
     ADD_TEST( Upgrade3to5 );
-    ADD_TEST( Upgrade4to5 );
-    ADD_TEST( Upgrade7to8 );
-    ADD_TEST( Upgrade8to9 );
-    ADD_TEST( Upgrade12to13 );
-    ADD_TEST( Upgrade13to14 );
-    ADD_TEST( Upgrade14to15 );
     ADD_TEST( Upgrade15to16 );
     ADD_TEST( Upgrade16to17 );
     ADD_TEST( Upgrade17to18 );

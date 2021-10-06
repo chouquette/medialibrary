@@ -258,7 +258,6 @@ public:
      * @param playlistId
      */
     static bool removePlaylistContentTasks( MediaLibraryPtr ml );
-    static bool recoverUnscannedFiles( MediaLibraryPtr ml );
 
     /***************************************************************************
      * IItem interface implementation

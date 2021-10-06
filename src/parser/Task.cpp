@@ -843,21 +843,6 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
                                          LinkType::Playlist );
 }
 
-/*
- * This is used only by the 11 -> 12 migration, and is refering to an old
- * DB model on purpose
- */
-bool Task::recoverUnscannedFiles( MediaLibraryPtr ml )
-{
-    static const std::string req = "INSERT INTO " + Table::Name +
-            "(file_id, parent_folder_id)"
-            " SELECT id_file, folder_id FROM " + File::Table::Name +
-            " f LEFT JOIN " + Table::Name + " t"
-            " ON t.file_id = f.id_file WHERE t.file_id IS NULL"
-            " AND f.folder_id IS NOT NULL";
-    return sqlite::Tools::executeInsert( ml->getConn(), req );
-}
-
 std::string Task::meta( Task::Metadata type ) const
 {
     return m_metadata[static_cast<std::underlying_type_t<Task::Metadata>>(type)];

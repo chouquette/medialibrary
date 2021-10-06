@@ -213,17 +213,10 @@ void Metadata::createTable(sqlite::Connection* connection)
 std::string Metadata::schema( const std::string& tableName, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( tableName );
+    UNUSED_IN_RELEASE( dbModel );
 
     assert( tableName == Table::Name );
-    if ( dbModel < 14 )
-    {
-        return "CREATE TABLE " + Table::Name +
-        "("
-            "id_media INTEGER,"
-            "type INTEGER,"
-            "value TEXT"
-        ")";
-    }
+    assert( dbModel >= 14 );
     return "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER,"
