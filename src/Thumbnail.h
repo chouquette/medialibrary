@@ -317,19 +317,6 @@ private:
     bool update( std::shared_ptr<Thumbnail> newThumbnail );
     bool update( std::string mrl, bool isOwned );
 
-    /**
-     * @brief updateAllLinkRecords Updates all link record using this thumbnail to
-     *                             use the one identified by newThumbnailId
-     * @param newThumbnailId The new thumbnail to link to
-     * @return true in case of success, false otherwise
-     *
-     * If this returns true, the instance must be considered invalid since it's
-     * pointing to the previous thumbnail, while it has now been removed from
-     * database, as the shared counter immediatly reached 0 (since no entity is
-     * linked with it anymore)
-     */
-    bool updateAllLinkRecords( int64_t newThumbnailId );
-
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;

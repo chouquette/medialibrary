@@ -181,14 +181,6 @@ bool Thumbnail::update( std::string mrl, bool isOwned )
     return true;
 }
 
-bool Thumbnail::updateAllLinkRecords( int64_t newThumbnailId )
-{
-    const std::string req = "UPDATE " + LinkingTable::Name +
-            " SET thumbnail_id = ? WHERE thumbnail_id = ?";
-    return sqlite::Tools::executeUpdate( m_ml->getConn(), req, newThumbnailId,
-                                         m_id );
-}
-
 bool Thumbnail::updateLinkRecord( int64_t entityId, EntityType type,
                                   Thumbnail::Origin origin )
 {
