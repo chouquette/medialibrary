@@ -149,7 +149,6 @@ public:
     void setMrl( std::string mrl );
     std::vector<std::shared_ptr<File>> files();
     std::vector<std::shared_ptr<Folder>> folders();
-    std::shared_ptr<Folder> parent();
     int64_t deviceId() const;
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;

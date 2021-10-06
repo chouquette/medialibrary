@@ -860,11 +860,6 @@ std::vector<std::shared_ptr<Folder>> Folder::folders()
     return DatabaseHelpers::fetchAll<Folder>( m_ml, req, m_id );
 }
 
-std::shared_ptr<Folder> Folder::parent()
-{
-    return fetch( m_ml, m_parent );
-}
-
 int64_t Folder::deviceId() const
 {
     return m_deviceId;
