@@ -373,7 +373,7 @@ static void FetchFromMedia( Tests* T )
     auto g = m->group();
     ASSERT_EQ( nullptr, g );
 
-    auto res = m->addToGroup( *mg );
+    auto res = m->addToGroup( mg->id() );
     ASSERT_TRUE( res );
     ASSERT_EQ( mg->id(), m->groupId() );
     g = m->group();
