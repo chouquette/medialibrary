@@ -22,7 +22,10 @@ build:debian:
       - docker
       - amd64
     script:
-      - meson -Db_coverage=true build
+      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+      - export PATH=/tmp/meson:$PATH
+      - cd $CI_PROJECT_DIR
+      - meson.py -Db_coverage=true build
       - cd build && ninja
     artifacts:
       expire_in: 1h
@@ -120,8 +123,10 @@ test:debian:
       - docker
       - amd64
     script:
-      - cd build
-      - meson test --no-stdsplit
+      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+      - export PATH=/tmp/meson:$PATH
+      - cd $CI_PROJECT_DIR/build
+      - meson.py test --no-stdsplit
       - mkdir html/
       - >
         gcovr -r "$CI_PROJECT_DIR/"
@@ -232,10 +237,12 @@ asan-ubsan:
       - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
       - make install -j8
       - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
-      - cd ..
-      - meson -Db_sanitize=address,undefined build
-      - cd build && meson test --no-stdsplit
-      - meson compile fast_discover_cancel fast_teardown
+      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+      - export PATH=/tmp/meson:$PATH
+      - cd $CI_PROJECT_DIR
+      - meson.py -Db_sanitize=address,undefined build
+      - cd build && meson.py test --no-stdsplit
+      - meson.py compile fast_discover_cancel fast_teardown
       - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
       - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
     artifacts:
