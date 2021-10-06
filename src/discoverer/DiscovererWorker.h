@@ -88,7 +88,6 @@ public:
     void ban( const std::string& entryPoint );
     void unban( const std::string& entryPoint );
     void reloadDevice( int64_t deviceId );
-    void addEntryPoint( std::string entryPoint );
 
 private:
     void enqueue( Task t );

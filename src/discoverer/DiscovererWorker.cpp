@@ -140,12 +140,6 @@ void DiscovererWorker::reloadDevice(int64_t deviceId)
     enqueue( deviceId, Task::Type::ReloadDevice );
 }
 
-void DiscovererWorker::addEntryPoint(std::string entryPoint)
-{
-    enqueue( utils::file::toFolderPath( std::move( entryPoint ) ),
-             Task::Type::AddEntryPoint );
-}
-
 bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
 {
     /* This *must* be called with the mutex locked */
