@@ -674,6 +674,11 @@ static void Upgrade32to33( DbModel* T )
     ASSERT_EQ( 1u, mg2->nbExternalMedia() );
 }
 
+static void Upgrade33to34( DbModel* T )
+{
+    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v33.sql" );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DbModel )
@@ -698,6 +703,7 @@ int main( int ac, char** av )
     ADD_TEST( Upgrade30to31 );
     ADD_TEST( Upgrade31to32 );
     ADD_TEST( Upgrade32to33 );
+    ADD_TEST( Upgrade33to34 );
 
     END_TESTS
 }

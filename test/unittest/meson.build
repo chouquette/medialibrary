@@ -200,6 +200,7 @@ db_model_tests = [
   'Upgrade30to31',
   'Upgrade31to32',
   'Upgrade32to33',
+  'Upgrade33to34',
 ]
 
 foreach t : db_model_tests
