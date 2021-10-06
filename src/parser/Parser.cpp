@@ -108,8 +108,8 @@ void Parser::flush()
      * The services are now paused so we are ensured we won't have a concurrent
      * update for the task counters
      */
-    m_opScheduled.store( 0, std::memory_order_relaxed );
     m_opDone.store( 0, std::memory_order_relaxed );
+    m_opScheduled.store( 0, std::memory_order_relaxed );
 }
 
 void Parser::prepareRescan()
