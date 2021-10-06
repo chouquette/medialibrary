@@ -94,11 +94,8 @@ struct UnitTests
 
     virtual void TearDown()
     {
-        LOG_ERROR( "Tearing down" );
         ml.reset();
-        LOG_ERROR( "Teared down" );
         ASSERT_TRUE( utils::fs::rmdir( m_testDir ) );
-        LOG_ERROR( "directory removed" );
     }
 
     std::string getDbPath()
@@ -127,7 +124,6 @@ using Tests = UnitTests<>;
                 t->SetUp( testSuite, selectedTest ); \
                 func( t.get() ); \
                 t->TearDown(); \
-                LOG_ERROR("returning from main"); \
                 return 0; \
             } catch ( const TestFailed& tf ) { \
                 fprintf(stderr, "Test %s failed: %s\n", #func, tf.what() ); \
