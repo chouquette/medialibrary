@@ -91,6 +91,7 @@ device_fs_tests = [
   'FolderPresence',
   'CompareMountpoints',
   'RelativeMrl',
+  'RemoveMissingAlbumTrack',
 ]
 
 foreach t : device_fs_tests

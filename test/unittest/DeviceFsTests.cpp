@@ -1063,6 +1063,43 @@ static void RelativeMrl( DeviceFsTests* T )
     doCheck( "smb://SHARENAME:445/////", "////" );
 }
 
+static void RemoveMissingAlbumTrack( DeviceFsTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+    T->enforceFakeMediaTypes();
+
+    auto alb = T->ml->createAlbum( "Colors II" );
+    ASSERT_NON_NULL( alb );
+
+    auto media1 = std::static_pointer_cast<Media>(
+                T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
+    auto media2 = std::static_pointer_cast<Media>(
+                T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
+    ASSERT_NON_NULL( media1 );
+    auto res = alb->addTrack( media1, 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+    res = alb->addTrack( media2, 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2u, alb->nbTracks() );
+    ASSERT_EQ( 2u, alb->nbPresentTracks() );
+
+    T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
+
+    alb = std::static_pointer_cast<Album>( T->ml->album( alb->id() ) );
+    ASSERT_NON_NULL( alb );
+    ASSERT_EQ( 2u, alb->nbTracks() );
+    ASSERT_EQ( 1u, alb->nbPresentTracks() );
+
+    T->ml->deleteMedia( media2->id() );
+
+    alb = std::static_pointer_cast<Album>( T->ml->album( alb->id() ) );
+    ASSERT_NON_NULL( alb );
+    ASSERT_EQ( 1u, alb->nbTracks() );
+    ASSERT_EQ( 1u, alb->nbPresentTracks() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DeviceFsTests )
@@ -1085,6 +1122,7 @@ int main( int ac, char** av )
     ADD_TEST( FolderPresence );
     ADD_TEST( CompareMountpoints );
     ADD_TEST( RelativeMrl );
+    ADD_TEST( RemoveMissingAlbumTrack );
 
     END_TESTS
 }

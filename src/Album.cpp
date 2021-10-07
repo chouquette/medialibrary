@@ -699,7 +699,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                    " UPDATE " + Table::Name +
                         " SET"
                             " nb_tracks = nb_tracks - 1,"
-                            " is_present = is_present - 1,"
+                            " is_present = is_present - IIF(old.is_present != 0, 1, 0),"
                             " duration = duration - MAX(old.duration, 0)"
                             " WHERE id_album = old.album_id;"
                    " END";
