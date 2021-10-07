@@ -39,6 +39,7 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "utils/Enums.h"
 
 #include <algorithm>
 
@@ -775,33 +776,27 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                        " UPDATE " + Table::Name + " SET "
                            "nb_video = nb_video -"
                                " IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    ", items.count, 0),"
                            "nb_present_video = nb_present_video -"
                                " IIF( old.is_present != 0, IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    ", items.count, 0), 0),"
                            "nb_audio = nb_audio -"
                                " IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    ", items.count, 0),"
                            "nb_present_audio = nb_present_audio -"
                                " IIF( old.is_present != 0, IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    ", items.count, 0), 0),"
                            "nb_unknown = nb_unknown -"
                                " IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    ", items.count, 0),"
                            "nb_present_unknown = nb_present_unknown -"
                                " IIF( old.is_present != 0, IIF(old.type = " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    ", items.count, 0), 0),"
                            " duration = duration - items.dur"
                            " FROM (SELECT COUNT(media_id) AS count,"
@@ -861,30 +856,24 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                        " UPDATE " + Table::Name + " SET"
                        " nb_present_video = nb_present_video - IIF(old.is_present != 0,"
                             "IIF(old.type = " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Video ) ) +
+                                utils::enum_to_string( IMedia::Type::Video ) +
                             ", items.count, 0), 0),"
                        " nb_video = nb_video - IIF(old.type = " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Video ) ) +
+                            utils::enum_to_string( IMedia::Type::Video ) +
                             ", items.count, 0),"
                        " nb_present_audio = nb_present_audio - IIF(old.is_present != 0,"
                             "IIF(old.type = " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Audio ) ) +
+                                utils::enum_to_string( IMedia::Type::Audio ) +
                             ", items.count, 0), 0),"
                        " nb_audio = nb_audio - IIF(old.type = " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Audio ) ) +
+                            utils::enum_to_string( IMedia::Type::Audio ) +
                             ", items.count, 0),"
                        " nb_present_unknown = nb_present_unknown - IIF(old.is_present != 0,"
                             "IIF(old.type = " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Unknown ) ) +
+                                utils::enum_to_string( IMedia::Type::Unknown ) +
                             ", items.count, 0), 0),"
                        " nb_unknown = nb_unknown - IIF(old.type = " +
-                            std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                            IMedia::Type::Unknown ) ) +
+                            utils::enum_to_string( IMedia::Type::Unknown ) +
                             ", items.count, 0) "
                        " FROM (SELECT COUNT(media_id) AS count, playlist_id"
                             " FROM " + MediaRelationTable::Name +
@@ -895,31 +884,25 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                       // And now increment
                       " UPDATE " + Table::Name + " SET"
                       " nb_video = nb_video + IIF(new.type = " +
-                           std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                           IMedia::Type::Video ) ) +
+                           utils::enum_to_string( IMedia::Type::Video ) +
                            ", items.count, 0),"
                       " nb_present_video = nb_present_video + IIF(new.is_present != 0,"
                            "IIF(new.type = " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                               IMedia::Type::Video ) ) +
+                               utils::enum_to_string( IMedia::Type::Video ) +
                            ", items.count, 0), 0),"
                       " nb_audio = nb_audio + IIF(new.type = " +
-                           std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                           IMedia::Type::Audio ) ) +
+                           utils::enum_to_string( IMedia::Type::Audio ) +
                            ", items.count, 0),"
                       " nb_present_audio = nb_present_audio + IIF(new.is_present != 0,"
                            "IIF(new.type = " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                               IMedia::Type::Audio ) ) +
+                               utils::enum_to_string( IMedia::Type::Audio ) +
                            ", items.count, 0), 0),"
                       " nb_unknown = nb_unknown + IIF(new.type = " +
-                           std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                           IMedia::Type::Unknown ) ) +
+                           utils::enum_to_string( IMedia::Type::Unknown ) +
                            ", items.count, 0),"
                       " nb_present_unknown = nb_present_unknown + IIF(new.is_present != 0,"
                            "IIF(new.type = " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                               IMedia::Type::Unknown ) ) +
+                               utils::enum_to_string( IMedia::Type::Unknown ) +
                            ", items.count, 0), 0) "
                        " FROM (SELECT COUNT(media_id) AS count, playlist_id"
                             " FROM " + MediaRelationTable::Name +
