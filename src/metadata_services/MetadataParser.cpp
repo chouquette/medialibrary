@@ -67,6 +67,7 @@ namespace parser
 MetadataAnalyzer::MetadataAnalyzer()
     : m_ml( nullptr )
     , m_previousFolderId( 0 )
+    , m_flushed( false )
     , m_stopped( false )
 {
 }
@@ -206,9 +207,27 @@ Status MetadataAnalyzer::run( IItem& item )
 
     if ( media->type() == IMedia::Type::Audio )
     {
-        auto status = parseAudioFile( item );
+        Cache cache{};
+        {
+            /*
+             * Load the cache before running anything else. The current task list
+             * might be flushed at any point while the task executes, which would
+             * invalidate the cache.
+             */
+            std::lock_guard<compat::Mutex> lock{ m_cacheMutex };
+            cache.previousAlbum = std::move( m_previousAlbum );
+            cache.previousFolderId = m_previousFolderId;
+            m_flushed = false;
+        }
+        auto status = parseAudioFile( item, cache );
         if ( status != Status::Success )
             return status;
+        std::lock_guard<compat::Mutex> lock{ m_cacheMutex };
+        if ( m_flushed == false )
+        {
+            m_previousAlbum = std::move( cache.previousAlbum );
+            m_previousFolderId = cache.previousFolderId;
+        }
     }
     else if ( media->type() == IMedia::Type::Video )
     {
@@ -886,7 +905,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
 
 /* Audio files */
 
-Status MetadataAnalyzer::parseAudioFile( IItem& item )
+Status MetadataAnalyzer::parseAudioFile( IItem& item, Cache& cache )
 {
     auto media = static_cast<Media*>( item.media().get() );
 
@@ -898,7 +917,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item )
 
     std::shared_ptr<Album> album;
     if ( albumName.empty() == false )
-        album = findAlbum( item, albumName, artists.first.get(), artists.second.get() );
+        album = findAlbum( item, albumName, artists.first.get(), artists.second.get(), cache );
     else
         album = handleUnknownAlbum( artists.first.get(), artists.second.get() );
     auto newAlbum = album == nullptr;
@@ -1038,15 +1057,20 @@ bool MetadataAnalyzer::assignMediaToGroup( IItem &item ) const
 std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
                                                     const std::string& albumName,
                                                     Artist* albumArtist,
-                                                    Artist* trackArtist )
+                                                    Artist* trackArtist,
+                                                    Cache& cache )
 {
     assert( albumName.empty() == false );
     auto file = static_cast<File*>( item.file().get() );
-    if ( m_previousAlbum != nullptr && albumName == m_previousAlbum->title() &&
-         m_previousFolderId != 0 && file->folderId() == m_previousFolderId )
-        return m_previousAlbum;
-    m_previousAlbum.reset();
-    m_previousFolderId = 0;
+    if ( cache.previousAlbum != nullptr &&
+         albumName == cache.previousAlbum->title() &&
+         cache.previousFolderId != 0 &&
+         cache.previousFolderId == file->folderId() )
+    {
+        return cache.previousAlbum;
+    }
+    cache.previousAlbum.reset();
+    cache.previousFolderId = 0;
 
     // Album matching depends on the difference between artist & album artist.
     // Specificaly pass the albumArtist here.
@@ -1189,8 +1213,8 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
     {
         LOG_WARN( "Multiple candidates for album ", albumName, ". Selecting first one out of luck" );
     }
-    m_previousFolderId = file->folderId();
-    m_previousAlbum = albums[0];
+    cache.previousFolderId = file->folderId();
+    cache.previousAlbum = albums[0];
     return albums[0];
 }
 
@@ -1350,6 +1374,7 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
         // We have more than a single artist on this album, fallback to various artists
         if ( albumArtist->id() != currentAlbumArtist->id() )
         {
+            std::lock_guard<compat::Mutex> lock{ m_cacheMutex };
             if ( m_variousArtists == nullptr )
                 m_variousArtists = Artist::fetch( m_ml, VariousArtistID );
             // If we already switched to various artist, no need to do it again
@@ -1579,9 +1604,11 @@ const char* MetadataAnalyzer::name() const
 
 void MetadataAnalyzer::onFlushing()
 {
+    std::lock_guard<compat::Mutex> lock{ m_cacheMutex };
     m_variousArtists = nullptr;
     m_previousAlbum = nullptr;
     m_previousFolderId = 0;
+    m_flushed = true;
 }
 
 void MetadataAnalyzer::onRestarted()

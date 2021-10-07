@@ -24,6 +24,7 @@
 
 #include "medialibrary/parser/IParserService.h"
 #include "medialibrary/IMedia.h"
+#include "compat/Mutex.h"
 
 #include <atomic>
 
@@ -51,6 +52,11 @@ public:
     MetadataAnalyzer();
 
 protected:
+    struct Cache
+    {
+        std::shared_ptr<Album> previousAlbum;
+        int64_t previousFolderId = 0;
+    };
     bool cacheUnknownArtist();
     bool cacheUnknownShow();
     virtual bool initialize( IMediaLibrary* ml ) override;
@@ -66,7 +72,7 @@ protected:
                              const std::string& mrl, const std::string& itemTitle,
                              int64_t itemIdx ) const;
     void addFolderToPlaylist(IItem& item, std::shared_ptr<Playlist> playlistPtr , const IItem& subitem) const;
-    Status parseAudioFile( IItem& task );
+    Status parseAudioFile( IItem& task, Cache& cache );
     bool parseVideoFile( IItem& task ) const;
     Status createFileAndMedia( IItem& item ) const;
     Status overrideExternalMedia( IItem& item, Media& media,
@@ -85,8 +91,8 @@ protected:
     void assignThumbnails( Media& media, Album &album,
                            Artist& albumArtist, bool newAlbum,
                            std::shared_ptr<Thumbnail> thumbnail );
-    std::shared_ptr<Album> findAlbum( IItem& item, const std::string& albumName,
-                                      Artist* albumArtist, Artist* artist );
+    std::shared_ptr<Album> findAlbum(IItem& item, const std::string& albumName,
+                                      Artist* albumArtist, Artist* artist , Cache& cache);
     std::shared_ptr<Album> handleUnknownAlbum( Artist* albumArtist,
                                                Artist* trackArtist );
     std::shared_ptr<Album> createUnknownAlbum( Artist* albumArtist,
@@ -106,9 +112,15 @@ private:
 
     std::shared_ptr<Artist> m_unknownArtist;
     std::shared_ptr<Artist> m_variousArtists;
-    std::shared_ptr<Album> m_previousAlbum;
     std::shared_ptr<Show> m_unknownShow;
+    /*
+     * Protects the previous album & previous folder ID which can change during
+     * the current task executes.
+     */
+    compat::Mutex m_cacheMutex;
+    std::shared_ptr<Album> m_previousAlbum;
     int64_t m_previousFolderId;
+    bool m_flushed;
     std::atomic_bool m_stopped;
 };
 
