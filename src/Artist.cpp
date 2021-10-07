@@ -28,6 +28,7 @@
 #include "Album.h"
 #include "AlbumTrack.h"
 #include "Media.h"
+#include "utils/Enums.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -407,8 +408,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                 return "CREATE TRIGGER " + triggerName( trigger, dbModelVersion ) +
                        " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                        " WHEN new.subtype = " +
-                           std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                               IMedia::SubType::AlbumTrack ) ) +
+                           utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                        " BEGIN "
                        " UPDATE " + Table::Name + " SET is_present=is_present + "
                            "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
@@ -420,8 +420,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
             return "CREATE TRIGGER "  + triggerName( trigger, dbModelVersion ) +
                    " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
-                       std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                           IMedia::SubType::AlbumTrack ) ) +
+                       utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                    " AND old.is_present != new.is_present"
                    " BEGIN "
                    " UPDATE " + Table::Name + " SET is_present=is_present + "
