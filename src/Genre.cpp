@@ -31,6 +31,7 @@
 #include "Artist.h"
 #include "Media.h"
 #include "database/SqliteQuery.h"
+#include "utils/Enums.h"
 
 namespace medialibrary
 {
@@ -278,8 +279,7 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
-                        std::to_string( static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                            IMedia::SubType::AlbumTrack ) ) +
+                        utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                    " AND old.is_present != new.is_present"
                    " BEGIN"
                    " UPDATE " + Table::Name + " SET is_present = is_present + "
