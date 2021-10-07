@@ -29,6 +29,7 @@
 #include "Media.h"
 #include "ShowEpisode.h"
 #include "MediaLibrary.h"
+#include "utils/Enums.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -308,9 +309,7 @@ std::string Show::trigger( Show::Triggers trigger, uint32_t dbModel )
                    " AFTER UPDATE OF "
                        "is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
-                       std::to_string(
-                        static_cast<typename std::underlying_type<IMedia::SubType>::type>(
-                                           IMedia::SubType::ShowEpisode ) ) +
+                       utils::enum_to_string( IMedia::SubType::ShowEpisode ) +
                    " AND new.is_present != old.is_present"
                    " BEGIN "
                    " UPDATE " + Table::Name + " SET is_present=is_present +"
