@@ -37,6 +37,7 @@
 #include "medialibrary/filesystem/Errors.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "utils/Enums.h"
 
 #include <queue>
 
@@ -185,14 +186,13 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                         "nb_audio = nb_audio + "
                             "(CASE new.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                        IMedia::Type::Audio ) ) + " THEN 1 "
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
+                                    " THEN 1 "
                                 "ELSE 0 "
                             "END),"
                         "nb_video = nb_video + "
                             "(CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Video ) ) + " THEN 1 "
+                                utils::enum_to_string( IMedia::Type::Video ) + " THEN 1 "
                                 "ELSE 0 "
                             "END) "
                         "WHERE id_folder = new.folder_id;"
@@ -209,30 +209,30 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                            "nb_audio = nb_audio + "
                                "(CASE old.type "
                                    "WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) + " THEN -1 "
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       " THEN -1 "
                                    "ELSE 0 "
                                "END)"
                                "+"
                                "(CASE new.type "
                                    "WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) + " THEN 1 "
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       " THEN 1 "
                                    "ELSE 0 "
                                "END)"
                            ","
                            "nb_video = nb_video + "
                                "(CASE old.type "
                                    "WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) + " THEN -1 "
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       " THEN -1 "
                                    "ELSE 0 "
                                "END)"
                                "+"
                                "(CASE new.type "
                                    "WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) + " THEN 1 "
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       " THEN 1 "
                                    "ELSE 0 "
                                "END)"
                            "WHERE id_folder = new.folder_id;"
@@ -248,16 +248,16 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                        " nb_audio = nb_audio + "
                            "(CASE new.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) + " THEN 1 "
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
+                                   " THEN 1 "
                                "ELSE 0 "
                            "END)"
                        ","
                        "nb_video = nb_video + "
                            "(CASE new.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) + " THEN 1 "
+                                   utils::enum_to_string( IMedia::Type::Video ) +
+                                   " THEN 1 "
                                "ELSE 0 "
                            "END)"
                            "WHERE new.folder_id IS NOT NULL AND id_folder = new.folder_id;"
@@ -266,16 +266,16 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                        " nb_audio = nb_audio - "
                            "(CASE old.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) + " THEN -1 "
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
+                                   " THEN -1 "
                                "ELSE 0 "
                            "END)"
                        ","
                        "nb_video = nb_video - "
                            "(CASE old.type "
                                "WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) + " THEN 1 "
+                                   utils::enum_to_string( IMedia::Type::Video ) +
+                                   " THEN 1 "
                                "ELSE 0 "
                            "END)"
                            "WHERE old.folder_id IS NOT NULL AND id_folder = old.folder_id;"
@@ -290,15 +290,15 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                         "nb_audio = nb_audio + "
                             "(CASE old.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Audio ) ) + " THEN -1 "
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
+                                    " THEN -1 "
                                 "ELSE 0 "
                             "END),"
                         "nb_video = nb_video + "
                             "(CASE old.type "
                                 "WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Video ) ) + " THEN -1 "
+                                    utils::enum_to_string( IMedia::Type::Video ) +
+                                    " THEN -1 "
                                 "ELSE 0 "
                             "END) "
                         "WHERE id_folder = old.folder_id;"
