@@ -398,6 +398,8 @@ bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
         return false;
 
     m_nbTracks++;
+    assert( media->isPresent() );
+    ++m_nbPresentTracks;
     m_duration += duration;
     // Don't assume we have always have a valid value in m_tracks.
     // While it's ok to assume that if we are currently parsing the album, we
