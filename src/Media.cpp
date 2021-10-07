@@ -1399,72 +1399,245 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
                " USING FTS3(title,labels)";
     }
     assert( tableName == Table::Name );
-    auto req = "CREATE TABLE " + Table::Name +
+    if ( dbModel <= 16 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "thumbnail_id INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
+                + "(id_thumbnail),"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel < 23 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel == 23 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel == 24 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "group_id UNSIGNED INTEGER,"
+            "has_been_grouped BOOLEAN NOT NULL DEFAULT 0,"
+            "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+            "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group) ON DELETE RESTRICT,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel < 27 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "group_id UNSIGNED INTEGER,"
+            "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+            "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group) ON DELETE RESTRICT,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel < 30 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "progress REAL DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "group_id UNSIGNED INTEGER,"
+            "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+            "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group) ON DELETE RESTRICT,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    if ( dbModel < 33 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
+                                    SubType::Unknown ) ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "last_position REAL DEFAULT -1,"
+            "last_time INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER,"
+            "last_played_date UNSIGNED INTEGER,"
+            "real_last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "group_id UNSIGNED INTEGER,"
+            "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+            "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group) ON DELETE RESTRICT,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
         "type INTEGER,"
         "subtype INTEGER NOT NULL DEFAULT " +
             std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
                                 SubType::Unknown ) ) + ","
-        "duration INTEGER DEFAULT -1,";
-
-    if ( dbModel >= 31 )
-    {
-        req += "last_position REAL DEFAULT -1,"
-               "last_time INTEGER DEFAULT -1,";
-    }
-    else if ( dbModel >= 27 )
-        req += "progress REAL DEFAULT -1,";
-
-    if ( dbModel < 33 )
-        req += "play_count UNSIGNED INTEGER,";
-    else
-        req += "play_count UNSIGNED INTEGER NOT NULL DEFAULT 0,";
-    req += "last_played_date UNSIGNED INTEGER,";
-
-    if ( dbModel < 33 )
-        req += "real_last_played_date UNSIGNED INTEGER,";
-
-    req +=
+        "duration INTEGER DEFAULT -1,"
+        "last_position REAL DEFAULT -1,"
+        "last_time INTEGER DEFAULT -1,"
+        "play_count UNSIGNED INTEGER NON NULL DEFAULT 0,"
+        "last_played_date UNSIGNED INTEGER,"
         "insertion_date UNSIGNED INTEGER,"
-        "release_date UNSIGNED INTEGER,";
-
-    if ( dbModel < 17 )
-        req += "thumbnail_id INTEGER,";
-
-    req += "title TEXT COLLATE NOCASE,"
+        "release_date UNSIGNED INTEGER,"
+        "title TEXT COLLATE NOCASE,"
         "filename TEXT COLLATE NOCASE,"
         "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
         "is_present BOOLEAN NOT NULL DEFAULT 1,"
         "device_id INTEGER,"
         "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-        "folder_id UNSIGNED INTEGER,";
-    if ( dbModel >= 23 )
-    {
-        req += "import_type UNSIGNED INTEGER NOT NULL,";
-    }
-    if ( dbModel >= 24 )
-    {
-        req += "group_id UNSIGNED INTEGER,";
-        if ( dbModel == 24 )
-            req += "has_been_grouped BOOLEAN NOT NULL DEFAULT 0,";
-        req += "forced_title BOOLEAN NOT NULL DEFAULT 0,";
-    }
-    if ( dbModel < 17 )
-    {
-          req += "FOREIGN KEY(thumbnail_id) REFERENCES " + Thumbnail::Table::Name
-            + "(id_thumbnail),";
-    }
-    if ( dbModel >= 24 )
-    {
-        req += "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
-                "(id_group) ON DELETE RESTRICT,";
-    }
-    req += "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
-        + "(id_folder)"
-
+        "folder_id UNSIGNED INTEGER,"
+        "import_type UNSIGNED INTEGER NOT NULL,"
+        "group_id UNSIGNED INTEGER,"
+        "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+        "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+            "(id_group) ON DELETE RESTRICT,"
+        "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+            + "(id_folder)"
     ")";
-    return req;
 }
 
 std::string Media::trigger( Triggers trigger, uint32_t dbModel )
