@@ -30,6 +30,7 @@
 #include "medialibrary/IMediaLibrary.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/Strings.h"
+#include "utils/Enums.h"
 
 #include <cstring>
 
@@ -720,18 +721,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                     " UPDATE " + Table::Name + " SET"
                         " nb_video = nb_video + "
                             "(CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Video ) ) +
+                                utils::enum_to_string( IMedia::Type::Video ) +
                                 " THEN 1 ELSE 0 END),"
                         " nb_audio = nb_audio + "
                             "(CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Audio ) ) +
+                                utils::enum_to_string( IMedia::Type::Audio ) +
                                 " THEN 1 ELSE 0 END),"
                         " nb_unknown = nb_unknown + "
                             "(CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Unknown ) ) +
+                                utils::enum_to_string( IMedia::Type::Unknown ) +
                                 " THEN 1 ELSE 0 END),"
                         " last_modification_date = strftime('%s')"
                     " WHERE id_group = new.group_id;"
@@ -748,18 +746,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                     " UPDATE " + Table::Name + " SET"
                         " nb_video = nb_video - "
                             "(CASE old.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Video ) ) +
+                                utils::enum_to_string( IMedia::Type::Video ) +
                                 " THEN 1 ELSE 0 END),"
                         " nb_audio = nb_audio - "
                             "(CASE old.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Audio ) ) +
+                                utils::enum_to_string( IMedia::Type::Audio ) +
                                 " THEN 1 ELSE 0 END),"
                         " nb_unknown = nb_unknown - "
                             "(CASE old.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Unknown ) ) +
+                                utils::enum_to_string( IMedia::Type::Unknown ) +
                                 " THEN 1 ELSE 0 END),"
                         " last_modification_date = strftime('%s')"
                     " WHERE id_group = old.group_id;"
@@ -780,18 +775,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " UPDATE " + Table::Name + " SET"
                             " nb_video = nb_video + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_audio = nb_audio + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_unknown = nb_unknown + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                     " THEN 1 ELSE 0 END),"
                             " last_modification_date = strftime('%s')"
                         " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
@@ -799,18 +791,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " UPDATE " + Table::Name + " SET"
                             " nb_video = nb_video - "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_audio = nb_audio - "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_unknown = nb_unknown - "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                     " THEN 1 ELSE 0 END),"
                             " last_modification_date = strftime('%s')"
                         " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
@@ -827,36 +816,30 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                         " UPDATE " + Table::Name + " SET"
                             " nb_video = nb_video + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_present_video = nb_present_video + "
                                 "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE new.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Video ) ) +
+                                        utils::enum_to_string( IMedia::Type::Video ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " nb_audio = nb_audio + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_present_audio = nb_present_audio + "
                                 "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE new.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Audio ) ) +
+                                        utils::enum_to_string( IMedia::Type::Audio ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " nb_unknown = nb_unknown + "
                                 "(CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_present_unknown = nb_present_unknown + "
                                 "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE new.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Unknown ) ) +
+                                        utils::enum_to_string( IMedia::Type::Unknown ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " last_modification_date = strftime('%s')"
                         " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
@@ -865,35 +848,29 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                             " nb_present_video = nb_present_video - "
                                 "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE old.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Video ) ) +
+                                        utils::enum_to_string( IMedia::Type::Video ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " nb_video = nb_video - "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_present_audio = nb_present_audio - "
                                 "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE old.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Audio ) ) +
+                                        utils::enum_to_string( IMedia::Type::Audio ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " nb_audio = nb_audio + "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                     " THEN 1 ELSE 0 END),"
                             " nb_present_unknown = nb_present_unknown - "
                                 "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                     "(CASE old.type WHEN " +
-                                        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                            IMedia::Type::Unknown ) ) +
+                                        utils::enum_to_string( IMedia::Type::Unknown ) +
                                         " THEN 1 ELSE 0 END) END),"
                             " nb_unknown = nb_unknown - "
                                 "(CASE old.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                        IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                     " THEN 1 ELSE 0 END),"
                             " last_modification_date = strftime('%s')"
                         " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
@@ -911,43 +888,36 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            " WHEN (IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) OR"
                            " old.type != new.type) AND"
                            " new.import_type = " +
-                                std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                                   Media::ImportType::Internal ) ) +
+                                utils::enum_to_string( Media::ImportType::Internal ) +
                        " BEGIN"
                        // Handle increment
                        " UPDATE " + Table::Name + " SET"
                            " nb_video = nb_video + "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_video = nb_present_video + "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_audio = nb_audio + "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_audio = nb_present_audio + "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Audio ) ) +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_unknown = nb_unknown + "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_unknown = nb_present_unknown + "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Unknown ) ) +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " last_modification_date = strftime('%s')"
                        " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
@@ -956,35 +926,29 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            " nb_present_video = nb_present_video - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_video = nb_video - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_audio = nb_present_audio - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Audio ) ) +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_audio = nb_audio - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_unknown = nb_present_unknown - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Unknown ) ) +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_unknown = nb_unknown - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END),"
                            " last_modification_date = strftime('%s')"
                        " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
@@ -999,44 +963,37 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " WHEN (IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) OR"
                        " old.type != new.type OR new.play_count != old.play_count) AND"
                        " new.import_type = " +
-                            std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                               Media::ImportType::Internal ) ) +
+                            utils::enum_to_string( Media::ImportType::Internal ) +
                    " BEGIN"
                    // Handle increment
                    " UPDATE " + Table::Name + " SET"
                        " nb_video = nb_video + "
                            "(CASE new.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Video ) ) +
+                               utils::enum_to_string( IMedia::Type::Video ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_present_video = nb_present_video + "
                            "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_audio = nb_audio + "
                            "(CASE new.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) +
+                               utils::enum_to_string( IMedia::Type::Audio ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_seen = nb_seen + IIF(new.play_count > 0, 1, 0),"
                        " nb_present_audio = nb_present_audio + "
                            "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_unknown = nb_unknown + "
                            "(CASE new.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Unknown ) ) +
+                               utils::enum_to_string( IMedia::Type::Unknown ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_present_unknown = nb_present_unknown + "
                            "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_present_seen = nb_present_seen +"
                             " IIF(new.play_count > 0 AND new.is_present, 1, 0),"
@@ -1047,37 +1004,31 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " nb_present_video = nb_present_video - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_video = nb_video - "
                            "(CASE old.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Video ) ) +
+                               utils::enum_to_string( IMedia::Type::Video )+
                                " THEN 1 ELSE 0 END),"
                        " nb_present_audio = nb_present_audio - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_present_seen = nb_present_seen -"
                             " IIF(old.play_count > 0 AND old.is_present != 0, 1, 0),"
                        " nb_audio = nb_audio - "
                            "(CASE old.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) +
+                               utils::enum_to_string( IMedia::Type::Audio ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_present_unknown = nb_present_unknown - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_unknown = nb_unknown - "
                            "(CASE old.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Unknown ) ) +
+                               utils::enum_to_string( IMedia::Type::Unknown ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_seen = nb_seen - IIF(old.play_count > 0, 1, 0),"
                        " last_modification_date = strftime('%s')"
@@ -1095,18 +1046,15 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " UPDATE " + Table::Name + " SET"
                            " nb_video = nb_video - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_audio = nb_audio - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_unknown = nb_unknown - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_media = nb_media - 1,"
                            " last_modification_date = strftime('%s')"
@@ -1123,35 +1071,29 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                            " nb_present_video = nb_present_video - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_video = nb_video - "
                                "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END),"
                            " nb_present_audio = nb_present_audio - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Audio ) ) +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_audio = nb_audio - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END),"
                            " nb_present_unknown = nb_present_unknown - "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Unknown) ) +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
                                        " THEN 1 ELSE 0 END) END),"
                            " nb_unknown = nb_unknown - "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END),"
                            " last_modification_date = strftime('%s')"
                        " WHERE id_group = old.group_id;"
@@ -1165,37 +1107,31 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " nb_present_video = nb_present_video - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_video = nb_video - "
                            "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END),"
                        " nb_present_audio = nb_present_audio - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_present_seen = nb_present_seen -"
                            " IIF(old.play_count > 0 AND old.is_present > 0, 1, 0),"
                        " nb_audio = nb_audio - "
                            "(CASE old.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Audio ) ) +
+                               utils::enum_to_string( IMedia::Type::Audio ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_present_unknown = nb_present_unknown - "
                            "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END) END),"
                        " nb_unknown = nb_unknown - "
                            "(CASE old.type WHEN " +
-                               std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                   IMedia::Type::Unknown ) ) +
+                               utils::enum_to_string( IMedia::Type::Unknown ) +
                                " THEN 1 ELSE 0 END),"
                        " nb_seen = nb_seen - IIF(old.play_count > 0, 1, 0),"
                        " last_modification_date = strftime('%s')"
@@ -1306,20 +1242,17 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                              */
                             " nb_video = nb_video + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                             " nb_audio = nb_audio + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                             " nb_unknown = nb_unknown + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
                             " WHERE id_group = new.group_id;"
@@ -1339,20 +1272,17 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                              */
                             " nb_present_video = nb_present_video + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Video ) ) +
+                                    utils::enum_to_string( IMedia::Type::Video ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                             " nb_present_audio = nb_present_audio + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Audio ) ) +
+                                    utils::enum_to_string( IMedia::Type::Audio ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                             " nb_present_unknown = nb_present_unknown + "
                                 " (CASE new.type WHEN " +
-                                    std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                    IMedia::Type::Unknown ) ) +
+                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                 " THEN 1 ELSE 0 END) *"
                                 " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
                             " WHERE id_group = new.group_id;"
@@ -1370,20 +1300,17 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                          */
                         " nb_present_video = nb_present_video + "
                             " (CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Video ) ) +
+                                utils::enum_to_string( IMedia::Type::Video ) +
                             " THEN 1 ELSE 0 END) *"
                             " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                         " nb_present_audio = nb_present_audio + "
                             " (CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Audio ) ) +
+                                utils::enum_to_string( IMedia::Type::Audio ) +
                             " THEN 1 ELSE 0 END) *"
                             " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                         " nb_present_unknown = nb_present_unknown + "
                             " (CASE new.type WHEN " +
-                                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                IMedia::Type::Unknown ) ) +
+                                utils::enum_to_string( IMedia::Type::Unknown ) +
                             " THEN 1 ELSE 0 END) *"
                             " (CASE new.is_present WHEN 0 THEN -1 ELSE 1 END),"
                         " nb_present_seen = nb_present_seen +"
@@ -1405,126 +1332,113 @@ std::string MediaGroup::trigger( MediaGroup::Triggers t, uint32_t dbModel )
                        " WHEN ("
                            " IFNULL(old.group_id, 0) != IFNULL(new.group_id, 0) "
                                " AND new.import_type != " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) +
+                                utils::enum_to_string( Media::ImportType::Internal ) +
                        " ) OR new.import_type != old.import_type" +
                    " BEGIN"
                    // Handle increment
                    " UPDATE " + Table::Name + " SET"
                        " nb_video = nb_video + " +
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_present_video = nb_present_video + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_audio = nb_audio + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_present_audio = nb_present_audio + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Audio ) ) +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_unknown = nb_unknown + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_present_unknown = nb_present_unknown + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE new.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE new.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Unknown ) ) +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_external = nb_external + "
                            "(CASE new.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN 0 ELSE 1 END),"
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN 0 ELSE 1 END),"
                        " last_modification_date = strftime('%s')"
                    " WHERE new.group_id IS NOT NULL AND id_group = new.group_id;"
                    // Handle decrement
                    " UPDATE " + Table::Name + " SET"
                        " nb_present_video = nb_present_video - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Video ) ) +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_video = nb_video - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Video ) ) +
+                                   utils::enum_to_string( IMedia::Type::Video ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_present_audio = nb_present_audio - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Audio ) ) +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_audio = nb_audio - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Audio ) ) +
+                                   utils::enum_to_string( IMedia::Type::Audio ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_present_unknown = nb_present_unknown - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                               " THEN "
                                "(CASE old.is_present WHEN 0 THEN 0 ELSE "
                                    "(CASE old.type WHEN " +
-                                       std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                           IMedia::Type::Unknown ) ) +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
                                        " THEN 1 ELSE 0 END) END) ELSE 0 END),"
                        " nb_unknown = nb_unknown - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN "
+                               utils::enum_to_string( Media::ImportType::Internal ) +
+                                   " THEN "
                                "(CASE old.type WHEN " +
-                                   std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                                       IMedia::Type::Unknown ) ) +
+                                   utils::enum_to_string( IMedia::Type::Unknown ) +
                                    " THEN 1 ELSE 0 END) ELSE 0 END),"
                        " nb_external = nb_external - "
                            "(CASE old.import_type WHEN " +
-                               std::to_string(static_cast<std::underlying_type_t<Media::ImportType>>(
-                                   Media::ImportType::Internal ) ) + " THEN 0 ELSE 1 END),"
+                                utils::enum_to_string( Media::ImportType::Internal ) +
+                                " THEN 0 ELSE 1 END),"
                        " last_modification_date = strftime('%s')"
                    " WHERE old.group_id IS NOT NULL AND id_group = old.group_id;"
                    " END";
