@@ -57,6 +57,7 @@
 #include "utils/Url.h"
 #include "thumbnails/ThumbnailerWorker.h"
 #include "utils/ModificationsNotifier.h"
+#include "utils/Enums.h"
 
 namespace medialibrary
 {
@@ -1406,8 +1407,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
@@ -1435,8 +1435,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
@@ -1461,8 +1460,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
@@ -1488,8 +1486,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
@@ -1520,8 +1517,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
             "last_played_date UNSIGNED INTEGER,"
@@ -1551,8 +1547,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "progress REAL DEFAULT -1,"
             "play_count UNSIGNED INTEGER,"
@@ -1583,8 +1578,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
             "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
             "type INTEGER,"
             "subtype INTEGER NOT NULL DEFAULT " +
-                std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                    SubType::Unknown ) ) + ","
+                utils::enum_to_string( SubType::Unknown ) + ","
             "duration INTEGER DEFAULT -1,"
             "last_position REAL DEFAULT -1,"
             "last_time INTEGER DEFAULT -1,"
@@ -1614,8 +1608,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
         "type INTEGER,"
         "subtype INTEGER NOT NULL DEFAULT " +
-            std::to_string( static_cast<typename std::underlying_type<SubType>::type>(
-                                SubType::Unknown ) ) + ","
+            utils::enum_to_string( SubType::Unknown ) + ","
         "duration INTEGER DEFAULT -1,"
         "last_position REAL DEFAULT -1,"
         "last_time INTEGER DEFAULT -1,"
@@ -1683,11 +1676,9 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + File::Table::Name +
                    " WHEN old.type = " +
-                       std::to_string( static_cast<std::underlying_type_t<File::Type>>(
-                                           IFile::Type::Main ) ) +
+                        utils::enum_to_string( IFile::Type::Main ) +
                    " OR old.type = " +
-                       std::to_string( static_cast<std::underlying_type_t<File::Type>>(
-                                           IFile::Type::Disc ) ) +
+                       utils::enum_to_string( IFile::Type::Disc ) +
                    " BEGIN "
                    " DELETE FROM " + Table::Name +
                        " WHERE id_media=old.media_id;"
@@ -1699,8 +1690,7 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER UPDATE OF media_id ON " + File::Table::Name +
                    " WHEN old.media_id != new.media_id AND old.type = " +
-                        std::to_string(
-                            static_cast<std::underlying_type_t<IFile::Type>>( IFile::Type::Main ) ) +
+                        utils::enum_to_string( IFile::Type::Main ) +
                    " BEGIN"
                    " DELETE FROM " + Table::Name +
                         " WHERE id_media = old.media_id;"
