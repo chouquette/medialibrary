@@ -99,7 +99,6 @@ private:
     bool m_paused;
     std::atomic_bool m_idle;
     compat::ConditionVariable m_cond;
-    compat::ConditionVariable m_idleCond;
     std::queue<std::shared_ptr<Task>> m_tasks;
     compat::Thread m_thread;
     compat::Mutex m_lock;

@@ -153,10 +153,6 @@ bool Worker::isIdle() const
 void Worker::flush()
 {
     std::unique_lock<compat::Mutex> lock( m_lock );
-    assert( m_paused == true || m_thread.get_id() == compat::Thread::id{} );
-    m_idleCond.wait( lock, [this]() {
-        return m_idle == true;
-    });
     while ( m_tasks.empty() == false )
         m_tasks.pop();
     m_service->onFlushing();
@@ -189,7 +185,6 @@ void Worker::mainloop()
                 {
                     LOG_DEBUG( "Halting ParserService [", serviceName, "] mainloop" );
                     setIdle( true );
-                    m_idleCond.notify_all();
                     m_cond.wait( lock, [this]() {
                         return ( m_tasks.empty() == false && m_paused == false )
                                 || m_stopParser == true;

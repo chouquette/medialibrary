@@ -114,7 +114,6 @@ void Parser::flush()
 
 void Parser::prepareRescan()
 {
-    pause();
     flush();
 }
 
@@ -160,17 +159,8 @@ void Parser::onDeviceDisappearing( int64_t )
 
 void Parser::refreshTaskList()
 {
-    /*
-     * We need to do this in various steps:
-     * - Pausing the workers after their currently running task
-     * - Flushing their task list
-     * - Restoring the task list from DB
-     * - Resuming the workers
-     */
-    pause();
     flush();
     restore();
-    resume();
 }
 
 void Parser::updateStats()
