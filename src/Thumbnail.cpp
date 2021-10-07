@@ -33,6 +33,7 @@
 #include "Media.h"
 #include "medialibrary/filesystem/Errors.h"
 #include "medialibrary/parser/IItem.h"
+#include "utils/Enums.h"
 
 namespace medialibrary
 {
@@ -594,9 +595,8 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
                            " entity_id = old.id_album AND"
-                           " entity_type = " + std::to_string(
-                               static_cast<std::underlying_type_t<EntityType>>(
-                                   EntityType::Album ) ) + ";"
+                           " entity_type = " +
+                                utils::enum_to_string( EntityType::Album ) + ";"
                    " END";
         case Triggers::AutoDeleteArtist:
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
@@ -604,9 +604,8 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
                            " entity_id = old.id_artist AND"
-                           " entity_type = " + std::to_string(
-                               static_cast<std::underlying_type_t<EntityType>>(
-                                   EntityType::Artist ) ) + ";"
+                           " entity_type = " +
+                                utils::enum_to_string( EntityType::Artist ) + ";"
                    " END";
         case Triggers::AutoDeleteMedia:
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
@@ -614,9 +613,8 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
                    " BEGIN"
                        " DELETE FROM " + LinkingTable::Name + " WHERE"
                            " entity_id = old.id_media AND"
-                           " entity_type = " + std::to_string(
-                               static_cast<std::underlying_type_t<EntityType>>(
-                                   EntityType::Media ) ) + ";"
+                           " entity_type = " +
+                               utils::enum_to_string( EntityType::Media ) + ";"
                    " END";
 
         case Triggers::IncrementRefcount:
@@ -685,9 +683,7 @@ std::string Thumbnail::trigger(Thumbnail::Triggers trigger, uint32_t dbModel)
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Table::Name +
                    " WHEN old.is_owned != 0 AND old.status = " +
-                        std::to_string(
-                            static_cast<std::underlying_type_t<ThumbnailStatus>>(
-                                ThumbnailStatus::Available ) ) +
+                        utils::enum_to_string( ThumbnailStatus::Available ) +
                    " BEGIN"
                        " INSERT INTO " + CleanupTable::Name + "(mrl) VALUES(old.mrl);"
                    " END";
