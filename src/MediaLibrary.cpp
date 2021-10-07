@@ -2294,7 +2294,7 @@ bool MediaLibrary::forceRescanLocked()
      * unknown show
      */
     if ( m_parser != nullptr )
-        m_parser->prepareRescan();
+        m_parser->flush();
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables

@@ -72,12 +72,6 @@ public:
     void resume();
     void stop();
     ///
-    /// \brief prepareRescan Prepares the parser for a forced rescan
-    ///
-    /// This will pause all workers and flush the tasks list.
-    ///
-    void prepareRescan();
-    ///
     /// \brief rescan Launch a rescan of all processed files.
     ///
     /// This will prepare the worker for restart, fetch all uncompleted tasks and

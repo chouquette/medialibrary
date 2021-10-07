@@ -112,11 +112,6 @@ void Parser::flush()
     m_opScheduled.store( 0, std::memory_order_release );
 }
 
-void Parser::prepareRescan()
-{
-    flush();
-}
-
 void Parser::rescan()
 {
     for ( auto& s : m_serviceWorkers )
