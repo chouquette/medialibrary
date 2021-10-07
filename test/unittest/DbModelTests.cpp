@@ -37,6 +37,7 @@
 #include "MediaGroup.h"
 #include "File.h"
 #include "utils/File.h"
+#include "utils/Enums.h"
 
 #include <fstream>
 
@@ -472,8 +473,7 @@ static void Upgrade22to23( DbModel* T )
         sqlite::Statement stmt{
             T->ml->getConn()->handle(),
             "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
-                " WHERE file_type = " + std::to_string(
-                        static_cast<std::underlying_type_t<IFile::Type>>( IFile::Type::Playlist ) )
+                " WHERE file_type = " + utils::enum_to_string( IFile::Type::Playlist )
         };
         stmt.execute();
         auto row = stmt.row();
