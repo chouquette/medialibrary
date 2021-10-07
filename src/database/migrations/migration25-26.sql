@@ -55,8 +55,7 @@ MediaGroup::schema( MediaGroup::Table::Name, 26 ),
 #define COUNT_MEDIA(type) \
     " (SELECT COUNT(*) FROM " + Media::Table::Name + " m" \
     " WHERE m.group_id = mg.id_group AND m.is_present != 0 AND " \
-    " m.type = " + std::to_string(  \
-        static_cast<std::underlying_type_t<IMedia::Type>>( type ) ) + "), "
+    " m.type = " + utils::enum_to_string( ( type ) ) + "), "
 
 "INSERT INTO " + MediaGroup::Table::Name +
     " SELECT id_group, name,"
@@ -97,14 +96,9 @@ MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 26 ),
  * tasks.
  */
 "UPDATE " + parser::Task::Table::Name + " SET file_type = " +
-    std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
-        IFile::Type::Playlist ) ) +
-    " WHERE type = " +
-    std::to_string( static_cast<std::underlying_type_t<parser::Task::Type>>(
-        parser::Task::Type::Restore ) ) +
-    " AND file_type = " +
-    std::to_string( static_cast<std::underlying_type_t<IFile::Type>>(
-        IFile::Type::Unknown ) ),
+    utils::enum_to_string( IFile::Type::Playlist ) +
+    " WHERE type = " + utils::enum_to_string( parser::Task::Type::Restore ) +
+    " AND file_type = " + utils::enum_to_string( IFile::Type::Unknown ),
 
 /*
  * Fix external files is_network state

@@ -64,14 +64,11 @@ MediaGroup::schema( MediaGroup::Table::Name, 30 ),
 "INSERT INTO " + MediaGroup::Table::Name +
     " SELECT id_group, name, "
     " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
-        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-            IMedia::Type::Video ) ) + "),"
+        " AND type = " + utils::enum_to_string( IMedia::Type::Video ) + "),"
     " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
-        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-            IMedia::Type::Audio ) ) + "),"
+        " AND type = " + utils::enum_to_string( IMedia::Type::Audio ) + "),"
     " (SELECT COUNT() FROM " + Media::Table::Name + " WHERE group_id = id_group"
-        " AND type = " + std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-            IMedia::Type::Unknown) ) + "),"
+        " AND type = " + utils::enum_to_string( IMedia::Type::Unknown ) + "),"
     " nb_video, nb_audio, nb_unknown, duration, creation_date,"
     " last_modification_date, user_interacted, forced_singleton "
     " FROM " + MediaGroup::Table::Name + "_backup",

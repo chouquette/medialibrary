@@ -69,6 +69,7 @@
 #include "utils/TitleAnalyzer.h"
 #include "Bookmark.h"
 #include "MediaGroup.h"
+#include "utils/Enums.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"

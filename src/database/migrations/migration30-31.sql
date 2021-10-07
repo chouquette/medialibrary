@@ -35,41 +35,34 @@ MediaGroup::schema( MediaGroup::Table::Name, 31 ),
 
 "UPDATE " + MediaGroup::Table::Name + " SET "
     "nb_video = nb_video - (CASE MQ.type WHEN " +
-        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                        IMedia::Type::Video ) ) +
+        utils::enum_to_string( IMedia::Type::Video ) +
         " THEN 1 ELSE 0 END),"
     "nb_present_video = nb_present_video - "
         "(CASE MQ.is_present WHEN 0 THEN 0 ELSE "
             "(CASE MQ.type WHEN " +
-                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                IMedia::Type::Video ) ) +
+                utils::enum_to_string( IMedia::Type::Video ) +
                 " THEN 1 ELSE 0 END)"
         "END),"
     "nb_audio = nb_audio - (CASE MQ.type WHEN " +
-        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                        IMedia::Type::Audio ) ) +
+        utils::enum_to_string( IMedia::Type::Audio ) +
         " THEN 1 ELSE 0 END),"
     "nb_present_audio = nb_present_audio - "
         "(CASE MQ.is_present WHEN 0 THEN 0 ELSE "
             "(CASE MQ.type WHEN " +
-                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                IMedia::Type::Audio ) ) +
+                utils::enum_to_string( IMedia::Type::Audio ) +
                 " THEN 1 ELSE 0 END)"
         "END),"
     "nb_unknown = nb_unknown - (CASE MQ.type WHEN " +
-        std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                        IMedia::Type::Unknown ) ) +
+        utils::enum_to_string( IMedia::Type::Unknown ) +
         " THEN 1 ELSE 0 END),"
     "nb_present_unknown = nb_present_unknown - "
         "(CASE MQ.is_present WHEN 0 THEN 0 ELSE "
             "(CASE MQ.type WHEN " +
-                std::to_string( static_cast<std::underlying_type_t<IMedia::Type>>(
-                                IMedia::Type::Unknown ) ) +
+                utils::enum_to_string( IMedia::Type::Unknown ) +
                 " THEN 1 ELSE 0 END)"
         "END) "
     "FROM (SELECT * FROM " + Media::Table::Name + " WHERE import_type = "
-        + std::to_string( static_cast<std::underlying_type_t<Media::ImportType>>(
-            Media::ImportType::External ) ) + ") as MQ "
+        + utils::enum_to_string( Media::ImportType::External ) + ") as MQ "
     "WHERE MQ.group_id = id_group",
 
 "CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
@@ -164,9 +157,7 @@ MediaGroup::index( MediaGroup::Indexes::LastModificationDate, 31 ),
 "UPDATE " + Media::Table::Name + " AS m"
 " SET play_count = meta.number"
 " FROM (SELECT id_media, CAST(value AS decimal) AS number FROM " + Metadata::Table::Name +
-    " WHERE entity_type = " + std::to_string(
-        static_cast<std::underlying_type_t<IMetadata::EntityType>>(
-            IMetadata::EntityType::Media ) ) +
+    " WHERE entity_type = " + utils::enum_to_string( IMetadata::EntityType::Media ) +
         " AND type = 55"
             /* std::to_string( static_cast<std::underlying_type_t<IMedia::MetadataType>>(
                 IMedia::MetadataType::Seen ) ) */

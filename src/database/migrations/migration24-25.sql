@@ -114,9 +114,7 @@ Media::schema( Media::Table::Name, 25 ),
 Bookmark::schema( Bookmark::Table::Name, 25 ),
 
 "INSERT INTO " + Bookmark::Table::Name +
-    " SELECT *, 0, " +
-    std::to_string( static_cast<std::underlying_type_t<IBookmark::Type>>(
-        IBookmark::Type::Simple ) ) +
+    " SELECT *, 0, " + utils::enum_to_string( IBookmark::Type::Simple ) +
     " FROM " + Bookmark::Table::Name + "_backup",
 
 "CREATE TEMPORARY TABLE " + Device::Table::Name + "_backup"

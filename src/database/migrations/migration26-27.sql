@@ -77,8 +77,7 @@ MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 27 ),
 
 " FROM " + Metadata::Table::Name + " md "
     " WHERE entity_type = " +
-        std::to_string(static_cast<std::underlying_type_t<IMetadata::EntityType>>(
-            IMetadata::EntityType::Media ) ) +
+        utils::enum_to_string( IMetadata::EntityType::Media ) +
     " AND type = 50 AND md.id_media = m.id_media "
 ")"
 #ifdef __ANDROID__
