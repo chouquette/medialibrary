@@ -39,6 +39,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/Strings.h"
+#include "utils/Enums.h"
 
 #include <algorithm>
 
@@ -148,8 +149,7 @@ bool Task::saveParserStep()
     static const std::string req = "UPDATE " + Table::Name + " SET step = ?, "
             "attempts_left = "
             "(CASE type "
-                "WHEN " +
-                    std::to_string( static_cast<std::underlying_type_t<Type>>( Type::Link ) ) + " "
+                "WHEN " + utils::enum_to_string( Type::Link ) + " "
                 "THEN (SELECT max_link_task_attempts FROM Settings) "
                 "ELSE (SELECT max_task_attempts FROM Settings) END) "
             "WHERE id_task = ?";
@@ -598,12 +598,10 @@ std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
            " BEGIN "
                "DELETE FROM " + Table::Name + " "
                    "WHERE link_to_type = " +
-                           std::to_string( static_cast<std::underlying_type_t<IItem::LinkType>>(
-                               IItem::LinkType::Playlist ) ) + " "
+                           utils::enum_to_string( IItem::LinkType::Playlist ) + " "
                        "AND link_to_id = old.id_playlist "
                        "AND type = " +
-                           std::to_string( static_cast<std::underlying_type_t<Type>>(
-                               Type::Link ) ) + ";"
+                           utils::enum_to_string( Type::Link ) + ";"
            "END";
 
 }
