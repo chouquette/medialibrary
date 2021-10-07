@@ -29,6 +29,7 @@
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
 #include "Media.h"
+#include "utils/Enums.h"
 
 namespace medialibrary
 {
@@ -100,7 +101,7 @@ Query<IChapter> Chapter::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
             break;
         default:
             LOG_WARN( "Unsupported sorting criteria ",
-                      static_cast<std::underlying_type<SortingCriteria>::type>( sort ),
+                      utils::enum_to_string( sort ),
                       " falling back to default (by offset)" );
             /* fall-through */
         case SortingCriteria::Default:
