@@ -363,7 +363,7 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
     std::string req = "FROM " + Media::Table::Name + " med "
             " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
             " WHERE att.album_id = ?"
-            " AND genre_id = ?";
+            " AND att.genre_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),

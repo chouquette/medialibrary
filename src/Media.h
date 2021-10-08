@@ -389,6 +389,11 @@ private:
         ImportType m_importType;
         int64_t m_groupId;
         bool m_forcedTitle;
+        int64_t m_artistId;
+        int64_t m_genreId;
+        uint32_t m_trackNumber;
+        int64_t m_albumId;
+        uint32_t m_discNumber;
 
         // Auto fetched related properties
         mutable AlbumTrackPtr m_albumTrack;

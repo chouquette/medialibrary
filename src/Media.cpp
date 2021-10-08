@@ -47,6 +47,7 @@
 #include "MediaGroup.h"
 #include "parser/Task.h"
 #include "parser/Parser.h"
+#include "Genre.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -90,6 +91,11 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_importType( row.extract<decltype(m_importType)>() )
     , m_groupId( row.extract<decltype(m_groupId)>() )
     , m_forcedTitle( row.extract<decltype(m_forcedTitle)>() )
+    , m_artistId( row.extract<decltype(m_artistId)>() )
+    , m_genreId( row.extract<decltype(m_genreId)>() )
+    , m_trackNumber( row.extract<decltype(m_trackNumber)>() )
+    , m_albumId( row.extract<decltype(m_albumId)>() )
+    , m_discNumber( row.extract<decltype(m_discNumber)>() )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
@@ -122,6 +128,11 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_importType( ImportType::Internal )
     , m_groupId( 0 )
     , m_forcedTitle( false )
+    , m_artistId( 0 )
+    , m_genreId( 0 )
+    , m_trackNumber( 0 )
+    , m_albumId( 0 )
+    , m_discNumber( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -150,6 +161,11 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_importType( importType )
     , m_groupId( 0 )
     , m_forcedTitle( false )
+    , m_artistId( 0 )
+    , m_genreId( 0 )
+    , m_trackNumber( 0 )
+    , m_albumId( 0 )
+    , m_discNumber( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
     , m_changed( false )
 {
@@ -1610,6 +1626,37 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_folder)"
         ")";
     }
+    if ( dbModel == 33 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "type INTEGER,"
+            "subtype INTEGER NOT NULL DEFAULT " +
+                utils::enum_to_string( SubType::Unknown ) + ","
+            "duration INTEGER DEFAULT -1,"
+            "last_position REAL DEFAULT -1,"
+            "last_time INTEGER DEFAULT -1,"
+            "play_count UNSIGNED INTEGER NON NULL DEFAULT 0,"
+            "last_played_date UNSIGNED INTEGER,"
+            "insertion_date UNSIGNED INTEGER,"
+            "release_date UNSIGNED INTEGER,"
+            "title TEXT COLLATE NOCASE,"
+            "filename TEXT COLLATE NOCASE,"
+            "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
+            "is_present BOOLEAN NOT NULL DEFAULT 1,"
+            "device_id INTEGER,"
+            "nb_playlists UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "folder_id UNSIGNED INTEGER,"
+            "import_type UNSIGNED INTEGER NOT NULL,"
+            "group_id UNSIGNED INTEGER,"
+            "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+            "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
+                "(id_group) ON DELETE RESTRICT,"
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+                + "(id_folder)"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -1633,10 +1680,20 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "import_type UNSIGNED INTEGER NOT NULL,"
         "group_id UNSIGNED INTEGER,"
         "forced_title BOOLEAN NOT NULL DEFAULT 0,"
+        "artist_id UNSIGNED INTEGER,"
+        "genre_id UNSIGNED INTEGER,"
+        "track_number UNSIGEND INTEGER,"
+        "album_id UNSIGNED INTEGER,"
+        "disc_number UNSIGNED INTEGER,"
         "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
             "(id_group) ON DELETE RESTRICT,"
         "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
             + "(id_folder)"
+         "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name + "(id_artist)"
+             " ON DELETE SET NULL,"
+         "FOREIGN KEY(genre_id) REFERENCES " + Genre::Table::Name + "(id_genre),"
+         "FOREIGN KEY(album_id) REFERENCES Album(id_album) "
+             " ON DELETE SET NULL"
     ")";
 }
 
