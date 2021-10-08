@@ -1052,6 +1052,52 @@ bool Media::isPresent() const
     return m_isPresent;
 }
 
+ArtistPtr Media::artist() const
+{
+    if ( m_artistId == 0 )
+        return nullptr;
+    return Artist::fetch( m_ml, m_artistId );
+}
+
+int64_t Media::artistId() const
+{
+    return m_artistId;
+}
+
+GenrePtr Media::genre()
+{
+    if ( m_genreId == 0 )
+        return nullptr;
+    return Genre::fetch( m_ml, m_genreId );
+}
+
+int64_t Media::genreId() const
+{
+    return m_genreId;
+}
+
+unsigned int Media::trackNumber() const
+{
+    return m_trackNumber;
+}
+
+AlbumPtr Media::album()
+{
+    if ( m_albumId == 0 )
+        return nullptr;
+    return Album::fetch( m_ml, m_albumId );
+}
+
+int64_t Media::albumId() const
+{
+    return m_albumId;
+}
+
+uint32_t Media::discNumber() const
+{
+    return m_discNumber;
+}
+
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,
                                     bool forceAlbumTrack )
 {

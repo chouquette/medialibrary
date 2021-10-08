@@ -461,6 +461,18 @@ public:
     /// This is only relevent when the media is not external
     ///
     virtual bool isPresent() const = 0;
+
+    virtual ArtistPtr artist() const = 0;
+    virtual int64_t artistId() const = 0;
+    virtual GenrePtr genre() = 0;
+    virtual int64_t genreId() const = 0;
+    virtual unsigned int trackNumber() const = 0;
+    virtual AlbumPtr album() = 0;
+    virtual int64_t albumId() const = 0;
+    /**
+     * @return Which disc this tracks appears on (or 0 if unspecified)
+     */
+    virtual uint32_t discNumber() const = 0;
 };
 
 }
