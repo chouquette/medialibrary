@@ -1459,6 +1459,9 @@ void Media::createIndexes( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::Progress,
                                           Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::AlbumTrack,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
@@ -1928,6 +1931,10 @@ std::string Media::index( Indexes index, uint32_t dbModel )
                        " ON " + Table::Name + "(progress)";
             return "CREATE INDEX " + indexName( index, dbModel ) +
                     " ON " + Table::Name + "(last_position, last_time)";
+        case Indexes::AlbumTrack:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(album_id, genre_id, artist_id)";
         default:
             assert( !"Invalid index provided" );
     }
@@ -1960,6 +1967,9 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
             if ( dbModel < 31 )
                 return "media_progress_idx";
             return "media_last_pos_time_idx";
+        case Indexes::AlbumTrack:
+            assert( dbModel >= 34 );
+            return "media_album_track_idx";
         default:
             assert( !"Invalid index provided" );
     }

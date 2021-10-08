@@ -88,6 +88,7 @@ class Media : public IMedia,
             Folder,
             MediaGroup,
             Progress,
+            AlbumTrack,
         };
 
         // Those should be private, however the standard states that the expression

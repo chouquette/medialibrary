@@ -105,6 +105,7 @@ namespace
         "folder_device_id_idx",
         "index_last_played_date",
         "index_media_presence",
+        "media_album_track_idx",
         "media_folder_id_idx",
         "media_group_creation_date",
         "media_group_duration",
