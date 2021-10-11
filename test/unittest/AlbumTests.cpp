@@ -676,7 +676,7 @@ static void SortByNonSensical( Tests* T )
     m3->save();
     a3->setAlbumArtist( artist1 );
 
-    QueryParameters params { SortingCriteria::InsertionDate, false };
+    QueryParameters params { static_cast<SortingCriteria>( -1 ), false };
     auto albums = T->ml->albums( &params )->all();
     ASSERT_EQ( 3u, albums.size() );
     ASSERT_EQ( a1->id(), albums[0]->id() );
