@@ -330,8 +330,6 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
 
 std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
 {
-    UNUSED_IN_RELEASE( dbModel );
-
     switch ( trigger )
     {
         case Triggers::InsertFts:
@@ -342,7 +340,9 @@ std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
             assert( dbModel < 34 );
             return "update_genre_on_new_track";
         case Triggers::UpdateOnTrackDelete:
-            return "update_genre_on_track_deleted";
+            if ( dbModel < 34 )
+                return "update_genre_on_track_deleted";
+            return "genre_update_on_track_deleted";
         case Triggers::UpdateIsPresent:
             assert( dbModel >= 30 );
             return "genre_update_is_present";
