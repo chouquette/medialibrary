@@ -32,7 +32,6 @@
 #include <cstring>
 
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "AudioTrack.h"
 #include "discoverer/DiscovererWorker.h"
@@ -70,6 +69,7 @@
 #include "Bookmark.h"
 #include "MediaGroup.h"
 #include "utils/Enums.h"
+#include "Deprecated.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"

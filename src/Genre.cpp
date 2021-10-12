@@ -27,11 +27,11 @@
 #include "Genre.h"
 
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "Media.h"
 #include "database/SqliteQuery.h"
 #include "utils/Enums.h"
+#include "Deprecated.h"
 
 namespace medialibrary
 {

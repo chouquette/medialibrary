@@ -1,6 +1,5 @@
 medialib_src = [
 	'Album.cpp',
-	'AlbumTrack.cpp',
 	'Artist.cpp',
 	'AudioTrack.cpp',
 	'Device.cpp',
@@ -54,6 +53,7 @@ medialib_src = [
 	'MediaGroup.cpp',
 	'utils/XxHasher.cpp',
 	'utils/StringKey.cpp',
+    'Deprecated.cpp',
 ]
 
 if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'

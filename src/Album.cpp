@@ -27,12 +27,12 @@
 #include <algorithm>
 
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "Genre.h"
 #include "Media.h"
 #include "Thumbnail.h"
 #include "utils/Enums.h"
+#include "Deprecated.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"

@@ -26,7 +26,6 @@
 
 #include "MetadataParser.h"
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "File.h"
 #include "medialibrary/filesystem/Errors.h"

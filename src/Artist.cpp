@@ -26,9 +26,9 @@
 
 #include "Artist.h"
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Media.h"
 #include "utils/Enums.h"
+#include "Deprecated.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"

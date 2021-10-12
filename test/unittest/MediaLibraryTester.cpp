@@ -27,7 +27,6 @@
 #include "MediaLibraryTester.h"
 
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "Device.h"
 #include "Playlist.h"

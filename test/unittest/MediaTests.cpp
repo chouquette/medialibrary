@@ -33,7 +33,6 @@
 #include "Media.h"
 #include "Artist.h"
 #include "Album.h"
-#include "AlbumTrack.h"
 
 #include "compat/Thread.h"
 #include "Playlist.h"

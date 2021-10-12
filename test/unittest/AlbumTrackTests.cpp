@@ -27,7 +27,6 @@
 #include "UnitTests.h"
 
 #include "Album.h"
-#include "AlbumTrack.h"
 #include "Artist.h"
 #include "Media.h"
 #include "Genre.h"
