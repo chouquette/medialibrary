@@ -629,7 +629,6 @@ media_tests = [
   'SortByAlbum',
   'SetFilename',
   'SetPlayCount',
-  'SetDeviceId',
   'SetFolderId',
   'CheckDbModel',
   'SortByTrackId',

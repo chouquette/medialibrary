@@ -1199,20 +1199,6 @@ static void SetPlayCount( Tests* T )
     ASSERT_EQ( 123u, m->playCount() );
 }
 
-static void SetDeviceId( Tests* T )
-{
-    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    // This will be assigned to the mock device
-    ASSERT_EQ( 1u, m->deviceId() );
-
-    m->setDeviceId( 123u );
-    ASSERT_EQ( 123u, m->deviceId() );
-    m->save();
-
-    m = T->ml->media( m->id() );
-    ASSERT_EQ( 123u, m->deviceId() );
-}
-
 static void SetFolderId( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
@@ -1540,7 +1526,6 @@ int main( int ac, char** av )
     ADD_TEST( SortByAlbum );
     ADD_TEST( SetFilename );
     ADD_TEST( SetPlayCount );
-    ADD_TEST( SetDeviceId );
     ADD_TEST( SetFolderId );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByTrackId );

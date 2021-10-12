@@ -842,14 +842,6 @@ int64_t Media::deviceId() const
     return m_deviceId;
 }
 
-void Media::setDeviceId( int64_t deviceId )
-{
-    if ( m_deviceId == deviceId )
-        return;
-    m_deviceId = deviceId;
-    m_changed = true;
-}
-
 int64_t Media::folderId() const
 {
     return m_folderId;
