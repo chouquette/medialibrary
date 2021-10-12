@@ -281,11 +281,16 @@ ShowEpisodePtr Media::showEpisode() const
     return m_showEpisode;
 }
 
-void Media::setShowEpisode( ShowEpisodePtr episode )
+bool Media::setShowEpisode( ShowEpisodePtr episode )
 {
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "subtype = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       SubType::ShowEpisode, m_id ) == false )
+        return false;
     m_showEpisode = std::move( episode );
     m_subType = SubType::ShowEpisode;
-    m_changed = true;
+    return true;
 }
 
 Query<ILabel> Media::labels() const

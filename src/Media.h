@@ -168,7 +168,7 @@ class Media : public IMedia,
         virtual int64_t lastTime() const override;
         void setDuration( int64_t duration);
         virtual ShowEpisodePtr showEpisode() const override;
-        void setShowEpisode( ShowEpisodePtr episode );
+        bool setShowEpisode( ShowEpisodePtr episode );
         virtual bool addLabel( LabelPtr label ) override;
         virtual bool removeLabel( LabelPtr label ) override;
         virtual Query<ILabel> labels() const override;

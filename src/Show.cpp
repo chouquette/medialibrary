@@ -141,7 +141,8 @@ std::shared_ptr<ShowEpisode> Show::addEpisode( Media& media, uint32_t seasonId,
 {
     auto episode = ShowEpisode::create( m_ml, media.id(), seasonId, episodeId,
                                         std::move( title ), m_id );
-    media.setShowEpisode( episode );
+    if ( media.setShowEpisode( episode ) == false )
+        return nullptr;
     m_nbEpisodes++;
     return episode;
 }
