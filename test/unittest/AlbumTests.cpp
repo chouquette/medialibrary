@@ -430,6 +430,7 @@ static void AutoDelete( Tests* T )
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto t = a->addTrack( m, 1, 1, 0, nullptr );
     ASSERT_NON_NULL( t );
+    m->save();
 
     auto album = T->ml->album( a->id() );
     ASSERT_NE( nullptr, album );
@@ -701,6 +702,7 @@ static void Duration( Tests* T )
     m->setDuration( 100 );
     m->save();
     a->addTrack( m, 1, 1, 0, nullptr );
+    m->save();
     ASSERT_EQ( 100u, a->duration() );
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
@@ -708,11 +710,13 @@ static void Duration( Tests* T )
     m2->save();
     auto t2 = a->addTrack( m2, 1, 1, 0, nullptr );
     ASSERT_NON_NULL( t2 );
+    m2->save();
     ASSERT_EQ( 300u, a->duration() );
 
     // Check that we don't add negative durations (default sqlite duration is -1)
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "track3.mp3", IMedia::Type::Audio ) );
     auto t3 = a->addTrack( m3, 1, 1, 0, nullptr );
+    m3->save();
     ASSERT_EQ( 300u, a->duration() );
 
     auto a2 = T->ml->album( a->id() );
@@ -888,7 +892,7 @@ static void SortByInsertionDate( Tests* T )
     res = m1->save();
     ASSERT_TRUE( res );
     alb2->addTrack( m2, 1, 1, 0, nullptr );
-    res = m1->save();
+    res = m2->save();
     ASSERT_TRUE( res );
 
     QueryParameters params{};
