@@ -514,11 +514,18 @@ MoviePtr Media::movie() const
     return m_movie;
 }
 
-void Media::setMovie( MoviePtr movie )
+bool Media::setMovie( MoviePtr movie )
 {
+    if ( m_subType == SubType::Movie )
+        return true;
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "subtype = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       SubType::Movie, m_id ) == false )
+        return false;
     m_movie = std::move( movie );
     m_subType = SubType::Movie;
-    m_changed = true;
+    return true;
 }
 
 bool Media::addVideoTrack( std::string codec, unsigned int width, unsigned int height,

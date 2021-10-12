@@ -183,7 +183,7 @@ class Media : public IMedia,
         virtual const std::vector<FilePtr>& files() const override;
         virtual const std::string& fileName() const override;
         virtual MoviePtr movie() const override;
-        void setMovie( MoviePtr movie );
+        bool setMovie( MoviePtr movie );
         bool addVideoTrack( std::string codec, unsigned int width,
                             unsigned int height, uint32_t fpsNum,
                             uint32_t fpsDen, uint32_t bitrate, uint32_t sarNum,

@@ -939,9 +939,11 @@ MoviePtr MediaLibrary::movie( int64_t id ) const
 
 std::shared_ptr<Movie> MediaLibrary::createMovie( Media& media )
 {
+    auto t = getConn()->newTransaction();
     auto movie = Movie::create( this, media.id() );
-    media.setMovie( movie );
-    media.save();
+    if ( media.setMovie( movie ) == false )
+        return nullptr;
+    t->commit();
     return movie;
 }
 
