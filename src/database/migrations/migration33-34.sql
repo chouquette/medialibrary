@@ -34,6 +34,8 @@ Media::schema( Media::Table::Name, 34 ),
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 
+"DROP TABLE " + AlbumTrack::Table::Name,
+
 Media::trigger( Media::Triggers::InsertFts, 34 ),
 Media::trigger( Media::Triggers::UpdateFts, 34 ),
 Media::trigger( Media::Triggers::DeleteFts, 34 ),
@@ -64,3 +66,15 @@ MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 34 ),
+
+// This trigger was automatically deleted with the AlbumTrack table
+Album::trigger( Album::Triggers::DeleteTrack, 34 ),
+
+"DROP TRIGGER " + Album::triggerName( Album::Triggers::IsPresent, 33 ),
+Album::trigger( Album::Triggers::IsPresent, 34 ),
+
+"DROP TRIGGER " + Artist::triggerName( Artist::Triggers::HasTrackPresent, 33 ),
+Artist::trigger( Artist::Triggers::HasTrackPresent, 34 ),
+
+// This trigger was automatically deleted with the AlbumTrack table
+Genre::trigger( Genre::Triggers::UpdateOnTrackDelete, 34 ),

@@ -57,7 +57,7 @@ public:
     std::shared_ptr<Device> addDevice( const std::string& uuid,
                                        const std::string& scheme, bool isRemovable );
     void setFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory );
-    std::shared_ptr<AlbumTrack> albumTrack( int64_t id );
+    std::shared_ptr<medialibrary::Media> albumTrack( int64_t id );
     // Use to run tests that fiddles with file properties (modification dates, size...)
     std::shared_ptr<Media> addFile(std::shared_ptr<fs::IFile> file, IMedia::Type type);
     // Used when we need an actual file instead of an external media

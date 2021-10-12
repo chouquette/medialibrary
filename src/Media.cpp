@@ -228,19 +228,15 @@ std::shared_ptr<Media> Media::createStream( MediaLibraryPtr ml, const std::strin
     return createExternalMedia( ml, fileName, ImportType::Stream, -1 );
 }
 
-AlbumTrackPtr Media::albumTrack() const
+void Media::markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
+                              uint32_t discNumber, int64_t artistId, Genre* genre )
 {
-    if ( m_subType != SubType::AlbumTrack )
-        return nullptr;
-    if ( m_albumTrack == nullptr )
-        m_albumTrack = AlbumTrack::fromMedia( m_ml, m_id );
-    return m_albumTrack;
-}
-
-void Media::setAlbumTrack( AlbumTrackPtr albumTrack )
-{
-    m_albumTrack = std::move( albumTrack );
     m_subType = SubType::AlbumTrack;
+    m_albumId = albumId;
+    m_trackNumber = trackNb;
+    m_discNumber = discNumber;
+    m_artistId = artistId;
+    m_genreId = genre != nullptr ? genre->id() : 0;
     m_changed = true;
 }
 
@@ -864,8 +860,7 @@ bool Media::convertToExternal()
             return false;
         break;
     case IMedia::SubType::AlbumTrack:
-        if ( AlbumTrack::deleteByMediaId( m_ml, m_id ) == false )
-            return false;
+        markAsAlbumTrack( 0, 0, 0, 0, nullptr );
         if ( Artist::dropMediaArtistRelation( m_ml, m_id ) == false )
             return false;
         break;
@@ -940,15 +935,20 @@ bool Media::save()
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
             "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "title = ?, device_id = ?, folder_id = ?, import_type = ? "
-            "WHERE id_media = ?";
+            "title = ?, device_id = ?, folder_id = ?, import_type = ?,"
+            "track_number = ?, album_id = ?, disc_number = ?, artist_id = ?, "
+            "genre_id = ? WHERE id_media = ?";
     if ( m_changed == false )
         return true;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
                                        m_releaseDate, m_title,
                                        sqlite::ForeignKey{ m_deviceId },
                                        sqlite::ForeignKey{ m_folderId },
-                                       m_importType,
+                                       m_importType, m_trackNumber,
+                                       sqlite::ForeignKey{ m_albumId },
+                                       m_discNumber,
+                                       sqlite::ForeignKey{ m_artistId },
+                                       sqlite::ForeignKey{ m_genreId },
                                        m_id ) == false )
     {
         return false;
@@ -1098,10 +1098,8 @@ uint32_t Media::discNumber() const
     return m_discNumber;
 }
 
-std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile,
-                                    bool forceAlbumTrack )
+std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile )
 {
-    bool albumTrack = forceAlbumTrack;
     bool artist = false;
     bool album = false;
     bool file = forceFile;
@@ -1124,16 +1122,13 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
             break;
         case SortingCriteria::Artist:
             artist = true;
-            albumTrack = true;
             break;
         case SortingCriteria::Album:
             /* We need the album track to get the album id & the album for its title */
-            albumTrack = true;
             album = true;
             break;
         case SortingCriteria::TrackId:
             album = true;
-            albumTrack = true;
             break;
         default:
             // Unrelated to media requests
@@ -1143,17 +1138,13 @@ std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile
     // Use "LEFT JOIN to allow for ordering different media type
     // For instance ordering by albums on all media would not fetch the video if
     // we were using INNER JOIN
-    if ( albumTrack == true )
-        req += " LEFT JOIN " + AlbumTrack::Table::Name + " att ON m.id_media = att.media_id ";
     if ( album == true )
     {
-        assert( albumTrack == true );
-        req += " LEFT JOIN " + Album::Table::Name + " alb ON att.album_id = alb.id_album ";
+        req += " LEFT JOIN " + Album::Table::Name + " alb ON m.album_id = alb.id_album ";
     }
     if ( artist == true )
     {
-        assert( albumTrack == true );
-        req += " LEFT JOIN " + Artist::Table::Name + " art ON att.artist_id = art.id_artist ";
+        req += " LEFT JOIN " + Artist::Table::Name + " art ON m.artist_id = art.id_artist ";
     }
     if ( file == true )
         req += " LEFT JOIN " + File::Table::Name + " f ON m.id_media = f.media_id ";
@@ -1194,9 +1185,9 @@ std::string Media::sortRequest( const QueryParameters* params )
         break;
     case SortingCriteria::Album:
         if ( desc == true )
-            req += "alb.title DESC, att.track_number";
+            req += "alb.title DESC, m.track_number";
         else
-            req += "alb.title, att.track_number";
+            req += "alb.title, m.track_number";
         descAdded = true;
         break;
     case SortingCriteria::Artist:
@@ -1204,9 +1195,9 @@ std::string Media::sortRequest( const QueryParameters* params )
         break;
     case SortingCriteria::TrackId:
         if ( desc == true )
-            req += "alb.title, att.track_number DESC, att.disc_number";
+            req += "alb.title, m.track_number DESC, m.disc_number";
         else
-            req += "alb.title, att.track_number, att.disc_number";
+            req += "alb.title, m.track_number, m.disc_number";
         descAdded = true;
         break;
     default:
@@ -1228,7 +1219,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, false );
+    req += addRequestJoin( params, true );
     // We want to include unknown media to the video listing, so we invert the
     // filter to exclude Audio (ie. we include Unknown & Video)
     // If we only want audio media, then we just filter 'type = Audio'
@@ -1251,7 +1242,7 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
     req += " WHERE (m.last_position >= 0 OR m.last_time > 0)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
@@ -1309,7 +1300,10 @@ void Media::setSubType( IMedia::SubType subType )
     switch ( m_subType )
     {
         case IMedia::SubType::AlbumTrack:
-            m_albumTrack = nullptr;
+            m_discNumber = 0;
+            m_trackNumber = 0;
+            m_artistId = 0;
+            m_genreId = 0;
             break;
         case IMedia::SubType::ShowEpisode:
             m_showEpisode = nullptr;
@@ -2074,7 +2068,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
@@ -2093,7 +2087,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, false );
+    req += addRequestJoin( params, true );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
@@ -2113,11 +2107,11 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, true );
+    req += addRequestJoin( params, true );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
-            " AND att.album_id = ?"
+            " AND m.album_id = ?"
             " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
@@ -2132,12 +2126,12 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, true );
+    req += addRequestJoin( params, true );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
-            " AND att.artist_id = ?"
+            " AND m.artist_id = ?"
             " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
@@ -2152,12 +2146,12 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, true );
+    req += addRequestJoin( params, true );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
-            " AND att.genre_id = ?"
+            " AND m.genre_id = ?"
             " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
@@ -2173,7 +2167,7 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, false );
+    req += addRequestJoin( params, true );
 
     req +=  " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = m.id_media "
             " WHERE"
@@ -2195,7 +2189,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true, false );
+    req += addRequestJoin( params, true );
 
     req += "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr "
            "ON pmr.media_id = m.id_media "
@@ -2257,7 +2251,7 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
      * to them.
      */
     std::string req = "FROM " + Table::Name +  " m ";
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
     req += " WHERE m.folder_id = ?";
     if ( type != Type::Unknown )
     {
@@ -2277,7 +2271,7 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                          const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name +  " m ";
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
     req += " WHERE m.folder_id = ?";
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
     " WHERE " + Media::FtsTable::Name + " MATCH ?)";
@@ -2298,7 +2292,7 @@ Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type ty
                                      const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " m ";
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
     req += " WHERE m.group_id = ? AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
@@ -2320,7 +2314,7 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
     if ( pattern.size() < 3 )
         return nullptr;
     std::string req = "FROM " + Table::Name + " m ";
-    req += addRequestJoin( params, false, false );
+    req += addRequestJoin( params, false );
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
             " WHERE " + FtsTable::Name + " MATCH ?)"
            " AND m.group_id = ? AND m.import_type = ?";
@@ -2374,7 +2368,12 @@ bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
 bool Media::resetSubTypes( MediaLibraryPtr ml )
 {
     const std::string req = "UPDATE " + Media::Table::Name +
-            " SET subtype = ? WHERE type = ? OR type = ?";
+            /* Reset all subtypes */
+            " SET subtype = ?, "
+            /* Reset album track related properties */
+            "album_id = NULL, track_number = 0, disc_number = 0, artist_id = NULL,"
+            "genre_id = NULL "
+            "WHERE type = ? OR type = ?";
     return sqlite::Tools::executeUpdate( ml->getConn(), req, SubType::Unknown,
                                          Type::Video, Type::Audio );
 }
@@ -2393,6 +2392,55 @@ bool Media::regroupAll( MediaLibraryPtr ml )
         if ( m->regroup() == false )
             return false;
     }
+}
+
+Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                      IGenre::TracksIncluded included,
+                                      const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m"
+            " WHERE m.genre_id = ?1 AND m.is_present = 1";
+    if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
+    {
+        req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
+               " WHERE entity_id = m.id_media AND entity_type = ?2)";
+    }
+    std::string orderBy = "ORDER BY ";
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    auto desc = params != nullptr ? params->desc : false;
+    switch ( sort )
+    {
+    case SortingCriteria::Duration:
+        orderBy += "m.duration";
+        break;
+    case SortingCriteria::InsertionDate:
+        orderBy += "m.insertion_date";
+        break;
+    case SortingCriteria::ReleaseDate:
+        orderBy += "m.release_date";
+        break;
+    case SortingCriteria::Alpha:
+        orderBy += "m.title";
+        break;
+    default:
+        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
+        /* fall-through */
+    case SortingCriteria::Default:
+        if ( desc == true )
+            orderBy += "m.artist_id DESC, m.album_id DESC, m.disc_number DESC, m.track_number DESC, m.filename";
+        else
+            orderBy += "m.artist_id, m.album_id, m.disc_number, m.track_number, m.filename";
+        break;
+    }
+
+    if ( desc == true )
+        orderBy += " DESC";
+    if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                          std::move( orderBy ), genreId,
+                                          Thumbnail::EntityType::Media );
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                      std::move( orderBy ), genreId );
 }
 
 }

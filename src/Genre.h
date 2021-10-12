@@ -58,7 +58,7 @@ public:
     virtual const std::string& name() const override;
     virtual uint32_t nbTracks() const override;
     virtual uint32_t nbPresentTracks() const override;
-    void updateCachedNbTracks( int increment );
+    bool updateNbTracks(int increment );
     virtual Query<IArtist> artists( const QueryParameters* params ) const override;
     virtual Query<IArtist> searchArtists( const std::string& pattern,
                                          const QueryParameters* params = nullptr ) const override;

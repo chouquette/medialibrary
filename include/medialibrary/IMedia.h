@@ -33,7 +33,6 @@
 namespace medialibrary
 {
 
-class IAlbumTrack;
 class IShowEpisode;
 class ITrackInformation;
 class IMetadata;
@@ -151,7 +150,6 @@ public:
      * @return true if the title was successfully modified, false otherwise
      */
     virtual bool setTitle( const std::string& title ) = 0;
-    virtual AlbumTrackPtr albumTrack() const = 0;
     /**
      * @brief duration Returns the media duration in ms
      */

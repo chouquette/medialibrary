@@ -154,9 +154,9 @@ void MediaLibraryTester::setFsFactory( std::shared_ptr<fs::IFileSystemFactory> f
     fsFactory = fsf;
 }
 
-std::shared_ptr<AlbumTrack> MediaLibraryTester::albumTrack( int64_t id )
+std::shared_ptr<Media> MediaLibraryTester::albumTrack( int64_t id )
 {
-    return AlbumTrack::fetch( this, id );
+    return Media::fetch( this, id );
 }
 
 std::vector<MediaPtr> MediaLibraryTester::files()

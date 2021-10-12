@@ -802,18 +802,11 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
         {
             case IMedia::SubType::AlbumTrack:
             {
-                auto albumTrack = std::static_pointer_cast<AlbumTrack>( media->albumTrack() );
-                if ( albumTrack == nullptr )
-                {
-                    LOG_ERROR( "Can't fetch album track associated with media ", media->id() );
-                    assert( false );
-                    return std::make_tuple( false, false );
-                }
-                auto album = std::static_pointer_cast<Album>( albumTrack->album() );
+                auto album = std::static_pointer_cast<Album>( media->album() );
                 if ( album == nullptr )
                 {
                     LOG_ERROR( "Can't fetch album associated to album track ",
-                               albumTrack->id(), "(media ", media->id(), ")" );
+                               media->id(), "(media ", media->id(), ")" );
                     assert( false );
                     return std::make_tuple( false, false );
                 }
@@ -829,8 +822,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                         media->removeThumbnail( static_cast<ThumbnailSizeType>( i ) );
                 }
 
-                album->removeTrack( *media, *albumTrack );
-                AlbumTrack::destroy( m_ml, albumTrack->id() );
+                album->removeTrack( *media );
                 if ( Artist::dropMediaArtistRelation( m_ml, media->id() ) == false )
                     return std::make_tuple( false, false );
                 break;
@@ -970,9 +962,9 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item, Cache& cache )
         return Status::Completed;
     }
 
+    media->save();
     link( item, *album, std::move( artists.first ), std::move( artists.second ),
           newAlbum, thumbnail );
-    media->save();
     t->commit();
 
     if ( newAlbum == true )
@@ -1133,15 +1125,11 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
         int64_t previousArtistId = trackArtist != nullptr ? trackArtist->id() : 0;
         for ( auto& t : tracks )
         {
-            auto at = t->albumTrack();
-            assert( at != nullptr );
-            if ( at == nullptr )
-                continue;
-            if ( at->discNumber() > 1 )
+            if ( t->discNumber() > 1 )
                 multiDisc = true;
-            if ( previousArtistId != 0 && previousArtistId != at->artist()->id() )
+            if ( previousArtistId != 0 && previousArtistId != t->artistId() )
                 multipleArtists = true;
-            previousArtistId = at->artist()->id();
+            previousArtistId = t->artistId();
             // We now know enough about the album, we can stop looking at its tracks
             if ( multiDisc == true && multipleArtists == true )
                 break;
@@ -1291,8 +1279,8 @@ std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> MetadataAnalyzer::fi
 
 /* Tracks handling */
 
-std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
-                                                         int64_t artistId, Genre* genre ) const
+std::shared_ptr<Media> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
+                                                      int64_t artistId, Genre* genre ) const
 {
     assert( sqlite::Transaction::isInProgress() == true );
 
@@ -1311,10 +1299,8 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& 
     if ( title.empty() == false )
         media->setTitleBuffered( title );
 
-    auto track = std::static_pointer_cast<AlbumTrack>( album.addTrack( media, trackNumber,
-                                                                        discNumber, artistId,
-                                                                        genre ) );
-    if ( track == nullptr )
+    if ( album.addTrack( media, trackNumber, discNumber, artistId,
+                         genre ) == false )
     {
         LOG_ERROR( "Failed to create album track" );
         return nullptr;
@@ -1330,7 +1316,7 @@ std::shared_ptr<AlbumTrack> MetadataAnalyzer::handleTrack( Album& album, IItem& 
         // using Album class internals.
         album.setReleaseYear( releaseYear, false );
     }
-    return track;
+    return media;
 }
 
 /* Misc */
@@ -1385,7 +1371,9 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
                 // We also need to link all existing tracks to Various Artists
                 auto currentAlbumTracks = album.tracks( nullptr )->all();
                 for ( const auto& track : currentAlbumTracks )
+                {
                     m_variousArtists->addMedia( static_cast<Media&>( *track ) );
+                }
                 album.setAlbumArtist( m_variousArtists );
             }
             // However we always need to bump the various artist number of tracks

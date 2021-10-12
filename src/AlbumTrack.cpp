@@ -194,8 +194,7 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
                                      const QueryParameters* params )
 {
     std::string req = "FROM " + Media::Table::Name + " m"
-            " INNER JOIN " + AlbumTrack::Table::Name + " t ON m.id_media = t.media_id"
-            " WHERE t.genre_id = ?1 AND m.is_present = 1";
+            " WHERE m.genre_id = ?1 AND m.is_present = 1";
     if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
     {
         req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
@@ -223,9 +222,9 @@ Query<IMedia> AlbumTrack::fromGenre( MediaLibraryPtr ml, int64_t genreId,
         /* fall-through */
     case SortingCriteria::Default:
         if ( desc == true )
-            orderBy += "t.artist_id DESC, t.album_id DESC, t.disc_number DESC, t.track_number DESC, m.filename";
+            orderBy += "m.artist_id DESC, m.album_id DESC, m.disc_number DESC, m.track_number DESC, m.filename";
         else
-            orderBy += "t.artist_id, t.album_id, t.disc_number, t.track_number, m.filename";
+            orderBy += "m.artist_id, m.album_id, m.disc_number, m.track_number, m.filename";
         break;
     }
 

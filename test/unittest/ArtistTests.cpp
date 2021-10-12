@@ -362,16 +362,16 @@ static void SortMedia( Tests* T )
     params.sort = SortingCriteria::NbMedia;
     tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 3u, tracks.size() );
-    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
-    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
-    ASSERT_EQ( 3u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[0]->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
+    ASSERT_EQ( 3u, tracks[2]->trackNumber() );
 
     params.desc = true;
     tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 3u, tracks.size() );
-    ASSERT_EQ( 3u, tracks[0]->albumTrack()->trackNumber() );
-    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
-    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 3u, tracks[0]->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
+    ASSERT_EQ( 1u, tracks[2]->trackNumber() );
 }
 
 static void SortMediaByAlbum( Tests* T )
@@ -404,25 +404,25 @@ static void SortMediaByAlbum( Tests* T )
     auto tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb9_song9.mp3", tracks[0]->title() );
-    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[0]->trackNumber() );
     ASSERT_EQ( "alb9_song8.mp3", tracks[1]->title() );
-    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
     ASSERT_EQ( "alb8_song9.mp3", tracks[2]->title() );
-    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[2]->trackNumber() );
     ASSERT_EQ( "alb8_song8.mp3", tracks[3]->title() );
-    ASSERT_EQ( 2u, tracks[3]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[3]->trackNumber() );
 
     params.desc = true;
     tracks = artist->tracks( &params )->all();
     ASSERT_EQ( 4u, tracks.size() );
     ASSERT_EQ( "alb8_song9.mp3", tracks[0]->title() );
-    ASSERT_EQ( 1u, tracks[0]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[0]->trackNumber() );
     ASSERT_EQ( "alb8_song8.mp3", tracks[1]->title() );
-    ASSERT_EQ( 2u, tracks[1]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[1]->trackNumber() );
     ASSERT_EQ( "alb9_song9.mp3", tracks[2]->title() );
-    ASSERT_EQ( 1u, tracks[2]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 1u, tracks[2]->trackNumber() );
     ASSERT_EQ( "alb9_song8.mp3", tracks[3]->title() );
-    ASSERT_EQ( 2u, tracks[3]->albumTrack()->trackNumber() );
+    ASSERT_EQ( 2u, tracks[3]->trackNumber() );
 }
 
 static void SortAlbum( Tests* T )
@@ -512,13 +512,14 @@ static void DeleteWhenNoAlbum( Tests* T )
     auto album = T->ml->createAlbum( "album 1" );
     album->setAlbumArtist( artist );
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    auto track1 = album->addTrack( m1, 1, 1, artist->id(), nullptr );
+    auto res = album->addTrack( m1, 1, 1, artist->id(), nullptr );
+    ASSERT_TRUE( res );
     artist->addMedia( *m1 );
 
     auto artists = T->ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 1u, artists.size() );
 
-    T->ml->deleteMedia( track1->id() );
+    T->ml->deleteMedia( m1->id() );
     artists = T->ml->artists( ArtistIncluded::All, nullptr )->all();
     ASSERT_EQ( 0u, artists.size() );
 
@@ -651,7 +652,8 @@ static void SearchTracks( Tests* T )
     auto album1 = T->ml->createAlbum( "album" );
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", Media::Type::Audio ) );
     m1->setTitleBuffered( "sea otter" );
-    auto track1 = album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
+    auto res = album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
+    ASSERT_TRUE( res );
     m1->save();
 
     auto artist2 = T->ml->createArtist( "artist2" );
@@ -666,7 +668,7 @@ static void SearchTracks( Tests* T )
 
     auto artistTracks = artist1->searchTracks( "sea", nullptr )->all();
     ASSERT_EQ( 1u, artistTracks.size() );
-    ASSERT_EQ( track1->id(), artistTracks[0]->id() );
+    ASSERT_EQ( m1->id(), artistTracks[0]->id() );
 }
 
 static void SearchAll( Tests* T )

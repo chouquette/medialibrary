@@ -45,7 +45,6 @@ static void Create( Tests* T )
     ASSERT_NE( m, nullptr );
 
     ASSERT_EQ( 0u, m->playCount() );
-    ASSERT_EQ( m->albumTrack(), nullptr );
     ASSERT_EQ( m->showEpisode(), nullptr );
     ASSERT_EQ( m->duration(), -1 );
     ASSERT_EQ( -1.f, m->lastPosition() );

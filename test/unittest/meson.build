@@ -124,8 +124,6 @@ endforeach
 album_track_tests = [
   'Create',
   'GetAlbum',
-  'CheckDbModel',
-  'DeleteByMediaId',
 ]
 
 album_track_test_exe = executable('album_track_tests', 'AlbumTrackTests.cpp',

@@ -355,7 +355,6 @@ bool MediaLibrary::createAllTables()
     Playlist::createTable( dbConn );
     Genre::createTable( dbConn );
     Album::createTable( dbConn );
-    AlbumTrack::createTable( dbConn );
     Show::createTable( dbConn );
     if ( Show::createUnknownShow( dbConn ) == false )
         return false;
@@ -394,7 +393,6 @@ void MediaLibrary::createAllTriggers()
     Folder::createIndexes( dbConn );
     Album::createTriggers( dbConn );
     Album::createIndexes( dbConn );
-    AlbumTrack::createIndexes( dbConn );
     Artist::createTriggers( dbConn );
     Media::createTriggers( dbConn );
     Media::createIndexes( dbConn );
@@ -428,7 +426,6 @@ bool MediaLibrary::checkDatabaseIntegrity()
             Playlist::checkDbModel( this ) &&
             Genre::checkDbModel( this ) &&
             Album::checkDbModel( this ) &&
-            AlbumTrack::checkDbModel( this ) &&
             Show::checkDbModel( this ) &&
             ShowEpisode::checkDbModel( this ) &&
             Movie::checkDbModel( this ) &&
@@ -1324,6 +1321,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
             {
                 migrateModel33to34();
                 previousVersion = 34;
+                needRescan = true;
             }
             // To be continued in the future!
 
@@ -2321,7 +2319,7 @@ bool MediaLibrary::forceRescanLocked()
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables
-        if ( AlbumTrack::deleteAll( this ) == false ||
+        if ( Media::resetSubTypes( this ) == false ||
              Genre::deleteAll( this ) == false ||
              Album::deleteAll( this ) == false ||
              Artist::deleteAll( this ) == false ||
@@ -2336,7 +2334,6 @@ bool MediaLibrary::forceRescanLocked()
              parser::Task::resetParsing( this ) == false ||
              Artist::createDefaultArtists( getConn() ) == false ||
              Show::createUnknownShow( getConn() ) == false ||
-             Media::resetSubTypes( this ) == false ||
              Thumbnail::deleteAll( this ) == false ||
              Thumbnail::removeAllCleanupRequests( this ) == false )
         {

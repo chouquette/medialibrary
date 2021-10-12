@@ -44,7 +44,6 @@
 namespace
 {
     const std::vector<const char*> expectedTriggers{
-        "add_album_track",
         "album_is_present",
         "artist_decrement_nb_albums",
         "artist_decrement_nb_tracks",
@@ -89,7 +88,7 @@ namespace
         "thumbnail_insert_cleanup",
         "update_folder_nb_media_on_delete",
         "update_folder_nb_media_on_insert",
-        "update_genre_on_new_track", "update_genre_on_track_deleted",
+        "update_genre_on_track_deleted",
         "update_media_title_fts", "update_playlist_fts",
         "update_playlist_order_on_delete", "update_playlist_order_on_insert",
         "update_thumbnail_refcount",
@@ -97,8 +96,6 @@ namespace
 
     const std::vector<const char*> expectedIndexes{
         "album_artist_id_idx",
-        "album_media_artist_genre_album_idx",
-        "album_track_album_genre_artist_ids",
         "audio_track_media_idx",
         "file_folder_id_index",
         "file_media_id_index",
@@ -129,7 +126,6 @@ namespace
     const std::vector<const char*> expectedTables{
         "Album",
         "AlbumFts",
-        "AlbumTrack",
         "Artist",
         "ArtistFts",
         "AudioTrack",

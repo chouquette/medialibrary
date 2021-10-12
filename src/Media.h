@@ -26,6 +26,7 @@
 #include "Thumbnail.h"
 #include "database/DatabaseHelpers.h"
 #include "Metadata.h"
+#include "medialibrary/IGenre.h"
 
 namespace medialibrary
 {
@@ -160,8 +161,8 @@ class Media : public IMedia,
         void setTitleBuffered( const std::string& title );
         // Should only be used by 13->14 migration
         bool setFileName( std::string fileName );
-        virtual AlbumTrackPtr albumTrack() const override;
-        void setAlbumTrack( AlbumTrackPtr albumTrack );
+        void markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
+                               uint32_t discNumber, int64_t artistId, Genre* genre );
         virtual int64_t duration() const override;
         virtual float lastPosition() const override;
         virtual int64_t lastTime() const override;
@@ -334,6 +335,10 @@ class Media : public IMedia,
 
         static bool regroupAll( MediaLibraryPtr ml );
 
+        static Query<IMedia> tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                              IGenre::TracksIncluded included,
+                                              const QueryParameters* params );
+
 private:
         enum class PositionTypes : uint8_t
         {
@@ -353,7 +358,7 @@ private:
              */
             Any,
         };
-        static std::string addRequestJoin(const QueryParameters* params, bool forceFile , bool forceAlbumTrack);
+        static std::string addRequestJoin(const QueryParameters* params, bool forceFile );
         static std::string sortRequest( const QueryParameters* params );
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
@@ -406,7 +411,6 @@ private:
         uint32_t m_discNumber;
 
         // Auto fetched related properties
-        mutable AlbumTrackPtr m_albumTrack;
         mutable ShowEpisodePtr m_showEpisode;
         mutable MoviePtr m_movie;
         mutable std::vector<FilePtr> m_files;

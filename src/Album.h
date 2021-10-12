@@ -54,7 +54,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         enum class Triggers : uint8_t
         {
             IsPresent,
-            AddTrack,
+            AddTrack, // Deprecated in model 34
             DeleteTrack,
             InsertFts,
             DeleteFts,
@@ -103,9 +103,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         /// This will modify the media, but *not* save it.
         /// The media will be added to the tracks cache.
         ///
-        std::shared_ptr<AlbumTrack> addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
-                                              unsigned int discNumber, int64_t artistId, Genre* genre );
-        bool removeTrack( Media& media, AlbumTrack& albumTrack );
+        bool addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
+                                         unsigned int discNumber, int64_t artistId, Genre* genre );
+        bool removeTrack( Media& media );
         unsigned int nbTracks() const override;
         uint32_t nbPresentTracks() const override;
         virtual uint32_t nbDiscs() const override;

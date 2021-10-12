@@ -113,8 +113,7 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
          sort != SortingCriteria::ReleaseDate &&
          sort != SortingCriteria::Alpha )
     {
-        req += "INNER JOIN AlbumTrack atr ON atr.media_id = med.id_media "
-               "INNER JOIN Album alb ON alb.id_album = atr.album_id ";
+        req += "INNER JOIN Album alb ON alb.id_album = med.album_id ";
     }
     req += "WHERE mar.artist_id = ? ";
 
@@ -141,9 +140,9 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     case SortingCriteria::Album:
     case SortingCriteria::Default:
         if ( desc == true )
-            orderBy += "alb.title DESC, alb.id_album DESC, atr.disc_number, atr.track_number";
+            orderBy += "alb.title DESC, alb.id_album DESC, med.disc_number, med.track_number";
         else
-            orderBy += "alb.title, alb.id_album, atr.disc_number, atr.track_number";
+            orderBy += "alb.title, alb.id_album, med.disc_number, med.track_number";
         break;
     }
 
@@ -417,6 +416,21 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                            ");"
                        " END";
             }
+            if ( dbModelVersion < 34 )
+            {
+                return "CREATE TRIGGER "  + triggerName( trigger, dbModelVersion ) +
+                       " AFTER UPDATE OF is_present ON " + Media::Table::Name +
+                       " WHEN new.subtype = " +
+                           utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
+                       " AND old.is_present != new.is_present"
+                       " BEGIN "
+                       " UPDATE " + Table::Name + " SET is_present=is_present + "
+                           "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                           "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
+                               " WHERE media_id = new.id_media "
+                           ");"
+                       " END";
+            }
             return "CREATE TRIGGER "  + triggerName( trigger, dbModelVersion ) +
                    " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
@@ -425,9 +439,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
                    " BEGIN "
                    " UPDATE " + Table::Name + " SET is_present=is_present + "
                        "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
-                       "WHERE id_artist = (SELECT artist_id FROM " + AlbumTrack::Table::Name + " "
-                           " WHERE media_id = new.id_media "
-                       ");"
+                       "WHERE id_artist = new.artist_id;"
                    " END";
         }
         case Triggers::HasAlbumRemaining:
@@ -698,12 +710,12 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
                                       const QueryParameters* params, int64_t genreId )
 {
     std::string req = "FROM " + Table::Name + " a "
-                "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
+                "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
                 "WHERE id_artist IN "
                     "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)"
-                "AND att.genre_id = ? ";
+                "AND m.genre_id = ? ";
 
-    std::string groupBy = "GROUP BY att.artist_id "
+    std::string groupBy = "GROUP BY m.artist_id "
                           "ORDER BY a.name";
     if ( params != nullptr )
     {

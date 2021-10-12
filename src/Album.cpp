@@ -208,11 +208,10 @@ bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 }
 
 std::string Album::addRequestJoin( const QueryParameters* params,
-        bool albumTrack )
+        bool media  )
 {
     auto sort = params != nullptr ? params->sort : SortingCriteria::Alpha;
     bool artist = false;
-    bool media = false;
 
     switch( sort )
     {
@@ -223,7 +222,6 @@ std::string Album::addRequestJoin( const QueryParameters* params,
             break;
         case SortingCriteria::PlayCount:
         case SortingCriteria::InsertionDate:
-            albumTrack = true;
             media = true;
             break;
         case SortingCriteria::Artist:
@@ -240,13 +238,8 @@ std::string Album::addRequestJoin( const QueryParameters* params,
     std::string req;
     if ( artist == true )
         req += "LEFT JOIN " + Artist::Table::Name + " art ON alb.artist_id = art.id_artist ";
-    if ( albumTrack == true )
-        req += "INNER JOIN " + AlbumTrack::Table::Name + " att ON alb.id_album = att.album_id ";
     if ( media == true )
-    {
-        assert( albumTrack == true );
-        req += "INNER JOIN " + Media::Table::Name + " m ON att.media_id = m.id_media ";
-    }
+        req += "INNER JOIN " + Media::Table::Name + " m ON m.album_id = alb.id_album ";
     return req;
 }
 
@@ -272,9 +265,9 @@ std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
     case SortingCriteria::TrackId:
     case SortingCriteria::Default:
         if ( desc == true )
-            req += "att.disc_number DESC, att.track_number DESC, med.filename";
+            req += "med.disc_number DESC, med.track_number DESC, med.filename";
         else
-            req += "att.disc_number, att.track_number, med.filename";
+            req += "med.disc_number, med.track_number, med.filename";
         break;
     }
 
@@ -348,8 +341,7 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
     // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
     // counter productive, to maintain a cache that respects all orderings.
     std::string req = "FROM " + Media::Table::Name + " med "
-        " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
-        " WHERE att.album_id = ?";
+        " WHERE med.album_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
@@ -361,9 +353,8 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
     if ( genre == nullptr )
         return {};
     std::string req = "FROM " + Media::Table::Name + " med "
-            " INNER JOIN " + AlbumTrack::Table::Name + " att ON att.media_id = med.id_media "
-            " WHERE att.album_id = ?"
-            " AND att.genre_id = ?";
+            " WHERE med.album_id = ?"
+            " AND med.genre_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
@@ -383,20 +374,31 @@ Query<IMedia> Album::searchTracks( const std::string& pattern,
     return Media::searchAlbumTracks( m_ml, pattern, m_id, params );
 }
 
-std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
-                                             unsigned int discNumber, int64_t artistId, Genre* genre )
+bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
+                      unsigned int discNumber, int64_t artistId, Genre* genre )
 {
-    auto track = AlbumTrack::create( m_ml, m_id, media->id(), trackNb, discNumber, artistId,
-                                     genre != nullptr ? genre->id() : 0, media->duration() );
-    if ( track == nullptr )
-        return nullptr;
-    media->setAlbumTrack( track );
-    if ( genre != nullptr )
-        genre->updateCachedNbTracks( 1 );
+    /*
+     * The transaction should already exist, but in order to avoid sprinkling
+     * all the tests with a transaction block, we just create one here. It's
+     * likely to be a noop transaction outside of the tests but it doesn't matter
+     * much.
+     */
+    auto t = m_ml->getConn()->newTransaction();
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "nb_tracks = nb_tracks + 1, is_present = is_present + 1,"
+        "duration = duration + ? "
+        "WHERE id_album = ?";
+    auto duration = media->duration() >= 0 ? media->duration() : 0;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, duration,
+                                       m_id ) == false )
+        return false;
+    media->markAsAlbumTrack( m_id, trackNb, discNumber, artistId, genre );
+    if ( genre != nullptr && genre->updateNbTracks( 1 ) == false )
+        return false;
+
     // Assume the media will be saved by the caller
     m_nbTracks++;
-    if ( media->duration() > 0 )
-        m_duration += media->duration();
+    m_duration += duration;
     // Don't assume we have always have a valid value in m_tracks.
     // While it's ok to assume that if we are currently parsing the album, we
     // have a valid cache tracks, this isn't true when restarting an interrupted parsing.
@@ -405,16 +407,36 @@ std::shared_ptr<AlbumTrack> Album::addTrack( std::shared_ptr<Media> media, unsig
     if ( ( m_tracks.empty() == true && m_nbTracks == 1 ) ||
          ( m_tracks.empty() == false && m_nbTracks > 1 ) )
         m_tracks.push_back( std::move( media ) );
-    return track;
+    t->commit();
+    return true;
 }
 
-bool Album::removeTrack( Media& media, AlbumTrack& track )
+bool Album::removeTrack( Media& media )
 {
-    m_duration -= media.duration();
+    /*
+     * Remove references to genre/album/artist from the media table before we
+     * start updating album & genre.
+     * If we don't do this first, if we're removing the last album track we'd
+     * end up with a genre/album being deleted while there's still a foreign key
+     * pointing to it
+     */
+    media.markAsAlbumTrack( 0, 0, 0, 0, nullptr );
+
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "nb_tracks = nb_tracks - 1, is_present = is_present - 1,"
+        "duration = duration - ? "
+        "WHERE id_album = ?";
+    auto duration = media.duration() >= 0 ? media.duration() : 0;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       duration, m_id ) == false )
+        return false;
+
+    auto genre = std::static_pointer_cast<Genre>( media.genre() );
+    if ( genre != nullptr && genre->updateNbTracks( -1 ) )
+        return false;
+
+    m_duration -= duration;
     m_nbTracks--;
-    auto genre = std::static_pointer_cast<Genre>( track.genre() );
-    if ( genre != nullptr )
-        genre->updateCachedNbTracks( -1 );
     auto it = std::find_if( begin( m_tracks ), end( m_tracks ), [&media]( MediaPtr& m ) {
         return m->id() == media.id();
     });
@@ -489,9 +511,9 @@ bool Album::setAlbumArtist( std::shared_ptr<Artist> artist )
 Query<IArtist> Album::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Artist::Table::Name + " art "
-            "INNER JOIN " + AlbumTrack::Table::Name + " att "
-                "ON att.artist_id = art.id_artist "
-            "WHERE att.album_id = ?";
+            "INNER JOIN " + Media::Table::Name + " m "
+                "ON m.artist_id = art.id_artist "
+            "WHERE m.album_id = ?";
     if ( params != nullptr && ( params->sort != SortingCriteria::Alpha &&
                                 params->sort != SortingCriteria::Default ) )
         LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
@@ -518,8 +540,6 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
                                    trigger( Triggers::IsPresent, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeleteTrack, Settings::DbModelVersion ) );
-    sqlite::Tools::executeRequest( dbConnection,
-                                   trigger( Triggers::AddTrack, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
@@ -610,7 +630,7 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                             ");"
                         " END";
             }
-            else
+            else if ( dbModel < 34 )
             {
                 return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                        " AFTER UPDATE OF is_present ON " + Media::Table::Name +
@@ -625,9 +645,20 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                            ");"
                        " END";
             }
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF is_present ON " + Media::Table::Name +
+                   " WHEN new.subtype = " +
+                       utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
+                   " AND old.is_present != new.is_present"
+                   " BEGIN "
+                   " UPDATE " + Table::Name + " SET is_present=is_present + "
+                       "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END)"
+                       "WHERE id_album = new.album_id;"
+                   " END";
         }
         case Triggers::AddTrack:
         {
+            assert( dbModel < 34 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER INSERT ON " + AlbumTrack::Table::Name +
                    " BEGIN"
@@ -640,14 +671,31 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::DeleteTrack:
         {
+            if ( dbModel < 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                            " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                       " BEGIN "
+                       " UPDATE " + Table::Name +
+                            " SET"
+                                " nb_tracks = nb_tracks - 1,"
+                                " is_present = is_present - 1,"
+                                " duration = duration - old.duration"
+                                " WHERE id_album = old.album_id;"
+                            " DELETE FROM " + Table::Name +
+                                " WHERE id_album=old.album_id AND nb_tracks = 0;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-                        " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                        " AFTER DELETE ON " + Media::Table::Name +
+                    " WHEN old.subtype = " +
+                        utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                    " BEGIN "
                    " UPDATE " + Table::Name +
                         " SET"
                             " nb_tracks = nb_tracks - 1,"
                             " is_present = is_present - 1,"
-                            " duration = duration - old.duration"
+                            " duration = duration - MAX(old.duration, 0)"
                             " WHERE id_album = old.album_id;"
                         " DELETE FROM " + Table::Name +
                             " WHERE id_album=old.album_id AND nb_tracks = 0;"
@@ -692,6 +740,7 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
             return "album_is_present";
         }
         case Triggers::AddTrack:
+            assert( dbModel < 34 );
             return "add_album_track";
         case Triggers::DeleteTrack:
             return "delete_album_track";
@@ -741,7 +790,6 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
                                     triggerName( t, Settings::DbModelVersion ) );
     };
     return check( ml->getConn(), Triggers::IsPresent ) &&
-            check( ml->getConn(), Triggers::AddTrack ) &&
             check( ml->getConn(), Triggers::DeleteTrack ) &&
             check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts );
@@ -802,14 +850,12 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " alb "
-                    "INNER JOIN " + AlbumTrack::Table::Name + " att "
-                        "ON att.album_id = alb.id_album "
                     "INNER JOIN " + Media::Table::Name + " m "
-                        "ON att.media_id = m.id_media "
-                    "WHERE (att.artist_id = ? OR alb.artist_id = ?)";
+                        "ON m.album_id = alb.id_album "
+                    "WHERE (m.artist_id = ? OR alb.artist_id = ?)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
-    std::string groupAndOrder = " GROUP BY att.album_id ORDER BY ";
+    std::string groupAndOrder = " GROUP BY m.album_id ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     switch ( sort )
@@ -844,8 +890,8 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const Query
 {
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, true );
-    req += "WHERE att.genre_id = ?";
-    std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
+    req += "WHERE m.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ), genreId );
 }
@@ -858,8 +904,8 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
     req += "WHERE id_album IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)"
-            "AND att.genre_id = ?";
-    std::string groupAndOrderBy = "GROUP BY att.album_id" + orderBy( params );
+            "AND m.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ),
                                       sqlite::Tools::sanitizePattern( pattern ),

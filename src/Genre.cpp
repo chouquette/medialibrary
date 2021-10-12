@@ -80,17 +80,24 @@ uint32_t Genre::nbPresentTracks() const
     return m_nbPresentTracks;
 }
 
-void Genre::updateCachedNbTracks( int increment )
+bool Genre::updateNbTracks( int increment )
 {
+    static const std::string req = "UPDATE " + Table::Name +
+            " SET nb_tracks = nb_tracks + ?1,"
+            " is_present = is_present + ?1 WHERE id_genre = ?2";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
+        return false;
     m_nbTracks += increment;
+    m_nbPresentTracks += increment;
+    return true;
 }
 
 Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Artist::Table::Name + " a "
-            "INNER JOIN " + AlbumTrack::Table::Name + " att ON att.artist_id = a.id_artist "
-            "WHERE att.genre_id = ?";
-    std::string groupAndOrderBy = "GROUP BY att.artist_id ORDER BY a.name";
+            "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
+            "WHERE m.genre_id = ?";
+    std::string groupAndOrderBy = "GROUP BY m.artist_id ORDER BY a.name";
     if ( params != nullptr )
     {
         if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
@@ -111,7 +118,7 @@ Query<IArtist> Genre::searchArtists( const std::string& pattern,
 Query<IMedia> Genre::tracks( TracksIncluded included,
                              const QueryParameters* params ) const
 {
-    return AlbumTrack::fromGenre( m_ml, m_id, included, params );
+    return Media::tracksFromGenre( m_ml, m_id, included, params );
 }
 
 Query<IMedia> Genre::searchTracks( const std::string& pattern, const QueryParameters* params ) const
@@ -200,8 +207,6 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
-                                   trigger( Triggers::UpdateOnNewTrack, Settings::DbModelVersion ) );
-    sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::UpdateOnTrackDelete, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::UpdateIsPresent, Settings::DbModelVersion ) );
@@ -253,6 +258,7 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                             " WHERE rowid = old.id_genre;"
                    " END";
         case Triggers::UpdateOnNewTrack:
+            assert( dbModel < 34 );
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                     " AFTER INSERT ON " + AlbumTrack::Table::Name +
                     " WHEN new.genre_id IS NOT NULL"
@@ -263,9 +269,24 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                                 " WHERE id_genre = new.genre_id;"
                     " END";
         case Triggers::UpdateOnTrackDelete:
+            if ( dbModel < 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER DELETE ON " + AlbumTrack::Table::Name +
+                       " WHEN old.genre_id IS NOT NULL"
+                       " BEGIN"
+                            " UPDATE " + Table::Name +
+                                " SET nb_tracks = nb_tracks - 1,"
+                                    " is_present = is_present - 1"
+                                    " WHERE id_genre = old.genre_id;"
+                            " DELETE FROM " + Table::Name +
+                                " WHERE nb_tracks = 0;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-                   " AFTER DELETE ON " + AlbumTrack::Table::Name +
-                   " WHEN old.genre_id IS NOT NULL"
+                   " AFTER DELETE ON " + Media::Table::Name +
+                    " WHEN old.subtype = " +
+                        utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                    " BEGIN"
                         " UPDATE " + Table::Name +
                             " SET nb_tracks = nb_tracks - 1,"
@@ -276,6 +297,21 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                    " END";
         case Triggers::UpdateIsPresent:
             assert( dbModel >= 30 );
+            if ( dbModel < 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF is_present ON " + Media::Table::Name +
+                       " WHEN new.subtype = " +
+                            utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
+                       " AND old.is_present != new.is_present"
+                       " BEGIN"
+                       " UPDATE " + Table::Name + " SET is_present = is_present + "
+                           "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END) "
+                           "WHERE id_genre = "
+                               "(SELECT genre_id FROM " + AlbumTrack::Table::Name +
+                                   " WHERE media_id = new.id_media);"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER UPDATE OF is_present ON " + Media::Table::Name +
                    " WHEN new.subtype = " +
@@ -284,9 +320,7 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                    " BEGIN"
                    " UPDATE " + Table::Name + " SET is_present = is_present + "
                        "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END) "
-                       "WHERE id_genre = "
-                           "(SELECT genre_id FROM " + AlbumTrack::Table::Name +
-                               " WHERE media_id = new.id_media);"
+                       "WHERE id_genre = new.genre_id;"
                    " END";
         default:
             assert( !"Invalid trigger provided" );
@@ -305,6 +339,7 @@ std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
         case Triggers::DeleteFts:
             return "delete_genre_fts";
         case Triggers::UpdateOnNewTrack:
+            assert( dbModel < 34 );
             return "update_genre_on_new_track";
         case Triggers::UpdateOnTrackDelete:
             return "update_genre_on_track_deleted";
@@ -333,7 +368,6 @@ bool Genre::checkDbModel(MediaLibraryPtr ml)
     };
     return check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts ) &&
-            check( ml->getConn(), Triggers::UpdateOnNewTrack ) &&
             check( ml->getConn(), Triggers::UpdateOnTrackDelete ) &&
             check( ml->getConn(), Triggers::UpdateIsPresent );
 }

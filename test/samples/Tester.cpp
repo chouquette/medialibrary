@@ -695,16 +695,15 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         if ( it == end( tracks ) )
             return ;
         const auto track = *it;
-        const auto albumTrack = track->albumTrack();
-        ASSERT_NE( nullptr, albumTrack );
+        ASSERT_NE( nullptr, track );
         if ( expectedTrack.HasMember( "number" ) )
         {
-            if ( expectedTrack["number"].GetUint() != albumTrack->trackNumber() )
+            if ( expectedTrack["number"].GetUint() != track->trackNumber() )
                 return ;
         }
         if ( expectedTrack.HasMember( "artist" ) )
         {
-            auto artist = albumTrack->artist();
+            auto artist = track->artist();
             if ( artist == nullptr )
                 return ;
             if ( strlen( expectedTrack["artist"].GetString() ) == 0 &&
@@ -715,7 +714,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "genre" ) )
         {
-            auto genre = albumTrack->genre();
+            auto genre = track->genre();
             if ( genre == nullptr || strcasecmp( expectedTrack["genre"].GetString(), genre->name().c_str() ) != 0 )
                 return ;
         }
@@ -726,7 +725,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         if ( expectedTrack.HasMember( "cd" ) )
         {
-            if ( expectedTrack["cd"].GetUint() != albumTrack->discNumber() )
+            if ( expectedTrack["cd"].GetUint() != track->discNumber() )
                 return;
         }
         if ( expectedTrack.HasMember( "hasArtwork" ) )
@@ -738,7 +737,7 @@ void Tests::checkAlbumTracks( const IAlbum* album, const std::vector<MediaPtr>& 
         }
         // Always check if the album link is correct. This isn't part of finding the proper album, so just fail hard
         // if the check fails.
-        const auto trackAlbum = albumTrack->album();
+        const auto trackAlbum = track->album();
         ASSERT_NE( nullptr, trackAlbum );
         ASSERT_EQ( album->id(), trackAlbum->id() );
     }
