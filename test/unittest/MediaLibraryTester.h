@@ -81,6 +81,7 @@ public:
     uint32_t countNbThumbnails();
     uint32_t countNbTasks();
     virtual bool setupDummyFolder();
+    bool markMediaAsInternal( int64_t mediaId );
     void deleteAllTables( sqlite::Connection* dbConn );
 
 private:

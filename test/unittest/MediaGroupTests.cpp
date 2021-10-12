@@ -1508,8 +1508,7 @@ static void ConvertMediaToExternal( Tests* T )
     ASSERT_EQ( 1u, mg->nbExternalMedia() );
 
     /* Now convert the media back to internal */
-    m->markAsInternal();
-    res = m->save();
+    res = T->ml->markMediaAsInternal( m->id() );
     ASSERT_TRUE( res );
 
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
@@ -1550,8 +1549,7 @@ static void ConvertExternalMediaType( Tests* T )
     ASSERT_EQ( 0u, mg->nbTotalMedia() );
     ASSERT_EQ( 1u, mg->nbExternalMedia() );
 
-    external->markAsInternal();
-    res = external->save();
+    res = T->ml->markMediaAsInternal( external->id() );
     ASSERT_TRUE( res );
 
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );
@@ -1573,8 +1571,7 @@ static void ConvertExternalMediaType( Tests* T )
     ASSERT_EQ( 0u, mg->nbTotalMedia() );
     ASSERT_EQ( 1u, mg->nbExternalMedia() );
 
-    external->markAsInternal();
-    res = external->save();
+    res = T->ml->markMediaAsInternal( external->id() );
     ASSERT_TRUE( res );
 
     mg = std::static_pointer_cast<MediaGroup>( T->ml->mediaGroup( mg->id() ) );

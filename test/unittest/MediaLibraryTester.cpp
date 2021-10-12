@@ -283,6 +283,14 @@ bool MediaLibraryTester::setupDummyFolder()
     return true;
 }
 
+bool MediaLibraryTester::markMediaAsInternal( int64_t mediaId )
+{
+    static const std::string req = "UPDATE " + Media::Table::Name +
+        " SET import_type = ? WHERE id_media = ?";
+    return sqlite::Tools::executeUpdate( getConn(), req,
+                                         Media::ImportType::Internal, mediaId );
+}
+
 void MediaLibraryTester::deleteAllTables( sqlite::Connection* dbConn )
 {
     MediaLibrary::deleteAllTables( dbConn );
