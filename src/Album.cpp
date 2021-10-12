@@ -392,11 +392,11 @@ bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, duration,
                                        m_id ) == false )
         return false;
-    media->markAsAlbumTrack( m_id, trackNb, discNumber, artistId, genre );
+    if ( media->markAsAlbumTrack( m_id, trackNb, discNumber, artistId, genre ) == false )
+        return false;
     if ( genre != nullptr && genre->updateNbTracks( 1 ) == false )
         return false;
 
-    // Assume the media will be saved by the caller
     m_nbTracks++;
     m_duration += duration;
     // Don't assume we have always have a valid value in m_tracks.
@@ -420,7 +420,8 @@ bool Album::removeTrack( Media& media )
      * end up with a genre/album being deleted while there's still a foreign key
      * pointing to it
      */
-    media.markAsAlbumTrack( 0, 0, 0, 0, nullptr );
+    if ( media.markAsAlbumTrack( 0, 0, 0, 0, nullptr ) == false )
+        return false;
 
     static const std::string req = "UPDATE " + Table::Name + " SET "
         "nb_tracks = nb_tracks - 1, is_present = is_present - 1,"

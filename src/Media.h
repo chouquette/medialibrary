@@ -161,7 +161,7 @@ class Media : public IMedia,
         void setTitleBuffered( const std::string& title );
         // Should only be used by 13->14 migration
         bool setFileName( std::string fileName );
-        void markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
+        bool markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
                                uint32_t discNumber, int64_t artistId, Genre* genre );
         virtual int64_t duration() const override;
         virtual float lastPosition() const override;

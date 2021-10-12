@@ -227,16 +227,25 @@ std::shared_ptr<Media> Media::createStream( MediaLibraryPtr ml, const std::strin
     return createExternalMedia( ml, fileName, ImportType::Stream, -1 );
 }
 
-void Media::markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
+bool Media::markAsAlbumTrack( int64_t albumId, uint32_t trackNb,
                               uint32_t discNumber, int64_t artistId, Genre* genre )
 {
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+            "subtype = ?, album_id = ?, track_number = ?, disc_number = ?, "
+            "artist_id = ?, genre_id = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, SubType::AlbumTrack,
+            sqlite::ForeignKey{ albumId }, trackNb, discNumber,
+            sqlite::ForeignKey{ artistId },
+            sqlite::ForeignKey{ genre != nullptr ? genre->id() : 0 },
+            m_id ) == false )
+        return false;
     m_subType = SubType::AlbumTrack;
     m_albumId = albumId;
     m_trackNumber = trackNb;
     m_discNumber = discNumber;
     m_artistId = artistId;
     m_genreId = genre != nullptr ? genre->id() : 0;
-    m_changed = true;
+    return true;
 }
 
 int64_t Media::duration() const
@@ -859,7 +868,8 @@ bool Media::convertToExternal()
             return false;
         break;
     case IMedia::SubType::AlbumTrack:
-        markAsAlbumTrack( 0, 0, 0, 0, nullptr );
+        if ( markAsAlbumTrack( 0, 0, 0, 0, nullptr ) == false )
+            return false;
         if ( Artist::dropMediaArtistRelation( m_ml, m_id ) == false )
             return false;
         break;
