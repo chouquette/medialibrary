@@ -743,7 +743,9 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
             assert( dbModel < 34 );
             return "add_album_track";
         case Triggers::DeleteTrack:
-            return "delete_album_track";
+            if ( dbModel < 34 )
+                return "delete_album_track";
+            return "album_delete_track";
         case Triggers::InsertFts:
             return "insert_album_fts";
         case Triggers::DeleteFts:

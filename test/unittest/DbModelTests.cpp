@@ -44,6 +44,7 @@
 namespace
 {
     const std::vector<const char*> expectedTriggers{
+        "album_delete_track",
         "album_is_present",
         "artist_decrement_nb_albums",
         "artist_decrement_nb_tracks",
@@ -55,7 +56,7 @@ namespace
         "auto_delete_artist_thumbnail", "auto_delete_media_thumbnail",
         "decr_thumbnail_refcount",
         "decrement_media_nb_playlist",
-        "delete_album_fts", "delete_album_track", "delete_artist_fts",
+        "delete_album_fts", "delete_artist_fts",
         "delete_artist_without_tracks",
         "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
         "delete_media_fts", "delete_playlist_fts", "delete_playlist_linking_tasks",
