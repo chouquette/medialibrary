@@ -1199,25 +1199,6 @@ static void SetPlayCount( Tests* T )
     ASSERT_EQ( 123u, m->playCount() );
 }
 
-static void SetFolderId( Tests* T )
-{
-    auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
-    // The media will be assigned to the mock folder
-    ASSERT_EQ( 1u, m->folderId() );
-    mock::NoopDevice deviceFs{};
-    // The device is automatically created by the MediaLibraryTester
-    auto d = Device::fromUuid( T->ml.get(), deviceFs.uuid(), "file://" );
-    auto folder = Folder::create( T->ml.get(), "path/to/folder", 0, *d, deviceFs );
-
-    m->setFolderId( folder->id() );
-    m->save();
-
-    ASSERT_EQ( folder->id(), m->folderId() );
-
-    m = T->ml->media( m->id() );
-    ASSERT_EQ( folder->id(), m->folderId() );
-}
-
 static void CheckDbModel( Tests* T )
 {
     auto res = Media::checkDbModel( T->ml.get() );
@@ -1526,7 +1507,6 @@ int main( int ac, char** av )
     ADD_TEST( SortByAlbum );
     ADD_TEST( SetFilename );
     ADD_TEST( SetPlayCount );
-    ADD_TEST( SetFolderId );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByTrackId );
     ADD_TEST( ForceTitle );

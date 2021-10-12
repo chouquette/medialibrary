@@ -847,14 +847,6 @@ int64_t Media::folderId() const
     return m_folderId;
 }
 
-void Media::setFolderId( int64_t folderId )
-{
-    if ( m_folderId == folderId )
-        return;
-    m_folderId = folderId;
-    m_changed = true;
-}
-
 bool Media::markAsInternal( Type type, int64_t duration, int64_t deviceId, int64_t folderId )
 {
     static const std::string req = "UPDATE " + Table::Name + " SET "
