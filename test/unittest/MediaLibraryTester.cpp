@@ -291,6 +291,13 @@ bool MediaLibraryTester::markMediaAsInternal( int64_t mediaId )
                                          Media::ImportType::Internal, mediaId );
 }
 
+bool MediaLibraryTester::setMediaFolderId( int64_t mediaId, int64_t folderId )
+{
+    static const std::string req = "UPDATE " + Media::Table::Name +
+        " SET folder_id = ? WHERE id_media = ?";
+    return sqlite::Tools::executeUpdate( getConn(), req, folderId, mediaId );
+}
+
 void MediaLibraryTester::deleteAllTables( sqlite::Connection* dbConn )
 {
     MediaLibrary::deleteAllTables( dbConn );
