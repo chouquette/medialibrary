@@ -863,12 +863,23 @@ void Media::setFolderId( int64_t folderId )
     m_changed = true;
 }
 
-void Media::markAsInternal()
+bool Media::markAsInternal( Type type, int64_t duration, int64_t deviceId, int64_t folderId )
 {
-    if ( m_importType == ImportType::Internal )
-        return;
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "type = ?, duration = ?, device_id = ?, folder_id = ?, import_type = ? "
+        "WHERE id_media = ?";
+    assert( deviceId != 0 );
+    assert( folderId != 0 );
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, duration,
+                                       deviceId, folderId, ImportType::Internal,
+                                       m_id ) == false )
+        return false;
+    m_type = type;
+    m_duration = duration;
+    m_deviceId = deviceId;
+    m_folderId = folderId;
     m_importType = ImportType::Internal;
-    m_changed = true;
+    return true;
 }
 
 bool Media::convertToExternal()

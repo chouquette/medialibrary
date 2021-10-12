@@ -255,7 +255,8 @@ class Media : public IMedia,
         void setDeviceId( int64_t deviceId );
         int64_t folderId() const; // Used for unit tests purposes only
         void setFolderId( int64_t folderId );
-        void markAsInternal();
+        bool markAsInternal( Type type, int64_t duration, int64_t deviceId,
+                             int64_t folderId );
         bool convertToExternal();
 
         bool save();

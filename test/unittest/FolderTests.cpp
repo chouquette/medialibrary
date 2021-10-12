@@ -1000,7 +1000,8 @@ static void NbMediaAfterExternalInternalConversion( FolderTests* T )
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_EQ( 0u, subFolder->nbVideo() );
 
-    m->markAsInternal();
+    m->markAsInternal( IMedia::Type::Video, 0,
+                       static_cast<Folder*>( subFolder.get() )->deviceId(), subFolder->id() );
     m->setFolderId( subFolder->id() );
     m->save();
 

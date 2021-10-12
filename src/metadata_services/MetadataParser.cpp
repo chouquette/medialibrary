@@ -671,13 +671,9 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, Media& media,
     auto updatedTitle = item.meta( Task::IItem::Metadata::Title );
     if ( updatedTitle.empty() == false )
         media.setTitleBuffered( updatedTitle );
-    media.setTypeBuffered( newType );
-    if ( media.setDuration( item.duration() ) == false )
+    if ( media.markAsInternal( newType, item.duration(), device->id(),
+                          item.parentFolder()->id() ) == false )
         return Status::Fatal;
-    media.setDeviceId( device->id() );
-    media.setFolderId( item.parentFolder()->id() );
-    media.markAsInternal();
-    media.save();
     return Status::Success;
 }
 
