@@ -1309,7 +1309,8 @@ std::shared_ptr<Media> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
     if ( releaseDate.empty() == false )
     {
         auto releaseYear = atoi( releaseDate.c_str() );
-        media->setReleaseDate( releaseYear );
+        if ( media->setReleaseDate( releaseYear ) == false )
+            return nullptr;
         // Let the album handle multiple dates. In order to do this properly, we need
         // to know if the date has been changed before, which can be known only by
         // using Album class internals.

@@ -250,7 +250,7 @@ class Media : public IMedia,
         virtual int64_t groupId() const override;
         virtual bool regroup() override;
 
-        void setReleaseDate( unsigned int date );
+        bool setReleaseDate( unsigned int date );
         int64_t deviceId() const; // Used for unit tests purposes only
         void setDeviceId( int64_t deviceId );
         int64_t folderId() const; // Used for unit tests purposes only

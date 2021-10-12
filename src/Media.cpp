@@ -820,12 +820,16 @@ bool Media::regroup()
     return true;
 }
 
-void Media::setReleaseDate( unsigned int date )
+bool Media::setReleaseDate( unsigned int date )
 {
     if ( m_releaseDate == date )
-        return;
+        return true;
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+        "release_date = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, date, m_id ) == false )
+        return false;
     m_releaseDate = date;
-    m_changed = true;
+    return true;
 }
 
 int64_t Media::deviceId() const
