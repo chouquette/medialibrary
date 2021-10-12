@@ -263,12 +263,17 @@ float Media::lastPosition() const
     return m_lastPosition;
 }
 
-void Media::setDuration( int64_t duration )
+bool Media::setDuration( int64_t duration )
 {
     if ( m_duration == duration )
-        return;
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET "
+        "duration = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       duration, m_id ) == false )
+        return false;
     m_duration = duration;
-    m_changed = true;
+    return true;
 }
 
 ShowEpisodePtr Media::showEpisode() const

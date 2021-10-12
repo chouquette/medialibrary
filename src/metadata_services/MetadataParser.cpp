@@ -672,7 +672,8 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, Media& media,
     if ( updatedTitle.empty() == false )
         media.setTitleBuffered( updatedTitle );
     media.setTypeBuffered( newType );
-    media.setDuration( item.duration() );
+    if ( media.setDuration( item.duration() ) == false )
+        return Status::Fatal;
     media.setDeviceId( device->id() );
     media.setFolderId( item.parentFolder()->id() );
     media.markAsInternal();
