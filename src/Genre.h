@@ -49,7 +49,8 @@ public:
         DeleteFts,
         UpdateOnNewTrack,
         UpdateOnTrackDelete,
-        UpdateIsPresent
+        UpdateIsPresent,
+        DeleteEmpty, // Introduced in model 34
     };
 
     Genre( MediaLibraryPtr ml, sqlite::Row& row );

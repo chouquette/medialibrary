@@ -79,5 +79,6 @@ Artist::trigger( Artist::Triggers::HasTrackPresent, 34 ),
 // This trigger was automatically deleted with the AlbumTrack table
 Genre::trigger( Genre::Triggers::UpdateOnTrackDelete, 34 ),
 
-// New trigger
+// New triggers
 Album::trigger( Album::Triggers::DeleteEmpty, 34 ),
+Genre::trigger( Genre::Triggers::DeleteEmpty, 34 ),

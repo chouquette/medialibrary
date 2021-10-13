@@ -210,6 +210,8 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
                                    trigger( Triggers::UpdateOnTrackDelete, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::UpdateIsPresent, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::DeleteEmpty, Settings::DbModelVersion ) );
 }
 
 std::string Genre::schema( const std::string& tableName, uint32_t dbModel )
@@ -292,8 +294,6 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                             " SET nb_tracks = nb_tracks - 1,"
                                 " is_present = is_present - 1"
                                 " WHERE id_genre = old.genre_id;"
-                        " DELETE FROM " + Table::Name +
-                            " WHERE nb_tracks = 0;"
                    " END";
         case Triggers::UpdateIsPresent:
             assert( dbModel >= 30 );
@@ -322,6 +322,16 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                        "(CASE new.is_present WHEN 0 THEN -1 ELSE 1 END) "
                        "WHERE id_genre = new.genre_id;"
                    " END";
+        case Triggers::DeleteEmpty:
+        {
+            assert( dbModel >= 34 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF nb_tracks ON " + Table::Name +
+                   " WHEN new.nb_tracks = 0"
+                   " BEGIN"
+                        " DELETE FROM " + Table::Name + ";"
+                   " END";
+        }
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -346,6 +356,9 @@ std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateIsPresent:
             assert( dbModel >= 30 );
             return "genre_update_is_present";
+        case Triggers::DeleteEmpty:
+            assert( dbModel >= 34 );
+            return "genre_delete_empty";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -369,7 +382,8 @@ bool Genre::checkDbModel(MediaLibraryPtr ml)
     return check( ml->getConn(), Triggers::InsertFts ) &&
             check( ml->getConn(), Triggers::DeleteFts ) &&
             check( ml->getConn(), Triggers::UpdateOnTrackDelete ) &&
-            check( ml->getConn(), Triggers::UpdateIsPresent );
+            check( ml->getConn(), Triggers::UpdateIsPresent ) &&
+            check( ml->getConn(), Triggers::DeleteEmpty );
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, std::string name )
