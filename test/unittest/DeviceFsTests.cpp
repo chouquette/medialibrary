@@ -267,7 +267,7 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
         auto album = std::static_pointer_cast<Album>( T->ml->createAlbum( "album" ) );
         auto media = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
         auto artist = T->ml->createArtist( "artist" );
-        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), 0 );
+        album->addTrack( std::static_pointer_cast<Media>( media ), 1, 1, artist->id(), nullptr );
         album->setAlbumArtist( artist );
         artist->addMedia( *media );
     }
@@ -373,9 +373,9 @@ static void RemoveArtist( DeviceFsTests* T )
     auto media2 = std::static_pointer_cast<Media>( T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" ) );
     auto media3 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
 
-    album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, artist->id(), 0 );
-    album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, artist->id(), 0 );
-    album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, artist->id(), 0 );
+    album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, artist->id(), nullptr );
+    album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, artist->id(), nullptr );
+    album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, artist->id(), nullptr );
     artist->addMedia( *media1 );
     artist->addMedia( *media2 );
     artist->addMedia( *media3 );
