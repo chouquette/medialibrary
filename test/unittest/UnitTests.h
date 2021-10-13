@@ -35,6 +35,8 @@
 #include "common/util.h"
 #include "mocks/FileSystem.h"
 
+#include <iostream>
+
 template <typename CB = mock::NoopCallback>
 struct UnitTests
 {
@@ -109,7 +111,7 @@ private:
 using Tests = UnitTests<>;
 
 #define INIT_TESTS_COMMON(TestClass, TestSuite) \
-    if ( ac != 2 ) { fprintf(stderr, "Missing test name\n" ); return 1; } \
+    if ( ac != 2 ) { std::cerr << "Missing test name\n"; return 1; } \
     const char* selectedTest = av[1]; \
     auto t = std::make_unique<TestClass>(); \
     auto testSuite = #TestSuite;
@@ -126,7 +128,7 @@ using Tests = UnitTests<>;
                 t->TearDown(); \
                 return 0; \
             } catch ( const TestFailed& tf ) { \
-                fprintf(stderr, "Test %s failed: %s\n", #func, tf.what() ); \
+                std::cerr << "Test " << #func << " failed: " << tf.what() << "\n"; \
             } \
         } \
     } while ( 0 )
