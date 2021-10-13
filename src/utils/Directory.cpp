@@ -220,7 +220,7 @@ bool rmdir( std::string path )
         }
         else
         {
-            auto res = _unlink( fullpath.c_str() );
+            _unlink( fullpath.c_str() );
         }
     } while ( FindNextFile( h, &f ) != 0 );
     auto wPath = charset::ToWide( path.c_str() );
