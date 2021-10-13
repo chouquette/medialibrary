@@ -424,12 +424,10 @@ bool Media::removeFromHistory()
             "last_position = ?, last_time = ?, play_count = ?, "
             "last_played_date = ? WHERE id_media = ?";
     auto dbConn = m_ml->getConn();
-    auto t = dbConn->newTransaction();
 
     if ( sqlite::Tools::executeUpdate( dbConn, req, -1.f, -1, 0, nullptr, m_id ) == false )
         return false;
 
-    t->commit();
     m_lastPosition = -1.f;
     m_lastTime = -1;
     m_lastPlayedDate = 0;
