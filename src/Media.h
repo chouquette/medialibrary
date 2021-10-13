@@ -147,7 +147,7 @@ class Media : public IMedia,
          */
         bool setTypeInternal( Type type );
         virtual SubType subType() const override;
-        void setSubType( SubType subType );
+        bool setSubTypeUnknown();
 
         virtual const std::string& title() const override;
         bool setTitle( const std::string& title, bool forced );

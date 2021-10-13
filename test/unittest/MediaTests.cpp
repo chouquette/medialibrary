@@ -700,20 +700,6 @@ static void SetType( Tests* T )
     ASSERT_TRUE( res );
 }
 
-static void SetSubType( Tests* T )
-{
-    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", IMedia::Type::Video ) );
-    ASSERT_EQ( IMedia::SubType::Unknown, m1->subType() );
-
-    m1->setSubType( IMedia::SubType::Movie );
-    m1->save();
-
-    ASSERT_EQ( IMedia::SubType::Movie, m1->subType() );
-
-    auto m2 = T->ml->media( m1->id() );
-    ASSERT_EQ( IMedia::SubType::Movie, m2->subType() );
-}
-
 static void GetMetadata( Tests* T )
 {
     auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
@@ -1470,7 +1456,6 @@ int main( int ac, char** av )
     ADD_TEST( SortByFileSize );
     ADD_TEST( SortByFilename );
     ADD_TEST( SetType );
-    ADD_TEST( SetSubType );
     ADD_TEST( GetMetadata );
     ADD_TEST( MetadataOverride );
     ADD_TEST( MetadataUnset );

@@ -606,7 +606,6 @@ media_tests = [
   'SortByFileSize',
   'SortByFilename',
   'SetType',
-  'SetSubType',
   'GetMetadata',
   'MetadataOverride',
   'MetadataUnset',

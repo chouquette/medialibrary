@@ -420,7 +420,7 @@ bool Album::removeTrack( Media& media )
      * end up with a genre/album being deleted while there's still a foreign key
      * pointing to it
      */
-    if ( media.markAsAlbumTrack( 0, 0, 0, 0, nullptr ) == false )
+    if ( media.setSubTypeUnknown() == false )
         return false;
 
     static const std::string req = "UPDATE " + Table::Name + " SET "

@@ -835,6 +835,8 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     return std::make_tuple( false, false );
                 }
                 Movie::destroy( m_ml, movie->id() );
+                if ( media->setSubTypeUnknown() == false )
+                    return std::make_tuple( false, false );
                 break;
             }
             case IMedia::SubType::ShowEpisode:
@@ -847,13 +849,14 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
                     return std::make_tuple( false, false );
                 }
                 ShowEpisode::destroy( m_ml, episode->id() );
+                if ( media->setSubTypeUnknown() == false )
+                    return std::make_tuple( false, false );
                 break;
             }
             case IMedia::SubType::Unknown:
                 assert( !"Unreachable" );
                 return std::make_tuple( false, false );
         }
-        media->setSubType( IMedia::SubType::Unknown );
     }
 
     if ( media->save() == false )

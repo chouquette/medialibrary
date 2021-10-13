@@ -1328,29 +1328,21 @@ IMedia::SubType Media::subType() const
     return m_subType;
 }
 
-void Media::setSubType( IMedia::SubType subType )
+bool Media::setSubTypeUnknown()
 {
-    if ( subType == m_subType )
-        return;
-    switch ( m_subType )
-    {
-        case IMedia::SubType::AlbumTrack:
-            m_discNumber = 0;
-            m_trackNumber = 0;
-            m_artistId = 0;
-            m_genreId = 0;
-            break;
-        case IMedia::SubType::ShowEpisode:
-            m_showEpisode = nullptr;
-            break;
-        case IMedia::SubType::Movie:
-            m_movie = nullptr;
-            break;
-        case IMedia::SubType::Unknown:
-            break;
-    }
-    m_subType = subType;
-    m_changed = true;
+    static const std::string req = "UPDATE " + Table::Name + " SET "
+            "subtype = ?, album_id = NULL, track_number = 0, disc_number = 0, "
+            "artist_id = NULL, genre_id = NULL WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, SubType::Unknown,
+            m_id ) == false )
+        return false;
+    m_subType = SubType::Unknown;
+    m_albumId = 0;
+    m_trackNumber = 0;
+    m_discNumber = 0;
+    m_artistId = 0;
+    m_genreId = 0;
+    return true;
 }
 
 const std::string& Media::title() const
