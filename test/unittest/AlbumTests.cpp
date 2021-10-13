@@ -57,7 +57,6 @@ static void AddTrack( Tests* T )
     auto a = T->ml->createAlbum( "albumtag" );
     auto f = std::static_pointer_cast<Media>( T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     auto res = a->addTrack( f, 10, 0, 0, nullptr );
-    f->save();
     ASSERT_TRUE( res );
 
     auto tracks = a->tracks( nullptr )->all();
@@ -73,12 +72,10 @@ static void RemoveTrack( Tests* T )
     auto a = T->ml->createAlbum( "albumtag" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     auto res = a->addTrack( m, 10, 0, 0, nullptr );
-    m->save();
     ASSERT_TRUE( res );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     res = a->addTrack( m2, 11, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    m2->save();
 
     auto tracks = a->tracks( nullptr )->all();
     ASSERT_EQ( tracks.size(), 2u );
@@ -97,7 +94,6 @@ static void NbTrack( Tests* T )
         auto f = std::static_pointer_cast<Media>(
                     T->ml->addMedia( "track" + std::to_string(i) + ".mp3", IMedia::Type::Audio ) );
         auto res = a->addTrack( f, i, i, 0, nullptr );
-        f->save();
         ASSERT_TRUE( res );
     }
     auto tracks = a->tracks( nullptr )->all();
@@ -118,7 +114,6 @@ static void TracksByGenre( Tests* T )
         auto f = std::static_pointer_cast<Media>(
                     T->ml->addMedia( "track" + std::to_string(i) + ".mp3", IMedia::Type::Audio ) );
         auto res = a->addTrack( f, i, i, 0, i <= 5 ? g.get() : nullptr );
-        f->save();
         ASSERT_TRUE( res );
     }
     auto tracksQuery = a->tracks( nullptr, nullptr );
@@ -207,7 +202,6 @@ static void FetchAlbumFromTrack( Tests* T )
                 T->ml->addMedia( "file.mp3", IMedia::Type::Audio ) );
     auto res = a->addTrack( f, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f->save();
 
     f = T->ml->media( f->id() );
     ASSERT_NON_NULL( f );
@@ -228,12 +222,10 @@ static void Artists( Tests* T )
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media1.mp3", IMedia::Type::Audio ) );
     album->addTrack( m1, 1, 0, artist1->id(), nullptr );
-    m1->save();
 
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     album->addTrack( m2, 2, 0, artist2->id(), nullptr );
-    m2->save();
 
     QueryParameters params { SortingCriteria::Default, false };
     auto query = album->artists( &params );
@@ -299,16 +291,12 @@ static void SortAlbumThenArtist( Tests* T )
 
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     albumOttersO->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     albumPangolinsP->addTrack( m2, 1, 0, 0, nullptr );
-    m2->save();
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     albumOttersS->addTrack( m3, 1, 0, 0, nullptr );
-    m3->save();
     auto m4 = std::static_pointer_cast<Media>( T->ml->addMedia( "media4.mp3", IMedia::Type::Audio ) );
     albumPangolinsS->addTrack( m4, 1, 0, 0, nullptr );
-    m3->save();
 
     QueryParameters params { SortingCriteria::Alpha, false };
     auto albums = T->ml->albums( &params )->all();
@@ -333,10 +321,8 @@ static void SearchByTitle( Tests* T )
     auto a2 = T->ml->createAlbum( "pangolins of fire" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a1->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     a2->addTrack( m2, 1, 0, 0, nullptr );
-    m2->save();
 
     auto albums = T->ml->searchAlbums( "otte", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
@@ -347,7 +333,6 @@ static void SearchByArtist( Tests* T )
     auto a = T->ml->createAlbum( "sea otters" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto artist = T->ml->createArtist( "pangolins" );
     a->setAlbumArtist( artist );
 
@@ -360,7 +345,6 @@ static void SearchNoDuplicate( Tests* T )
     auto a = T->ml->createAlbum( "sea otters" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto artist = T->ml->createArtist( "otters" );
     a->setAlbumArtist( artist );
 
@@ -375,7 +359,6 @@ static void SearchNoUnknownAlbum( Tests* T )
     ASSERT_TRUE( album->isUnknownAlbum() );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     album->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     ASSERT_NE( nullptr, album );
 
     auto albums = T->ml->searchAlbums( "otters", nullptr )->all();
@@ -388,7 +371,6 @@ static void SearchAfterDeletion( Tests* T )
     auto a = T->ml->createAlbum( "sea otters" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto albums = T->ml->searchAlbums( "sea", nullptr )->all();
     ASSERT_EQ( 1u, albums.size() );
 
@@ -403,7 +385,6 @@ static void SearchAfterArtistUpdate( Tests* T )
     auto a = T->ml->createAlbum( "sea otters" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     auto artist = T->ml->createArtist( "pangolin of fire" );
     auto artist2 = T->ml->createArtist( "pangolin of ice" );
     a->setAlbumArtist( artist );
@@ -429,7 +410,6 @@ static void AutoDelete( Tests* T )
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     auto res = a->addTrack( m, 1, 1, 0, nullptr );
     ASSERT_TRUE( res );
-    m->save();
 
     auto album = T->ml->album( a->id() );
     ASSERT_NE( nullptr, album );
@@ -449,8 +429,6 @@ static void SortTracks( Tests* T )
     ASSERT_TRUE( res );
     res = a->addTrack( m2, 2, 1, 0, nullptr );
     ASSERT_TRUE( res );
-    m1->save();
-    m2->save();
 
     // Default order is by disc number & track number
     auto tracks = a->tracks( nullptr )->all();
@@ -478,22 +456,18 @@ static void Sort( Tests* T )
     auto a1 = T->ml->createAlbum( "A" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a1->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     a1->setReleaseYear( 1000, false );
     auto a2 = T->ml->createAlbum( "B" );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     a2->addTrack( m2, 1, 0, 0, nullptr );
-    m2->save();
     a2->setReleaseYear( 2000, false );
     auto a3 = T->ml->createAlbum( "C" );
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     a3->addTrack( m3, 1, 0, 0, nullptr );
     m3->setReleaseDate( 1000 );
-    m3->save();
     auto m4 = std::static_pointer_cast<Media>( T->ml->addMedia( "media4.mp3", IMedia::Type::Audio ) );
     a3->addTrack( m4, 2, 0, 0, nullptr );
     m4->setReleaseDate( 995 );
-    m4->save();
     a3->setReleaseYear( 1000, false );
 
     QueryParameters params { SortingCriteria::ReleaseDate, false };
@@ -544,11 +518,9 @@ static void SortByPlayCount( Tests* T )
     auto f1 = std::static_pointer_cast<Media>( T->ml->addMedia( "first.opus", IMedia::Type::Audio ) );
     auto res = a1->addTrack( f1, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f1->save();
     auto f2 = std::static_pointer_cast<Media>( T->ml->addMedia( "second.opus", IMedia::Type::Audio ) );
     res = a1->addTrack( f2, 2, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f2->save();
 
     ASSERT_TRUE( f1->setPlayCount( 2 ) );
 
@@ -558,7 +530,6 @@ static void SortByPlayCount( Tests* T )
     auto f3 = std::static_pointer_cast<Media>( T->ml->addMedia( "third.opus", IMedia::Type::Audio ) );
     res = a2->addTrack( f3, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f3->save();
 
     ASSERT_TRUE( f3->setPlayCount( 4 ) );
 
@@ -566,7 +537,6 @@ static void SortByPlayCount( Tests* T )
     auto f4 = std::static_pointer_cast<Media>( T->ml->addMedia( "fourth.opus", IMedia::Type::Audio ) );
     res = a3->addTrack( f4, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f4->save();
 
     ASSERT_TRUE( f4->setPlayCount( 1 ) );
 
@@ -574,7 +544,6 @@ static void SortByPlayCount( Tests* T )
     auto f5 = std::static_pointer_cast<Media>( T->ml->addMedia( "fifth.opus", IMedia::Type::Audio ) );
     res = a4->addTrack( f5, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    f5->save();
 
     ASSERT_TRUE( f5->setPlayCount( 1 ) );
 
@@ -620,17 +589,14 @@ static void SortByArtist( Tests* T )
     auto a1 = T->ml->createAlbum( "C" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a1->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     a1->setAlbumArtist( artist1 );
     auto a2 = T->ml->createAlbum( "B" );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     a2->addTrack( m2, 1, 0, 0, nullptr );
-    m2->save();
     a2->setAlbumArtist( artist2 );
     auto a3 = T->ml->createAlbum( "A" );
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     a3->addTrack( m3, 1, 0, 0, nullptr );
-    m3->save();
     a3->setAlbumArtist( artist1 );
 
     QueryParameters params { SortingCriteria::Artist, false };
@@ -663,19 +629,16 @@ static void SortByNonSensical( Tests* T )
     auto a1 = T->ml->createAlbum( "A" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     a1->addTrack( m, 1, 0, 0, nullptr );
-    m->save();
     a1->setAlbumArtist( artist1 );
 
     auto a2 = T->ml->createAlbum( "B" );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", IMedia::Type::Audio ) );
     a2->addTrack( m2, 1, 0, 0, nullptr );
-    m2->save();
     a2->setAlbumArtist( artist2 );
 
     auto a3 = T->ml->createAlbum( "C" );
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", IMedia::Type::Audio ) );
     a3->addTrack( m3, 1, 0, 0, nullptr );
-    m3->save();
     a3->setAlbumArtist( artist1 );
 
     QueryParameters params { static_cast<SortingCriteria>( -1 ), false };
@@ -701,17 +664,13 @@ static void Duration( Tests* T )
 
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     m->setDuration( 100 );
-    m->save();
     auto res = a->addTrack( m, 1, 1, 0, nullptr );
-    m->save();
     ASSERT_TRUE( res );
     ASSERT_EQ( 100u, a->duration() );
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     m2->setDuration( 200 );
-    m2->save();
     res = a->addTrack( m2, 1, 1, 0, nullptr );
-    m2->save();
     ASSERT_TRUE( res );
     ASSERT_EQ( 300u, a->duration() );
 
@@ -719,7 +678,6 @@ static void Duration( Tests* T )
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "track3.mp3", IMedia::Type::Audio ) );
     res = a->addTrack( m3, 1, 1, 0, nullptr );
     ASSERT_TRUE( res );
-    m3->save();
     ASSERT_EQ( 300u, a->duration() );
 
 
@@ -771,16 +729,13 @@ static void SearchTracks( Tests* T )
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     m1->setTitle( "otter otter run run", true );
     alb->addTrack( m1, 1, 1, 0, nullptr );
-    m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
     m2->setTitle( "weasel weasel", true );
     alb->addTrack( m2, 1, 1, 0, nullptr );
-    m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "random media.aac", IMedia::Type::Audio ) );
     m3->setTitle( "otters are cute but not on this album", true );
-    m3->save();
 
     auto allMedia = T->ml->searchMedia( "otter", nullptr )->all();
     ASSERT_EQ( 2u, allMedia.size() );
@@ -815,29 +770,21 @@ static void SortByDuration( Tests* T )
                 T->ml->addMedia( "short1.mp3", IMedia::Type::Audio ) );
     // The media duration needs to be known when inserting an album track
     short1->setDuration( 123 );
-    short1->save();
     shortAlb->addTrack( short1, 1, 0, 0, nullptr );
-    short1->save();
     auto short2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "short2.mp3", IMedia::Type::Audio ) );
     short2->setDuration( 456 );
-    short2->save();
     shortAlb->addTrack( short2, 2, 0, 0, nullptr );
-    short2->save();
 
     auto longAlb = T->ml->createAlbum( "Long" );
     auto long1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "long1.mp3", IMedia::Type::Audio ) );
     long1->setDuration( 999999 );
-    long1->save();
     longAlb->addTrack( long1, 1, 0, 0, nullptr );
-    long1->save();
     auto long2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "long2.mp3", IMedia::Type::Audio ) );
     long2->setDuration( 888888 );
-    long2->save();
     longAlb->addTrack( long2, 2, 0, 0, nullptr );
-    long2->save();
 
     QueryParameters params{ SortingCriteria::Duration, false };
     auto albumsQuery = T->ml->albums( &params );
@@ -893,10 +840,8 @@ static void SortByInsertionDate( Tests* T )
     ASSERT_TRUE( res );
 
     alb1->addTrack( m1, 1, 1, 0, nullptr );
-    res = m1->save();
     ASSERT_TRUE( res );
     alb2->addTrack( m2, 1, 1, 0, nullptr );
-    res = m2->save();
     ASSERT_TRUE( res );
 
     QueryParameters params{};
@@ -920,8 +865,7 @@ static void SortByInsertionDate( Tests* T )
     // Now insert a new track to album2 and force its insertion date before album1's media
     res = T->ml->setMediaInsertionDate( m3->id(), 12 );
     ASSERT_TRUE( res );
-    alb1->addTrack( m3, 2, 1, 0, nullptr );
-    res = m3->save();
+    res = alb1->addTrack( m3, 2, 1, 0, nullptr );
     ASSERT_TRUE( res );
 
     params.desc = false;

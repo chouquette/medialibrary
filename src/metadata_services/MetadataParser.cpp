@@ -508,7 +508,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     {
         // How do we know if it's a movie or a random video?
     }
-    media->save();
     t->commit();
     auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
     // before relocating the thumbnail of a video media, bear in mind that the
@@ -859,8 +858,6 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
         }
     }
 
-    if ( media->save() == false )
-        return std::make_tuple( false, false );
     t->commit();
     item.setMedia( std::move( media ) );
     return std::make_tuple( true, needRescan );
@@ -900,8 +897,6 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
 
 Status MetadataAnalyzer::parseAudioFile( IItem& item, Cache& cache )
 {
-    auto media = static_cast<Media*>( item.media().get() );
-
     auto genre = handleGenre( item );
     auto artists = findOrCreateArtist( item );
     if ( artists.first == nullptr && artists.second == nullptr )
@@ -963,7 +958,6 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item, Cache& cache )
         return Status::Completed;
     }
 
-    media->save();
     link( item, *album, std::move( artists.first ), std::move( artists.second ),
           newAlbum, thumbnail );
     t->commit();

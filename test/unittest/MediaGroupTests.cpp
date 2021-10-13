@@ -1011,7 +1011,6 @@ static void UpdateDuration( Tests* T )
 
     /* Insert a media with an already known duration */
     m1->setDuration( 123 );
-    m1->save();
     auto res = mg->add( *m1 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 123, mg->duration() );
@@ -1034,7 +1033,6 @@ static void UpdateDuration( Tests* T )
     ASSERT_EQ( 123, mg->duration() );
 
     m2->setDuration( 999 );
-    m2->save();
 
     mg = T->ml->mediaGroup( mg->id() );
     ASSERT_EQ( 123 + 999, mg->duration() );
@@ -1085,14 +1083,12 @@ static void OrderByDuration( Tests* T )
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     m1->setDuration( 999 );
-    m1->save();
     auto mg1 = T->ml->createMediaGroup( std::vector<int64_t>{ m1->id() } );
     mg1->rename( "a" );
 
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     m2->setDuration( 111 );
-    m2->save();
     auto mg2 = T->ml->createMediaGroup( std::vector<int64_t>{ m2->id() } );
     mg2->rename( "z" );
 

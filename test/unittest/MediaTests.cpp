@@ -78,7 +78,6 @@ static void Duration( Tests* T )
     int64_t d = int64_t(1) << 40;
 
     f->setDuration( d );
-    f->save();
     ASSERT_EQ( f->duration(), d );
 
     auto f2 = T->ml->media( f->id() );
@@ -93,7 +92,6 @@ static void GetThumbnail( Tests* T )
     std::string newThumbnail( "file:///path/to/thumbnail" );
 
     f->setThumbnail( newThumbnail, ThumbnailSizeType::Thumbnail );
-    f->save();
     ASSERT_EQ( f->thumbnailMrl( ThumbnailSizeType::Thumbnail ), newThumbnail );
 
     auto f2 = T->ml->media( f->id() );
@@ -105,11 +103,9 @@ static void SetProgress( Tests* T )
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media1.mkv", IMedia::Type::Video ) );
     m1->setDuration( 60 * 30 * 1000 ); // 30min
-    m1->save();
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     m2->setDuration( 5 * 3600 * 1000 ); // 5h
-    m2->save();
 
     ASSERT_EQ( -1.f, m1->lastPosition() );
     ASSERT_EQ( -1.f, m2->lastPosition() );
@@ -264,9 +260,8 @@ static void Search( Tests* T )
 {
     for ( auto i = 1u; i <= 10u; ++i )
     {
-        auto m = std::static_pointer_cast<Media>(
-                    T->ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-        m->save();
+        T->ml->addMedia( "track " + std::to_string( i ) + ".mp3",
+                         IMedia::Type::Audio );
     }
 
     auto media = T->ml->searchMedia( "tra", nullptr )->all();
@@ -289,7 +284,6 @@ static void SearchAndSort( Tests* T )
         auto m = std::static_pointer_cast<Media>(
                     T->ml->addMedia( "track " + std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
         m->setDuration( 3 - i );
-        m->save();
     }
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia(
                     "this pattern doesn't match.mp3", IMedia::Type::Audio ) );
@@ -317,7 +311,6 @@ static void SearchAfterEdit( Tests* T )
     ASSERT_EQ( 1u, media.size() );
 
     m->setTitle( "otters are awesome", true );
-    m->save();
 
     media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 0u, media.size() );
@@ -394,7 +387,6 @@ static void SearchTracks( Tests* T )
        auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track " +
                         std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
        a->addTrack( m, i, 1, 0, nullptr );
-       m->save();
     }
     auto tracks = T->ml->searchMedia( "tra", nullptr )->all();
     ASSERT_EQ( 10u, tracks.size() );
@@ -413,7 +405,6 @@ static void SearchWeirdPatterns( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
-    m->save();
     // All we care about is this not crashing
     // https://code.videolan.org/videolan/medialibrary/issues/116
     auto media = T->ml->searchMedia( "@*\"", nullptr )->all();
@@ -518,7 +509,6 @@ static void RemoveFromHistory( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     m->setDuration( 100 );
-    m->save();
 
     auto history = T->ml->history()->all();
     ASSERT_EQ( 0u, history.size() );
@@ -549,7 +539,6 @@ static void SetReleaseDate( Tests* T )
 
     ASSERT_EQ( m->releaseDate(), 0u );
     m->setReleaseDate( 1234 );
-    m->save();
     ASSERT_EQ( m->releaseDate(), 1234u );
 
     auto m2 = T->ml->media( m->id() );
@@ -560,15 +549,12 @@ static void SortByAlpha( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", Media::Type::Audio ) );
     m1->setTitle( "Abcd", true );
-    m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", Media::Type::Audio ) );
     m2->setTitle( "Zyxw", true );
-    m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", Media::Type::Audio) );
     m3->setTitle( "afterA-beforeZ", true );
-    m3->save();
 
     QueryParameters params { SortingCriteria::Alpha, false };
     auto media = T->ml->audioFiles( &params )->all();
@@ -589,15 +575,12 @@ static void SortByReleaseDate( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", Media::Type::Audio ) );
     m1->setReleaseDate( 1111 );
-    m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", Media::Type::Audio ) );
     m2->setReleaseDate( 3333 );
-    m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", Media::Type::Audio ) );
     m3->setReleaseDate( 2222 );
-    m3->save();
 
     QueryParameters params { SortingCriteria::ReleaseDate, false };
     auto media = T->ml->audioFiles( &params )->all();
@@ -1126,10 +1109,6 @@ static void SortByAlbum( Tests* T )
     // Album1: [m2; m1]
     // Album2: [m3]
 
-    m1->save();
-    m2->save();
-    m3->save();
-
     auto queryParams = QueryParameters{};
     queryParams.desc = false;
     queryParams.sort = SortingCriteria::Album;
@@ -1197,10 +1176,6 @@ static void SortByTrackId( Tests* T )
     album1->addTrack( m1, 3, 0, 0, nullptr );
     album2->addTrack( m2, 2, 0, 0, nullptr );
     album3->addTrack( m3, 1, 0, 0, nullptr );
-
-    m1->save();
-    m2->save();
-    m3->save();
 
     QueryParameters params;
     params.sort = SortingCriteria::TrackId;
@@ -1277,11 +1252,9 @@ static void FetchInProgress( Tests* T )
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     m1->setDuration( 10000 );
-    m1->save();
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "media.mp3", IMedia::Type::Audio ) );
     m2->setDuration( 10000 );
-    m2->save();
 
     auto m = T->ml->inProgressMedia( IMedia::Type::Unknown, nullptr )->all();
     ASSERT_EQ( 0u, m.size() );
@@ -1331,7 +1304,6 @@ static void ConvertToExternal( Tests* T )
                 T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     auto movie = T->ml->createMovie( *m1 );
     ASSERT_NON_NULL( movie );
-    m1->save();
 
     auto videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 2u, videos.size() );

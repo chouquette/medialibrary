@@ -36,7 +36,6 @@ static void Create( Tests *T )
     auto album = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto res = album->addTrack( m, 1, 10, 0, nullptr );
-    m->save();
     ASSERT_TRUE( res );
     ASSERT_EQ( 10u, m->discNumber() );
     ASSERT_EQ( nullptr, m->artist() );
@@ -55,7 +54,6 @@ static void GetAlbum( Tests *T )
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
     auto res = album->addTrack( m, 1, 0, 0, nullptr );
     ASSERT_TRUE( res );
-    m->save();
 
     auto albumFromTrack = m->album();
     ASSERT_EQ( album->id(), albumFromTrack->id() );

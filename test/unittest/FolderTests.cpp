@@ -59,17 +59,14 @@ static void enforceFakeMediaTypes( MediaLibraryTester* ml )
     auto media = std::static_pointer_cast<Media>( ml->media(
                                 mock::FileSystemFactory::Root + "video.avi" ) );
     media->setType( IMedia::Type::Video );
-    media->save();
 
     media = std::static_pointer_cast<Media>( ml->media(
                                     mock::FileSystemFactory::Root + "audio.mp3" ) );
     media->setType( IMedia::Type::Audio );
-    media->save();
 
     media = std::static_pointer_cast<Media>( ml->media(
                                     mock::FileSystemFactory::SubFolder + "subfile.mp4" ) );
     media->setType( IMedia::Type::Video );
-    media->save();
 }
 
 static void Add( FolderTests* T )
@@ -591,7 +588,6 @@ static void NbMedia( FolderTests* T )
     ASSERT_EQ( 1u, videoMedia.size() );
     auto media = std::static_pointer_cast<Media>( videoMedia[0] );
     media->setType( IMedia::Type::Audio );
-    media->save();
 
     videoMedia = root->media( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 0u, videoMedia.size() );
@@ -602,7 +598,6 @@ static void NbMedia( FolderTests* T )
     ASSERT_EQ( 2u, root->media( IMedia::Type::Audio, nullptr )->count() );
 
     media->setType( IMedia::Type::Video );
-    media->save();
 
     videoMedia = root->media( IMedia::Type::Video, nullptr )->all();
     ASSERT_EQ( 1u, videoMedia.size() );
@@ -864,7 +859,6 @@ static void ListSubFolders( FolderTests* T )
 
     auto media = std::static_pointer_cast<Media>( sfMedia[0] );
     media->setType( IMedia::Type::Video );
-    media->save();
 
     // Check fetching by type now
     ASSERT_EQ( 0u, rootSubFolders[0]->media( IMedia::Type::Audio, nullptr )->count() );
@@ -894,12 +888,10 @@ static void SearchFolders( FolderTests* T )
     auto media = std::static_pointer_cast<Media>(
                                 T->ml->media( newSubFolder + "some file.avi" ) );
     media->setType( IMedia::Type::Video );
-    media->save();
 
     media = std::static_pointer_cast<Media>(
                         T->ml->media( newSubFolder + "some other file.avi" ) );
     media->setType( IMedia::Type::Video );
-    media->save();
 
     QueryParameters params{};
     params.sort = SortingCriteria::NbMedia;

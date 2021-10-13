@@ -263,8 +263,6 @@ class Media : public IMedia,
                              int64_t folderId );
         bool convertToExternal();
 
-        bool save();
-
         std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                        bool isFolderFsRemovable, IFile::Type type );
         virtual FilePtr addFile( const std::string& mrl, IFile::Type fileType ) override;
@@ -421,7 +419,6 @@ private:
         mutable std::vector<FilePtr> m_files;
         mutable Metadata m_metadata;
         mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
-        bool m_changed;
 
         friend Media::Table;
 };

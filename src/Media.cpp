@@ -98,7 +98,6 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
-    , m_changed( false )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -133,7 +132,6 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
-    , m_changed( false )
 {
 }
 
@@ -166,7 +164,6 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
-    , m_changed( false )
 {
 }
 
@@ -954,32 +951,6 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType siz
     return setThumbnail( std::make_shared<Thumbnail>( m_ml, thumbnailMrl,
                                                       Thumbnail::Origin::UserProvided,
                                                       sizeType, false ) );
-}
-
-bool Media::save()
-{
-    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "type = ?, subtype = ?, duration = ?, release_date = ?,"
-            "title = ?, device_id = ?, folder_id = ?, import_type = ?,"
-            "track_number = ?, album_id = ?, disc_number = ?, artist_id = ?, "
-            "genre_id = ? WHERE id_media = ?";
-    if ( m_changed == false )
-        return true;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, m_type, m_subType, m_duration,
-                                       m_releaseDate, m_title,
-                                       sqlite::ForeignKey{ m_deviceId },
-                                       sqlite::ForeignKey{ m_folderId },
-                                       m_importType, m_trackNumber,
-                                       sqlite::ForeignKey{ m_albumId },
-                                       m_discNumber,
-                                       sqlite::ForeignKey{ m_artistId },
-                                       sqlite::ForeignKey{ m_genreId },
-                                       m_id ) == false )
-    {
-        return false;
-    }
-    m_changed = false;
-    return true;
 }
 
 std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, int64_t parentFolderId,

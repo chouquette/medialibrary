@@ -479,16 +479,13 @@ static void SearchMedia( PlaylistTests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "m1.mp3", IMedia::Type::Audio ) );
     m1->setTitle( "otter", true );
-    m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "m2.mp3", IMedia::Type::Audio ) );
     // Won't match since it's not on the beginning of a word
     m2->setTitle( "ENOOTTER", true );
-    m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "m3.mp3", IMedia::Type::Audio ) );
     m3->setTitle( "otter otter otter", true );
-    m3->save();
 
     T->pl->append( *m1 );
     T->pl->append( *m2 );
@@ -779,8 +776,7 @@ static void Duration( PlaylistTests* T )
     ASSERT_TRUE( res );
 
     // And update its duration
-    m2->setDuration( 12 );
-    res = m2->save();
+    res = m2->setDuration( 12 );
     ASSERT_TRUE( res );
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
@@ -788,8 +784,7 @@ static void Duration( PlaylistTests* T )
 
     // Ensure that if for whatever reason the duration goes back to unknown, we
     // don't end up adding '-1' to the playlist duration
-    m2->setDuration( -1 );
-    res = m2->save();
+    res = m2->setDuration( -1 );
     ASSERT_TRUE( res );
 
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );

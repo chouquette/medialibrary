@@ -77,47 +77,38 @@ struct DeviceFsTests : public UnitTests<mock::WaitForDiscoveryComplete>
         auto media = std::static_pointer_cast<Media>( ml->media(
                                     mock::FileSystemFactory::Root + "video.avi" ) );
         media->setType( IMedia::Type::Video );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         mock::FileSystemFactory::Root + "audio.mp3" ) );
         media->setType( IMedia::Type::Audio );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         mock::FileSystemFactory::SubFolder + "subfile.mp4" ) );
         media->setType( IMedia::Type::Video );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
         media->setType( IMedia::Type::Audio );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" ) );
         media->setType( IMedia::Type::Audio );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablefile3.mp3" ) );
         media->setType( IMedia::Type::Audio );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablefile4.mp3" ) );
         media->setType( IMedia::Type::Audio );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" ) );
         media->setType( IMedia::Type::Video );
-        media->save();
 
         media = std::static_pointer_cast<Media>( ml->media(
                                         DeviceFsTests::RemovableDeviceMountpoint + "removablevideo2.mkv" ) );
         media->setType( IMedia::Type::Video );
-        media->save();
     }
 };
 
@@ -294,10 +285,6 @@ static void RemoveAlbumAndArtist( DeviceFsTests* T )
         artist->addMedia( *media2 );
         artist->addMedia( *media3 );
         artist->addMedia( *media4 );
-        media1->save();
-        media2->save();
-        media3->save();
-        media4->save();
     }
 
     auto res = Artist::checkDBConsistency( T->ml.get() );
@@ -374,11 +361,8 @@ static void RemoveArtist( DeviceFsTests* T )
     auto media3 = std::static_pointer_cast<Media>( T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
 
     album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, artist->id(), nullptr );
-    media1->save();
     album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, artist->id(), nullptr );
-    media2->save();
     album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, artist->id(), nullptr );
-    media3->save();
     artist->addMedia( *media1 );
     artist->addMedia( *media2 );
     artist->addMedia( *media3 );
@@ -450,9 +434,7 @@ static void PartialAlbumRemoval( DeviceFsTests* T )
                     T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile2.mp3" ) );
         auto newArtist = T->ml->createArtist( "artist" );
         album->addTrack( media, 1, 1, newArtist->id(), nullptr );
-        media->save();
         album->addTrack( media2, 2, 1, newArtist->id(), nullptr );
-        media2->save();
         album->setAlbumArtist( newArtist );
         newArtist->addMedia( static_cast<Media&>( *media ) );
         newArtist->addMedia( static_cast<Media&>( *media2 ) );
@@ -579,11 +561,9 @@ static void RemoveShowEpisodes( DeviceFsTests* T )
     auto media1 = std::static_pointer_cast<Media>(
                 T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" ) );
     show1->addEpisode( *media1, 1, 1, "episode title" );
-    media1->save();
     auto media2 = std::static_pointer_cast<Media>(
                 T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo2.mkv" ) );
     show1->addEpisode( *media2, 1, 2, "episode title" );
-    media2->save();
 
     auto showsQuery = T->ml->shows( nullptr );
     ASSERT_EQ( 1u, showsQuery->count() );
@@ -614,12 +594,10 @@ static void PartialRemoveShowEpisodes( DeviceFsTests* T )
     auto media1 = std::static_pointer_cast<Media>(
                 T->ml->media( mock::FileSystemFactory::Root + "video.avi" ) );
     show1->addEpisode( *media1, 1, 1, "episode title" );
-    media1->save();
 
     auto media2 = std::static_pointer_cast<Media>(
                 T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablevideo.mkv" ) );
     show1->addEpisode( *media2, 1, 2, "episode title" );
-    media2->save();
 
     auto shows = T->ml->shows( nullptr )->all();
     ASSERT_EQ( 1u, shows.size() );
@@ -783,9 +761,6 @@ static void GenrePresence( DeviceFsTests* T )
     album->addTrack( std::static_pointer_cast<Media>( media1 ), 1, 1, 0, genre.get() );
     album->addTrack( std::static_pointer_cast<Media>( media2 ), 2, 1, 0, genre.get() );
     album->addTrack( std::static_pointer_cast<Media>( media3 ), 3, 1, 0, genre.get() );
-    media1->save();
-    media2->save();
-    media3->save();
 
     /* We should now have 3 tracks in the genre. 1 non-removable and 2 removable */
     genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
