@@ -395,7 +395,7 @@ static void SearchTracks( Tests* T )
     {
        auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "track " +
                         std::to_string( i ) + ".mp3", IMedia::Type::Audio ) );
-       a->addTrack( m, i, 1, 0, 0 );
+       a->addTrack( m, i, 1, 0, nullptr );
        m->save();
     }
     auto tracks = T->ml->searchMedia( "tra", nullptr )->all();
