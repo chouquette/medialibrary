@@ -63,7 +63,7 @@ if cxx.compiles('''#include <mutex>
     int main() { std::mutex m; }''')
         cdata.set('CXX11_MUTEX', 1)
 endif
-    
+
 message('Checking for C++11 thread_local support')
 if cxx.compiles('thread_local int seaOtter = 0; int main() {}')
         cdata.set('CXX11_THREAD_LOCAL', 1)
