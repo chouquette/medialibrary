@@ -24,6 +24,17 @@ medialib_minor_version = ver_arr[1]
 medialib_micro_version = ver_arr[2]
 
 cxx = meson.get_compiler('cpp')
+
+extra_warnings = [
+  '-Wzero-as-null-pointer-constant'
+]
+
+foreach w : extra_warnings
+  if cxx.has_argument(w)
+    add_project_arguments(w, language: 'cpp')
+  endif
+endforeach
+
 cdata = configuration_data()
 
 cdata.set('_FILE_OFFSET_BITS', 64)
