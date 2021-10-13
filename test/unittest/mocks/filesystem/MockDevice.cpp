@@ -106,7 +106,7 @@ void Device::setMountpointRoot( const std::string& mrl, std::shared_ptr<Director
     auto relMrl = relativeMrl( mrl );
     // m_root is already a mountpoint, we can't add a mountpoint to it.
     assert( relMrl.empty() == false );
-    m_root->setMountpointRoot( relMrl, root );
+    m_root->setMountpointRoot( relMrl, std::move( root ) );
 }
 
 void Device::invalidateMountpoint( const std::string& mrl )
