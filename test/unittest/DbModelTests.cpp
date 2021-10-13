@@ -242,7 +242,7 @@ struct DbModel : public Tests
         }
     }
 
-    void CheckTriggers( std::vector<const char*> expected )
+    void CheckTriggers( const std::vector<const char*>& expected )
     {
         medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT name FROM sqlite_master WHERE type='trigger' "
@@ -262,7 +262,7 @@ struct DbModel : public Tests
         ASSERT_TRUE( stmt.row() == nullptr );
     }
 
-    void CheckIndexes( std::vector<const char*> expected )
+    void CheckIndexes( const std::vector<const char*>& expected )
     {
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
@@ -282,7 +282,7 @@ struct DbModel : public Tests
         ASSERT_TRUE( stmt.row() == nullptr );
     }
 
-    void CheckTables( std::vector<const char*> expected )
+    void CheckTables( const std::vector<const char*>& expected )
     {
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
