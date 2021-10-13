@@ -164,12 +164,7 @@ class Media : public IMedia,
         /// This is only intended for unit tests purposes
         ///
         bool isForcedTitle() const;
-        ///
-        /// \brief setTitleBuffered Mark the media as changed but doesn't save the change in DB
-        /// Querying the title after this method will return the new title, but it won't appear in DB
-        /// until save() is called
-        ///
-        void setTitleBuffered( const std::string& title );
+
         // Should only be used by 13->14 migration
         bool setFileName( std::string fileName );
         bool markAsAlbumTrack( int64_t albumId, uint32_t trackNb,

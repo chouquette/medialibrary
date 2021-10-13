@@ -316,7 +316,7 @@ static void SearchAfterEdit( Tests* T )
     auto media = T->ml->searchMedia( "media", nullptr )->all();
     ASSERT_EQ( 1u, media.size() );
 
-    m->setTitleBuffered( "otters are awesome" );
+    m->setTitle( "otters are awesome", true );
     m->save();
 
     media = T->ml->searchMedia( "media", nullptr )->all();
@@ -559,15 +559,15 @@ static void SetReleaseDate( Tests* T )
 static void SortByAlpha( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", Media::Type::Audio ) );
-    m1->setTitleBuffered( "Abcd" );
+    m1->setTitle( "Abcd", true );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mp3", Media::Type::Audio ) );
-    m2->setTitleBuffered( "Zyxw" );
+    m2->setTitle( "Zyxw", true );
     m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mp3", Media::Type::Audio) );
-    m3->setTitleBuffered( "afterA-beforeZ" );
+    m3->setTitle( "afterA-beforeZ", true );
     m3->save();
 
     QueryParameters params { SortingCriteria::Alpha, false };
@@ -1253,17 +1253,6 @@ static void ForceTitle( Tests* T )
     // Now set a non forced title, it should be rejected
     std::string rejectedTitle{ "another title" };
     res = m->setTitle( rejectedTitle, false );
-    ASSERT_TRUE( res );
-    ASSERT_NE( rejectedTitle, m->title() );
-    ASSERT_EQ( title, m->title() );
-
-    m = T->ml->media( m->id() );
-    ASSERT_NE( rejectedTitle, m->title() );
-    ASSERT_EQ( title, m->title() );
-
-    // Check that setTitleBuffered is respecting forced title
-    m->setTitleBuffered( rejectedTitle );
-    res = m->save();
     ASSERT_TRUE( res );
     ASSERT_NE( rejectedTitle, m->title() );
     ASSERT_EQ( title, m->title() );

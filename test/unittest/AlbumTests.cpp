@@ -769,17 +769,17 @@ static void SearchTracks( Tests* T )
     auto alb = T->ml->createAlbum( "Mustelidae" );
 
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", IMedia::Type::Audio ) );
-    m1->setTitleBuffered( "otter otter run run" );
+    m1->setTitle( "otter otter run run", true );
     alb->addTrack( m1, 1, 1, 0, nullptr );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
-    m2->setTitleBuffered( "weasel weasel" );
+    m2->setTitle( "weasel weasel", true );
     alb->addTrack( m2, 1, 1, 0, nullptr );
     m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "random media.aac", IMedia::Type::Audio ) );
-    m3->setTitleBuffered( "otters are cute but not on this album" );
+    m3->setTitle( "otters are cute but not on this album", true );
     m3->save();
 
     auto allMedia = T->ml->searchMedia( "otter", nullptr )->all();

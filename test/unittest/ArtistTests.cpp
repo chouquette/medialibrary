@@ -650,7 +650,7 @@ static void SearchTracks( Tests* T )
     auto artist1 = T->ml->createArtist( "artist" );
     auto album1 = T->ml->createAlbum( "album" );
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "track1.mp3", Media::Type::Audio ) );
-    m1->setTitleBuffered( "sea otter" );
+    m1->setTitle( "sea otter", true );
     auto res = album1->addTrack( m1, 1, 0, artist1->id(), nullptr );
     ASSERT_TRUE( res );
     m1->save();
@@ -658,7 +658,7 @@ static void SearchTracks( Tests* T )
     auto artist2 = T->ml->createArtist( "artist2" );
     auto album2 = T->ml->createAlbum( "album2" );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
-    m2->setTitleBuffered( "sea cucumber" );
+    m2->setTitle( "sea cucumber", true );
     album2->addTrack( m2, 1, 0, artist2->id(), nullptr );
     m2->save();
 

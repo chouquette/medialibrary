@@ -309,13 +309,13 @@ static void SearchEpisodes( Tests* T )
     auto show2 = T->ml->createShow( "show2" );
 
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "episode.mkv", IMedia::Type::Video ) );
-    m1->setTitleBuffered( "cute otters" );
+    m1->setTitle( "cute otters", true );
     // will save the media in db
     auto ep1 = show1->addEpisode( *m1, 1, 1, "episode title" );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "other episode.mkv", IMedia::Type::Video ) );
-    m2->setTitleBuffered( "fluffy otters" );
+    m2->setTitle( "fluffy otters", true );
     auto ep2 = show2->addEpisode( *m2, 1, 1, "episode title" );
     m2->save();
 

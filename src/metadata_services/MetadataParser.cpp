@@ -475,7 +475,7 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
 
     auto t = m_ml->getConn()->newTransaction();
-    media->setTitleBuffered( title );
+    media->setTitle( title, false );
 
     if ( media->groupId() == 0 )
     {
@@ -670,7 +670,7 @@ Status MetadataAnalyzer::overrideExternalMedia( IItem& item, Media& media,
         return Status::Fatal;
     auto updatedTitle = item.meta( Task::IItem::Metadata::Title );
     if ( updatedTitle.empty() == false )
-        media.setTitleBuffered( updatedTitle );
+        media.setTitle( updatedTitle, false );
     if ( media.markAsInternal( newType, item.duration(), device->id(),
                           item.parentFolder()->id() ) == false )
         return Status::Fatal;
@@ -759,7 +759,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
     if ( isAudio == false )
     {
         auto newTitle = utils::title::sanitize( media->fileName() );
-        media->setTitleBuffered( newTitle );
+        media->setTitle( newTitle, false );
     }
 
     auto t = m_ml->getConn()->newTransaction();
@@ -1298,7 +1298,7 @@ std::shared_ptr<Media> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
         }
     }
     if ( title.empty() == false )
-        media->setTitleBuffered( title );
+        media->setTitle( title, false );
 
     if ( album.addTrack( media, trackNumber, discNumber, artistId,
                          genre ) == false )

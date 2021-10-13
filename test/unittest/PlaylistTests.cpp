@@ -478,16 +478,16 @@ static void AddDuplicate( PlaylistTests* T )
 static void SearchMedia( PlaylistTests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "m1.mp3", IMedia::Type::Audio ) );
-    m1->setTitleBuffered( "otter" );
+    m1->setTitle( "otter", true );
     m1->save();
 
     auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "m2.mp3", IMedia::Type::Audio ) );
     // Won't match since it's not on the beginning of a word
-    m2->setTitleBuffered( "ENOOTTER" );
+    m2->setTitle( "ENOOTTER", true );
     m2->save();
 
     auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "m3.mp3", IMedia::Type::Audio ) );
-    m3->setTitleBuffered( "otter otter otter" );
+    m3->setTitle( "otter otter otter", true );
     m3->save();
 
     T->pl->append( *m1 );

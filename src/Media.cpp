@@ -1392,14 +1392,6 @@ bool Media::isForcedTitle() const
     return m_forcedTitle;
 }
 
-void Media::setTitleBuffered( const std::string& title )
-{
-    if ( m_title == title || m_forcedTitle == true )
-        return;
-    m_title = title;
-    m_changed = true;
-}
-
 bool Media::setFileName( std::string fileName )
 {
     if ( fileName == m_filename )
