@@ -4,7 +4,7 @@ project('medialibrary', 'cpp',
         default_options: [
             'cpp_std=c++14',
             'buildtype=debug',
-            'warning_level=2',
+            'warning_level=3',
             'b_ndebug=if-release'
         ]
 )
