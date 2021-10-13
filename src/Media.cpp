@@ -1295,11 +1295,10 @@ bool Media::setType( IMedia::Type type )
 {
     if ( type == m_type )
         return true;
-    const std::string req = "UPDATE " + Table::Name + " SET type = ? "
-            "WHERE id_media = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, m_id ) == false )
+    auto oldType = m_type;
+    if ( setTypeInternal( type ) == false )
         return false;
-    if ( m_type == IMedia::Type::Unknown )
+    if ( oldType == IMedia::Type::Unknown )
     {
         auto task = parser::Task::createMediaRefreshTask( m_ml, *this );
         if ( task != nullptr )
@@ -1309,6 +1308,17 @@ bool Media::setType( IMedia::Type type )
                 parser->parse( std::move( task ) );
         }
     }
+    return true;
+}
+
+bool Media::setTypeInternal( IMedia::Type type )
+{
+    if ( type == m_type )
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET type = ? "
+            "WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, type, m_id ) == false )
+        return false;
     m_type = type;
     return true;
 }
@@ -1340,14 +1350,6 @@ void Media::setSubType( IMedia::SubType subType )
             break;
     }
     m_subType = subType;
-    m_changed = true;
-}
-
-void Media::setTypeBuffered( Type type )
-{
-    if ( m_type == type )
-        return;
-    m_type = type;
     m_changed = true;
 }
 

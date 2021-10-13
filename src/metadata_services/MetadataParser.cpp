@@ -762,13 +762,15 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshMedia( IItem& item ) const
         media->setTitleBuffered( newTitle );
     }
 
-    if ( isAudio == true && media->type() == IMedia::Type::Video )
-        media->setTypeBuffered( IMedia::Type::Audio );
-    else if ( isAudio == false && media->type() == IMedia::Type::Audio )
-        media->setTypeBuffered( IMedia::Type::Video );
-
     auto t = m_ml->getConn()->newTransaction();
-    if ( VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
+
+    /*
+     * Media::setType already checks that the assigned type is different from
+     * the current one so we can just call it blindly from here
+     */
+    if ( media->setTypeInternal( isAudio == true ? IMedia::Type::Audio :
+                         IMedia::Type::Video ) == false ||
+         VideoTrack::removeFromMedia( m_ml, media->id() ) == false ||
          AudioTrack::removeFromMedia( m_ml, media->id(), true ) == false ||
          SubtitleTrack::removeFromMedia( m_ml, media->id(), true ) == false )
     {

@@ -133,8 +133,19 @@ class Media : public IMedia,
 
         virtual int64_t id() const override;
         virtual Type type() const override;
+        /**
+         * @brief setType Will update the media type and trigger a media refresh
+         * if the previous type was Unknown.
+         * @param type The new media type
+         * @return true if the database update was successful, false otherwise
+         */
         bool setType( Type type ) override;
-        void setTypeBuffered( Type type );
+        /**
+         * @brief setTypeInternal Will only update the media type in database
+         * @param type The new media type
+         * @return true if the database update was successful, false otherwise
+         */
+        bool setTypeInternal( Type type );
         virtual SubType subType() const override;
         void setSubType( SubType subType );
 

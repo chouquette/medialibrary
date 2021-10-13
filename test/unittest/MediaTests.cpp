@@ -700,20 +700,6 @@ static void SetType( Tests* T )
     ASSERT_TRUE( res );
 }
 
-static void SetTypeBuffered( Tests* T )
-{
-    auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media1.mp3", -1 ) );
-    ASSERT_TRUE( m1->isExternalMedia() );
-
-    m1->setTypeBuffered( IMedia::Type::Video );
-    m1->save();
-
-    ASSERT_EQ( IMedia::Type::Video, m1->type() );
-
-    auto m2 = T->ml->media( m1->id() );
-    ASSERT_EQ( IMedia::Type::Video, m2->type() );
-}
-
 static void SetSubType( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media1.mp3", IMedia::Type::Video ) );
@@ -1484,7 +1470,6 @@ int main( int ac, char** av )
     ADD_TEST( SortByFileSize );
     ADD_TEST( SortByFilename );
     ADD_TEST( SetType );
-    ADD_TEST( SetTypeBuffered );
     ADD_TEST( SetSubType );
     ADD_TEST( GetMetadata );
     ADD_TEST( MetadataOverride );
