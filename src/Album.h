@@ -58,6 +58,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
             DeleteTrack,
             InsertFts,
             DeleteFts,
+            DeleteEmpty, // Introduced in model 34
         };
         enum class Indexes : uint8_t
         {

@@ -44,6 +44,7 @@
 namespace
 {
     const std::vector<const char*> expectedTriggers{
+        "album_delete_empty",
         "album_delete_track",
         "album_is_present",
         "artist_decrement_nb_albums",

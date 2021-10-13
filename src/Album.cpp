@@ -545,6 +545,8 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
                                    trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteEmpty, Settings::DbModelVersion ) );
 }
 
 void Album::createIndexes( sqlite::Connection* dbConnection )
@@ -698,8 +700,6 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                             " is_present = is_present - 1,"
                             " duration = duration - MAX(old.duration, 0)"
                             " WHERE id_album = old.album_id;"
-                        " DELETE FROM " + Table::Name +
-                            " WHERE id_album=old.album_id AND nb_tracks = 0;"
                    " END";
         }
         case Triggers::InsertFts:
@@ -723,6 +723,17 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                         " DELETE FROM " + FtsTable::Name +
                             " WHERE rowid = old.id_album;"
                     " END";
+        }
+        case Triggers::DeleteEmpty:
+        {
+            assert( dbModel >= 34 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF nb_tracks ON " + Table::Name +
+                   " WHEN new.nb_tracks = 0"
+                   " BEGIN "
+                        " DELETE FROM " + Table::Name +
+                            " WHERE id_album=new.id_album;"
+                   " END";
         }
         default:
             assert( !"Invalid trigger provided" );
@@ -751,6 +762,9 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
             return "insert_album_fts";
         case Triggers::DeleteFts:
             return "delete_album_fts";
+        case Triggers::DeleteEmpty:
+            assert( dbModel >= 34 );
+            return "album_delete_empty";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -795,7 +809,8 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
     return check( ml->getConn(), Triggers::IsPresent ) &&
             check( ml->getConn(), Triggers::DeleteTrack ) &&
             check( ml->getConn(), Triggers::InsertFts ) &&
-            check( ml->getConn(), Triggers::DeleteFts );
+            check( ml->getConn(), Triggers::DeleteFts ) &&
+            check( ml->getConn(), Triggers::DeleteEmpty );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, std::string title )
