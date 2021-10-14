@@ -292,7 +292,7 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                    " BEGIN"
                         " UPDATE " + Table::Name +
                             " SET nb_tracks = nb_tracks - 1,"
-                                " is_present = is_present - 1"
+                                " is_present = is_present - IIF(old.is_present != 0, 1, 0)"
                                 " WHERE id_genre = old.genre_id;"
                    " END";
         case Triggers::UpdateIsPresent:

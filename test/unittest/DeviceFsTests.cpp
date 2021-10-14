@@ -1073,17 +1073,22 @@ static void RemoveMissingAlbumTrack( DeviceFsTests* T )
     auto alb = T->ml->createAlbum( "Colors II" );
     ASSERT_NON_NULL( alb );
 
+    auto genre = T->ml->createGenre( "Progressive Metal" );
+    ASSERT_NON_NULL( genre );
+
     auto media1 = std::static_pointer_cast<Media>(
                 T->ml->media( mock::FileSystemFactory::Root + "audio.mp3" ) );
     auto media2 = std::static_pointer_cast<Media>(
                 T->ml->media( DeviceFsTests::RemovableDeviceMountpoint + "removablefile.mp3" ) );
     ASSERT_NON_NULL( media1 );
-    auto res = alb->addTrack( media1, 1, 1, 0, nullptr );
+    auto res = alb->addTrack( media1, 1, 1, 0, genre.get() );
     ASSERT_TRUE( res );
-    res = alb->addTrack( media2, 1, 1, 0, nullptr );
+    res = alb->addTrack( media2, 1, 1, 0, genre.get() );
     ASSERT_TRUE( res );
     ASSERT_EQ( 2u, alb->nbTracks() );
     ASSERT_EQ( 2u, alb->nbPresentTracks() );
+    ASSERT_EQ( 2u, genre->nbTracks() );
+    ASSERT_EQ( 2u, genre->nbPresentTracks() );
 
     T->fsMock->removeDevice( DeviceFsTests::RemovableDeviceUuid );
 
@@ -1092,12 +1097,22 @@ static void RemoveMissingAlbumTrack( DeviceFsTests* T )
     ASSERT_EQ( 2u, alb->nbTracks() );
     ASSERT_EQ( 1u, alb->nbPresentTracks() );
 
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_NON_NULL( genre );
+    ASSERT_EQ( 2u, genre->nbTracks() );
+    ASSERT_EQ( 1u, genre->nbPresentTracks() );
+
     T->ml->deleteMedia( media2->id() );
 
     alb = std::static_pointer_cast<Album>( T->ml->album( alb->id() ) );
     ASSERT_NON_NULL( alb );
     ASSERT_EQ( 1u, alb->nbTracks() );
     ASSERT_EQ( 1u, alb->nbPresentTracks() );
+
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_NON_NULL( genre );
+    ASSERT_EQ( 1u, genre->nbTracks() );
+    ASSERT_EQ( 1u, genre->nbPresentTracks() );
 }
 
 int main( int ac, char** av )
