@@ -16,9 +16,11 @@ stages:
 build:debian:
     image: $MEDIALIBRARY_IMG
     rules:
+      - if: '$MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+        when: never
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
     stage: build
     tags:
       - docker
@@ -114,9 +116,11 @@ build:win64:
 test:debian:
     image: $MEDIALIBRARY_IMG
     rules:
+      - if: '$MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+        when: never
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
     stage: test
     needs:
       - job: "build:debian"
