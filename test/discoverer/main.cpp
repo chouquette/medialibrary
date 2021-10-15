@@ -117,16 +117,20 @@ int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
-        std::cerr << "usage: " << argv[0] << " <entrypoint> [nb_runs]" << std::endl;
+        std::cerr << "usage: " << argv[0] << " <entrypoint> [nb_runs] [-q]" << std::endl;
         return 1;
     }
 
     auto mlDir = getTempPath( "discoverer_test" );
     auto dbPath = mlDir + "/test.db";
     auto nbRuns = 1;
-    if ( argc > 2 )
+    auto quiet = false;
+    for ( auto i = 2; i < argc; ++i )
     {
-        nbRuns = atoi( argv[2] );
+        if ( !strcmp( argv[i], "-q" ) )
+            quiet = true;
+        else
+            nbRuns = atoi( argv[i] );
     }
 
 
@@ -137,7 +141,8 @@ int main( int argc, char** argv )
         NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false )
     };
 
-    ml->setVerbosity( medialibrary::LogLevel::Debug );
+    ml->setVerbosity( quiet == true ? medialibrary::LogLevel::Error :
+                                      medialibrary::LogLevel::Debug );
     ml->initialize( testCb.get() );
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
