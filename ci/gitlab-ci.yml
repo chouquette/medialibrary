@@ -10,13 +10,15 @@ variables:
 stages:
   - build
   - test
+  - bench-prepare
+  - run-bench
 
 build:debian:
     image: $MEDIALIBRARY_IMG
     rules:
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
     stage: build
     tags:
       - docker
@@ -114,7 +116,7 @@ test:debian:
     rules:
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
     stage: test
     needs:
       - job: "build:debian"
@@ -222,7 +224,7 @@ test:win64:
 asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
     rules:
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
         when: on_success
       - when: never
     stage: build
@@ -275,4 +277,38 @@ asan-ubsan:
 #      - meson compile fast_discover_cancel fast_teardown
 #      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
 #      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+
+# This job attempts to regenerate a database to be used for benchmarks.
+# If a MR is flagged with the 'model-change' label, then we will attempt to
+# regenerate the database and upload it to artifacts.videolan.org
+# It's also possible to trigger a regeneration by triggering a scheduled
+# pipeline with the MEDIALIB_GENERATE_BENCH_DB_VERSION variable set to the
+# targeted milestome (this assumes one db model per milestone)
+gen-bench-db:
+  image: $MEDIALIBRARY_IMG
+  stage: bench-prepare
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
+      when: on_success
+    - when: never
+  tags:
+    - docker
+    - amd64
+  before_script:
+    - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
+    - if [ -n "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$MEDIALIB_GENERATE_BENCH_DB_VERSION; fi
+    - if [ -n "$BENCH_DB_SUFFIX" ]; then printf "Unexpected configuration"; exit 1 ; fi
+  script:
+    - meson --buildtype=release build
+    - cd build && ninja
+    - ../ci/generate-samples.sh $CI_PROJECT_DIR/dummysamples
+    - test/discoverer/discoverer -q $CI_PROJECT_DIR/dummysamples
+    - mv $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db $CI_PROJECT_DIR/bench$BENCH_DB_SUFFIX.db
+  artifacts:
+    when: on_success
+    expire_in: 1 day
+    paths:
+      - $CI_PROJECT_DIR/bench$BENCH_DB_SUFFIX.db
 
