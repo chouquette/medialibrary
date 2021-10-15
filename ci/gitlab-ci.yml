@@ -298,8 +298,8 @@ gen-bench-db:
     - amd64
   before_script:
     - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
-    - if [ -n "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$MEDIALIB_GENERATE_BENCH_DB_VERSION; fi
-    - if [ -n "$BENCH_DB_SUFFIX" ]; then printf "Unexpected configuration"; exit 1 ; fi
+    - if [ -z "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$MEDIALIB_GENERATE_BENCH_DB_VERSION; fi
+    - if [ -z "$BENCH_DB_SUFFIX" ]; then printf "Unexpected configuration"; exit 1 ; fi
   script:
     - meson --buildtype=release build
     - cd build && ninja
