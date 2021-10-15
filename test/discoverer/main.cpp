@@ -29,6 +29,9 @@
 #include "test/common/util.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
+#include "utils/Filename.h"
+#include "utils/Url.h"
+#include "medialibrary/filesystem/Errors.h"
 
 #include <iostream>
 #include <condition_variable>
@@ -133,6 +136,16 @@ int main( int argc, char** argv )
             nbRuns = atoi( argv[i] );
     }
 
+    std::string target;
+    try
+    {
+        utils::url::scheme( argv[1] );
+        target = argv[1];
+    }
+    catch ( const medialibrary::fs::errors::UnhandledScheme& )
+    {
+        target = utils::file::toMrl( argv[1] );
+    }
 
     unlink( dbPath.c_str() );
 
@@ -148,7 +161,7 @@ int main( int argc, char** argv )
     assert( res );
     for ( auto i = 0; i < nbRuns; ++i )
     {
-        ml->discover( argv[1] );
+        ml->discover( target );
         res = testCb->waitForCompletion();
         if ( res == false )
             return 1;
