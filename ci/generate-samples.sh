@@ -12,7 +12,7 @@ if [ $# -gt 2 ]; then
     exit 1
 fi
 
-if [ $# -eq 2 ]; then
+if [ $# -eq 1 ]; then
     CORPUS_DIRECTORY=$1
 else
     CORPUS_DIRECTORY=/tmp/medialib_samples/
