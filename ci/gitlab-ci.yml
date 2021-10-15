@@ -309,10 +309,11 @@ gen-bench-db:
     - cd build && ninja
     - ../ci/generate-samples.sh $CI_PROJECT_DIR/dummysamples
     - test/discoverer/discoverer -q $CI_PROJECT_DIR/dummysamples
-    - mv $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db $CI_PROJECT_DIR/bench$BENCH_DB_SUFFIX.db
+    - echo $BENCH_DB_SUFFIX
+    - mv "$MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db" "$CI_PROJECT_DIR/bench.$BENCH_DB_SUFFIX.db"
   artifacts:
     when: on_success
     expire_in: 1 day
     paths:
-      - $CI_PROJECT_DIR/bench$BENCH_DB_SUFFIX.db
+      - "$CI_PROJECT_DIR/bench.*.db"
 
