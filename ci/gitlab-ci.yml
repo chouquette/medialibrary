@@ -258,29 +258,29 @@ asan-ubsan:
         - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
       expire_in: 1 week
 
-#tsan:
-#    image: $VLC_DEBIAN_UNSTABLE_IMG
-#    rules:
-#      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-#        when: on_success
-#      - when: never
-#    tags:
-#      - docker
-#      - amd64
-#    variables:
-#        TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
-#    script:
-#      - git clone https://code.videolan.org/videolan/vlc.git --depth=1
-#      - cd vlc && ./bootstrap
-#      - ./configure LDFLAGS="-ltsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=thread --disable-medialibrary --disable-nls --enable-debug
-#      - make install -j8
-#      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
-#      - cd ..
-#      - meson -Db_sanitize=thread build
-#      - cd build && meson test --no-stdsplit
-#      - meson compile fast_discover_cancel fast_teardown
-#      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
-#      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+tsan:
+    image: $VLC_DEBIAN_UNSTABLE_IMG
+    rules:
+      - if: '$CI_PIPELINE_SOURCE == "schedule"'
+        when: on_success
+      - when: never
+    tags:
+      - docker
+      - amd64
+    variables:
+        TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
+    script:
+      - git clone https://code.videolan.org/videolan/vlc.git --depth=1
+      - cd vlc && ./bootstrap
+      - ./configure LDFLAGS="-ltsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=thread --disable-medialibrary --disable-nls --enable-debug
+      - make install -j8
+      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
+      - cd ..
+      - meson -Db_sanitize=thread build
+      - cd build && meson test --no-stdsplit
+      - meson compile fast_discover_cancel fast_teardown
+      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
+      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
 
 # This job attempts to regenerate a database to be used for benchmarks.
 # If a MR is flagged with the 'model-change' label, then we will attempt to
@@ -291,6 +291,7 @@ asan-ubsan:
 gen-bench-db:
   image: $MEDIALIBRARY_IMG
   stage: bench-prepare
+  needs: []
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
       when: on_success
@@ -315,4 +316,46 @@ gen-bench-db:
     expire_in: 1 day
     paths:
       - "$CI_PROJECT_DIR/bench.*.db"
+
+run-bench:
+  image: $MEDIALIBRARY_IMG
+  stage: run-bench
+  needs: []
+  allow_failure: true
+  tags:
+    - docker
+    - amd64
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
+    - if [ -n "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=".$BENCH_DB_SUFFIX"; fi
+  script:
+    - meson --buildtype=release -Dtests=disabled build
+    - cd build && ninja
+    - wget -nv https://artifacts.videolan.org/medialibrary/gen-bench-db/bench$BENCH_DB_SUFFIX.db -O bench.db
+    - wget -nv https://artifacts.videolan.org/medialibrary/run-bench/bench$BENCH_DB_SUFFIX.json -O bench.old.json || echo "No previous benchmark" && rm bench.old.json
+    - ./benchmark/requests/bench_requests --benchmark_out_format=json --benchmark_out=bench.new.json --benchmark_repetitions=10
+    - export STATE=success
+    - export RES="No previous benchmark"
+    - >
+      if [ -f bench.old.json ]; then
+      python3 /benchmark/tools/compare.py -d result.json benchmarks bench.old.json bench.new.json;
+      export RES=$(../ci/check-benchmark.py result.json) || export STATE=failed;
+      fi
+    - rm -f bench.old.json
+    - mv bench.new.json bench.$BENCH_DB_SUFFIX.json
+    - >
+      curl --request POST --header "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN"
+      -F description="$RES"
+      -F state=$STATE
+      -F name="Benchmark results"
+      -F target_url="$CI_JOB_URL"
+      "https://code.videolan.org/api/v4/projects/$CI_PROJECT_ID/statuses/$CI_COMMIT_SHA"
+  artifacts:
+    when: on_success
+    expire_in: 1 day
+    paths:
+      - build/bench.*.json
 
