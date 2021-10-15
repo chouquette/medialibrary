@@ -308,8 +308,7 @@ gen-bench-db:
     - meson --buildtype=release build
     - cd build && ninja
     - ../ci/generate-samples.sh $CI_PROJECT_DIR/dummysamples
-    - test/discoverer/discoverer -q $CI_PROJECT_DIR/dummysamples
-    - echo $BENCH_DB_SUFFIX
+    - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
     - mv "$MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db" "$CI_PROJECT_DIR/bench.$BENCH_DB_SUFFIX.db"
   artifacts:
     when: on_success
