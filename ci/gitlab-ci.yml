@@ -241,8 +241,6 @@ asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
     rules:
       - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
-        when: on_success
-      - when: never
     stage: build
     tags:
       - docker
@@ -308,9 +306,7 @@ gen-bench-db:
       artifacts: false
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB != null'
-      when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
-      when: on_success
     - when: never
   tags:
     - docker
