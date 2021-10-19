@@ -345,12 +345,11 @@ run-bench:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   before_script:
     - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
-    - if [ -n "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=".$BENCH_DB_SUFFIX"; fi
   script:
     - meson --buildtype=release -Dtests=disabled build
     - cd build && ninja
-    - wget -nv https://artifacts.videolan.org/medialibrary/gen-bench-db/bench$BENCH_DB_SUFFIX.db -O bench.db
-    - wget -nv https://artifacts.videolan.org/medialibrary/run-bench/bench$BENCH_DB_SUFFIX.json -O bench.old.json || echo "No previous benchmark" && rm bench.old.json
+    - wget -nv https://artifacts.videolan.org/medialibrary/gen-bench-db/bench.$BENCH_DB_SUFFIX.db -O bench.db
+    - wget -nv https://artifacts.videolan.org/medialibrary/run-bench/bench.$BENCH_DB_SUFFIX.json -O bench.old.json || echo "No previous benchmark" && rm bench.old.json
     - ./benchmark/requests/bench_requests --benchmark_out_format=json --benchmark_out=bench.new.json --benchmark_repetitions=10
     - export STATE=success
     - export RES="No previous benchmark"
