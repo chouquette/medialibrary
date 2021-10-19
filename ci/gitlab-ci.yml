@@ -38,7 +38,6 @@ build:debian:
       - docker
       - amd64
     script:
-      - env
       - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
       - export PATH=/tmp/meson:$PATH
       - cd $CI_PROJECT_DIR
