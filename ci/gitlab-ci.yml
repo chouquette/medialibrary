@@ -334,6 +334,10 @@ run-bench:
     - docker
     - amd64
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
+      when: delayed
+      # Let artifacts.videolan.org grab our prebuilt database if it was regenerated
+      start_in: 1 minute
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   before_script:
     - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
