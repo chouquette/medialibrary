@@ -351,19 +351,18 @@ run-bench:
     - wget -nv https://artifacts.videolan.org/medialibrary/gen-bench-db/bench.$BENCH_DB_SUFFIX.db -O bench.db
     - wget -nv https://artifacts.videolan.org/medialibrary/run-bench/bench.$BENCH_DB_SUFFIX.json -O bench.old.json || echo "No previous benchmark" && rm bench.old.json
     - ./benchmark/requests/bench_requests --benchmark_out_format=json --benchmark_out=bench.new.json --benchmark_repetitions=10
-    - export STATE=success
     - export RES="No previous benchmark"
     - >
       if [ -f bench.old.json ]; then
       python3 /benchmark/tools/compare.py -d result.json benchmarks bench.old.json bench.new.json;
-      export RES=$(../ci/check-benchmark.py result.json) || export STATE=failed;
+      export RES=$(../ci/check-benchmark.py result.json);
       fi
     - rm -f bench.old.json
     - mv bench.new.json bench.$BENCH_DB_SUFFIX.json
     - >
       curl --request POST --header "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN"
       -F description="$RES"
-      -F state=$STATE
+      -F state=success
       -F name="Benchmark results"
       -F target_url="$CI_JOB_URL"
       "https://code.videolan.org/api/v4/projects/$CI_PROJECT_ID/statuses/$CI_COMMIT_SHA"
