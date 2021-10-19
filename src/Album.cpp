@@ -555,6 +555,8 @@ void Album::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::ArtistId, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::NbTracks, Settings::DbModelVersion ) );
 }
 
 std::string Album::schema( const std::string& tableName, uint32_t dbModel )
@@ -775,17 +777,33 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
 
 std::string Album::index( Indexes index, uint32_t dbModel )
 {
-    assert( index == Indexes::ArtistId );
-    return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
-            Table::Name + "(artist_id)";
+    switch ( index )
+    {
+        case Indexes::ArtistId:
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                    Table::Name + "(artist_id)";
+        case Indexes::NbTracks:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                    Table::Name + "(nb_tracks, is_present)";
+    }
+    return "<invalid request>";
 }
 
-std::string Album::indexName( Album::Indexes index, uint32_t )
+std::string Album::indexName( Album::Indexes index, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( index );
+    UNUSED_IN_RELEASE( dbModel );
 
-    assert( index == Indexes::ArtistId );
-    return "album_artist_id_idx";
+    switch ( index )
+    {
+        case Indexes::ArtistId:
+            return "album_artist_id_idx";
+        case Indexes::NbTracks:
+            assert( dbModel >= 34 );
+            return "album_nb_tracks_idx";
+    }
+    return "<invalid request>";
 }
 
 bool Album::checkDbModel( MediaLibraryPtr ml )

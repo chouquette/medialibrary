@@ -63,6 +63,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         enum class Indexes : uint8_t
         {
             ArtistId,
+            NbTracks,
         };
 
         Album( MediaLibraryPtr ml, sqlite::Row& row );

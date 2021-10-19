@@ -82,3 +82,6 @@ Genre::trigger( Genre::Triggers::UpdateOnTrackDelete, 34 ),
 // New triggers
 Album::trigger( Album::Triggers::DeleteEmpty, 34 ),
 Genre::trigger( Genre::Triggers::DeleteEmpty, 34 ),
+
+// New indexes
+Album::index( Album::Indexes::NbTracks, 34 ),
