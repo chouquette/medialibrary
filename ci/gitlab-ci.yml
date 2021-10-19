@@ -28,7 +28,7 @@ run-checks:
 build:debian:
     image: $MEDIALIBRARY_IMG
     rules:
-      - if: '$MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+      - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
         when: never
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -307,7 +307,7 @@ gen-bench-db:
     - job: test:debian
       artifacts: false
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB != null'
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
       when: on_success
@@ -317,7 +317,7 @@ gen-bench-db:
     - amd64
   before_script:
     - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
-    - if [ -z "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$MEDIALIB_GENERATE_BENCH_DB_VERSION; fi
+    - if [ -z "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$CI_COMMIT_BRANCH; fi
     - if [ -z "$BENCH_DB_SUFFIX" ]; then printf "Unexpected configuration"; exit 1 ; fi
   script:
     - meson --buildtype=release build
