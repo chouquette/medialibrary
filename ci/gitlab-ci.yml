@@ -357,7 +357,7 @@ run-bench:
     - mv bench.new.json bench.$BENCH_DB_SUFFIX.json
     - >
       curl --request POST --header "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN"
-      -F description="$RES"
+      --form-string description="$RES"
       -F state=success
       -F name="Benchmark results"
       -F target_url="$CI_JOB_URL"
