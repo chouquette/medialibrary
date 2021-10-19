@@ -3,8 +3,6 @@
 import json
 import sys
 
-def check_measurement(m):
-
 def run_compare(report):
     with open(report) as f:
         doc = json.load(f)
@@ -28,18 +26,18 @@ def run_compare(report):
         if time < -0.05:
             print(f"Performance increase detected for test {testcase['name']}", file=sys.stderr)
             increase += 1
-        elif time > 0.05
+        elif time > 0.05:
             print(f"Performance decrease detected for test {testcase['name']}", file=sys.stderr)
             decrease += 1
         else:
-            print(f"No major performance change detected for test {testcase['name']}", sys.stderr)
+            print(f"No major performance change detected for test {testcase['name']}", file=sys.stderr)
 
-    if decrease > 0 || increase > 0:
+    if decrease > 0 or increase > 0:
         print(f"{increase} tests with improved performance ; {decrease} with performance decrease")
         if decrease > 0:
             sys.exit(2)
     else:
-        printf("No performance change")
+        print("No performance change")
 
 def main(argv):
     if len(argv) != 2:
