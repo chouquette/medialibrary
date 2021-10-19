@@ -302,9 +302,7 @@ asan-ubsan:
 gen-bench-db:
   image: $MEDIALIBRARY_IMG
   stage: bench-prepare
-  needs:
-    - job: test:debian
-      artifacts: false
+  dependencies: []
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB != null'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
@@ -331,9 +329,7 @@ gen-bench-db:
 run-bench:
   image: $MEDIALIBRARY_IMG
   stage: run-bench
-  needs:
-    - job: test:debian
-      artifacts: false
+  dependencies: []
   allow_failure: true
   tags:
     - docker
