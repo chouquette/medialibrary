@@ -128,7 +128,7 @@ build:win64:
 test:debian:
     image: $MEDIALIBRARY_IMG
     rules:
-      - if: '$MEDIALIB_GENERATE_BENCH_DB_VERSION != null'
+      - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
         when: never
       - if: $CI_MERGE_REQUEST_IID
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -240,7 +240,7 @@ test:win64:
 asan-ubsan:
     image: $VLC_DEBIAN_UNSTABLE_IMG
     rules:
-      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB_VERSION == null'
+      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
         when: on_success
       - when: never
     stage: build
@@ -298,7 +298,7 @@ asan-ubsan:
 # If a MR is flagged with the 'model-change' label, then we will attempt to
 # regenerate the database and upload it to artifacts.videolan.org
 # It's also possible to trigger a regeneration by triggering a scheduled
-# pipeline with the MEDIALIB_GENERATE_BENCH_DB_VERSION variable set to the
+# pipeline with the MEDIALIB_GENERATE_BENCH_DB variable set to the
 # targeted milestome (this assumes one db model per milestone)
 gen-bench-db:
   image: $MEDIALIBRARY_IMG
