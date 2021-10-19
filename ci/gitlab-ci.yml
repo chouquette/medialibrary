@@ -344,8 +344,8 @@ run-bench:
   script:
     - meson --buildtype=release -Dtests=disabled build
     - cd build && ninja
-    - wget -nv https://artifacts.videolan.org/medialibrary/gen-bench-db/bench.$BENCH_DB_SUFFIX.db -O bench.db
-    - wget -nv https://artifacts.videolan.org/medialibrary/run-bench/bench.$BENCH_DB_SUFFIX.json -O bench.old.json || echo "No previous benchmark" && rm bench.old.json
+    - curl -f -L https://artifacts.videolan.org/medialibrary/gen-bench-db/bench.$BENCH_DB_SUFFIX.db -o bench.db
+    - curl -f -L https://artifacts.videolan.org/medialibrary/run-bench/bench.$BENCH_DB_SUFFIX.json -o bench.old.json || echo "No previous benchmark"
     - ./benchmark/requests/bench_requests --benchmark_out_format=json --benchmark_out=bench.new.json --benchmark_repetitions=10
     - export RES="No previous benchmark"
     - >
