@@ -11,7 +11,7 @@ stages:
   - checks
   - build
   - test
-  - bench-prepare
+  - generate
   - run-bench
 
 default:
@@ -272,7 +272,7 @@ asan-ubsan:
 # version suffix (including "master")
 gen-bench-db:
   image: $MEDIALIBRARY_IMG
-  stage: bench-prepare
+  stage: generate
   dependencies: []
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == "benchmark-db"'
