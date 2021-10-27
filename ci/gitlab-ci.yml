@@ -31,11 +31,9 @@ run-checks:
 build:debian:
   image: $MEDIALIBRARY_IMG
   rules:
-    - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
-      when: never
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: build
   script:
     - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
@@ -115,11 +113,9 @@ build:win64:
 test:debian:
   image: $MEDIALIBRARY_IMG
   rules:
-    - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
-      when: never
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: test
   needs:
     - job: "build:debian"
@@ -218,7 +214,7 @@ test:win64:
 asan-ubsan:
   image: $VLC_DEBIAN_UNSTABLE_IMG
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: build
   variables:
     LSAN_OPTIONS: 'detect_leaks=0'
@@ -271,14 +267,15 @@ asan-ubsan:
 # If a MR is flagged with the 'model-change' label, then we will attempt to
 # regenerate the database and upload it to artifacts.videolan.org
 # It's also possible to trigger a regeneration by triggering a scheduled
-# pipeline with the MEDIALIB_GENERATE_BENCH_DB variable set to the
-# targeted milestome (this assumes one db model per milestone)
+# pipeline with the MEDIALIB_MANUAL_JOB_NAME variable set to "benchmark-db"
+# In this case, the branch schedule targetted branch will be used as the
+# version suffix (including "master")
 gen-bench-db:
   image: $MEDIALIBRARY_IMG
   stage: bench-prepare
   dependencies: []
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB != null'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == "benchmark-db"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
     - when: never
   before_script:
