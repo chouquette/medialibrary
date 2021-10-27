@@ -334,3 +334,28 @@ run-bench:
     paths:
       - build/bench.*.json
 
+gen-test-db:
+  image: $MEDIALIBRARY_IMG
+  stage: generate
+  dependencies: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == "gen-test-db"'
+  script:
+    - meson --buildtype=release build
+    - cd build && ninja
+    - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples -n 10
+    - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
+    - echo "BEGIN;" > $CI_PROJECT_DIR/test_db.sql
+    - > 
+      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.schema --nosys' 
+      | grep -vF '/*' >> $CI_PROJECT_DIR/test_db.sql
+    - >
+      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.dump --data-only --nosys' 
+      | grep -v '^INSERT INTO [[:alpha:]]*Fts'
+      >> $CI_PROJECT_DIR/test_db.sql
+    - echo "COMMIT;" >> $CI_PROJECT_DIR/test_db.sql
+  artifacts:
+    when: on_success
+    expire_in: 1 day
+    paths:
+      - "$CI_PROJECT_DIR/test_db.sql"
