@@ -28,60 +28,59 @@ run-checks:
     - if [ -z "$CI_MERGE_REQUEST_MILESTONE" ]; then echo "A milestone is required for new merge requests"; exit 1; fi
 
 build:debian:
-    image: $MEDIALIBRARY_IMG
-    rules:
-      - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
-        when: never
-      - if: $CI_MERGE_REQUEST_IID
-      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    stage: build
-    script:
-      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-      - export PATH=/tmp/meson:$PATH
-      - cd $CI_PROJECT_DIR
-      - meson.py -Db_coverage=true build
-      - cd build && ninja
-    artifacts:
-      expire_in: 1h
-      paths:
-        - $CI_PROJECT_DIR/build
-      when: on_success
-
+  image: $MEDIALIBRARY_IMG
+  rules:
+    - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
+      when: never
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  stage: build
+  script:
+    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+    - export PATH=/tmp/meson:$PATH
+    - cd $CI_PROJECT_DIR
+    - meson.py -Db_coverage=true build
+    - cd build && ninja
+  artifacts:
+    expire_in: 1h
+    paths:
+      - $CI_PROJECT_DIR/build
+    when: on_success
 
 build:novlc:
-    image: $MEDIALIBRARY_IMG
-    stage: build
-    rules:
-      - if: $CI_MERGE_REQUEST_IID
-    script:
-      - meson -Dlibvlc=disabled --buildtype=release build
-      - cd build && ninja
+  image: $MEDIALIBRARY_IMG
+  stage: build
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+  script:
+    - meson -Dlibvlc=disabled --buildtype=release build
+    - cd build && ninja
 
 build:alpine:
-    image: $MEDIALIBRARY_ALPINE_IMG
-    stage: build
-    rules:
-      - if: $CI_MERGE_REQUEST_IID
-    script:
-      - meson build
-      - cd build && ninja
+  image: $MEDIALIBRARY_ALPINE_IMG
+  stage: build
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+  script:
+    - meson build
+    - cd build && ninja
 
 build:win32:
-    image: $MEDIALIBRARY_WIN32_IMG
-    stage: build
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
-    script:
-      - >
-        meson -Dpkg_config_path=/prefix/lib/pkgconfig
-        --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
-        -Ddefault_library=static
-        build
-      - cd build && ninja
+  image: $MEDIALIBRARY_WIN32_IMG
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+  script:
+    - >
+      meson -Dpkg_config_path=/prefix/lib/pkgconfig
+      --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
+      -Ddefault_library=static
+      build
+    - cd build && ninja
 # Until the dynamic build behave properly, we'll just rebuild everything
 # before the tests. Otherwise the archive is >500MB which seems overkill just
 # to split build & tests
@@ -92,156 +91,156 @@ build:win32:
 #      when: on_success
 
 build:win64:
-    image: $MEDIALIBRARY_WIN64_IMG
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
-    stage: build
-    script:
-      - >
-        PKG_CONFIG_PATH=/prefix/lib/pkgconfig
-        meson
-        --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson
-        build
-      - cd build && ninja
-    artifacts:
-      expire_in: 1h
-      paths:
-        - $CI_PROJECT_DIR/build
-      when: on_success
+  image: $MEDIALIBRARY_WIN64_IMG
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+  stage: build
+  script:
+    - >
+      PKG_CONFIG_PATH=/prefix/lib/pkgconfig
+      meson
+      --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson
+      build
+    - cd build && ninja
+  artifacts:
+    expire_in: 1h
+    paths:
+      - $CI_PROJECT_DIR/build
+    when: on_success
 
 test:debian:
-    image: $MEDIALIBRARY_IMG
-    rules:
-      - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
-        when: never
-      - if: $CI_MERGE_REQUEST_IID
-      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    stage: test
-    needs:
-      - job: "build:debian"
-        artifacts: true
-    script:
-      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-      - export PATH=/tmp/meson:$PATH
-      - cd $CI_PROJECT_DIR/build
-      - meson.py test --no-stdsplit
-      - mkdir html/
-      - >
-        gcovr -r "$CI_PROJECT_DIR/"
-        -e "$CI_PROJECT_DIR/libvlcpp"
-        -e "$CI_PROJECT_DIR/test"
-        -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
-        -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
-        -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
-        -e "$CI_PROJECT_DIR/src/utils/xxhash/"
-        --xml cobertura.xml --html=html/medialibrary.html --html-details
-        -s
-        -j 4
-    artifacts:
-      reports:
-        cobertura: build/cobertura.xml
-        junit: build/meson-logs/testlog.junit.xml
-      name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
-      paths:
-        - build/html/
-        - $MEDIALIB_TEST_FOLDER/**/test.db
-        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
-      when: always
+  image: $MEDIALIBRARY_IMG
+  rules:
+    - if: '$MEDIALIB_GENERATE_BENCH_DB != null'
+      when: never
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  stage: test
+  needs:
+    - job: "build:debian"
+      artifacts: true
+  script:
+    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+    - export PATH=/tmp/meson:$PATH
+    - cd $CI_PROJECT_DIR/build
+    - meson.py test --no-stdsplit
+    - mkdir html/
+    - >
+      gcovr -r "$CI_PROJECT_DIR/"
+      -e "$CI_PROJECT_DIR/libvlcpp"
+      -e "$CI_PROJECT_DIR/test"
+      -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
+      -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
+      -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
+      -e "$CI_PROJECT_DIR/src/utils/xxhash/"
+      --xml cobertura.xml --html=html/medialibrary.html --html-details
+      -s
+      -j 4
+  artifacts:
+    reports:
+      cobertura: build/cobertura.xml
+      junit: build/meson-logs/testlog.junit.xml
+    name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - build/html/
+      - $MEDIALIB_TEST_FOLDER/**/test.db
+      - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+    when: always
 
 test:win32:
-    image: $MEDIALIBRARY_WIN32_IMG
-    variables:
-      MESON_TESTTHREADS: 8
-    stage: test
-    needs: 
-      - job: "build:win32"
-        artifacts: false
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
-    script:
-      - wineserver -p && wine wineboot
-      - >
-        meson -Dpkg_config_path=/prefix/lib/pkgconfig
-        --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
-        -Ddefault_library=static
-        build
-      - cd build && ninja
-      - cp /prefix/dll/libvlc.dll .
-      - cp /prefix/dll/libvlccore.dll .
-      - ln -s /prefix/lib/vlc/plugins/ .
-      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
-    artifacts:
-      when: always
-      reports:
-        junit: build/meson-logs/testlog.junit.xml
-      paths: 
-        - $MEDIALIB_TEST_FOLDER/**/test.db
-        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
-      expire_in: 1 week
+  image: $MEDIALIBRARY_WIN32_IMG
+  variables:
+    MESON_TESTTHREADS: 8
+  stage: test
+  needs: 
+    - job: "build:win32"
+      artifacts: false
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+  script:
+    - wineserver -p && wine wineboot
+    - >
+      meson -Dpkg_config_path=/prefix/lib/pkgconfig
+      --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
+      -Ddefault_library=static
+      build
+    - cd build && ninja
+    - cp /prefix/dll/libvlc.dll .
+    - cp /prefix/dll/libvlccore.dll .
+    - ln -s /prefix/lib/vlc/plugins/ .
+    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
+  artifacts:
+    when: always
+    reports:
+      junit: build/meson-logs/testlog.junit.xml
+    paths: 
+      - $MEDIALIB_TEST_FOLDER/**/test.db
+      - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+    expire_in: 1 week
 
 test:win64:
-    image: $MEDIALIBRARY_WIN64_IMG
-    variables:
-      MESON_TESTTHREADS: 8
-    stage: test
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-      - if: '$CI_PIPELINE_SOURCE == "schedule"'
-        when: never
-    needs: 
-      - job: "build:win64"
-        artifacts: true
-    script:
-      - cd build
-      - wineserver -p && wine wineboot
-      - cp /prefix/dll/libvlc.dll .
-      - cp /prefix/dll/libvlccore.dll .
-      - ln -s /prefix/lib/vlc/plugins/ .
-      - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
-    artifacts:
-      when: always
-      reports:
-        junit: build/meson-logs/testlog.junit.xml
-      paths: 
-        - $MEDIALIB_TEST_FOLDER/**/test.db
-        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
-      expire_in: 1 week
+  image: $MEDIALIBRARY_WIN64_IMG
+  variables:
+    MESON_TESTTHREADS: 8
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+  needs: 
+    - job: "build:win64"
+      artifacts: true
+  script:
+    - cd build
+    - wineserver -p && wine wineboot
+    - cp /prefix/dll/libvlc.dll .
+    - cp /prefix/dll/libvlccore.dll .
+    - ln -s /prefix/lib/vlc/plugins/ .
+    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
+  artifacts:
+    when: always
+    reports:
+      junit: build/meson-logs/testlog.junit.xml
+    paths: 
+      - $MEDIALIB_TEST_FOLDER/**/test.db
+      - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+    expire_in: 1 week
 
 asan-ubsan:
-    image: $VLC_DEBIAN_UNSTABLE_IMG
-    rules:
-      - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
-    stage: build
-    variables:
-      LSAN_OPTIONS: 'detect_leaks=0'
-    script:
-      - git clone https://code.videolan.org/videolan/vlc.git --depth=1
-      - cd vlc && ./bootstrap
-      - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
-      - make install -j8
-      - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
-      - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-      - export PATH=/tmp/meson:$PATH
-      - cd $CI_PROJECT_DIR
-      - meson.py -Db_sanitize=address,undefined build
-      - cd build && meson.py test --no-stdsplit
-      - meson.py compile fast_discover_cancel fast_teardown
-      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
-      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
-    artifacts:
-      when: on_failure
-      paths:
-        - $MEDIALIB_TEST_FOLDER/**/test.db
-        - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
-      expire_in: 1 week
+  image: $VLC_DEBIAN_UNSTABLE_IMG
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
+  stage: build
+  variables:
+    LSAN_OPTIONS: 'detect_leaks=0'
+  script:
+    - git clone https://code.videolan.org/videolan/vlc.git --depth=1
+    - cd vlc && ./bootstrap
+    - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
+    - make install -j8
+    - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
+    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+    - export PATH=/tmp/meson:$PATH
+    - cd $CI_PROJECT_DIR
+    - meson.py -Db_sanitize=address,undefined build
+    - cd build && meson.py test --no-stdsplit
+    - meson.py compile fast_discover_cancel fast_teardown
+    - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
+    - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+  artifacts:
+    when: on_failure
+    paths:
+      - $MEDIALIB_TEST_FOLDER/**/test.db
+      - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+    expire_in: 1 week
 
 #tsan:
 #    image: $VLC_DEBIAN_UNSTABLE_IMG
