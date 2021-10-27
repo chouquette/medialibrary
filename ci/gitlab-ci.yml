@@ -18,6 +18,7 @@ default:
   tags:
     - docker
     - amd64
+  interruptible: true
 
 run-checks:
   image: $MEDIALIBRARY_IMG
