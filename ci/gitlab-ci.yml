@@ -14,14 +14,16 @@ stages:
   - bench-prepare
   - run-bench
 
+default:
+  tags:
+    - docker
+    - amd64
+
 run-checks:
   image: $MEDIALIBRARY_IMG
   rules:
     - if: $CI_MERGE_REQUEST_IID
   stage: checks
-  tags:
-    - docker
-    - amd64
   script:
     - if [ -z "$CI_MERGE_REQUEST_MILESTONE" ]; then echo "A milestone is required for new merge requests"; exit 1; fi
 
@@ -34,9 +36,6 @@ build:debian:
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
     stage: build
-    tags:
-      - docker
-      - amd64
     script:
       - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
       - export PATH=/tmp/meson:$PATH
@@ -55,9 +54,6 @@ build:novlc:
     stage: build
     rules:
       - if: $CI_MERGE_REQUEST_IID
-    tags:
-      - docker
-      - amd64
     script:
       - meson -Dlibvlc=disabled --buildtype=release build
       - cd build && ninja
@@ -67,9 +63,6 @@ build:alpine:
     stage: build
     rules:
       - if: $CI_MERGE_REQUEST_IID
-    tags:
-      - docker
-      - amd64
     script:
       - meson build
       - cd build && ninja
@@ -82,9 +75,6 @@ build:win32:
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
         when: never
-    tags:
-      - docker
-      - amd64
     script:
       - >
         meson -Dpkg_config_path=/prefix/lib/pkgconfig
@@ -109,9 +99,6 @@ build:win64:
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
         when: never
     stage: build
-    tags:
-      - docker
-      - amd64
     script:
       - >
         PKG_CONFIG_PATH=/prefix/lib/pkgconfig
@@ -137,9 +124,6 @@ test:debian:
     needs:
       - job: "build:debian"
         artifacts: true
-    tags:
-      - docker
-      - amd64
     script:
       - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
       - export PATH=/tmp/meson:$PATH
@@ -181,9 +165,6 @@ test:win32:
       - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
         when: never
-    tags:
-      - docker
-      - amd64
     script:
       - wineserver -p && wine wineboot
       - >
@@ -218,9 +199,6 @@ test:win64:
     needs: 
       - job: "build:win64"
         artifacts: true
-    tags:
-      - docker
-      - amd64
     script:
       - cd build
       - wineserver -p && wine wineboot
@@ -242,9 +220,6 @@ asan-ubsan:
     rules:
       - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB == null'
     stage: build
-    tags:
-      - docker
-      - amd64
     variables:
       LSAN_OPTIONS: 'detect_leaks=0'
     script:
@@ -306,9 +281,6 @@ gen-bench-db:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_GENERATE_BENCH_DB != null'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
     - when: never
-  tags:
-    - docker
-    - amd64
   before_script:
     - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
     - if [ -z "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$CI_COMMIT_BRANCH; fi
@@ -330,9 +302,6 @@ run-bench:
   stage: run-bench
   dependencies: []
   allow_failure: true
-  tags:
-    - docker
-    - amd64
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
       when: delayed
