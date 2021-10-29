@@ -5,20 +5,30 @@ NB_ALBUMS_PER_ARTIST=10
 NB_TRACKS_PER_ALBUM=10
 
 SCRIPT_DIRECTORY=$(dirname "$0")
-CORPUS_DIRECTORY=
+CORPUS_DIRECTORY=/tmp/medialib_samples/
 
-if [ $# -gt 2 ]; then
-    echo "usage: $0 [dest folder]"
+usage()
+{
+    echo "usage: $0 [-o dest_folder] [-n nb_artists]"
     exit 1
-fi
+}
 
-if [ $# -eq 1 ]; then
-    CORPUS_DIRECTORY=$1
-else
-    CORPUS_DIRECTORY=/tmp/medialib_samples/
-fi
+while getopts ":o:n:" ARG; do
+    case "$ARG" in
+        o)
+            CORPUS_DIRECTORY=$OPTARG
+            ;;
+        n)
+            NB_ARTISTS=$OPTARG
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
 
 echo "Generating samples to $CORPUS_DIRECTORY"
+echo "Generating $NB_ARTISTS artists with 10 albums of 10 tracks each"
 
 for i_art in `seq 1 $NB_ARTISTS`; do
     ARTIST_NAME="artist_$i_art"
