@@ -354,8 +354,10 @@ gen-test-db:
       | grep -v '^INSERT INTO [[:alpha:]]*Fts'
       >> $CI_PROJECT_DIR/test_db.sql
     - echo "COMMIT;" >> $CI_PROJECT_DIR/test_db.sql
+    - mv $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db $CI_PROJECT_DIR/
   artifacts:
     when: on_success
     expire_in: 1 day
     paths:
       - "$CI_PROJECT_DIR/test_db.sql"
+      - "$CI_PROJECT_DIR/test.db"
