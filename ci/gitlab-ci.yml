@@ -32,7 +32,7 @@ build:debian:
   image: $MEDIALIBRARY_IMG
   rules:
     - if: $CI_MERGE_REQUEST_IID
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: build
   script:
@@ -114,7 +114,7 @@ test:debian:
   image: $MEDIALIBRARY_IMG
   rules:
     - if: $CI_MERGE_REQUEST_IID
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: test
   needs:
