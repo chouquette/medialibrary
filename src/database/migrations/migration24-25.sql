@@ -150,7 +150,7 @@ Media::trigger( Media::Triggers::DeleteFts, 25 ),
 Media::index( Media::Indexes::LastPlayedDate, 25 ),
 Media::index( Media::Indexes::Presence, 25 ),
 Media::index( Media::Indexes::Types, 25 ),
-Media::index( Media::Indexes::LastUsageDate, 25 ),
+Media::index( Media::Indexes::InsertionDate, 25 ),
 Media::index( Media::Indexes::Folder, 25 ),
 Media::index( Media::Indexes::MediaGroup, 25 ),
 

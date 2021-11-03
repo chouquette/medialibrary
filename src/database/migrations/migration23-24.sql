@@ -51,7 +51,7 @@ Media::trigger( Media::Triggers::DeleteFts, 24 ),
 Media::index( Media::Indexes::LastPlayedDate, 24 ),
 Media::index( Media::Indexes::Presence, 24 ),
 Media::index( Media::Indexes::Types, 24 ),
-Media::index( Media::Indexes::LastUsageDate, 24 ),
+Media::index( Media::Indexes::InsertionDate, 24 ),
 Media::index( Media::Indexes::Folder, 24 ),
 Media::index( Media::Indexes::MediaGroup, 24 ),
 

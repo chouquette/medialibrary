@@ -1424,7 +1424,7 @@ void Media::createIndexes( sqlite::Connection* connection )
                                    index( Indexes::Types,
                                           Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-                                   index( Indexes::LastUsageDate,
+                                   index( Indexes::InsertionDate,
                                           Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::Folder,
@@ -1882,7 +1882,7 @@ std::string Media::index( Indexes index, uint32_t dbModel )
         case Indexes::Types:
             return "CREATE INDEX " + indexName( index, dbModel ) +
                         " ON " + Table::Name + "(type, subtype)";
-        case Indexes::LastUsageDate:
+        case Indexes::InsertionDate:
             assert( dbModel >= 14 );
             // Don't create this index before model 14, as the real_last_played_date
             // column was introduced in model version 14
@@ -1939,11 +1939,13 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
             return "index_media_presence";
         case Indexes::Types:
             return "media_types_idx";
-        case Indexes::LastUsageDate:
+        case Indexes::InsertionDate:
             assert( dbModel >= 14 );
             // Don't create this index before model 14, as the real_last_played_date
             // column was introduced in model version 14
-            return "media_last_usage_dates_idx";
+            if ( dbModel < 34 )
+                return "media_last_usage_dates_idx";
+            return "media_insertion_date_idx";
         case Indexes::Folder:
             assert( dbModel >= 22 );
             return "media_folder_id_idx";
@@ -1999,7 +2001,7 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkIndex( ml->getConn(), Indexes::LastPlayedDate ) &&
             checkIndex( ml->getConn(), Indexes::Presence ) &&
             checkIndex( ml->getConn(), Indexes::Types ) &&
-            checkIndex( ml->getConn(), Indexes::LastUsageDate ) &&
+            checkIndex( ml->getConn(), Indexes::InsertionDate ) &&
             checkIndex( ml->getConn(), Indexes::Folder ) &&
             checkIndex( ml->getConn(), Indexes::MediaGroup ) &&
             checkIndex( ml->getConn(), Indexes::Progress ) &&

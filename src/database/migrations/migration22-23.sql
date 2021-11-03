@@ -90,7 +90,7 @@ Media::trigger( Media::Triggers::IsPresent, 23 ),
 Media::index( Media::Indexes::LastPlayedDate, 23 ),
 Media::index( Media::Indexes::Presence, 23 ),
 Media::index( Media::Indexes::Types, 23 ),
-Media::index( Media::Indexes::LastUsageDate, 23 ),
+Media::index( Media::Indexes::InsertionDate, 23 ),
 Media::index( Media::Indexes::Folder, 23 ),
 
 Show::trigger( Show::Triggers::InsertFts, 23 ),
