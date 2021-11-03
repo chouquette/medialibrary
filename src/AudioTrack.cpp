@@ -130,7 +130,7 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
     {
         return "CREATE TABLE " + Table::Name +
         "(" +
-            AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             "codec TEXT,"
             "bitrate UNSIGNED INTEGER,"
             "samplerate UNSIGNED INTEGER,"
@@ -144,7 +144,7 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
     }
     return "CREATE TABLE " + Table::Name +
     "(" +
-        AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+        Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
         "codec TEXT,"
         "bitrate UNSIGNED INTEGER,"
         "samplerate UNSIGNED INTEGER,"
@@ -161,11 +161,11 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
     ")";
 }
 
-std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t dbModel )
+std::string AudioTrack::index( Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
-        case AudioTrack::Indexes::MediaId:
+        case Indexes::MediaId:
             return "CREATE INDEX " + indexName( index, dbModel ) + " ON "
                     + Table::Name + "(media_id)";
         case Indexes::AttachedFileId:
@@ -183,7 +183,7 @@ std::string AudioTrack::indexName( Indexes index, uint32_t dbModel )
 
     switch ( index )
     {
-        case AudioTrack::Indexes::MediaId:
+        case Indexes::MediaId:
             return "audio_track_media_idx";
         case Indexes::AttachedFileId:
             assert( dbModel >= 34 );
@@ -212,7 +212,7 @@ std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, std::string 
                                                 int64_t mediaId,
                                                 int64_t attachedFileId )
 {
-    static const std::string req = "INSERT INTO " + AudioTrack::Table::Name
+    static const std::string req = "INSERT INTO " + Table::Name
             + "(codec, bitrate, samplerate, nb_channels, language, description, "
             "media_id, attached_file_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     auto track = std::make_shared<AudioTrack>( ml, std::move( codec ), bitrate, sampleRate,
@@ -238,7 +238,7 @@ bool AudioTrack::removeFromMedia( MediaLibraryPtr ml, int64_t mediaId,
 Query<IAudioTrack> AudioTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
                                           bool internalTracksOnly )
 {
-    std::string req = "FROM " + AudioTrack::Table::Name + " WHERE media_id = ?";
+    std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
     if ( internalTracksOnly == true )
         req += " AND attached_file_id IS NULL";
     return make_query<AudioTrack, IAudioTrack>( ml, "*", req, "", mediaId );
