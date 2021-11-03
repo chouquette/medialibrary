@@ -92,6 +92,7 @@ class Media : public IMedia,
             Progress,
             AlbumTrack,
             Duration,
+            ReleaseDate,
         };
 
         // Those should be private, however the standard states that the expression

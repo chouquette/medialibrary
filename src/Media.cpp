@@ -1441,6 +1441,9 @@ void Media::createIndexes( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::Duration,
                                           Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::ReleaseDate,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
@@ -1923,6 +1926,10 @@ std::string Media::index( Indexes index, uint32_t dbModel )
             assert( dbModel >= 34 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
                     " ON " + Table::Name + "(duration)";
+        case Indexes::ReleaseDate:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(release_date)";
         default:
             assert( !"Invalid index provided" );
     }
@@ -1963,6 +1970,9 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
         case Indexes::Duration:
             assert( dbModel >= 34 );
             return "media_duration_idx";
+        case Indexes::ReleaseDate:
+            assert( dbModel >= 34 );
+            return "media_release_date_idx";
         default:
             assert( !"Invalid index provided" );
     }
@@ -2006,7 +2016,8 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkIndex( ml->getConn(), Indexes::MediaGroup ) &&
             checkIndex( ml->getConn(), Indexes::Progress ) &&
             checkIndex( ml->getConn(), Indexes::AlbumTrack ) &&
-            checkIndex( ml->getConn(), Indexes::Duration );
+            checkIndex( ml->getConn(), Indexes::Duration ) &&
+            checkIndex( ml->getConn(), Indexes::ReleaseDate );
 }
 
 bool Media::addLabel( LabelPtr label )

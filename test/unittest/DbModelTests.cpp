@@ -116,6 +116,7 @@ namespace
         "media_group_last_modification_date",
         "media_insertion_date_idx",
         "media_last_pos_time_idx",
+        "media_release_date_idx",
         "media_types_idx",
         "movie_media_idx",
         "parent_folder_id_idx",
