@@ -43,6 +43,7 @@ public:
     {
         MediaId,
         FolderId,
+        PlaylistId,
     };
 
     File( MediaLibraryPtr ml, sqlite::Row& row );

@@ -274,6 +274,8 @@ void File::createIndexes( sqlite::Connection* dbConnection )
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::FolderId, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::PlaylistId, Settings::DbModelVersion ) );
 }
 
 std::string File::schema( const std::string& tableName, uint32_t )
@@ -318,13 +320,17 @@ std::string File::index( Indexes index, uint32_t dbModel )
         case Indexes::FolderId:
             return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                         Table::Name + "(folder_id)";
+        case Indexes::PlaylistId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                        Table::Name + "(playlist_id)";
         default:
             assert( !"Invalid index provided" );
     }
     return "<invalid request>";
 }
 
-std::string File::indexName( File::Indexes index, uint32_t )
+std::string File::indexName( File::Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
@@ -332,6 +338,9 @@ std::string File::indexName( File::Indexes index, uint32_t )
             return "file_media_id_index";
         case Indexes::FolderId:
             return "file_folder_id_index";
+        case Indexes::PlaylistId:
+            assert( dbModel >= 34 );
+            return "file_playlist_id_idx";
     }
     return "<invalid trigger>";
 }
@@ -346,7 +355,10 @@ bool File::checkDbModel(MediaLibraryPtr ml)
                         indexName( Indexes::MediaId, Settings::DbModelVersion ) ) &&
             sqlite::Tools::checkIndexStatement( ml->getConn(),
                         index( Indexes::FolderId, Settings::DbModelVersion ),
-                        indexName( Indexes::FolderId, Settings::DbModelVersion ) );
+                        indexName( Indexes::FolderId, Settings::DbModelVersion ) ) &&
+            sqlite::Tools::checkIndexStatement( ml->getConn(),
+                        index( Indexes::PlaylistId, Settings::DbModelVersion ),
+                        indexName( Indexes::PlaylistId, Settings::DbModelVersion ) );
 
 }
 

@@ -106,6 +106,7 @@ namespace
         "chapter_media_id_idx",
         "file_folder_id_index",
         "file_media_id_index",
+        "file_playlist_id_idx",
         "folder_device_id_idx",
         "index_last_played_date",
         "index_media_presence",
