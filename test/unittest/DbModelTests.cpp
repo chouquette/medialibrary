@@ -108,6 +108,7 @@ namespace
         "index_media_presence",
         "media_album_track_idx",
         "media_duration_idx",
+        "media_filename_idx",
         "media_folder_id_idx",
         "media_group_creation_date",
         "media_group_duration",
