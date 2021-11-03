@@ -44,6 +44,12 @@ void Chapter::createTable( sqlite::Connection* dbConn )
                                                    Settings::DbModelVersion ) );
 }
 
+void Chapter::createIndexes( sqlite::Connection* dbConnection )
+{
+    sqlite::Tools::executeRequest( dbConnection, index( Indexes::MediaId,
+                                                        Settings::DbModelVersion ) );
+}
+
 std::string Chapter::schema( const std::string& tableName, uint32_t )
 {
     UNUSED_IN_RELEASE( tableName );
@@ -60,6 +66,30 @@ std::string Chapter::schema( const std::string& tableName, uint32_t )
             Media::Table::Name + "(" + Media::Table::PrimaryKeyColumn + ")"
             " ON DELETE CASCADE"
     ")";
+}
+
+std::string Chapter::index( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                    Table::Name + "(media_id)";
+    }
+    return "<invalid request>";
+}
+
+std::string Chapter::indexName( Indexes index, uint32_t dbModel )
+{
+    UNUSED_IN_RELEASE( dbModel );
+
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            assert( dbModel >= 34 );
+            return "chapter_media_id_idx";
+    }
+    return "<invalid request>";
 }
 
 bool Chapter::checkDbModel( MediaLibraryPtr ml )

@@ -414,6 +414,7 @@ void MediaLibrary::createAllTriggers()
     Movie::createIndexes( dbConn );
     parser::Task::createIndex( dbConn );
     Bookmark::createIndexes( dbConn );
+    Chapter::createIndexes( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()

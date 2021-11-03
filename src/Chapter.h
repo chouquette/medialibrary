@@ -38,6 +38,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Chapter::*const PrimaryKey;
     };
+    enum class Indexes : uint8_t
+    {
+        MediaId,
+    };
 
     Chapter( MediaLibraryPtr ml, sqlite::Row& row );
     Chapter( MediaLibraryPtr ml, int64_t offset, int64_t duration,
@@ -49,7 +53,10 @@ public:
     virtual int64_t duration() const override;
 
     static void createTable( sqlite::Connection* dbConn );
+    static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Chapter> create( MediaLibraryPtr ml, int64_t offset,
                                             int64_t duration, std::string name,
