@@ -1,5 +1,6 @@
 bench_requests_srcs = [
   'BenchAlbumRequests.cpp',
+  'BenchMediaRequests.cpp',
   'main.cpp',
   'BenchRequestsCommon.cpp'
 ]
