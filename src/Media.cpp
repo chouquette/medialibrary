@@ -1892,9 +1892,14 @@ std::string Media::index( Indexes index, uint32_t dbModel )
                             " ON " + Table::Name + "(last_played_date, "
                                 "real_last_played_date, insertion_date)";
             }
+            if ( dbModel == 33 )
+            {
+                return "CREATE INDEX " + indexName( index, dbModel ) +
+                        " ON " + Table::Name + "(last_played_date, "
+                            "insertion_date)";
+            }
             return "CREATE INDEX " + indexName( index, dbModel ) +
-                    " ON " + Table::Name + "(last_played_date, "
-                        "insertion_date)";
+                    " ON " + Table::Name + "(insertion_date)";
         case Indexes::Folder:
             assert( dbModel >= 22 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
