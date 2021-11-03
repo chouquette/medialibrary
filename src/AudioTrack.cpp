@@ -116,6 +116,8 @@ void AudioTrack::createIndexes(sqlite::Connection* dbConnection)
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::MediaId, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::AttachedFileId, Settings::DbModelVersion ) );
 }
 
 std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
@@ -161,27 +163,47 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
 
 std::string AudioTrack::index( AudioTrack::Indexes index, uint32_t dbModel )
 {
-    assert( index == Indexes::MediaId );
-    return "CREATE INDEX " + indexName( index, dbModel ) + " ON "
-            + Table::Name + "(media_id)";
+    switch ( index )
+    {
+        case AudioTrack::Indexes::MediaId:
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON "
+                    + Table::Name + "(media_id)";
+        case Indexes::AttachedFileId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON "
+                    + Table::Name + "(attached_file_id)";
+    }
+    return "<invalid request>";
 }
 
-std::string AudioTrack::indexName( Indexes index, uint32_t )
+std::string AudioTrack::indexName( Indexes index, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( index );
+    UNUSED_IN_RELEASE( dbModel );
 
-    assert( index == Indexes::MediaId );
-    return "audio_track_media_idx";
+    switch ( index )
+    {
+        case AudioTrack::Indexes::MediaId:
+            return "audio_track_media_idx";
+        case Indexes::AttachedFileId:
+            assert( dbModel >= 34 );
+            return "audio_track_attached_file_idx";
+    }
+    return "<invalid request>";
 }
 
 bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
 {
+    auto checkIndex = [ml]( Indexes idx ) {
+        return sqlite::Tools::checkIndexStatement( ml->getConn(),
+             index( idx, Settings::DbModelVersion ),
+             indexName( idx, Settings::DbModelVersion ) );
+    };
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkIndexStatement( ml->getConn(),
-                index( Indexes::MediaId, Settings::DbModelVersion ),
-                indexName( Indexes::MediaId, Settings::DbModelVersion ) );
+           checkIndex( Indexes::MediaId ) &&
+           checkIndex( Indexes::AttachedFileId );
 }
 
 std::shared_ptr<AudioTrack> AudioTrack::create( MediaLibraryPtr ml, std::string codec,

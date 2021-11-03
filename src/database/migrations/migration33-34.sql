@@ -90,3 +90,4 @@ Genre::trigger( Genre::Triggers::DeleteEmpty, 34 ),
 
 // New indexes
 Album::index( Album::Indexes::NbTracks, 34 ),
+AudioTrack::index( AudioTrack::Indexes::AttachedFileId, 34 ),

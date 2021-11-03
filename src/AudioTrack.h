@@ -41,6 +41,7 @@ class AudioTrack : public IAudioTrack, public DatabaseHelpers<AudioTrack>
         enum class Indexes : uint8_t
         {
             MediaId,
+            AttachedFileId,
         };
 
         AudioTrack(MediaLibraryPtr ml, sqlite::Row& row );
