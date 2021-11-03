@@ -38,6 +38,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Bookmark::*const PrimaryKey;
     };
+    enum class Indexes : uint8_t
+    {
+        MediaId,
+    };
 
     Bookmark( MediaLibraryPtr ml, int64_t time, int64_t mediaId );
     Bookmark( MediaLibraryPtr ml, sqlite::Row& row );
@@ -54,7 +58,10 @@ public:
     virtual bool move( int64_t newTime ) override;
 
     static void createTable( sqlite::Connection* dbConn );
+    static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<Bookmark> create(MediaLibraryPtr ml, int64_t time, int64_t mediaId );
     static bool remove( MediaLibraryPtr ml, int64_t time, int64_t mediaId );

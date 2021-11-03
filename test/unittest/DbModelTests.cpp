@@ -102,6 +102,7 @@ namespace
         "album_nb_tracks_idx",
         "audio_track_attached_file_idx",
         "audio_track_media_idx",
+        "bookmark_media_id_idx",
         "file_folder_id_index",
         "file_media_id_index",
         "folder_device_id_idx",

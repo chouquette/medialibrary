@@ -145,6 +145,12 @@ void Bookmark::createTable(sqlite::Connection* dbConn)
         sqlite::Tools::executeRequest( dbConn, req );
 }
 
+void Bookmark::createIndexes(sqlite::Connection* dbConnection)
+{
+    sqlite::Tools::executeRequest( dbConnection, index( Indexes::MediaId,
+                                                        Settings::DbModelVersion ) );
+}
+
 std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( tableName );
@@ -172,11 +178,38 @@ std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
     return req;
 }
 
-bool Bookmark::checkDbModel(MediaLibraryPtr ml)
+std::string Bookmark::index( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                    Table::Name + "(media_id)";
+    }
+    return "<invalid request>";
+}
+
+std::string Bookmark::indexName( Indexes index, uint32_t dbModel )
+{
+    UNUSED_IN_RELEASE( dbModel );
+
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            assert( dbModel >= 34 );
+            return "bookmark_media_id_idx";
+    }
+    return "<invalid request>";
+}
+
+bool Bookmark::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
-                                       Table::Name );
+                                       Table::Name ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                 index( Indexes::MediaId, Settings::DbModelVersion ),
+                 indexName( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<Bookmark> Bookmark::create( MediaLibraryPtr ml, int64_t time,
