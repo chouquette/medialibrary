@@ -94,6 +94,7 @@ class Media : public IMedia,
             Duration,
             ReleaseDate,
             PlayCount,
+            Title,
         };
 
         // Those should be private, however the standard states that the expression

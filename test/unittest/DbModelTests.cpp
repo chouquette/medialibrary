@@ -118,6 +118,7 @@ namespace
         "media_last_pos_time_idx",
         "media_play_count_idx",
         "media_release_date_idx",
+        "media_title_idx",
         "media_types_idx",
         "movie_media_idx",
         "parent_folder_id_idx",
