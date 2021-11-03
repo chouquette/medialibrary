@@ -1986,7 +1986,9 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkIndex( ml->getConn(), Indexes::Types ) &&
             checkIndex( ml->getConn(), Indexes::LastUsageDate ) &&
             checkIndex( ml->getConn(), Indexes::Folder ) &&
-            checkIndex( ml->getConn(), Indexes::MediaGroup );
+            checkIndex( ml->getConn(), Indexes::MediaGroup ) &&
+            checkIndex( ml->getConn(), Indexes::Progress ) &&
+            checkIndex( ml->getConn(), Indexes::AlbumTrack );
 }
 
 bool Media::addLabel( LabelPtr label )
