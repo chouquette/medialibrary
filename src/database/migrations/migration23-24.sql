@@ -143,4 +143,4 @@ ShowEpisode::schema( ShowEpisode::Table::Name, 24 ),
 
 Show::trigger( Show::Triggers::IncrementNbEpisode, 24 ),
 Show::trigger( Show::Triggers::DecrementNbEpisode, 24 ),
-ShowEpisode::index( ShowEpisode::Indexes::MediaIdShowId, 24 ),
+ShowEpisode::index( ShowEpisode::Indexes::MediaId, 24 ),

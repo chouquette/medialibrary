@@ -131,7 +131,9 @@ void ShowEpisode::createTable( sqlite::Connection* dbConnection )
 void ShowEpisode::createIndexes( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
-                                   index( Indexes::MediaIdShowId, Settings::DbModelVersion ) );
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::ShowId, Settings::DbModelVersion ) );
 }
 
 std::string ShowEpisode::schema( const std::string& tableName, uint32_t dbModel )
@@ -175,17 +177,36 @@ std::string ShowEpisode::schema( const std::string& tableName, uint32_t dbModel 
 
 std::string ShowEpisode::index( Indexes index, uint32_t dbModel )
 {
-    assert( index == Indexes::MediaIdShowId );
-    return "CREATE INDEX " + indexName( index, dbModel ) +
-           " ON " + Table::Name + "(media_id, show_id)";
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            if ( dbModel < 34 )
+            {
+                return "CREATE INDEX " + indexName( index, dbModel ) +
+                       " ON " + Table::Name + "(media_id, show_id)";
+            }
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                   " ON " + Table::Name + "(media_id)";
+        case Indexes::ShowId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                   " ON " + Table::Name + "(show_id)";
+    }
+    return "<invalid request>";
 }
 
-std::string ShowEpisode::indexName( Indexes index, uint32_t )
+std::string ShowEpisode::indexName( Indexes index, uint32_t dbModel )
 {
-    UNUSED_IN_RELEASE( index );
-
-    assert( index == Indexes::MediaIdShowId );
-    return "show_episode_media_show_idx";
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            if ( dbModel < 34 )
+                return "show_episode_media_show_idx";
+            return "show_episode_media_idx";
+        case Indexes::ShowId:
+            return "show_episode_show_id_idx";
+    }
+    return "<invalid request>";
 }
 
 bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
@@ -194,8 +215,11 @@ bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
            sqlite::Tools::checkIndexStatement( ml->getConn(),
-                index( Indexes::MediaIdShowId, Settings::DbModelVersion ),
-                indexName( Indexes::MediaIdShowId, Settings::DbModelVersion ) );
+                index( Indexes::MediaId, Settings::DbModelVersion ),
+                indexName( Indexes::MediaId, Settings::DbModelVersion ) ) &&
+            sqlite::Tools::checkIndexStatement( ml->getConn(),
+                 index( Indexes::ShowId, Settings::DbModelVersion ),
+                 indexName( Indexes::ShowId, Settings::DbModelVersion ) );
 }
 
 std::shared_ptr<ShowEpisode> ShowEpisode::create( MediaLibraryPtr ml,

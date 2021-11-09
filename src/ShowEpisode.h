@@ -41,7 +41,8 @@ public:
     };
     enum class Indexes : uint8_t
     {
-        MediaIdShowId,
+        MediaId,
+        ShowId,
     };
 
     ShowEpisode( MediaLibraryPtr ml, sqlite::Row& row );

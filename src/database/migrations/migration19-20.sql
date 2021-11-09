@@ -275,7 +275,7 @@ Album::index( Album::Indexes::ArtistId, 20 ),
 AlbumTrack::index( AlbumTrack::Indexes::AlbumGenreArtist, 20 ),
 AlbumTrack::index( AlbumTrack::Indexes::MediaArtistGenreAlbum, 20 ),
 
-ShowEpisode::index( ShowEpisode::Indexes::MediaIdShowId, 20 ),
+ShowEpisode::index( ShowEpisode::Indexes::MediaId, 20 ),
 
 Artist::trigger( Artist::Triggers::DeleteArtistsWithoutTracks, 20 ),
 Artist::trigger( Artist::Triggers::HasAlbumRemaining, 20 ),
