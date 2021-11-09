@@ -115,6 +115,7 @@ namespace
         "media_duration_idx",
         "media_filename_idx",
         "media_folder_id_idx",
+        "media_genre_id_idx",
         "media_group_creation_date",
         "media_group_duration",
         "media_group_forced_singleton",

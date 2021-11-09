@@ -1453,6 +1453,9 @@ void Media::createIndexes( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    index( Indexes::FileName,
                                           Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   index( Indexes::GenreId,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Media::schema( const std::string& tableName, uint32_t dbModel )
@@ -1951,6 +1954,10 @@ std::string Media::index( Indexes index, uint32_t dbModel )
             assert( dbModel >= 34 );
             return "CREATE INDEX " + indexName( index, dbModel ) +
                     " ON " + Table::Name + "(filename)";
+        case Indexes::GenreId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(genre_id)";
         default:
             assert( !"Invalid index provided" );
     }
@@ -2003,6 +2010,9 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
         case Indexes::FileName:
             assert( dbModel >= 34 );
             return "media_filename_idx";
+        case Indexes::GenreId:
+            assert( dbModel >= 34 );
+            return "media_genre_id_idx";
         default:
             assert( !"Invalid index provided" );
     }
@@ -2050,7 +2060,8 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkIndex( ml->getConn(), Indexes::ReleaseDate ) &&
             checkIndex( ml->getConn(), Indexes::PlayCount ) &&
             checkIndex( ml->getConn(), Indexes::Title ) &&
-            checkIndex( ml->getConn(), Indexes::FileName );
+            checkIndex( ml->getConn(), Indexes::FileName ) &&
+            checkIndex( ml->getConn(), Indexes::GenreId );
 }
 
 bool Media::addLabel( LabelPtr label )

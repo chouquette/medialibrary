@@ -96,6 +96,7 @@ class Media : public IMedia,
             PlayCount,
             Title,
             FileName,
+            GenreId,
         };
 
         // Those should be private, however the standard states that the expression
