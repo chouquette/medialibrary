@@ -1386,6 +1386,24 @@ static void FlushUserProvidedThumbnails( Tests* T )
     }
 }
 
+static void Lyrics( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file:///colors2/revolution_in_limbo.flac",
+                                 IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m );
+    ASSERT_EQ( "", m->lyrics() );
+
+    std::string lyrics{ "We didn't live, we only existed" };
+    auto res = m->setLyrics( lyrics );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( lyrics, m->lyrics() );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( lyrics, m->lyrics() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1444,6 +1462,7 @@ int main( int ac, char** av )
     ADD_TEST( FetchInProgress );
     ADD_TEST( ConvertToExternal );
     ADD_TEST( FlushUserProvidedThumbnails );
+    ADD_TEST( Lyrics );
 
     END_TESTS
 }

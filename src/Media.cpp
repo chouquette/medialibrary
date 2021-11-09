@@ -95,6 +95,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_trackNumber( row.extract<decltype(m_trackNumber)>() )
     , m_albumId( row.extract<decltype(m_albumId)>() )
     , m_discNumber( row.extract<decltype(m_discNumber)>() )
+    , m_lyrics( row.extract<decltype(m_lyrics)>() )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
@@ -1098,6 +1099,23 @@ uint32_t Media::discNumber() const
     return m_discNumber;
 }
 
+const std::string& Media::lyrics() const
+{
+    return m_lyrics;
+}
+
+bool Media::setLyrics( std::string lyrics )
+{
+    if ( lyrics == m_lyrics )
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET lyrics = ? "
+        " WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, lyrics, m_id ) == false )
+        return false;
+    m_lyrics = std::move( lyrics );
+    return true;
+}
+
 std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile )
 {
     bool artist = false;
@@ -1735,6 +1753,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "track_number UNSIGEND INTEGER,"
         "album_id UNSIGNED INTEGER,"
         "disc_number UNSIGNED INTEGER,"
+        "lyrics TEXT,"
         "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
             "(id_group) ON DELETE RESTRICT,"
         "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name

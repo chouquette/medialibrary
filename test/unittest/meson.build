@@ -634,6 +634,7 @@ media_tests = [
   'FetchInProgress',
   'ConvertToExternal',
   'FlushUserProvidedThumbnails',
+  'Lyrics',
 ]
 
 foreach t : media_tests

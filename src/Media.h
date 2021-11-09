@@ -293,6 +293,8 @@ class Media : public IMedia,
         virtual AlbumPtr album() override;
         virtual int64_t albumId() const override;
         virtual uint32_t discNumber() const override;
+        virtual const std::string& lyrics() const override;
+        bool setLyrics( std::string lyrics );
 
         static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
         static Query<IMedia> listInProgress( MediaLibraryPtr ml, Type type,
@@ -420,6 +422,7 @@ private:
         uint32_t m_trackNumber;
         int64_t m_albumId;
         uint32_t m_discNumber;
+        std::string m_lyrics;
 
         // Auto fetched related properties
         mutable ShowEpisodePtr m_showEpisode;

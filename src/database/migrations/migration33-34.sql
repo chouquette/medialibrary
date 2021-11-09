@@ -30,7 +30,7 @@
 Media::schema( Media::Table::Name, 34 ),
 
 "INSERT INTO " + Media::Table::Name +
-    " SELECT *, NULL, NULL, 0, NULL, 0 FROM " + Media::Table::Name + "_backup",
+    " SELECT *, NULL, NULL, 0, NULL, 0, NULL FROM " + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",
 

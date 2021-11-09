@@ -471,6 +471,10 @@ public:
      * @return Which disc this tracks appears on (or 0 if unspecified)
      */
     virtual uint32_t discNumber() const = 0;
+    /**
+     * @brief lyrics returns the lyrics associated with this media, if any
+     */
+    virtual const std::string& lyrics() const = 0;
 };
 
 }
