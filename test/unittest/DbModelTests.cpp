@@ -112,6 +112,7 @@ namespace
         "index_media_presence",
         "label_rel_media_id_idx",
         "media_album_track_idx",
+        "media_artist_id_idx",
         "media_duration_idx",
         "media_filename_idx",
         "media_folder_id_idx",

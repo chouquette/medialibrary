@@ -97,6 +97,7 @@ class Media : public IMedia,
             Title,
             FileName,
             GenreId,
+            ArtistId,
         };
 
         // Those should be private, however the standard states that the expression
