@@ -136,6 +136,7 @@ namespace
         "playlist_rel_media_id_idx",
         "show_episode_media_idx",
         "show_episode_show_id_idx",
+        "subtitle_track_attached_file_idx",
         "subtitle_track_media_idx",
         "task_parent_folder_id_idx",
         "thumbnail_link_index",

@@ -39,7 +39,8 @@ public:
     };
     enum class Indexes : uint8_t
     {
-        MediaId
+        MediaId,
+        AttachedFileId,
     };
 
     SubtitleTrack( MediaLibraryPtr ml, sqlite::Row& row );

@@ -100,6 +100,7 @@ Label::index( Label::Indexes::MediaId, 34 ),
 Artist::index( Artist::Indexes::MediaRelArtistId, 34 ),
 Playlist::index( Playlist::Indexes::PlaylistRelMediaId, 34 ),
 ShowEpisode::index( ShowEpisode::Indexes::ShowId, 34 ),
+SubtitleTrack::index( SubtitleTrack::Indexes::AttachedFileId, 34 ),
 
 // Renamed indexes
 "DROP INDEX " + ShowEpisode::indexName( ShowEpisode::Indexes::MediaId, 33 ),
