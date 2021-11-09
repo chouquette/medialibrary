@@ -445,6 +445,9 @@ void Task::createIndex( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::ParentFolderId,
                                           Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::FileId,
+                                          Settings::DbModelVersion ) );
 }
 
 std::string Task::schema( const std::string& tableName, uint32_t dbModel )
@@ -616,22 +619,36 @@ std::string Task::triggerName( Triggers trigger, uint32_t dbModel )
     return "delete_playlist_linking_tasks";
 }
 
-std::string Task::index(Task::Indexes index, uint32_t dbModel)
+std::string Task::index( Task::Indexes index, uint32_t dbModel )
 {
-    assert( index == Indexes::ParentFolderId );
-    assert( dbModel >= 24 );
-    return "CREATE INDEX " + indexName( index, dbModel ) +
-            " ON " + Table::Name + "(parent_folder_id)";
+    switch ( index )
+    {
+        case Indexes::ParentFolderId:
+            assert( dbModel >= 24 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(parent_folder_id)";
+        case Indexes::FileId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + Table::Name + "(file_id)";
+    }
+    return "<invalid request>";
 }
 
 std::string Task::indexName( Task::Indexes index, uint32_t dbModel )
 {
-    UNUSED_IN_RELEASE( index );
     UNUSED_IN_RELEASE( dbModel );
 
-    assert( index == Indexes::ParentFolderId );
-    assert( dbModel >= 24 );
-    return "task_parent_folder_id_idx";
+    switch ( index )
+    {
+        case Indexes::ParentFolderId:
+            assert( dbModel >= 24 );
+            return "task_parent_folder_id_idx";
+        case Indexes::FileId:
+            assert( dbModel >= 34 );
+            return "task_file_id_idx";
+    }
+    return "<invalid request>";
 }
 
 bool Task::checkDbModel( MediaLibraryPtr ml )

@@ -71,6 +71,7 @@ public:
     enum class Indexes : uint8_t
     {
         ParentFolderId,
+        FileId,
     };
 
     enum class Type : uint8_t
