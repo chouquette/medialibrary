@@ -287,6 +287,7 @@ gen-bench-db:
     - cd build && ninja
     - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples
     - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
+    - test $(sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.lint fkey-indexes' | wc -l) -eq 0
     - mv "$MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db" "$CI_PROJECT_DIR/bench.$BENCH_DB_SUFFIX.db"
   artifacts:
     when: on_success
