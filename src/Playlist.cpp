@@ -546,6 +546,8 @@ void Playlist::createIndexes( sqlite::Connection* dbConn )
                                                   Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistIdPosition,
                                                   Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistRelMediaId,
+                                                  Settings::DbModelVersion ) );
 }
 
 std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
@@ -986,6 +988,12 @@ std::string Playlist::index( Indexes index, uint32_t dbModel )
             return "CREATE INDEX " + indexName( index, dbModel ) +
                    " ON " + MediaRelationTable::Name + "(playlist_id,position)";
         }
+        case Indexes::PlaylistRelMediaId:
+        {
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                   " ON " + MediaRelationTable::Name + "(media_id)";
+        }
 
         default:
             assert( !"Invalid index provided" );
@@ -1010,7 +1018,11 @@ std::string Playlist::indexName( Indexes index, uint32_t dbModel )
             assert( dbModel >= 16 );
             return "playlist_position_pl_id_index";
         }
-
+        case Indexes::PlaylistRelMediaId:
+        {
+            assert( dbModel >= 34 );
+            return "playlist_rel_media_id_idx";
+        }
         default:
             assert( !"Invalid index provided" );
     }
@@ -1051,7 +1063,8 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaChange ) &&
             checkIndex( ml->getConn(), Indexes::FileId ) &&
-            checkIndex( ml->getConn(), Indexes::PlaylistIdPosition );
+            checkIndex( ml->getConn(), Indexes::PlaylistIdPosition ) &&
+            checkIndex( ml->getConn(), Indexes::PlaylistRelMediaId );
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,

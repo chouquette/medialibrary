@@ -133,6 +133,7 @@ namespace
         "parent_folder_id_idx",
         "playlist_file_id",
         "playlist_position_pl_id_index",
+        "playlist_rel_media_id_idx",
         "show_episode_media_show_idx",
         "subtitle_track_media_idx",
         "task_parent_folder_id_idx",

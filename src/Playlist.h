@@ -72,7 +72,8 @@ public:
     enum class Indexes : uint8_t
     {
         FileId,
-        PlaylistIdPosition
+        PlaylistIdPosition,
+        PlaylistRelMediaId,
     };
 
     // Contains the backup date as the index, and a vector of playlist files as values
