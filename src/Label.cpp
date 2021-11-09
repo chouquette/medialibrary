@@ -124,6 +124,29 @@ std::string Label::triggerName( Triggers trigger, uint32_t )
     return "delete_label_fts";
 }
 
+std::string Label::index(Label::Indexes index, uint32_t dbModel)
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                    " ON " + FileRelationTable::Name + "(media_id)";
+    }
+    return "<invalid request>";
+}
+
+std::string Label::indexName(Label::Indexes index, uint32_t dbModel)
+{
+    switch ( index )
+    {
+        case Indexes::MediaId:
+            assert( dbModel >= 34 );
+            return "label_rel_media_id_idx";
+    }
+    return "<invalid request>";
+}
+
 bool Label::checkDbModel( MediaLibraryPtr ml )
 {
     return sqlite::Tools::checkTableSchema( ml->getConn(),
@@ -134,7 +157,11 @@ bool Label::checkDbModel( MediaLibraryPtr ml )
                                        FileRelationTable::Name ) &&
            sqlite::Tools::checkTriggerStatement( ml->getConn(),
                  trigger( Triggers::DeleteFts, Settings::DbModelVersion ),
-                 triggerName( Triggers::DeleteFts, Settings::DbModelVersion ) );
+                 triggerName( Triggers::DeleteFts, Settings::DbModelVersion ) ) &&
+           sqlite::Tools::checkIndexStatement( ml->getConn(),
+                 index( Indexes::MediaId, Settings::DbModelVersion ),
+                 indexName( Indexes::MediaId, Settings::DbModelVersion ) );
+
 }
 
 void Label::createTable( sqlite::Connection* dbConnection )
@@ -151,6 +178,12 @@ void Label::createTriggers( sqlite::Connection* dbConnection )
 {
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
+}
+
+void Label::createIndexes( sqlite::Connection* dbConnection )
+{
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaId, Settings::DbModelVersion ) );
 }
 
 }

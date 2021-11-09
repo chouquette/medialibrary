@@ -47,6 +47,10 @@ class Label : public ILabel, public DatabaseHelpers<Label>
         {
             DeleteFts,
         };
+        enum class Indexes : uint8_t
+        {
+            MediaId,
+        };
 
         Label( MediaLibraryPtr ml, sqlite::Row& row );
         Label( MediaLibraryPtr ml, const std::string& name );
@@ -60,9 +64,12 @@ class Label : public ILabel, public DatabaseHelpers<Label>
         static std::string schema( const std::string& tableName, uint32_t dbModel );
         static std::string trigger( Triggers trigger, uint32_t dbModel );
         static std::string triggerName( Triggers trigger, uint32_t dbModel );
+        static std::string index( Indexes index, uint32_t dbModel );
+        static std::string indexName( Indexes index, uint32_t dbModel );
         static bool checkDbModel( MediaLibraryPtr ml );
         static void createTable( sqlite::Connection* dbConnection );
         static void createTriggers( sqlite::Connection* dbConnection );
+        static void createIndexes( sqlite::Connection* dbConnection );
 
     private:
         MediaLibraryPtr m_ml;

@@ -110,6 +110,7 @@ namespace
         "folder_device_id_idx",
         "index_last_played_date",
         "index_media_presence",
+        "label_rel_media_id_idx",
         "media_album_track_idx",
         "media_duration_idx",
         "media_filename_idx",
