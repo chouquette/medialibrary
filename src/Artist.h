@@ -63,6 +63,10 @@ public:
         InsertFts,
         DeleteFts,
     };
+    enum class Indexes : uint8_t
+    {
+        MediaRelArtistId,
+    };
 
     Artist( MediaLibraryPtr ml, sqlite::Row& row );
     Artist( MediaLibraryPtr ml, std::string name );
@@ -110,9 +114,12 @@ public:
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
+    static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModelVersion );
     static std::string trigger( Triggers trigger, uint32_t dbModelVersion );
     static std::string triggerName( Triggers trigger, uint32_t dbModelVersion );
+    static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool createDefaultArtists( sqlite::Connection* dbConnection );
     static std::shared_ptr<Artist> create( MediaLibraryPtr ml, std::string name );

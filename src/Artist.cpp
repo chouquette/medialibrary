@@ -336,6 +336,13 @@ void Artist::createTriggers( sqlite::Connection* dbConnection )
                                             Settings::DbModelVersion ) );
 }
 
+void Artist::createIndexes(sqlite::Connection* dbConnection)
+{
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::MediaRelArtistId,
+                                          Settings::DbModelVersion ) );
+}
+
 std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersion )
 {
     if ( tableName == FtsTable::Name )
@@ -622,6 +629,31 @@ std::string Artist::triggerName( Triggers trigger, uint32_t dbModelVersion )
     return "<invalid request>";
 }
 
+std::string Artist::index( Indexes index, uint32_t dbModel )
+{
+    switch ( index )
+    {
+        case Indexes::MediaRelArtistId:
+            assert( dbModel >= 34 );
+            return "CREATE INDEX " + indexName( index, dbModel ) +
+                   " ON " + MediaRelationTable::Name + "(artist_id)";
+    }
+    return "<invalid request>";
+}
+
+std::string Artist::indexName( Indexes index, uint32_t dbModel )
+{
+    UNUSED_IN_RELEASE( dbModel );
+
+    switch ( index )
+    {
+        case Indexes::MediaRelArtistId:
+            assert( dbModel >= 34 );
+            return "artist_media_rel_artist_id_idx";
+    }
+    return "<invalid request>";
+}
+
 bool Artist::checkDbModel(MediaLibraryPtr ml)
 {
     if ( sqlite::Tools::checkTableSchema( ml->getConn(),
@@ -640,6 +672,11 @@ bool Artist::checkDbModel(MediaLibraryPtr ml)
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
+    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
+        return sqlite::Tools::checkIndexStatement( dbConn,
+                                    index( i, Settings::DbModelVersion ),
+                                    indexName( i, Settings::DbModelVersion ) );
+    };
     return check( ml->getConn(), Triggers::HasTrackPresent ) &&
             check( ml->getConn(), Triggers::DeleteArtistsWithoutTracks ) &&
             check( ml->getConn(), Triggers::IncrementNbTracks ) &&
@@ -648,7 +685,8 @@ bool Artist::checkDbModel(MediaLibraryPtr ml)
             check( ml->getConn(), Triggers::DecrementNbAlbums ) &&
             check( ml->getConn(), Triggers::IncrementNbAlbums ) &&
             check( ml->getConn(), Triggers::InsertFts ) &&
-            check( ml->getConn(), Triggers::DeleteFts );
+            check( ml->getConn(), Triggers::DeleteFts ) &&
+            checkIndex( ml->getConn(), Indexes::MediaRelArtistId );
 }
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )

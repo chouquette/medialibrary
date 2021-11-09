@@ -394,6 +394,7 @@ void MediaLibrary::createAllTriggers()
     Album::createTriggers( dbConn );
     Album::createIndexes( dbConn );
     Artist::createTriggers( dbConn );
+    Artist::createIndexes( dbConn );
     Media::createTriggers( dbConn );
     Media::createIndexes( dbConn );
     File::createIndexes( dbConn );

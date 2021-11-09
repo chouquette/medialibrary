@@ -100,6 +100,7 @@ namespace
     const std::vector<const char*> expectedIndexes{
         "album_artist_id_idx",
         "album_nb_tracks_idx",
+        "artist_media_rel_artist_id_idx",
         "audio_track_attached_file_idx",
         "audio_track_media_idx",
         "bookmark_media_id_idx",
