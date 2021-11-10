@@ -932,6 +932,9 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     if ( currentThumbnail == nullptr )
         return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaModification( m_id );
     return true;
 }
 

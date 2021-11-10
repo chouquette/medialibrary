@@ -32,6 +32,7 @@
 #include "Media.h"
 #include "Thumbnail.h"
 #include "utils/Enums.h"
+#include "utils/ModificationsNotifier.h"
 #include "Deprecated.h"
 
 #include "database/SqliteTools.h"
@@ -205,6 +206,9 @@ bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
     if ( currentThumbnail == nullptr )
         return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyAlbumModification( m_id );
     return true;
 }
 

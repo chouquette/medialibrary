@@ -31,6 +31,7 @@
 #include "Media.h"
 #include "database/SqliteQuery.h"
 #include "utils/Enums.h"
+#include "utils/ModificationsNotifier.h"
 #include "Deprecated.h"
 
 namespace medialibrary
@@ -173,6 +174,9 @@ bool Genre::setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
     if ( takeOwnership == true )
         m_thumbnails[thumbnailIdx]->relocate();
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyGenreModification( m_id );
     return true;
 }
 
