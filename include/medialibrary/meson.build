@@ -1,6 +1,5 @@
 medialib_headers = [
 	'IAlbum.h',
-	'IAlbumTrack.h',
 	'IArtist.h',
 	'IAudioTrack.h',
 	'IBookmark.h',

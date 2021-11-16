@@ -32,7 +32,6 @@
 #include "medialibrary/IAlbum.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMedia.h"
-#include "medialibrary/IAlbumTrack.h"
 #include "medialibrary/IAudioTrack.h"
 #include "medialibrary/IVideoTrack.h"
 #include "medialibrary/IGenre.h"
