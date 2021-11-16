@@ -28,7 +28,6 @@ namespace medialibrary
 {
 
 class IAlbum;
-class IAlbumTrack;
 class IAudioTrack;
 class IBookmark;
 class IChapter;
@@ -63,7 +62,6 @@ class IFileSystemFactory;
 }
 
 using AlbumPtr = std::shared_ptr<IAlbum>;
-using AlbumTrackPtr = std::shared_ptr<IAlbumTrack>;
 using ArtistPtr = std::shared_ptr<IArtist>;
 using AudioTrackPtr = std::shared_ptr<IAudioTrack>;
 using BookmarkPtr = std::shared_ptr<IBookmark>;
