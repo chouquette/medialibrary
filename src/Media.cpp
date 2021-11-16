@@ -929,9 +929,10 @@ bool Media::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
                                                    std::move( newThumbnail ),
                                                    Media::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Media );
-    auto res = currentThumbnail != nullptr;
+    if ( currentThumbnail == nullptr )
+        return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
-    return res;
+    return true;
 }
 
 bool Media::removeThumbnail( ThumbnailSizeType sizeType )

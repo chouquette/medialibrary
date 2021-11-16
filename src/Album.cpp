@@ -202,9 +202,10 @@ bool Album::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
                                                    std::move( newThumbnail ),
                                                    Album::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Album );
-    auto res = currentThumbnail != nullptr;
+    if ( currentThumbnail == nullptr )
+        return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
-    return res;
+    return true;
 }
 
 std::string Album::addRequestJoin( const QueryParameters* params,

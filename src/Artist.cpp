@@ -233,9 +233,10 @@ bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
                                                    std::move( newThumbnail ),
                                                    Artist::shouldUpdateThumbnail,
                                                    m_id, Thumbnail::EntityType::Artist );
-    auto res = currentThumbnail != nullptr;
+    if ( currentThumbnail == nullptr )
+        return false;
     m_thumbnails[thumbnailIdx] = std::move( currentThumbnail );
-    return res;
+    return true;
 }
 
 bool Artist::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType sizeType )
