@@ -397,7 +397,8 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          */
         if ( oldThumbnail->status() != ThumbnailStatus::Available )
         {
-            oldThumbnail->update( std::move( newThumbnail ) );
+            if ( oldThumbnail->update( std::move( newThumbnail ) ) == false )
+                return nullptr; 
             res = std::move( oldThumbnail );
         }
         else if ( shouldUpdateCb( *oldThumbnail ) == true )
@@ -417,7 +418,10 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
                 if ( oldThumbnail->update( std::move( newThumbnail ) ) == false )
                     return nullptr;
                 if ( oldThumbnail->origin() != newOrigin )
-                    oldThumbnail->updateLinkRecord( entityId, entityType, newOrigin );
+                {
+                    if ( oldThumbnail->updateLinkRecord( entityId, entityType, newOrigin ) == false )
+                        return nullptr;
+                }
                 res = std::move( oldThumbnail );
             }
             else
