@@ -35,7 +35,10 @@
 #include "logging/Logger.h"
 #include "utils/Url.h"
 #include "utils/XxHasher.h"
-#include "utils/Defer.h"
+
+#ifdef FORCE_ATTACHMENTS_API
+# include "utils/Defer.h"
+#endif
 
 #if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0) && !defined(FORCE_ATTACHMENTS_API)
 # include "utils/File.h"
