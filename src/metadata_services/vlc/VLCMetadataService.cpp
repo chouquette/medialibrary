@@ -37,7 +37,7 @@
 #include "utils/XxHasher.h"
 #include "utils/Defer.h"
 
-#ifndef USE_EMBEDDED_THUMBNAIL_API
+#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0) && !defined(FORCE_ATTACHMENTS_API)
 # include "utils/File.h"
 #endif
 
