@@ -24,8 +24,6 @@
 # include "config.h"
 #endif
 
-//#define XXH_NO_INLINE_HINTS 1
-
 #include "XxHasher.h"
 
 #define XXH_INLINE_ALL 1
