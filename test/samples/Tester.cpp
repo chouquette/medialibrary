@@ -520,6 +520,10 @@ void Tests::checkPlaylists( const rapidjson::Value& expectedPlaylists, std::vect
         {
             ASSERT_EQ( expectedPlaylist["nbItems"].GetUint(), items.size() );
         }
+        if ( expectedPlaylist.HasMember( "nbAudio" ) )
+        {
+            ASSERT_EQ( expectedPlaylist["nbAudio"].GetUint(), playlist->nbAudio() );
+        }
 
         if ( expectedPlaylist.HasMember( "items" ) )
         {
