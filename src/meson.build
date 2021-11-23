@@ -57,7 +57,7 @@ medialib_src = [
 ]
 
 if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
-  medialib_src += ['utils/xxhash/xxh_x86dispatch.cpp']
+  medialib_src += ['utils/xxhash/xxh_x86dispatch.c']
   add_project_arguments('-DXXHASH_DYNAMIC_DISPATCH=1', language: ['cpp'])
 endif
 
