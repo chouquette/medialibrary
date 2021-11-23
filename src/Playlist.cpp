@@ -1125,9 +1125,23 @@ bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
 
 bool Playlist::clearContent()
 {
+    auto t = m_ml->getConn()->newTransaction();
     const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id );
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id ) == false )
+        return false;
+    const std::string plReq = "UPDATE " + Table::Name + " SET "
+            "nb_video = 0, nb_present_video = 0,"
+            "nb_audio = 0, nb_present_audio = 0,"
+            "nb_unknown = 0, nb_present_unknown = 0,"
+            "duration = 0 "
+            "WHERE id_playlist = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), plReq, m_id ) == false )
+        return false;
+    t->commit();
+    m_nbVideo = m_nbPresentVideo = m_nbAudio = m_nbPresentAudio =
+            m_nbUnknown = m_nbPresentUnknown = m_duration = 0;
+    return true;
 }
 
 Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
