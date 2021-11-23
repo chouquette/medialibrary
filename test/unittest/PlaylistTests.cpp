@@ -530,20 +530,31 @@ static void RemoveMedia( PlaylistTests* T )
 
 static void ClearContent( PlaylistTests* T )
 {
-    auto m1 = T->ml->addMedia( "seaotter.mkv", IMedia::Type::Video );
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "seaotter.mkv", IMedia::Type::Video ) );
     auto m2 = T->ml->addMedia( "fluffyfurball.mp4", IMedia::Type::Video );
     auto pl2 = T->ml->createPlaylist( "playlist 2" );
+
+    m1->setDuration( 123 );
 
     T->pl->append( *m1 );
     pl2->append( *m2 );
 
     ASSERT_EQ( 1u, T->pl->media( nullptr )->count() );
     ASSERT_EQ( 1u, pl2->media( nullptr )->count() );
+    ASSERT_EQ( 123, T->pl->duration() );
+
+    auto pl = T->ml->playlist( T->pl->id() );
+    ASSERT_EQ( 123, pl->duration() );
+    ASSERT_EQ( 1u, pl->nbVideo() );
 
     T->pl->clearContent();
 
     ASSERT_EQ( 0u, T->pl->media( nullptr )->count() );
     ASSERT_EQ( 1u, pl2->media( nullptr )->count() );
+    pl = T->ml->playlist( T->pl->id() );
+    ASSERT_EQ( 0, pl->duration() );
+    ASSERT_EQ( 0u, pl->nbVideo() );
 }
 
 static void RemoveReAddMedia( PlaylistTests* T )
