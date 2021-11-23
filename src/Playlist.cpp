@@ -1103,11 +1103,22 @@ bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     // deletion of the associated task through the Task.playlist_id Playlist.id_playlist
     // foreign key, and therefor they wouldn't be rescanned.
     // Instead, flush the playlist content.
-    const std::string req = "DELETE FROM " + Playlist::MediaRelationTable::Name +
-            " WHERE playlist_id IN ("
+    auto t = ml->getConn()->newTransaction();
+    const std::string req = "DELETE FROM " +
+            Playlist::MediaRelationTable::Name + " WHERE playlist_id IN ("
             "SELECT id_playlist FROM " + Playlist::Table::Name + " WHERE "
             "file_id IS NOT NULL)";
-    return sqlite::Tools::executeDelete( ml->getConn(), req );
+    const std::string counterReq = "UPDATE " + Table::Name + " SET "
+            "nb_video = 0, nb_present_video = 0,"
+            "nb_audio = 0, nb_present_audio = 0,"
+            "nb_unknown = 0, nb_present_unknown = 0, duration = 0 "
+            "WHERE file_id IS NOT NULL";
+    if ( sqlite::Tools::executeDelete( ml->getConn(), req ) == false ||
+         sqlite::Tools::executeUpdate( ml->getConn(), counterReq ) == false )
+        return false;
+
+    t->commit();
+    return true;
 }
 
 bool Playlist::clearContent()
