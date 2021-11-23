@@ -201,6 +201,16 @@ Status LinkService::linkToMedia( IItem &item )
         {
             media->addAudioTrack( tr.codec, tr.bitrate, tr.a.rate, tr.a.nbChannels,
                                   tr.language, tr.description, item.fileId() );
+            /*
+             * In 0.10.x branch, the database has a
+             * UNIQUE(media_id, attached_file_id) constraint, which would trigger
+             * if we were to add more than a single track for each attached file.
+             * Since we can't remove that constraint in the stable branch, we
+             * work around by pretending there's only a single track in each
+             * attached file.
+             * See #392
+             */
+            break;
         }
         t->commit();
     }
