@@ -8,6 +8,7 @@
             "name": "playlist.m3u8",
             "nbItems": 3,
             "nbAudio": 3,
+            "nbUnknownDuration": 0,
             "items": [
                 {
                     "title": "Track 3",

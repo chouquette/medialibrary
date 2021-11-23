@@ -321,15 +321,16 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
                 " nb_video = nb_video + ?, nb_present_video = nb_present_video + ?,"
                 " nb_audio = nb_audio + ?, nb_present_audio = nb_present_audio + ?,"
                 " nb_unknown = nb_unknown + ?, nb_present_unknown = nb_present_unknown + ?,"
-                " duration = duration + ?"
+                " duration = duration + ?, nb_duration_unknown = nb_duration_unknown + ?"
                 " WHERE id_playlist = ?";
         auto isPresent = media.isPresent();
         auto duration = media.duration() > 0 ? media.duration() : 0;
+        auto unknownDurationIncrement = duration <= 0 ? 1 : 0;
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
                                            videoIncrement, videoIncrement & isPresent,
                                            audioIncrement, audioIncrement & isPresent,
                                            unknownIncrement, unknownIncrement & isPresent,
-                                           duration, m_id ) == false )
+                                           duration, unknownDurationIncrement, m_id ) == false )
             return false;
 
         m_nbVideo += videoIncrement;
@@ -339,6 +340,7 @@ bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateC
         m_nbUnknown += unknownIncrement;
         m_nbPresentUnknown += unknownIncrement & isPresent;
         m_duration += duration;
+        m_nbUnknownDuration += unknownDurationIncrement;
     }
     t->commit();
     return true;
@@ -381,14 +383,15 @@ bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateC
             " nb_video = nb_video - ?, nb_present_video = nb_present_video - ?,"
             " nb_audio = nb_audio - ?, nb_present_audio = nb_present_audio - ?,"
             " nb_unknown = nb_unknown - ?, nb_present_unknown = nb_present_unknown - ?,"
-            " duration = duration - ?"
+            " duration = duration - ?, nb_duration_unknown = nb_duration_unknown - ?"
             " WHERE id_playlist = ?";
     auto duration = media->duration() > 0 ? media->duration() : 0;
+    auto unknownDurationDecrement = duration <= 0 ? 1 : 0;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
                                        videoDecrement, videoDecrement & isPresent,
                                        audioDecrement, audioDecrement & isPresent,
                                        unknownDecrement, unknownDecrement & isPresent,
-                                       duration, m_id ) == false )
+                                       duration, unknownDurationDecrement, m_id ) == false )
         return false;
     if ( t != nullptr )
         t->commit();
@@ -400,6 +403,7 @@ bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateC
     m_nbUnknown -= unknownDecrement;
     m_nbPresentUnknown -= unknownDecrement & isPresent;
     m_duration -= duration;
+    m_nbUnknownDuration -= unknownDurationDecrement;
 
     return true;
 }
@@ -635,8 +639,14 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
             "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
                 "CHECK(nb_present_unknown <= nb_unknown),"
             "duration UNSIGNED INT NOT NULL DEFAULT 0,"
-            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
-                "CHECK(nb_duration_unknown <= (nb_video + nb_audio + nb_unknown)),"
+            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+            /*
+             * Ideally we should check that nb_duration_unknown never increases
+             * over nb_video + nb_audio + nb_unknown but we can't enforce this
+             * unless we had a way to atomically update all fields at once,
+             * which we can't AFAIK (a transaction doesn't work, the CHECK would
+             * still fire between updates
+             */
             "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
             + "(id_file) ON DELETE CASCADE"
         ")";
@@ -803,6 +813,50 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                                     " WHERE media_id = old.id_media;"
                            " END";
             }
+            if ( dbModel < 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER DELETE ON " + Media::Table::Name +
+                       " WHEN old.nb_playlists > 0"
+                       " BEGIN"
+                           " UPDATE " + Table::Name + " SET "
+                               "nb_video = nb_video -"
+                                   " IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       ", items.count, 0),"
+                               "nb_present_video = nb_present_video -"
+                                   " IIF( old.is_present != 0, IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       ", items.count, 0), 0),"
+                               "nb_audio = nb_audio -"
+                                   " IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       ", items.count, 0),"
+                               "nb_present_audio = nb_present_audio -"
+                                   " IIF( old.is_present != 0, IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       ", items.count, 0), 0),"
+                               "nb_unknown = nb_unknown -"
+                                   " IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
+                                       ", items.count, 0),"
+                               "nb_present_unknown = nb_present_unknown -"
+                                   " IIF( old.is_present != 0, IIF(old.type = " +
+                                       utils::enum_to_string( IMedia::Type::Unknown ) +
+                                       ", items.count, 0), 0),"
+                               " duration = duration - items.dur"
+                               " FROM (SELECT COUNT(media_id) AS count,"
+                                    " TOTAL(IIF(old.duration > 0, old.duration, 0)) AS dur,"
+                                    " playlist_id"
+                                    " FROM " + MediaRelationTable::Name +
+                                        " WHERE media_id = old.id_media"
+                                        " GROUP BY playlist_id"
+                                    ") AS items"
+                               " WHERE id_playlist = items.playlist_id;"
+                           " DELETE FROM " + MediaRelationTable::Name +
+                                " WHERE media_id = old.id_media;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Media::Table::Name +
                    " WHEN old.nb_playlists > 0"
@@ -832,7 +886,9 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                                " IIF( old.is_present != 0, IIF(old.type = " +
                                    utils::enum_to_string( IMedia::Type::Unknown ) +
                                    ", items.count, 0), 0),"
-                           " duration = duration - items.dur"
+                           " duration = duration - items.dur,"
+                           " nb_duration_unknown = nb_duration_unknown -"
+                               "IIF(items.dur <= 0, items.count, 0)"
                            " FROM (SELECT COUNT(media_id) AS count,"
                                 " TOTAL(IIF(old.duration > 0, old.duration, 0)) AS dur,"
                                 " playlist_id"
@@ -863,14 +919,32 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
         }
         case Triggers::UpdateDurationOnMediaChange:
             assert( dbModel >= 33 );
+            if ( dbModel < 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF duration ON " + Media::Table::Name +
+                       " WHEN old.duration != new.duration"
+                       " BEGIN"
+                           " UPDATE " + Table::Name +
+                            " SET duration = duration "
+                            " - IIF(old.duration > 0, old.duration, 0)"
+                            " + IIF(new.duration > 0, new.duration, 0)"
+                            " WHERE " + Table::PrimaryKeyColumn + " IN"
+                            " (SELECT DISTINCT playlist_id FROM " + MediaRelationTable::Name +
+                                " WHERE media_id = new.id_media);"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER UPDATE OF duration ON " + Media::Table::Name +
                    " WHEN old.duration != new.duration"
                    " BEGIN"
                        " UPDATE " + Table::Name +
-                        " SET duration = duration "
+                        " SET duration = duration"
                         " - IIF(old.duration > 0, old.duration, 0)"
-                        " + IIF(new.duration > 0, new.duration, 0)"
+                        " + IIF(new.duration > 0, new.duration, 0),"
+                        " nb_duration_unknown = nb_duration_unknown"
+                        " - IIF(old.duration <= 0, 1, 0)"
+                        " + IIF(new.duration <= 0, 1, 0)"
                         " WHERE " + Table::PrimaryKeyColumn + " IN"
                         " (SELECT DISTINCT playlist_id FROM " + MediaRelationTable::Name +
                             " WHERE media_id = new.id_media);"
