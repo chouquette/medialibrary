@@ -1,4 +1,4 @@
-project('medialibrary', 'cpp',
+project('medialibrary', ['cpp','c'],
         license: 'LGPLv2+',
         version: '0.11',
         default_options: [
