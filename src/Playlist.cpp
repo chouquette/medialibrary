@@ -383,7 +383,7 @@ bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateC
             " nb_unknown = nb_unknown - ?, nb_present_unknown = nb_present_unknown - ?,"
             " duration = duration - ?"
             " WHERE id_playlist = ?";
-    auto duration = media != nullptr && media->duration() > 0 ? media->duration() : 0;
+    auto duration = media->duration() > 0 ? media->duration() : 0;
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
                                        videoDecrement, videoDecrement & isPresent,
                                        audioDecrement, audioDecrement & isPresent,
