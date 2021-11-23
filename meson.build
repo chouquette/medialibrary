@@ -102,7 +102,6 @@ else
   libjpeg_dep = []
 endif
 
-
 if libvlc_dep.found()
     libvlcpp_dep = dependency('libvlcpp', required: false)
     if not libvlcpp_dep.found()
@@ -117,6 +116,8 @@ if libvlc_dep.found()
 else
     libvlcpp_dep = []
 endif
+
+libxxhash_dep = dependency('libxxhash', required: false)
 
 if get_option('force_attachment_api')
   if not libvlc_dep.found()

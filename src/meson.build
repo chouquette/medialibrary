@@ -62,6 +62,7 @@ if use_xxhash_dispatch
   add_project_arguments('-DXXHASH_DYNAMIC_DISPATCH=1', language: ['cpp'])
 endif
 
+if not libxxhash_dep.found()
 xxhash_lib = []
 if use_xxhash_dispatch
   xxhash_lib = static_library('xxhash',
@@ -70,6 +71,7 @@ if use_xxhash_dispatch
   libxxhash_dep = declare_dependency(link_with: xxhash_lib,
     include_directories: ['utils/xxhash/']
   )
+endif
 endif
 
 if libvlc_dep.found()
