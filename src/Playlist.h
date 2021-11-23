@@ -98,6 +98,7 @@ public:
     virtual uint32_t nbPresentAudio() const override;
     virtual uint32_t nbPresentUnknown() const override;
     virtual int64_t duration() const override;
+    virtual uint32_t nbDurationUnknown() const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
     virtual Query<IMedia> searchMedia( const std::string& pattern,
                                        const QueryParameters* params ) const override;
@@ -174,6 +175,7 @@ private:
     uint32_t m_nbPresentAudio;
     uint32_t m_nbPresentUnknown;
     int64_t m_duration;
+    uint32_t m_nbUnknownDuration;
 
     friend Playlist::Table;
 };

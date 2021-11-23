@@ -78,10 +78,19 @@ public:
     virtual uint32_t nbPresentUnknown() const = 0;
     ///
     /// \brief duration Returns the duration of the playlist
+    ///
     /// This is equal to the sum of the duration for all media belonging to
-    /// that playlist
+    /// that playlist.
+    /// Some media duration may not be known by the media library, in which case
+    /// \sa{nbDurationUnknown} will return a non-zero value.
     ///
     virtual int64_t duration() const = 0;
+    ///
+    /// \brief nbDurationUnknown Returns the number of media for which the duration
+    /// is unknown
+    ///
+    ///
+    virtual uint32_t nbDurationUnknown() const = 0;
     ///
     /// \brief media Returns the media contained in this playlist
     /// \param params A QueryParameters object or nullptr for the default params

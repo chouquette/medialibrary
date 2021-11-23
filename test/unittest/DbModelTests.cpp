@@ -695,6 +695,15 @@ static void Upgrade32to33( DbModel* T )
 static void Upgrade33to34( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v33.sql" );
+    auto pl = T->ml->playlist( 1 );
+    ASSERT_NON_NULL( pl );
+    ASSERT_EQ( pl->nbDurationUnknown(), 2u );
+    pl = T->ml->playlist( 2 );
+    ASSERT_NON_NULL( pl );
+    ASSERT_EQ( pl->nbDurationUnknown(), 3u );
+    pl = T->ml->playlist( 3 );
+    ASSERT_NON_NULL( pl );
+    ASSERT_EQ( pl->nbDurationUnknown(), 0u );
 }
 
 int main( int ac, char** av )

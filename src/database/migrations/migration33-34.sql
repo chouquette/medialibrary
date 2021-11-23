@@ -65,6 +65,39 @@ AudioTrack::schema( AudioTrack::Table::Name, 34 ),
 
 "DROP TABLE " + AudioTrack::Table::Name + "_backup",
 
+"CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
+"("
+    + Playlist::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "name TEXT COLLATE NOCASE,"
+    "file_id UNSIGNED INT DEFAULT NULL,"
+    "creation_date UNSIGNED INT NOT NULL,"
+    "artwork_mrl TEXT,"
+    "nb_video UNSIGNED INT NOT NULL DEFAULT 0,"
+    "nb_audio UNSIGNED INT NOT NULL DEFAULT 0,"
+    "nb_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+    "nb_present_video UNSIGNED INT NOT NULL DEFAULT 0,"
+    "nb_present_audio UNSIGNED INT NOT NULL DEFAULT 0,"
+    "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+    "duration UNSIGNED INT NOT NULL DEFAULT 0,"
+    "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+    + "(id_file) ON DELETE CASCADE"
+")",
+
+"INSERT INTO " + Playlist::Table::Name + "_backup "
+    "SELECT * FROM " + Playlist::Table::Name,
+
+"DROP TABLE " + Playlist::Table::Name,
+
+Playlist::schema( Playlist::Table::Name, 34 ),
+
+"INSERT INTO " + Playlist::Table::Name +
+    " SELECT *, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name + " mrt "
+        " INNER JOIN " + Media::Table::Name + " m ON m.id_media = mrt.media_id "
+        " WHERE m.duration <= 0 AND mrt.playlist_id = id_playlist)"
+    " FROM " + Playlist::Table::Name + "_backup",
+
+"DROP TABLE " + Playlist::Table::Name + "_backup",
+
 AudioTrack::index( AudioTrack::Indexes::MediaId, 34 ),
 
 Media::trigger( Media::Triggers::InsertFts, 34 ),
@@ -104,6 +137,11 @@ MediaGroup::trigger( MediaGroup::Triggers::RenameForcedSingleton, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaChange, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateDurationOnMediaDeletion, 34 ),
 MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 34 ),
+Playlist::trigger( Playlist::Triggers::InsertFts, 34 ),
+Playlist::trigger( Playlist::Triggers::UpdateFts, 34 ),
+Playlist::trigger( Playlist::Triggers::DeleteFts, 34 ),
+Playlist::index( Playlist::Indexes::FileId, 34 ),
+parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 34 ),
 
 // This trigger was automatically deleted with the AlbumTrack table
 Album::trigger( Album::Triggers::DeleteTrack, 34 ),

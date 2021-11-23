@@ -67,6 +67,7 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbPresentAudio( row.extract<decltype(m_nbPresentAudio)>() )
     , m_nbPresentUnknown( row.extract<decltype(m_nbPresentUnknown)>() )
     , m_duration( row.extract<decltype(m_duration)>() )
+    , m_nbUnknownDuration( row.extract<decltype(m_nbUnknownDuration)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -84,6 +85,7 @@ Playlist::Playlist( MediaLibraryPtr ml, std::string name )
     , m_nbPresentAudio( 0 )
     , m_nbPresentUnknown( 0 )
     , m_duration( 0 )
+    , m_nbUnknownDuration( 0 )
 {
 }
 
@@ -172,6 +174,11 @@ uint32_t Playlist::nbPresentUnknown() const
 int64_t Playlist::duration() const
 {
     return m_duration;
+}
+
+uint32_t Playlist::nbDurationUnknown() const
+{
+    return m_nbUnknownDuration;
 }
 
 Query<IMedia> Playlist::media( const QueryParameters* params ) const
@@ -588,6 +595,29 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_file) ON DELETE CASCADE"
             ")";
         }
+        if ( dbModel < 34 )
+        {
+            return "CREATE TABLE " + Table::Name +
+            "("
+                + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "name TEXT COLLATE NOCASE,"
+                "file_id UNSIGNED INT DEFAULT NULL,"
+                "creation_date UNSIGNED INT NOT NULL,"
+                "artwork_mrl TEXT,"
+                "nb_video UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_audio UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_present_video UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_video <= nb_video),"
+                "nb_present_audio UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_audio <= nb_audio),"
+                "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_unknown <= nb_unknown),"
+                "duration UNSIGNED INT NOT NULL DEFAULT 0,"
+                "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
+                + "(id_file) ON DELETE CASCADE"
+            ")";
+        }
         return "CREATE TABLE " + Table::Name +
         "("
             + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -605,6 +635,8 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
             "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
                 "CHECK(nb_present_unknown <= nb_unknown),"
             "duration UNSIGNED INT NOT NULL DEFAULT 0,"
+            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
+                "CHECK(nb_duration_unknown <= (nb_video + nb_audio + nb_unknown)),"
             "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
             + "(id_file) ON DELETE CASCADE"
         ")";
@@ -1124,7 +1156,8 @@ bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     const std::string counterReq = "UPDATE " + Table::Name + " SET "
             "nb_video = 0, nb_present_video = 0,"
             "nb_audio = 0, nb_present_audio = 0,"
-            "nb_unknown = 0, nb_present_unknown = 0, duration = 0 "
+            "nb_unknown = 0, nb_present_unknown = 0, duration = 0, "
+            "nb_duration_unknown = 0 "
             "WHERE file_id IS NOT NULL";
     if ( sqlite::Tools::executeDelete( ml->getConn(), req ) == false ||
          sqlite::Tools::executeUpdate( ml->getConn(), counterReq ) == false )
@@ -1145,13 +1178,14 @@ bool Playlist::clearContent()
             "nb_video = 0, nb_present_video = 0,"
             "nb_audio = 0, nb_present_audio = 0,"
             "nb_unknown = 0, nb_present_unknown = 0,"
-            "duration = 0 "
+            "duration = 0, nb_duration_unknown = 0 "
             "WHERE id_playlist = ?";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), plReq, m_id ) == false )
         return false;
     t->commit();
     m_nbVideo = m_nbPresentVideo = m_nbAudio = m_nbPresentAudio =
-            m_nbUnknown = m_nbPresentUnknown = m_duration = 0;
+            m_nbUnknown = m_nbPresentUnknown = m_duration =
+            m_nbUnknownDuration = 0;
     return true;
 }
 
