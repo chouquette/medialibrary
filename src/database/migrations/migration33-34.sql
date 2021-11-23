@@ -36,6 +36,37 @@ Media::schema( Media::Table::Name, 34 ),
 
 "DROP TABLE " + AlbumTrack::Table::Name,
 
+"CREATE TEMPORARY TABLE " + AudioTrack::Table::Name + "_backup"
+"("
+    + AudioTrack::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "codec TEXT,"
+    "bitrate UNSIGNED INTEGER,"
+    "samplerate UNSIGNED INTEGER,"
+    "nb_channels UNSIGNED INTEGER,"
+    "language TEXT,"
+    "description TEXT,"
+    "media_id UNSIGNED INT,"
+    "attached_file_id UNSIGNED INT,"
+    "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+        + "(id_media) ON DELETE CASCADE,"
+    "FOREIGN KEY(attached_file_id) REFERENCES " + File::Table::Name +
+        "(id_file) ON DELETE CASCADE"
+")",
+
+"INSERT INTO " + AudioTrack::Table::Name + "_backup "
+    "SELECT * FROM " + AudioTrack::Table::Name,
+
+"DROP TABLE " + AudioTrack::Table::Name,
+
+AudioTrack::schema( AudioTrack::Table::Name, 34 ),
+
+"INSERT INTO " + AudioTrack::Table::Name +
+    " SELECT * FROM " + AudioTrack::Table::Name + "_backup",
+
+"DROP TABLE " + AudioTrack::Table::Name + "_backup",
+
+AudioTrack::index( AudioTrack::Indexes::MediaId, 34 ),
+
 Media::trigger( Media::Triggers::InsertFts, 34 ),
 Media::trigger( Media::Triggers::UpdateFts, 34 ),
 Media::trigger( Media::Triggers::DeleteFts, 34 ),

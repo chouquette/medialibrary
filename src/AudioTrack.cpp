@@ -142,6 +142,26 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_media) ON DELETE CASCADE"
         ")";
     }
+    if ( dbModel < 34 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "(" +
+            Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "codec TEXT,"
+            "bitrate UNSIGNED INTEGER,"
+            "samplerate UNSIGNED INTEGER,"
+            "nb_channels UNSIGNED INTEGER,"
+            "language TEXT,"
+            "description TEXT,"
+            "media_id UNSIGNED INT,"
+            "attached_file_id UNSIGNED INT,"
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+                + "(id_media) ON DELETE CASCADE,"
+            "FOREIGN KEY(attached_file_id) REFERENCES " + File::Table::Name +
+                "(id_file) ON DELETE CASCADE,"
+            "UNIQUE(media_id, attached_file_id) ON CONFLICT FAIL"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "(" +
         Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -156,8 +176,7 @@ std::string AudioTrack::schema( const std::string& tableName, uint32_t dbModel )
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
             + "(id_media) ON DELETE CASCADE,"
         "FOREIGN KEY(attached_file_id) REFERENCES " + File::Table::Name +
-            "(id_file) ON DELETE CASCADE,"
-        "UNIQUE(media_id, attached_file_id) ON CONFLICT FAIL"
+            "(id_file) ON DELETE CASCADE"
     ")";
 }
 
