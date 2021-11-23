@@ -526,6 +526,8 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
 IMedia::Type MetadataAnalyzer::guessMediaType( const IItem &item ) const
 {
     auto ext = utils::file::extension( item.mrl() );
+    std::transform(cbegin( ext ), cend( ext ), begin( ext ),
+                   [](unsigned char c){ return tolower(c); } );
     if ( ext == "vob" || ext == "ts" || ext == "ogv" || ext == "mpg" ||
          ext == "ogm" || ext == "m2ts" || ext == "m2v" || ext == "mpeg" ||
          ext == "xvid" || ext == "ogx" )
