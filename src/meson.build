@@ -56,9 +56,20 @@ medialib_src = [
     'Deprecated.cpp',
 ]
 
-if host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
-  medialib_src += ['utils/xxhash/xxh_x86dispatch.c']
+use_xxhash_dispatch = host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
+
+if use_xxhash_dispatch
   add_project_arguments('-DXXHASH_DYNAMIC_DISPATCH=1', language: ['cpp'])
+endif
+
+xxhash_lib = []
+if use_xxhash_dispatch
+  xxhash_lib = static_library('xxhash',
+    ['utils/xxhash/xxh_x86dispatch.c']
+  )
+  libxxhash_dep = declare_dependency(link_with: xxhash_lib,
+    include_directories: ['utils/xxhash/']
+  )
 endif
 
 if libvlc_dep.found()
@@ -107,6 +118,7 @@ medialib = library('medialibrary', medialib_src,
         libvlc_dep, 
         libvlcpp_dep,
         threads_dep,
+        libxxhash_dep,
         macosx_dep,
     ],
     install: true,

@@ -31,7 +31,7 @@
 #define XXH_INLINE_ALL 1
 #define XXH_STATIC_LINKING_ONLY 1
 
-# include "xxhash/xxhash.h"
+# include <xxhash.h>
 
 #if defined(XXHASH_DYNAMIC_DISPATCH)
 /*
@@ -43,7 +43,7 @@
  */
 # undef XXH_PUBLIC_API
 # define XXH_PUBLIC_API
-# include "xxhash/xxh_x86dispatch.h"
+# include <xxh_x86dispatch.h>
 #endif
 
 
