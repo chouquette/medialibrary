@@ -1,6 +1,6 @@
 project('medialibrary', 'cpp',
         license: 'LGPLv2+',
-        version: '0.9.3-dev',
+        version: '0.9.4',
         default_options: [
             'cpp_std=c++14',
             'buildtype=debug',
