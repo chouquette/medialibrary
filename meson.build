@@ -26,7 +26,6 @@ medialib_micro_version = ver_arr[2]
 cxx = meson.get_compiler('cpp')
 
 extra_warnings = [
-  '-Wzero-as-null-pointer-constant'
 ]
 
 foreach w : extra_warnings
