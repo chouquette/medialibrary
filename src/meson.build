@@ -68,10 +68,11 @@ if not libxxhash_dep.found()
     xxhash_lib = static_library('xxhash',
       ['utils/xxhash/xxh_x86dispatch.c']
     )
-    libxxhash_dep = declare_dependency(link_with: xxhash_lib,
-      include_directories: ['utils/xxhash/']
-    )
   endif
+  xxhash_inc = include_directories('utils/xxhash')
+  libxxhash_dep = declare_dependency(link_with: xxhash_lib,
+    include_directories: [xxhash_inc]
+  )
 endif
 
 if libvlc_dep.found()
