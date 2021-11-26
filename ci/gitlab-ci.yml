@@ -8,7 +8,6 @@ variables:
   MEDIALIB_TEST_FOLDER: $CI_PROJECT_DIR/medialib_tests/
 
 stages:
-  - checks
   - build
   - test
   - generate
@@ -18,14 +17,6 @@ default:
     - docker
     - amd64
   interruptible: true
-
-run-checks:
-  image: $MEDIALIBRARY_IMG
-  rules:
-    - if: $CI_MERGE_REQUEST_IID
-  stage: checks
-  script:
-    - if [ -z "$CI_MERGE_REQUEST_MILESTONE" ]; then echo "A milestone is required for new merge requests"; exit 1; fi
 
 build:debian:
   image: $MEDIALIBRARY_IMG
