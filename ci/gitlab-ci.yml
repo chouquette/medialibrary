@@ -12,7 +12,6 @@ stages:
   - build
   - test
   - generate
-  - run-bench
 
 default:
   tags:
@@ -262,78 +261,6 @@ asan-ubsan:
 #      - meson compile fast_discover_cancel fast_teardown
 #      - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
 #      - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
-
-# This job attempts to regenerate a database to be used for benchmarks.
-# If a MR is flagged with the 'model-change' label, then we will attempt to
-# regenerate the database and upload it to artifacts.videolan.org
-# It's also possible to trigger a regeneration by triggering a scheduled
-# pipeline with the MEDIALIB_MANUAL_JOB_NAME variable set to "benchmark-db"
-# In this case, the branch schedule targetted branch will be used as the
-# version suffix (including "master")
-gen-bench-db:
-  image: $MEDIALIBRARY_IMG
-  stage: generate
-  dependencies: []
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == "benchmark-db"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
-    - when: never
-  before_script:
-    - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
-    - if [ -z "$BENCH_DB_SUFFIX" ]; then export BENCH_DB_SUFFIX=$CI_COMMIT_BRANCH; fi
-    - if [ -z "$BENCH_DB_SUFFIX" ]; then printf "Unexpected configuration"; exit 1 ; fi
-  script:
-    - meson --buildtype=release build
-    - cd build && ninja
-    - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples
-    - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
-    - test $(sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.lint fkey-indexes' | wc -l) -eq 0
-    - mv "$MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db" "$CI_PROJECT_DIR/bench.$BENCH_DB_SUFFIX.db"
-  artifacts:
-    when: on_success
-    expire_in: 1 day
-    paths:
-      - "$CI_PROJECT_DIR/bench.*.db"
-
-run-bench:
-  image: $MEDIALIBRARY_IMG
-  stage: run-bench
-  dependencies: []
-  allow_failure: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /(^|.*,)model-change($|,.*)/i'
-      when: delayed
-      # Let artifacts.videolan.org grab our prebuilt database if it was regenerated
-      start_in: 1 minute
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  before_script:
-    - export BENCH_DB_SUFFIX=$CI_MERGE_REQUEST_MILESTONE
-  script:
-    - meson --buildtype=release -Dtests=disabled build
-    - cd build && ninja
-    - curl -f -L https://artifacts.videolan.org/medialibrary/gen-bench-db/bench.$BENCH_DB_SUFFIX.db -o bench.db
-    - curl -f -L https://artifacts.videolan.org/medialibrary/run-bench/bench.$BENCH_DB_SUFFIX.json -o bench.old.json || echo "No previous benchmark"
-    - ./benchmark/requests/bench_requests --benchmark_out_format=json --benchmark_out=bench.new.json --benchmark_repetitions=10
-    - export RES="No previous benchmark"
-    - >
-      if [ -f bench.old.json ]; then
-      python3 /benchmark/tools/compare.py -d result.json benchmarks bench.old.json bench.new.json;
-      export RES=$(../ci/check-benchmark.py result.json);
-      fi
-    - rm -f bench.old.json
-    - mv bench.new.json bench.$BENCH_DB_SUFFIX.json
-    - >
-      curl --request POST --header "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN"
-      --form-string description="$RES"
-      -F state=success
-      -F name="Benchmark results"
-      -F target_url="$CI_JOB_URL"
-      "https://code.videolan.org/api/v4/projects/$CI_PROJECT_ID/statuses/$CI_COMMIT_SHA"
-  artifacts:
-    when: on_success
-    expire_in: 1 day
-    paths:
-      - build/bench.*.json
 
 gen-test-db:
   image: $MEDIALIBRARY_IMG
