@@ -93,7 +93,7 @@ public:
     };
 
     Folder( MediaLibraryPtr ml, sqlite::Row& row );
-    Folder( MediaLibraryPtr ml, const std::string& path, int64_t parent,
+    Folder(MediaLibraryPtr ml, const std::string& path, std::string name, int64_t parent,
             int64_t deviceId , bool isRemovable );
 
     static void createTable( sqlite::Connection* connection );
