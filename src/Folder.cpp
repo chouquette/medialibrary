@@ -65,11 +65,11 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Folder::Folder(MediaLibraryPtr ml, const std::string& path, std::string name,
+Folder::Folder(MediaLibraryPtr ml, std::string path, std::string name,
                int64_t parent, int64_t deviceId, bool isRemovable )
     : m_ml( ml )
     , m_id( 0 )
-    , m_path( path )
+    , m_path( std::move( path ) )
     , m_name( std::move( name ) )
     , m_parent( parent )
     , m_isBanned( false )
@@ -405,15 +405,15 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
         path = deviceFs.relativeMrl( mrl );
     else
         path = mrl;
-    auto self = std::make_shared<Folder>( ml, path, std::move( name ), parentId,
-                                          device.id(), deviceFs.isRemovable() );
+    auto self = std::make_shared<Folder>( ml, std::move( path ), std::move( name ),
+                                          parentId, device.id(), deviceFs.isRemovable() );
     static const std::string req = "INSERT INTO " + Folder::Table::Name +
             "(path, name, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
-    if ( insert( ml, self, req, path, self->m_name, sqlite::ForeignKey( parentId ),
+    if ( insert( ml, self, req, self->m_path, self->m_name, sqlite::ForeignKey( parentId ),
                  device.id(), deviceFs.isRemovable() ) == false )
         return nullptr;
     if ( device.isRemovable() == true )
-        self->m_fullPath = deviceFs.absoluteMrl( path );
+        self->m_fullPath = deviceFs.absoluteMrl( self->m_path );
     return self;
 }
 
