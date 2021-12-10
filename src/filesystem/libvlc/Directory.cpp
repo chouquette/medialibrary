@@ -124,7 +124,15 @@ void Directory::read() const
             m_dirs.push_back( std::make_shared<Directory>( m->mrl(), m_fsFactory ) );
         else
         {
-            addFile( m->mrl(), IFile::LinkedFileType::None, {} );
+            int64_t fileSize = 0;
+            int64_t fileMtime = 0;
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+            auto fileSizeTpl = m->fileStat( VLC::Media::FileStat::Size );
+            auto fileMtimeTpl = m->fileStat( VLC::Media::FileStat::Mtime );
+            fileSize = std::get<1>( fileSizeTpl );
+            fileMtime = std::get<1>( fileMtimeTpl );
+#endif
+            addFile( m->mrl(), IFile::LinkedFileType::None, {}, fileMtime, fileSize );
             for ( const auto& am : m->slaves() )
             {
                 IFile::LinkedFileType linkedType;
@@ -135,19 +143,18 @@ void Directory::read() const
                     assert( am.type() == VLC::MediaSlave::Type::Subtitle );
                     linkedType = IFile::LinkedFileType::Subtitles;
                 }
-                addFile( am.uri(), linkedType, m->mrl() );
+                addFile( am.uri(), linkedType, m->mrl(), 0, 0 );
             }
         }
     }
 }
 
 void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
-                         std::string linkedWith ) const
+                         std::string linkedWith, time_t lastModificationDate,
+                         int64_t fileSize ) const
 {
-    time_t lastModificationDate = 0;
-    int64_t fileSize = 0;
-
-    if ( m_fsFactory.isNetworkFileSystem() == false )
+    if ( m_fsFactory.isNetworkFileSystem() == false && lastModificationDate == 0 &&
+         fileSize == 0 )
     {
         auto path = utils::url::toLocalPath( mrl );
 

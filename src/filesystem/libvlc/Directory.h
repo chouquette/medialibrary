@@ -43,7 +43,8 @@ private:
     // lazily initialized when calling files() / dirs()
     virtual void read() const override;
     void addFile( std::string mrl, IFile::LinkedFileType fileType,
-                  std::string linkedWith ) const;
+                  std::string linkedWith, time_t lastModificationDate,
+                  int64_t fileSize ) const;
 
 private:
     std::string m_mrl;
