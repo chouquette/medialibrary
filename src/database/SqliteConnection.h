@@ -53,6 +53,15 @@ public:
         Delete,
         Update
     };
+
+    struct DisableForeignKeyContext
+    {
+        explicit DisableForeignKeyContext( Connection* conn );
+        ~DisableForeignKeyContext();
+    private:
+        Connection* m_conn;
+    };
+
     struct WeakDbContext
     {
         explicit WeakDbContext( Connection* conn );
@@ -63,6 +72,7 @@ public:
         WeakDbContext& operator=( WeakDbContext&& ) = delete;
     private:
         Connection* m_conn;
+        DisableForeignKeyContext m_fkeyCtx;
     };
 
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;

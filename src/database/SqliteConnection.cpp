@@ -302,14 +302,13 @@ void logCallback( void*, int c, const char *str )
 
 Connection::WeakDbContext::WeakDbContext( Connection* conn )
     : m_conn( conn )
+    , m_fkeyCtx( m_conn )
 {
-    m_conn->setForeignKeyEnabled( false );
     m_conn->setRecursiveTriggersEnabled( false );
 }
 
 Connection::WeakDbContext::~WeakDbContext()
 {
-    m_conn->setForeignKeyEnabled( true );
     m_conn->setRecursiveTriggersEnabled( true );
 }
 
@@ -346,6 +345,17 @@ Connection::SqliteConfigurator::SqliteConfigurator()
 #if DEBUG_SQLITE_TRIGGERS
     sqlite3_config( SQLITE_CONFIG_LOG, &logCallback, nullptr );
 #endif
+}
+
+Connection::DisableForeignKeyContext::DisableForeignKeyContext( Connection* conn )
+    : m_conn( conn )
+{
+    m_conn->setForeignKeyEnabled( false );
+}
+
+Connection::DisableForeignKeyContext::~DisableForeignKeyContext()
+{
+    m_conn->setForeignKeyEnabled( true );
 }
 
 }
