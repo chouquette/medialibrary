@@ -380,12 +380,8 @@ bool MediaLibrary::createAllTables()
 void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
 {
     auto tables = sqlite::Tools::listTables( dbConn );
-    assert( sqlite::Transaction::isInProgress() == false );
-    sqlite::Connection::WeakDbContext ctx{ dbConn };
-    auto t = dbConn->newTransaction();
     for ( const auto& table : tables )
         sqlite::Tools::executeRequest( dbConn, "DROP TABLE " + table );
-    t->commit();
 }
 
 void MediaLibrary::createAllTriggers()
@@ -1375,9 +1371,10 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 
 bool MediaLibrary::recreateDatabase()
 {
+    sqlite::Connection::DisableForeignKeyContext ctx{ m_dbConnection.get() };
+    auto t = m_dbConnection->newTransaction();
     deleteAllTables( m_dbConnection.get() );
     sqlite::Statement::FlushStatementCache();
-    auto t = m_dbConnection->newTransaction();
     Settings::createTable( m_dbConnection.get() );
     if ( createAllTables() == false )
         return false;
