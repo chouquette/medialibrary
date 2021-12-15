@@ -116,6 +116,13 @@ public:
      */
     virtual Query<IFolder> subfolders( const QueryParameters* params = nullptr ) const = 0;
 
+    /**
+     * @brief playlists Returns the playlists contained in this directory
+     * @param params A query parameter instance, or nullptr for the default
+     * @return A query object to be used to fetch the results
+     */
+    virtual Query<IPlaylist> playlists( const QueryParameters* params = nullptr ) const = 0;
+
     virtual uint32_t nbVideo() const = 0;
     virtual uint32_t nbAudio() const = 0;
     virtual uint32_t nbMedia() const = 0;

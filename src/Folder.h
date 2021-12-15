@@ -161,6 +161,8 @@ public:
                                        const QueryParameters* params = nullptr ) const override;
     virtual Query<IFolder> subfolders( const QueryParameters* params ) const override;
 
+    virtual Query<IPlaylist> playlists(const QueryParameters* params) const override;
+
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbMedia() const override;

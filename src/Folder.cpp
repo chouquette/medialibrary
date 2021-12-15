@@ -28,6 +28,7 @@
 #include "Folder.h"
 #include "Device.h"
 #include "Media.h"
+#include "Playlist.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -906,6 +907,11 @@ Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
     return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id );
+}
+
+Query<IPlaylist> Folder::playlists(const QueryParameters* params) const
+{
+    return Playlist::fromFolder( m_ml, m_id, params );
 }
 
 uint32_t Folder::nbVideo() const
