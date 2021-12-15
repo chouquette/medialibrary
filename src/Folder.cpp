@@ -735,6 +735,12 @@ bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
             if ( m->convertToExternal() == false )
                 return false;
         }
+        auto playlists = f->playlists( nullptr )->all();
+        for ( const auto& pl : playlists )
+        {
+            if ( Playlist::destroy( ml, pl->id() ) == false )
+                return false;
+        }
         t->commit();
     }
     /* If we're banning an entry point, we just need to delete if from the database */
