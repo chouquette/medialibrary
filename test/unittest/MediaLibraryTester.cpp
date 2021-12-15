@@ -48,7 +48,10 @@ MediaLibraryTester::MediaLibraryTester( const std::string& dbPath,
 
 void MediaLibraryTester::onDbConnectionReady( sqlite::Connection* dbConn )
 {
+    sqlite::Connection::WeakDbContext ctx{ m_dbConnection.get() };
+    auto t = m_dbConnection->newTransaction();
     deleteAllTables( dbConn );
+    t->commit();
 }
 
 std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )

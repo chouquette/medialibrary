@@ -247,7 +247,10 @@ class MediaLibraryTester : public MediaLibrary
     using MediaLibrary::MediaLibrary;
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override
     {
+        sqlite::Connection::DisableForeignKeyContext ctx{ m_dbConnection.get() };
+        auto t = m_dbConnection->newTransaction();
         deleteAllTables( dbConn );
+        t->commit();
     }
 };
 }
@@ -860,7 +863,10 @@ void MediaLibraryResumeTest::forceParserStart()
 
 void MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
 {
+    sqlite::Connection::DisableForeignKeyContext ctx{ m_dbConnection.get() };
+    auto t = m_dbConnection->newTransaction();
     deleteAllTables( dbConn );
+    t->commit();
 }
 
 void MediaLibraryResumeTest::startParser()
