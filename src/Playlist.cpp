@@ -252,6 +252,17 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
     }
 }
 
+Query<IPlaylist> Playlist::fromFolder( MediaLibraryPtr ml, int64_t folderId,
+                                      const QueryParameters* params )
+{
+    std::string req = "FROM " + Playlist::Table::Name + " pl "
+        " INNER JOIN " + File::Table::Name + " fil ON pl.file_id = fil.id_file"
+        " INNER JOIN " + Folder::Table::Name + " fol ON fol.id_folder = fil.folder_id"
+        " WHERE fol.id_folder = ?";
+    return make_query<Playlist, IPlaylist>( ml, "pl.*", std::move( req ),
+                                            sortRequest( params ), folderId );
+}
+
 int64_t Playlist::mediaAt( uint32_t position )
 {
     const std::string fetchReq = "SELECT media_id FROM " +
