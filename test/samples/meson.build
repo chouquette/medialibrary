@@ -75,3 +75,7 @@ endforeach
 test('BackupRestorePlaylist', samples_exe,
   args: ['BackupRestorePlaylist', 'dummy']
 )
+
+test('ReplaceExternalMediaByPlaylist', samples_exe,
+  args: ['ReplaceExternalMediaByPlaylist', 'dummy']
+)

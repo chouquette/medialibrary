@@ -31,6 +31,8 @@
 #include "Thumbnail.h"
 #include "File.h"
 #include "utils/Filename.h"
+#include "utils/Url.h"
+#include "utils/Directory.h"
 #include "factory/DeviceListerFactory.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDirectory.h"
@@ -926,4 +928,24 @@ void MockCallback::prepareForRemoval( uint32_t nbEntryPointsRemovalExpected )
     std::lock_guard<compat::Mutex> lock{ m_parsingMutex };
     m_nbEntryPointsRemovalExpected = nbEntryPointsRemovalExpected;
     m_removalCompleted = false;
+}
+
+void ReplaceExternalMediaByPlaylistTests::InitTestCase( const std::string& )
+{
+    /*
+     * This test is about recovering from a playlist wrongly inserted as an
+     * external media, which can happen if the user starts an unimported
+     * playlist playback, only to discover the folder containing the playlist at
+     * a later time.
+     * After the initial playback, VLC will create an external media to save the
+     * playback states & preferences.
+     * When the playlist should be imported, there's already a file representing
+     * that playlist so it fails to get imported.
+     * See #400
+     */
+    auto playlistPath = utils::fs::toAbsolute( SRC_DIR );
+    playlistPath += "test/samples/samples/playlist/mixed_content/playlist.xspf";
+    playlistMrl = utils::file::toMrl( playlistPath );
+    m_ml->addExternalMedia( playlistMrl, -1 );
+    Tests::InitTestCase( "playlist_mixed_content" );
 }

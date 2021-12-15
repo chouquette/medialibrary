@@ -31,6 +31,7 @@
 #include "utils/Directory.h"
 #include "Playlist.h"
 #include "Media.h"
+#include "File.h"
 
 #include <vlcpp/vlc.hpp>
 
@@ -190,6 +191,31 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
     ASSERT_EQ( m1->title(), media[2]->title() );
 }
 
+static void ReplaceExternalMediaByPlaylist( ReplaceExternalMediaByPlaylistTests* T )
+{
+    /*
+     * This test was initialized with a playlist inserted as an external media.
+     * From there, just run the same test as the ParseTwice suite to check if we
+     * can recover properly and insert the playlist as an actual playlist
+     */
+    ParseTwice( T );
+    /*
+     * Initially the playlist was inserted with the same MRL as the media, ensure
+     * this is not the case anymore
+     */
+    auto mlPtr = static_cast<MediaLibrary*>( T->m_ml.get() );
+    auto file = File::fromMrl( mlPtr, T->playlistMrl );
+    ASSERT_NON_NULL( file );
+    ASSERT_EQ( IFile::Type::Playlist, file->type() );
+    auto res = file->destroy();
+    ASSERT_TRUE( res );
+    /* Ensure there's no other file with the same MRL */
+    file = File::fromMrl( mlPtr, T->playlistMrl );
+    ASSERT_EQ( nullptr, file );
+    file = File::fromExternalMrl( mlPtr, T->playlistMrl );
+    ASSERT_EQ( nullptr, file );
+}
+
 #define RUN_TEST( Type, Func ) \
     try \
     { \
@@ -242,6 +268,10 @@ int main(int ac, char** av)
     else if ( testType == "BackupRestorePlaylist" )
     {
         RUN_TEST( BackupRestorePlaylistTests, RunBackupRestorePlaylist );
+    }
+    else if ( testType == "ReplaceExternalMediaByPlaylist" )
+    {
+        RUN_TEST( ReplaceExternalMediaByPlaylistTests, ReplaceExternalMediaByPlaylist );
     }
     else
     {

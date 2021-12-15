@@ -270,6 +270,11 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
         auto playlistName = item.meta( IItem::Metadata::Title );
         if ( playlistName.empty() == true )
             playlistName = utils::url::decode( utils::file::fileName( mrl ) );
+        /*
+         * Check if that MRL matches an existing external file. In which case
+         * it might be linked to an external media which has been wrongfully
+         * inserted as media instead of playlist
+         */
         try
         {
             auto t = m_ml->getConn()->newTransaction();
@@ -291,13 +296,32 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                 auto deviceFs = item.parentFolderFs()->device();
                 if ( deviceFs == nullptr )
                     throw fs::errors::DeviceRemoved{};
-                auto file = playlistPtr->addFile( *item.fileFs(),
-                                                  item.parentFolder()->id(),
-                                                  deviceFs->isRemovable() );
-                if ( file == nullptr )
+                auto file = File::fromExternalMrl( m_ml, mrl );
+                if ( file != nullptr )
                 {
-                    LOG_ERROR( "Failed to add playlist file ", mrl );
-                    return Status::Fatal;
+                    LOG_DEBUG( "Reassigning file ", mrl, " to playlist" );
+                    assert( file->isExternal() == true );
+                    /*
+                     * Mind the operations order. If we destroy the media before
+                     * reassigning the file to the playlist, the file would be
+                     * deleted through the foreign key
+                     */
+                    if ( file->update( *item.fileFs(), item.parentFolder()->id(),
+                                       deviceFs->isRemovable() ) == false ||
+                         playlistPtr->setFileId( file->id() ) == false ||
+                         file->setPlaylistId( playlistPtr->id() ) == false ||
+                         Media::destroy( m_ml, file->mediaId() ) == false )
+                    {
+                        return Status::Fatal;
+                    }
+                }
+                else
+                {
+                    file = playlistPtr->addFile( *item.fileFs(),
+                                                 item.parentFolder()->id(),
+                                                 deviceFs->isRemovable() );
+                    if ( file == nullptr )
+                        return Status::Fatal;
                 }
                 if ( item.setFile( std::move( file ) ) == false )
                     return Status::Fatal;

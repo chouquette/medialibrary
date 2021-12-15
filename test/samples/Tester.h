@@ -161,4 +161,10 @@ struct BackupRestorePlaylistTests : public Tests
     virtual void InitTestCase( const std::string& ) override {}
 };
 
+struct ReplaceExternalMediaByPlaylistTests : public Tests
+{
+    virtual void InitTestCase( const std::string& ) override;
+    std::string playlistMrl;
+};
+
 #endif // TESTER_H
