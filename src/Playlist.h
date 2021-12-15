@@ -112,6 +112,7 @@ public:
     virtual std::string mrl() const override;
     std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                    bool isFolderFsRemovable );
+    bool setFileId( int64_t fileId );
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
