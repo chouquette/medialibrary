@@ -77,6 +77,7 @@ public:
      * If this was the previous media's main file, it will be deleted.
      */
     bool setMediaId( int64_t mediaId );
+    bool setPlaylistId( int64_t playlistId );
     bool destroy();
     int64_t folderId() const;
 
@@ -136,7 +137,7 @@ private:
 
     int64_t m_id;
     int64_t m_mediaId;
-    const int64_t m_playlistId;
+    int64_t m_playlistId;
     // Contains the path relative to the containing folder for files contained in a removable folder
     // or the full file MRL for non removable ones
     std::string m_mrl;

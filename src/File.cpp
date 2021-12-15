@@ -224,6 +224,19 @@ bool File::setMediaId( int64_t mediaId )
     return true;
 }
 
+bool File::setPlaylistId( int64_t playlistId )
+{
+    if ( playlistId == m_playlistId )
+        return true;
+    const std::string req = "UPDATE " + Table::Name + " SET media_id = NULL "
+            ", playlist_id = ? WHERE id_file = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, playlistId, m_id ) == false )
+        return false;
+    m_playlistId = playlistId;
+    return true;
+
+}
+
 bool File::destroy()
 {
     return DatabaseHelpers::destroy( m_ml, m_id );
