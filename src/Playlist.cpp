@@ -256,7 +256,7 @@ Query<IPlaylist> Playlist::fromFolder( MediaLibraryPtr ml, int64_t folderId,
                                       const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name + " pl "
-        " INNER JOIN " + File::Table::Name + " fil ON pl.file_id = fil.id_file"
+        " INNER JOIN " + File::Table::Name + " fil ON pl.id_playlist = fil.playlist_id"
         " INNER JOIN " + Folder::Table::Name + " fol ON fol.id_folder = fil.folder_id"
         " WHERE fol.id_folder = ?";
     return make_query<Playlist, IPlaylist>( ml, "pl.*", std::move( req ),
