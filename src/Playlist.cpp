@@ -1312,8 +1312,10 @@ Playlist::Backups Playlist::loadBackups( MediaLibraryPtr ml )
 
 std::shared_ptr<Playlist> Playlist::fromFile( MediaLibraryPtr ml, int64_t fileId )
 {
-    static const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE file_id = ?";
+    static const std::string req = "SELECT pl.* FROM " + Table::Name + " pl"
+            " INNER JOIN " + File::Table::Name + " f"
+            " ON f.playlist_id = pl.id_playlist"
+            " WHERE f.id_file = ?";
     return fetch( ml, req, fileId );
 }
 
