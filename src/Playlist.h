@@ -68,6 +68,9 @@ public:
 
         // Deprecated since model 33
         UpdateNbPresentMediaOnPresenceChange,
+
+        // Introduced in model 34
+        CascadeFileDeletion,
     };
     enum class Indexes : uint8_t
     {

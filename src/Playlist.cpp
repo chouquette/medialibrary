@@ -550,6 +550,9 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::UpdateNbMediaOnMediaChange,
                                             Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::CascadeFileDeletion,
+                                            Settings::DbModelVersion ) );
 }
 
 void Playlist::createIndexes( sqlite::Connection* dbConn )
@@ -1020,7 +1023,16 @@ std::string Playlist::trigger( Triggers trigger, uint32_t dbModel )
                             ") AS items"
                        " WHERE id_playlist = items.playlist_id;"
                    " END";
-
+        case Triggers::CascadeFileDeletion:
+            assert( dbModel >= 34 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER DELETE ON " + File::Table::Name +
+                   " WHEN old.type = " +
+                        utils::enum_to_string( IFile::Type::Playlist ) +
+                   " BEGIN "
+                   " DELETE FROM " + Table::Name +
+                       " WHERE id_playlist=old.playlist_id;"
+                   " END";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -1069,6 +1081,9 @@ std::string Playlist::triggerName(Playlist::Triggers trigger, uint32_t dbModel)
         case Triggers::UpdateNbMediaOnMediaChange:
             assert( dbModel >= 33 );
             return "playlist_update_nb_media_on_media_change";
+        case Triggers::CascadeFileDeletion:
+            assert( dbModel >= 34 );
+            return "playlist_cascade_file_deletion";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -1169,6 +1184,7 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaDeletion ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaChange ) &&
+            checkTrigger( ml->getConn(), Triggers::CascadeFileDeletion ) &&
             checkIndex( ml->getConn(), Indexes::FileId ) &&
             checkIndex( ml->getConn(), Indexes::PlaylistIdPosition ) &&
             checkIndex( ml->getConn(), Indexes::PlaylistRelMediaId );
