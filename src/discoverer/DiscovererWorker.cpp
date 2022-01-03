@@ -67,13 +67,6 @@ DiscovererWorker::~DiscovererWorker()
 
 void DiscovererWorker::stop()
 {
-    /*
-     * We need to execute all non running tasks before returning, otherwise the
-     * queued jobs will be lost.
-     * We don't mind losing a reload request since it's based on what's in the
-     * database, but we mind losing a request that would modify the database
-     * state
-     */
     bool running = true;
     if ( m_run.compare_exchange_strong( running, false ) )
     {
