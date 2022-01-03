@@ -1363,16 +1363,23 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
         std::vector<std::string> mrls;
     };
     std::vector<Backup> pls;
-    // There was no file_id field before model 5
-    sqlite::Statement stmt{ dbConn->handle(),
-        "SELECT id_playlist, name FROM " + Table::Name +
-        (dbModel >= 5 ? " WHERE file_id IS NULL" : "")
-    };
+    // There was no file_id field before model 5 and was removed in model 34
+    const std::string req = []( uint32_t dbModel ) {
+        if ( dbModel < 5 )
+            return "SELECT id_playlist, name FROM " + Table::Name;
+        if ( dbModel < 34 )
+            return "SELECT id_playlist, name FROM " + Table::Name +
+                   " WHERE file_id IS NULL";
+        return "SELECT id_playlist, name FROM " + Table::Name +
+                " WHERE id_playlist NOT IN"
+                " (SELECT playlist_id FROM " + File::Table::Name +
+                " WHERE playlist_id IS NOT NULL)";
+    }( dbModel );
+    sqlite::Statement stmt{ dbConn->handle(), req };
     stmt.execute();
     sqlite::Row row;
     while ( ( row = stmt.row() ) != nullptr )
         pls.emplace_back( row.load<int64_t>( 0 ), row.load<std::string>( 1 ) );
-
     auto backupFolder = utils::file::toFolderPath( ml->playlistPath() +
                                                    std::to_string( backupDate ) );
     try
