@@ -132,7 +132,6 @@ namespace
         "media_types_idx",
         "movie_media_idx",
         "parent_folder_id_idx",
-        "playlist_file_id",
         "playlist_position_pl_id_index",
         "playlist_rel_media_id_idx",
         "show_episode_media_idx",

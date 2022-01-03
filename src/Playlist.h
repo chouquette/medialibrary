@@ -168,7 +168,6 @@ private:
 
     int64_t m_id;
     std::string m_name;
-    int64_t m_fileId;
     const unsigned int m_creationDate;
     std::string m_artworkMrl;
     uint32_t m_nbVideo;

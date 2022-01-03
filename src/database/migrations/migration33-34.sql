@@ -69,7 +69,6 @@ AudioTrack::schema( AudioTrack::Table::Name, 34 ),
 "("
     + Playlist::Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
     "name TEXT COLLATE NOCASE,"
-    "file_id UNSIGNED INT DEFAULT NULL,"
     "creation_date UNSIGNED INT NOT NULL,"
     "artwork_mrl TEXT,"
     "nb_video UNSIGNED INT NOT NULL DEFAULT 0,"
@@ -78,13 +77,14 @@ AudioTrack::schema( AudioTrack::Table::Name, 34 ),
     "nb_present_video UNSIGNED INT NOT NULL DEFAULT 0,"
     "nb_present_audio UNSIGNED INT NOT NULL DEFAULT 0,"
     "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
-    "duration UNSIGNED INT NOT NULL DEFAULT 0,"
-    "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
-    + "(id_file) ON DELETE CASCADE"
+    "duration UNSIGNED INT NOT NULL DEFAULT 0"
 ")",
 
 "INSERT INTO " + Playlist::Table::Name + "_backup "
-    "SELECT * FROM " + Playlist::Table::Name,
+    "SELECT " + Playlist::Table::PrimaryKeyColumn + ", "
+    "name, creation_date, artwork_mrl, nb_video, nb_audio, nb_unknown, "
+    "nb_present_video, nb_present_audio, nb_present_unknown, duration "
+    "FROM " + Playlist::Table::Name,
 
 "DROP TABLE " + Playlist::Table::Name,
 
@@ -140,7 +140,6 @@ MediaGroup::trigger( MediaGroup::Triggers::UpdateNbMediaOnImportTypeChange, 34 )
 Playlist::trigger( Playlist::Triggers::InsertFts, 34 ),
 Playlist::trigger( Playlist::Triggers::UpdateFts, 34 ),
 Playlist::trigger( Playlist::Triggers::DeleteFts, 34 ),
-Playlist::index( Playlist::Indexes::FileId, 34 ),
 parser::Task::trigger( parser::Task::Triggers::DeletePlaylistLinkingTask, 34 ),
 
 // This trigger was automatically deleted with the AlbumTrack table

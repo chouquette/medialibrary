@@ -57,7 +57,6 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     : m_ml( ml )
     , m_id( row.extract<decltype(m_id)>() )
     , m_name( row.extract<decltype(m_name)>() )
-    , m_fileId( row.extract<decltype(m_fileId)>() )
     , m_creationDate( row.extract<decltype(m_creationDate)>() )
     , m_artworkMrl( row.extract<decltype(m_artworkMrl)>() )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
@@ -76,7 +75,6 @@ Playlist::Playlist( MediaLibraryPtr ml, std::string name )
     : m_ml( ml )
     , m_id( 0 )
     , m_name( std::move( name ) )
-    , m_fileId( 0 )
     , m_creationDate( time( nullptr ) )
     , m_nbVideo( 0 )
     , m_nbAudio( 0 )
@@ -93,8 +91,8 @@ std::shared_ptr<Playlist> Playlist::create( MediaLibraryPtr ml, std::string name
 {
     auto self = std::make_shared<Playlist>( ml, std::move( name ) );
     static const std::string req = "INSERT INTO " + Playlist::Table::Name +
-            "(name, file_id, creation_date, artwork_mrl) VALUES(?, ?, ?, ?)";
-    if ( insert( ml, self, req, self->m_name, nullptr, self->m_creationDate,
+            "(name, creation_date, artwork_mrl) VALUES(?, ?, ?)";
+    if ( insert( ml, self, req, self->m_name, self->m_creationDate,
                  self->m_artworkMrl ) == false )
         return nullptr;
     return self;
@@ -557,8 +555,6 @@ void Playlist::createTriggers( sqlite::Connection* dbConn )
 
 void Playlist::createIndexes( sqlite::Connection* dbConn )
 {
-    sqlite::Tools::executeRequest( dbConn, index( Indexes::FileId,
-                                                  Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistIdPosition,
                                                   Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn, index( Indexes::PlaylistRelMediaId,
@@ -630,7 +626,6 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
         "("
             + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             "name TEXT COLLATE NOCASE,"
-            "file_id UNSIGNED INT DEFAULT NULL,"
             "creation_date UNSIGNED INT NOT NULL,"
             "artwork_mrl TEXT,"
             "nb_video UNSIGNED INT NOT NULL DEFAULT 0,"
@@ -643,7 +638,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
             "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
                 "CHECK(nb_present_unknown <= nb_unknown),"
             "duration UNSIGNED INT NOT NULL DEFAULT 0,"
-            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0"
             /*
              * Ideally we should check that nb_duration_unknown never increases
              * over nb_video + nb_audio + nb_unknown but we can't enforce this
@@ -651,8 +646,6 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
              * which we can't AFAIK (a transaction doesn't work, the CHECK would
              * still fire between updates
              */
-            "FOREIGN KEY(file_id) REFERENCES " + File::Table::Name
-            + "(id_file) ON DELETE CASCADE"
         ")";
     }
     assert( tableName == MediaRelationTable::Name );
@@ -1185,7 +1178,6 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
             checkTrigger( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
             checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaChange ) &&
             checkTrigger( ml->getConn(), Triggers::CascadeFileDeletion ) &&
-            checkIndex( ml->getConn(), Indexes::FileId ) &&
             checkIndex( ml->getConn(), Indexes::PlaylistIdPosition ) &&
             checkIndex( ml->getConn(), Indexes::PlaylistRelMediaId );
 }
