@@ -110,8 +110,6 @@ public:
     virtual bool remove( uint32_t position ) override;
     virtual bool isReadOnly() const override;
     virtual std::string mrl() const override;
-    std::shared_ptr<File> addFile( const fs::IFile& fileFs, int64_t parentFolderId,
-                                   bool isFolderFsRemovable );
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );

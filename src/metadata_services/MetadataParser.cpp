@@ -316,9 +316,9 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                 }
                 else
                 {
-                    file = playlistPtr->addFile( *item.fileFs(),
-                                                 item.parentFolder()->id(),
-                                                 deviceFs->isRemovable() );
+                    file = File::createFromPlaylist( m_ml, playlistPtr->id(),
+                                *item.fileFs(), item.parentFolder()->id(),
+                                deviceFs->isRemovable() );
                     if ( file == nullptr )
                         return Status::Fatal;
                 }

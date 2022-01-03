@@ -452,19 +452,6 @@ bool Playlist::add( int64_t mediaId, uint32_t position )
     return add( *media, position );
 }
 
-// Attach file object to Playlist
-std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parentFolderId,
-                                         bool isFolderFsRemovable )
-{
-    assert( m_fileId == 0 );
-    assert( sqlite::Transaction::isInProgress() == true );
-
-    auto file = File::createFromPlaylist( m_ml, m_id, fileFs, parentFolderId, isFolderFsRemovable);
-    if ( file == nullptr )
-        return nullptr;
-    return file;
-}
-
 bool Playlist::move( uint32_t from, uint32_t position )
 {
     auto dbConn = m_ml->getConn();
