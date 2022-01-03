@@ -1246,14 +1246,16 @@ bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
     auto t = ml->getConn()->newTransaction();
     const std::string req = "DELETE FROM " +
             Playlist::MediaRelationTable::Name + " WHERE playlist_id IN ("
-            "SELECT id_playlist FROM " + Playlist::Table::Name + " WHERE "
-            "file_id IS NOT NULL)";
+            "SELECT playlist_id FROM " + File::Table::Name + " WHERE "
+            "playlist_id IS NOT NULL)";
     const std::string counterReq = "UPDATE " + Table::Name + " SET "
             "nb_video = 0, nb_present_video = 0,"
             "nb_audio = 0, nb_present_audio = 0,"
             "nb_unknown = 0, nb_present_unknown = 0, duration = 0, "
             "nb_duration_unknown = 0 "
-            "WHERE file_id IS NOT NULL";
+            "WHERE id_playlist IN ("
+                "SELECT playlist_id FROM " + File::Table::Name + " WHERE "
+                "playlist_id IS NOT NULL)";
     if ( sqlite::Tools::executeDelete( ml->getConn(), req ) == false ||
          sqlite::Tools::executeUpdate( ml->getConn(), counterReq ) == false )
         return false;
