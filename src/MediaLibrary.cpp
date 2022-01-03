@@ -2446,9 +2446,8 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
 
         /*
          * The VLCMetadataService will fetch the new instance during its next run
-         * The thumbnailer also fetches the instance before using it
-         * However the discoverer
-         * The discoverer and all FS related code is highly likely to use a
+         * The thumbnailer also fetches the instance before using it.
+         * However the discoverer and all FS related code is highly likely to use a
          * cached/queued instance that will hold the old libvlc instance which
          * we don't want, as the libvlc instance provided by an external user
          * is our only way of leveraging libvlc's keystore and accessing password
