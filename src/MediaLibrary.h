@@ -322,7 +322,6 @@ private:
     void startThumbnailer() const;
     parser::Parser* getParserLocked() const;
     virtual bool forceRescanLocked();
-    void startDiscovererLocked();
 
 protected:
     virtual void addLocalFsFactory();
