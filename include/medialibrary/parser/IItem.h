@@ -114,7 +114,7 @@ public:
             {
                 char encoding[sizeof(v)];
             } s;
-        };
+        } u;
     };
 
 public:

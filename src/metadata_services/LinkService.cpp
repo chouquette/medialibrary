@@ -199,7 +199,7 @@ Status LinkService::linkToMedia( IItem &item )
         auto tracks = item.tracks();
         for ( const auto& tr : tracks )
         {
-            media->addAudioTrack( tr.codec, tr.bitrate, tr.a.rate, tr.a.nbChannels,
+            media->addAudioTrack( tr.codec, tr.bitrate, tr.u.a.rate, tr.u.a.nbChannels,
                                   tr.language, tr.description, item.fileId() );
         }
         t->commit();

@@ -240,18 +240,18 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
         if ( track.type() == VLC::MediaTrack::Type::Audio )
         {
             t.type = IItem::Track::Type::Audio;
-            t.a.nbChannels = track.channels();
-            t.a.rate = track.rate();
+            t.u.a.nbChannels = track.channels();
+            t.u.a.rate = track.rate();
         }
         else if ( track.type() == VLC::MediaTrack::Type::Video )
         {
             t.type = IItem::Track::Type::Video;
-            t.v.fpsNum = track.fpsNum();
-            t.v.fpsDen = track.fpsDen();
-            t.v.width = track.width();
-            t.v.height = track.height();
-            t.v.sarNum = track.sarNum();
-            t.v.sarDen = track.sarDen();
+            t.u.v.fpsNum = track.fpsNum();
+            t.u.v.fpsDen = track.fpsDen();
+            t.u.v.width = track.width();
+            t.u.v.height = track.height();
+            t.u.v.sarNum = track.sarNum();
+            t.u.v.sarDen = track.sarDen();
         }
         else if ( track.type() == VLC::MediaTrack::Type::Subtitle )
         {
@@ -259,7 +259,7 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
             t.language = track.language();
             t.description = track.description();
             const auto& enc = track.encoding();
-            strncpy( t.s.encoding, enc.c_str(), sizeof(t.s.encoding) - 1 );
+            strncpy( t.u.s.encoding, enc.c_str(), sizeof(t.u.s.encoding) - 1 );
         }
         else
             continue;

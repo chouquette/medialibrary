@@ -708,22 +708,22 @@ void MetadataAnalyzer::createTracks( Media& m, const std::vector<IItem::Track>& 
     {
         if ( track.type == IItem::Track::Type::Video )
         {
-            m.addVideoTrack( track.codec, track.v.width, track.v.height,
-                                  track.v.fpsNum, track.v.fpsDen, track.bitrate,
-                                  track.v.sarNum, track.v.sarDen,
+            m.addVideoTrack( track.codec, track.u.v.width, track.u.v.height,
+                                  track.u.v.fpsNum, track.u.v.fpsDen, track.bitrate,
+                                  track.u.v.sarNum, track.u.v.sarDen,
                                   track.language, track.description );
         }
         else if ( track.type == IItem::Track::Type::Audio )
         {
             m.addAudioTrack( track.codec, track.bitrate,
-                                       track.a.rate, track.a.nbChannels,
+                                       track.u.a.rate, track.u.a.nbChannels,
                                        track.language, track.description, 0 );
         }
         else
         {
             assert( track.type == IItem::Track::Type::Subtitle );
             m.addSubtitleTrack( track.codec, track.language, track.description,
-                                track.s.encoding, 0 );
+                                track.u.s.encoding, 0 );
         }
     }
 }
