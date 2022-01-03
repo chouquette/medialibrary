@@ -161,6 +161,7 @@ private:
     bool addInternal( int64_t mediaId, uint32_t position, bool updateCounters );
     bool addInternal( const IMedia& media, uint32_t position, bool updateCounters );
     bool removeInternal( uint32_t position, int64_t mediaId, bool updateCounters );
+    std::shared_ptr<File> file() const;
 
 private:
     MediaLibraryPtr m_ml;

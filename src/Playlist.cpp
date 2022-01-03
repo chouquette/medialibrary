@@ -419,6 +419,13 @@ bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateC
     return true;
 }
 
+std::shared_ptr<File> Playlist::file() const
+{
+    const std::string req = "SELECT * FROM " + File::Table::Name +
+            " WHERE playlist_id = ?";
+    return File::fetch( m_ml, req, m_id );
+}
+
 bool Playlist::append( const IMedia& media )
 {
     return addInternal( media, UINT32_MAX, true );
@@ -515,17 +522,17 @@ bool Playlist::remove( uint32_t position )
 
 bool Playlist::isReadOnly() const
 {
-    return m_fileId != 0;
+    return file() != nullptr;
 }
 
 std::string Playlist::mrl() const
 {
-    auto file = File::fetch( m_ml, m_fileId );
-    if ( file == nullptr )
+    auto f = file();
+    if ( f == nullptr )
         return {};
     try
     {
-        return file->mrl();
+        return f->mrl();
     }
     catch ( const fs::errors::DeviceRemoved& )
     {
