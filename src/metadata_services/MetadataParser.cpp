@@ -308,7 +308,6 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                      */
                     if ( file->update( *item.fileFs(), item.parentFolder()->id(),
                                        deviceFs->isRemovable() ) == false ||
-                         playlistPtr->setFileId( file->id() ) == false ||
                          file->setPlaylistId( playlistPtr->id() ) == false ||
                          Media::destroy( m_ml, file->mediaId() ) == false )
                     {

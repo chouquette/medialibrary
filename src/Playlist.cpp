@@ -462,21 +462,7 @@ std::shared_ptr<File> Playlist::addFile( const fs::IFile& fileFs, int64_t parent
     auto file = File::createFromPlaylist( m_ml, m_id, fileFs, parentFolderId, isFolderFsRemovable);
     if ( file == nullptr )
         return nullptr;
-    if ( setFileId( file->id() ) == false )
-        return nullptr;
     return file;
-}
-
-bool Playlist::setFileId( int64_t fileId )
-{
-    if ( m_fileId == fileId )
-        return true;
-    static const std::string req = "UPDATE " + Table::Name +
-            " SET file_id = ? WHERE id_playlist = ?";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, fileId, m_id ) == false )
-        return false;
-    m_fileId = fileId;
-    return true;
 }
 
 bool Playlist::move( uint32_t from, uint32_t position )
