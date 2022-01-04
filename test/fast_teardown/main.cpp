@@ -87,7 +87,7 @@ int main( int argc, char** argv )
     {
         auto testCb = std::make_unique<FastTearDownCb>();
         std::unique_ptr<medialibrary::IMediaLibrary> ml(
-                    NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false ) );
+                    NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false, nullptr ) );
         ml->initialize( testCb.get() );
         testCb->prepareWait();
         ml->discover( entryPoint );

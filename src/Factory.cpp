@@ -27,11 +27,13 @@
 #include "MediaLibrary.h"
 #include "logging/Logger.h"
 
-extern "C" medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath, const char* mlFolderPath, bool lockFile )
+extern "C"
+medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath, const char* mlFolderPath,
+                                              bool lockFile, const medialibrary::SetupConfig* cfg )
 {
     try
     {
-        auto ml = medialibrary::MediaLibrary::create( dbPath, mlFolderPath, lockFile );
+        auto ml = medialibrary::MediaLibrary::create( dbPath, mlFolderPath, lockFile, cfg );
         if ( ml )
             return ml.release();
         return nullptr;

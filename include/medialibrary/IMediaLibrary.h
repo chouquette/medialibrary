@@ -180,6 +180,15 @@ enum class PlaylistType : uint8_t
     VideoOnly,
 };
 
+struct SetupConfig
+{
+    /**
+     * @brief parserServices A vector of external parser services provided by the application
+     * @note This currently only supports MetadataExtraction services.
+     */
+    std::vector<std::shared_ptr<parser::IParserService>> parserServices;
+};
+
 class IMediaLibraryCb
 {
 public:
@@ -967,5 +976,6 @@ extern "C"
 {
     medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath,
                                                   const char* mlFolderPath,
-                                                  bool lockFile );
+                                                  bool lockFile,
+                                                  const medialibrary::SetupConfig* cfg );
 }

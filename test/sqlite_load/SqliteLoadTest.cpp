@@ -196,7 +196,7 @@ int main( int argc, char** argv)
 
     auto cbMock = std::make_shared<MockCallback>();
     std::unique_ptr<IMediaLibrary> ml{
-        NewMediaLibrary( "sqliteload.db", "/tmp/ml/", false )
+        NewMediaLibrary( "sqliteload.db", "/tmp/ml/", false, nullptr )
     };
     ml->setVerbosity( medialibrary::LogLevel::Info );
     unlink( "sqliteload.db" );

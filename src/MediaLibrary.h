@@ -85,9 +85,10 @@ class MediaLibrary : public IMediaLibrary
 public:
     static std::unique_ptr<MediaLibrary> create( const std::string &dbPath,
                                                  const std::string &mlFolderPath,
-                                                 bool lockFile );
+                                                 bool lockFile, const SetupConfig* cfg );
 
-    MediaLibrary( const std::string& dbPath, const std::string& mlFolderPath, std::unique_ptr<LockFile> lockFile = {} );
+    MediaLibrary( const std::string& dbPath, const std::string& mlFolderPath,
+                  std::unique_ptr<LockFile> lockFile = {}, const SetupConfig* cfg = nullptr );
 
     virtual ~MediaLibrary();
     virtual InitializeResult initialize( IMediaLibraryCb* mlCallback ) override;

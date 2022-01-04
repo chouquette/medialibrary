@@ -35,7 +35,7 @@ BenchMedialib commonInit()
     if ( utils::fs::fileSize( db ) == 0 )
         abort();
     bml.ml.reset(
-        NewMediaLibrary( db, "/tmp/bench_ml", false ) );
+        NewMediaLibrary( db, "/tmp/bench_ml", false, nullptr ) );
     bml.ml->initialize( &bml.cb );
     return bml;
 }

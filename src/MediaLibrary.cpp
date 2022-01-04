@@ -287,7 +287,7 @@ const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
 
 std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
                                                     const std::string& mlFolderPath,
-                                                    bool lockFile )
+                                                    bool lockFile, const SetupConfig* cfg )
 {
     std::unique_ptr<LockFile> lock;
 
@@ -298,12 +298,13 @@ std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
             return {};
     }
 
-    return std::make_unique<MediaLibrary>( dbPath, mlFolderPath, std::move( lock ) );
+    return std::make_unique<MediaLibrary>( dbPath, mlFolderPath, std::move( lock ), cfg );
 }
 
 MediaLibrary::MediaLibrary( const std::string& dbPath,
                             const std::string& mlFolderPath,
-                            std::unique_ptr<LockFile> lockFile )
+                            std::unique_ptr<LockFile> lockFile,
+                            const SetupConfig* cfg )
     : m_settings( this )
     , m_initialized( false )
     , m_discovererIdle( true )
