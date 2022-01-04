@@ -214,7 +214,7 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
     m_serviceWorkers[serviceIdx]->parse( std::move( t ) );
 }
 
-void Parser::onIdleChanged( bool idle )
+void Parser::onIdleChanged( bool idle ) const
 {
     // If any parser service is not idle, then the global parser state is active
     if ( idle == false )

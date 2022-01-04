@@ -48,7 +48,7 @@ public:
     virtual ~IParserCb() = default;
     virtual void parse( std::shared_ptr<Task> task ) = 0;
     virtual void done( std::shared_ptr<Task> task, Status status ) = 0;
-    virtual void onIdleChanged( bool isIdle ) = 0;
+    virtual void onIdleChanged( bool isIdle ) const = 0;
     /**
      * @brief refreshTaskList Will be invoked when the task list should be refreshed
      *
@@ -87,7 +87,7 @@ private:
     void updateStats();
     virtual void done( std::shared_ptr<Task> task,
                        Status status ) override;
-    virtual void onIdleChanged( bool idle ) override;
+    virtual void onIdleChanged( bool idle ) const override;
     // Queues all unparsed files for parsing.
     void restore();
     virtual void onDeviceReappearing( int64_t deviceId ) override;
