@@ -315,18 +315,17 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
     , m_fsHolder( this )
+    , m_discovererWorker( this, &m_fsHolder )
 {
     Log::setLogLevel( LogLevel::Error );
+    m_fsHolder.registerCallback( &m_discovererWorker );
 }
 
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
-    if ( m_discovererWorker != nullptr )
-    {
-        m_fsHolder.unregisterCallback( m_discovererWorker.get() );
-        m_discovererWorker->stop();
-    }
+    m_fsHolder.unregisterCallback( &m_discovererWorker );
+    m_discovererWorker.stop();
     if ( m_parser != nullptr )
     {
         m_fsHolder.unregisterCallback( m_parser.get() );
@@ -1117,17 +1116,6 @@ void MediaLibrary::startParser()
     m_fsHolder.registerCallback( parser.get() );
     parser->start();
     m_parser = std::move( parser );
-}
-
-void MediaLibrary::startDiscoverer()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    if ( m_discovererWorker != nullptr )
-        return;
-    auto discoverer = std::make_unique<FsDiscoverer>( this, m_fsHolder, m_callback );
-    m_discovererWorker.reset( new DiscovererWorker( this, &m_fsHolder,
-                                                    std::move( discoverer ) ) );
-    m_fsHolder.registerCallback( m_discovererWorker.get() );
 }
 
 void MediaLibrary::startDeletionNotifier()
@@ -1953,8 +1941,7 @@ void MediaLibrary::migrationEpilogue( uint32_t originalPreviousVersion )
 
 void MediaLibrary::reload()
 {
-    startDiscoverer();
-    m_discovererWorker->reload();
+    m_discovererWorker.reload();
     /*
      * Initialize the parser and implicitely restart uncompleted parser tasks
      * If the parser was already started, this is a no-op
@@ -1964,8 +1951,7 @@ void MediaLibrary::reload()
 
 void MediaLibrary::reload( const std::string& entryPoint )
 {
-    startDiscoverer();
-    m_discovererWorker->reload( entryPoint );
+    m_discovererWorker.reload( entryPoint );
     getParser();
 }
 
@@ -2063,8 +2049,7 @@ void MediaLibrary::resumeBackgroundOperations()
 
 void MediaLibrary::pauseBackgroundOperationsLocked()
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->pause();
+    m_discovererWorker.pause();
     if ( m_parser != nullptr )
         m_parser->pause();
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
@@ -2074,8 +2059,7 @@ void MediaLibrary::pauseBackgroundOperationsLocked()
 
 void MediaLibrary::resumeBackgroundOperationsLocked()
 {
-    if ( m_discovererWorker != nullptr )
-        m_discovererWorker->resume();
+    m_discovererWorker.resume();
     if ( m_parser != nullptr )
         m_parser->resume();
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
@@ -2193,8 +2177,7 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
 
 void MediaLibrary::discover( const std::string& entryPoint )
 {
-    startDiscoverer();
-    m_discovererWorker->discover( entryPoint );
+    m_discovererWorker.discover( entryPoint );
 }
 
 bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
@@ -2257,20 +2240,17 @@ FolderPtr MediaLibrary::folder( const std::string& mrl ) const
 
 void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
 {
-    startDiscoverer();
-    m_discovererWorker->remove( entryPoint );
+    m_discovererWorker.remove( entryPoint );
 }
 
 void MediaLibrary::banFolder( const std::string& entryPoint )
 {
-    startDiscoverer();
-    m_discovererWorker->ban( entryPoint );
+    m_discovererWorker.ban( entryPoint );
 }
 
 void MediaLibrary::unbanFolder( const std::string& entryPoint )
 {
-    startDiscoverer();
-    m_discovererWorker->unban( entryPoint );
+    m_discovererWorker.unban( entryPoint );
 }
 
 Query<IFolder> MediaLibrary::bannedEntryPoints() const
@@ -2428,16 +2408,9 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
         VLCInstance::set( inst );
         return true;
     }
-    auto restartDiscoverer = false;
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
-        if ( m_discovererWorker != nullptr )
-        {
-            m_fsHolder.unregisterCallback( m_discovererWorker.get() );
-            m_discovererWorker->stop();
-            m_discovererWorker.reset();
-            restartDiscoverer = true;
-        }
+        m_discovererWorker.stop();
 
         /*
          * The VLCMetadataService will fetch the new instance during its next run
@@ -2453,9 +2426,6 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
          */
         VLCInstance::set( inst );
     }
-
-    if ( restartDiscoverer == true )
-        startDiscoverer();
 
     return true;
 #endif

@@ -43,14 +43,11 @@
 namespace medialibrary
 {
 
-DiscovererWorker::DiscovererWorker(MediaLibrary* ml, FsHolder* fsHolder,
-                                    std::unique_ptr<FsDiscoverer> discoverer )
+DiscovererWorker::DiscovererWorker( MediaLibrary* ml, FsHolder* fsHolder )
     : m_fsHolder( fsHolder )
     , m_currentTask( nullptr )
-    , m_run( true )
-    , m_discoverer( std::move( discoverer ) )
+    , m_run( false )
     , m_ml( ml )
-    , m_thread( &DiscovererWorker::run, this )
     , m_discoveryNotified( false )
 {
     /*
@@ -67,28 +64,40 @@ DiscovererWorker::~DiscovererWorker()
 
 void DiscovererWorker::stop()
 {
-    bool running = true;
-    if ( m_run.compare_exchange_strong( running, false ) )
     {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        if ( m_run == false )
+            return;
+        m_run = false;
         /* Interrupt the current long running task if any */
         m_discoverer->interrupt();
-        /* Wake the thread in case it was waiting for more things to do */
-        m_cond.notify_all();
-
-        m_fsHolder->stopNetworkFsFactories();
-
-        /* And wait for all short requests to be handled */
-        m_thread.join();
     }
+    /* Wake the thread in case it was waiting for more things to do */
+    m_cond.notify_all();
+
+    m_fsHolder->stopNetworkFsFactories();
+
+    /* And wait for all short requests to be handled */
+    m_thread.join();
 }
 
 void DiscovererWorker::pause()
 {
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        if ( m_run == false )
+            return;
+    }
     m_discoverer->pause();
 }
 
 void DiscovererWorker::resume()
 {
+    {
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        if ( m_run == false )
+            return;
+    }
     m_discoverer->resume();
 }
 
@@ -358,8 +367,21 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
         default:
             assert( !"Unexpected task type" );
     }
-
-    notify();
+    if ( m_thread.joinable() == false )
+    {
+        /*
+         * This check is only relevent in discoverer tests configuration.
+         * Otherwise we always have a valid fsHolder instance
+         */
+        if ( m_fsHolder != nullptr )
+        {
+            m_discoverer = std::make_unique<FsDiscoverer>( m_ml, *m_fsHolder, m_ml->getCb() );
+            m_thread = compat::Thread{ &DiscovererWorker::run, this };
+            m_run = true;
+        }
+    }
+    else
+        notify();
 }
 
 void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
@@ -429,8 +451,7 @@ void DiscovererWorker::run()
                  * to update the database to reflect the user's actions.
                  * The actual reload will be run next time.
                  */
-                if ( task.isLongRunning() == true &&
-                     m_run.load( std::memory_order_acquire ) == false )
+                if ( task.isLongRunning() == true && m_run == false )
                     continue;
                 m_currentTask = &task;
             }
@@ -471,9 +492,13 @@ void DiscovererWorker::run()
             default:
                 assert(false);
             }
-            if ( needTaskRefresh == true &&
-                 m_run.load( std::memory_order_acquire ) == true )
+            if ( needTaskRefresh == true )
             {
+                {
+                    std::unique_lock<compat::Mutex> lock( m_mutex );
+                    if ( m_run == false )
+                        continue;
+                }
                 auto parser = m_ml->tryGetParser();
                 if ( parser != nullptr )
                     parser->refreshTaskList();

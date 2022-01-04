@@ -33,6 +33,7 @@
 #include "LockFile.h"
 #include "database/SqliteConnection.h"
 #include "filesystem/FsHolder.h"
+#include "discoverer/DiscovererWorker.h"
 
 #include <atomic>
 
@@ -276,7 +277,6 @@ private:
 
 protected:
     virtual void startParser();
-    void startDiscoverer();
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();
     /*
@@ -358,7 +358,7 @@ protected:
     mutable std::unique_ptr<parser::Parser> m_parser;
     // Same reasoning applies here.
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
-    std::unique_ptr<DiscovererWorker> m_discovererWorker;
+    DiscovererWorker m_discovererWorker;
     std::shared_ptr<ModificationNotifier> m_modificationNotifier;
     mutable compat::Mutex m_thumbnailerWorkerMutex;
     mutable std::unique_ptr<ThumbnailerWorker> m_thumbnailerWorker;

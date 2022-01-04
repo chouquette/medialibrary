@@ -74,8 +74,7 @@ protected:
     DiscovererWorker() = default;
 
 public:
-    DiscovererWorker( MediaLibrary* ml, FsHolder* fsHolder,
-                      std::unique_ptr<FsDiscoverer> discoverer );
+    DiscovererWorker( MediaLibrary* ml, FsHolder* fsHolder );
     virtual ~DiscovererWorker();
     void stop();
     void pause();
@@ -113,7 +112,7 @@ protected:
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     // This will be set to false when the worker needs to be stopped
-    std::atomic_bool m_run;
+    bool m_run;
     std::unique_ptr<FsDiscoverer> m_discoverer;
     MediaLibrary* m_ml;
     compat::Thread m_thread;
