@@ -135,14 +135,12 @@ void Worker::parse( std::vector<std::shared_ptr<Task>> tasks )
     m_cond.notify_all();
 }
 
-bool Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
-                               std::shared_ptr<IParserService> service )
+void Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
+                         std::shared_ptr<IParserService> service )
 {
     m_ml = ml;
     m_service = std::move( service );
     m_parserCb = parserCb;
-    // Run the service specific initializer
-    return m_service->initialize( ml );
 }
 
 bool Worker::isIdle() const
@@ -171,6 +169,9 @@ void Worker::mainloop()
     std::string serviceName = m_service->name();
     LOG_INFO("Entering ParserService [", serviceName, "] thread");
     m_parserCb->onIdleChanged( false );
+
+    // Run the service specific initializer
+    m_service->initialize( m_ml );
 
     while ( true )
     {

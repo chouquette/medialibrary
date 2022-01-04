@@ -69,7 +69,7 @@ public:
     /// locking/queuing/unlocking in a loop
     ///
     void parse( std::vector<std::shared_ptr<Task>> tasks );
-    bool initialize( MediaLibrary* ml, IParserCb* parserCb, std::shared_ptr<IParserService> service );
+    void initialize( MediaLibrary* ml, IParserCb* parserCb, std::shared_ptr<IParserService> service );
     bool isIdle() const;
     ///
     /// \brief flush flush every currently scheduled tasks
