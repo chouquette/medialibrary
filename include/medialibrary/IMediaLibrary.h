@@ -644,7 +644,7 @@ public:
      * factories if needed
      * The actuall discovery will run asynchronously, meaning this method will immediatly return.
      * Depending on which discoverer modules where provided, this might or might not work
-     * \note This must be called after initialize()
+     * @note This must be called after initialize()
      * @param entryPoint The MRL of the entrypoint to discover.
      */
     virtual void discover( const std::string& entryPoint ) = 0;
@@ -732,6 +732,7 @@ public:
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
      *       task
+     * @note This must be called after initialize()
      */
     virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
     /**
@@ -742,6 +743,7 @@ public:
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
      *       task
+     * @note This must be called after initialize()
      */
     virtual void banFolder( const std::string& mrl ) = 0;
     /**
@@ -752,6 +754,7 @@ public:
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
      *       task
+     * @note This must be called after initialize()
      */
     virtual void unbanFolder( const std::string& mrl ) = 0;
     /**
@@ -775,6 +778,7 @@ public:
     virtual void resumeBackgroundOperations() = 0;
     /**
      * @brief reload Reload all known entry points
+     * @note This must be called after initialize()
      *
      * This will start the discoverer thread, appropriate device listers and
      * file system factories if needed.
@@ -783,6 +787,7 @@ public:
     /**
      * @brief reload Reload a specific entry point
      * @param entryPoint The entrypoint to reload
+     * @note This must be called after initialize()
      *
      * This will start the discoverer thread, appropriate device listers and
      * file system factories if needed.
