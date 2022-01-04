@@ -276,7 +276,7 @@ private:
 
 protected:
     virtual void startParser();
-    virtual void startDiscoverer();
+    void startDiscoverer();
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();
     /*

@@ -106,12 +106,6 @@ class MediaLibraryWithDiscoverer : public MediaLibraryTester
     {
         return true;
     }
-
-    virtual void startDiscoverer() override
-    {
-        // Fall back to the default variant which actually starts the discoverer
-        MediaLibrary::startDiscoverer();
-    }
 };
 
 class MediaLibraryWithNotifier : public MediaLibraryTester
