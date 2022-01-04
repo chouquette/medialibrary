@@ -72,6 +72,8 @@ void DiscovererWorker::stop()
         /* Interrupt the current long running task if any */
         m_discoverer->interrupt();
     }
+    m_fsHolder->unregisterCallback( this );
+
     /* Wake the thread in case it was waiting for more things to do */
     m_cond.notify_all();
 
@@ -377,6 +379,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
         {
             m_discoverer = std::make_unique<FsDiscoverer>( m_ml, *m_fsHolder, m_ml->getCb() );
             m_thread = compat::Thread{ &DiscovererWorker::run, this };
+            m_fsHolder->registerCallback( this );
             m_run = true;
         }
     }

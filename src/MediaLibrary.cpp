@@ -318,13 +318,11 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_discovererWorker( this, &m_fsHolder )
 {
     Log::setLogLevel( LogLevel::Error );
-    m_fsHolder.registerCallback( &m_discovererWorker );
 }
 
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
-    m_fsHolder.unregisterCallback( &m_discovererWorker );
     m_discovererWorker.stop();
     if ( m_parser != nullptr )
     {
