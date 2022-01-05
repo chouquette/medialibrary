@@ -213,10 +213,11 @@ public:
 struct DbModel : public Tests
 {
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlDir ) override
+                                          const std::string& mlDir,
+                                          const SetupConfig* cfg ) override
     {
         utils::fs::remove( dbPath );
-        ml.reset( new MediaLibraryTesterNoForceRescan( dbPath, mlDir ) );
+        ml.reset( new MediaLibraryTesterNoForceRescan( dbPath, mlDir, cfg ) );
     }
 
     virtual void Initialize() override

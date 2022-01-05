@@ -39,8 +39,9 @@
 
 
 MediaLibraryTester::MediaLibraryTester( const std::string& dbPath,
-                                        const std::string& mlFolderPath )
-    : MediaLibrary( dbPath, mlFolderPath )
+                                        const std::string& mlFolderPath,
+                                        const SetupConfig* cfg )
+    : MediaLibrary( dbPath, mlFolderPath, nullptr, cfg )
     , dummyDevice( new mock::NoopDevice )
     , dummyDirectory( new mock::NoopDirectory )
 {

@@ -59,9 +59,10 @@ struct DeviceFsTests : public UnitTests<mock::WaitForDiscoveryComplete>
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlFolderDir ) override
+                                          const std::string& mlFolderDir,
+                                          const SetupConfig* cfg ) override
     {
-        ml.reset( new MediaLibraryWithDiscoverer( dbPath, mlFolderDir ) );
+        ml.reset( new MediaLibraryWithDiscoverer( dbPath, mlFolderDir, cfg ) );
     }
 
     bool Reload()

@@ -65,7 +65,7 @@ struct DiscovererTests : public Tests
     {
         InitTestFolder( testSuite, testName );
         /* We won't use the database in these tests but need a valid medialib instance */
-        InstantiateMediaLibrary( "/no/such/file.db", "/or/directory" );
+        InstantiateMediaLibrary( "/no/such/file.db", "/or/directory", nullptr );
         discoverer.reset( new DiscovererWorkerTest() );
     }
 

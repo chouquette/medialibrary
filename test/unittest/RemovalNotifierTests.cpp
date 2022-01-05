@@ -85,9 +85,10 @@ private:
 struct RemovalNotifierTests : public UnitTests<MockCallback>
 {
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlFolderDir ) override
+                                          const std::string& mlFolderDir,
+                                          const SetupConfig* cfg ) override
     {
-        ml.reset( new MediaLibraryWithNotifier ( dbPath, mlFolderDir ) );
+        ml.reset( new MediaLibraryWithNotifier ( dbPath, mlFolderDir, cfg ) );
     }
 };
 

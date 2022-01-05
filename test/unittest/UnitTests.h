@@ -56,7 +56,7 @@ struct UnitTests
     virtual void SetUp( const std::string& testSuite, const std::string& testName )
     {
         InitTestFolder( testSuite, testName );
-        InstantiateMediaLibrary( getDbPath(), m_testDir );
+        InstantiateMediaLibrary( getDbPath(), m_testDir, nullptr );
         fsMock = std::make_shared<mock::FileSystemFactory>();
         SetupMockFileSystem();
         cbMock.reset( new CB );
@@ -89,9 +89,10 @@ struct UnitTests
     }
 
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlDir )
+                                          const std::string& mlDir,
+                                          const SetupConfig* cfg )
     {
-        ml.reset( new MediaLibraryTester( dbPath, mlDir ) );
+        ml.reset( new MediaLibraryTester( dbPath, mlDir, cfg ) );
     }
 
     virtual void TearDown()

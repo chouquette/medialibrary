@@ -42,9 +42,10 @@ class MediaLibraryTesterDevices : public MediaLibraryTester
 class DeviceTests : public Tests
 {
     virtual void InstantiateMediaLibrary( const std::string& dbPath,
-                                          const std::string& mlFolderDir ) override
+                                          const std::string& mlFolderDir,
+                                          const SetupConfig* cfg ) override
     {
-        ml.reset( new MediaLibraryTesterDevices( dbPath, mlFolderDir ) );
+        ml.reset( new MediaLibraryTesterDevices( dbPath, mlFolderDir, cfg ) );
     }
 };
 
