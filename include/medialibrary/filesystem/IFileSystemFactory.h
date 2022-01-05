@@ -28,6 +28,8 @@
 namespace medialibrary
 {
 
+class IMediaLibrary;
+
 namespace fs
 {
     class IDirectory;
@@ -68,6 +70,18 @@ namespace fs
     {
     public:
         virtual ~IFileSystemFactory() = default;
+        /**
+         * @brief initialize Will be invoked when the factory gets added to the medialib
+         *
+         * @param ml A media library instance pointer
+         * @return true in case of success, false otherwise.
+         *
+         * If this returns false, the factory will be abandonned and the shared_ptr
+         * for to that factory provided through SetupConfig will be destroyed
+         * If this factory handles a scheme that was already registered, it will
+         * not be used by the media library but this function will still be invoked
+         */
+        virtual bool initialize( const IMediaLibrary* ml ) = 0;
         ///
         /// \brief createDirectory creates a representation of a directory
         /// \note This method can fail by throwing an exception if the

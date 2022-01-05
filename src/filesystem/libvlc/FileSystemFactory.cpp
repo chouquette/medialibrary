@@ -46,14 +46,18 @@ namespace fs
 namespace libvlc
 {
 
-FileSystemFactory::FileSystemFactory( MediaLibraryPtr ml,
-                                      const std::string& scheme )
+FileSystemFactory::FileSystemFactory( const std::string& scheme )
     : m_scheme( scheme )
-    , m_deviceLister( ml->deviceLister( scheme ) )
     , m_cb( nullptr )
 {
     m_isNetwork = strncasecmp( m_scheme.c_str(), "file://",
                                m_scheme.length() ) != 0;
+}
+
+bool FileSystemFactory::initialize( const IMediaLibrary* ml )
+{
+    m_deviceLister = ml->deviceLister( m_scheme );
+    return m_deviceLister != nullptr;
 }
 
 std::shared_ptr<fs::IDirectory> FileSystemFactory::createDirectory( const std::string& mrl )

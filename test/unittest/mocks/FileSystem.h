@@ -279,6 +279,11 @@ struct FileSystemFactory : public fs::IFileSystemFactory
         return m_cb != nullptr;
     }
 
+    virtual bool initialize( const IMediaLibrary* ) override
+    {
+        return true;
+    }
+
     std::vector<std::shared_ptr<Device>> devices;
     fs::IFileSystemFactoryCb* m_cb;
 };

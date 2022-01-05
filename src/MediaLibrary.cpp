@@ -1137,7 +1137,7 @@ void MediaLibrary::startThumbnailer() const
 void MediaLibrary::populateNetworkFsFactories()
 {
 #ifdef HAVE_LIBVLC
-    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( this, "smb://" ) );
+    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( "smb://" ) );
 #endif
 }
 
@@ -1148,7 +1148,7 @@ void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 void MediaLibrary::addLocalFsFactory()
 {
 #ifdef HAVE_LIBVLC
-    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( this, "file://" ) );
+    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( "file://" ) );
 #endif
 }
 

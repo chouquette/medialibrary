@@ -67,6 +67,13 @@ FsHolder::~FsHolder()
 
 bool FsHolder::addFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 {
+    /*
+     * Since the fs factory is likely to fetch a device lister, we need to call
+     * this before locking
+     */
+    if ( fsFactory->initialize( m_ml ) == false )
+        return false;
+
     std::lock_guard<compat::Mutex> lock{ m_mutex };
 
     auto it = std::find_if( cbegin( m_fsFactories  ),

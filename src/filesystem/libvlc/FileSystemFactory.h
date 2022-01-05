@@ -43,7 +43,8 @@ public:
      * @brief FileSystemFactory Constructs a filesystem factory for the given scheme
      * @param scheme The targeted scheme, including '://'
      */
-    FileSystemFactory( MediaLibraryPtr ml, const std::string& scheme );
+    FileSystemFactory( const std::string& scheme );
+    virtual bool initialize( const IMediaLibrary* ml ) override;
     virtual std::shared_ptr<fs::IDirectory> createDirectory( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IFile> createFile( const std::string& mrl ) override;
     virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) override;
