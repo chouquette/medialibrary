@@ -63,7 +63,7 @@ class Parser : public IParserCb, public IFsHolderCb
 public:
     using ServicePtr = std::shared_ptr<IParserService>;
 
-    explicit Parser( MediaLibrary* ml );
+    explicit Parser(MediaLibrary* ml , FsHolder* fsHolder);
     virtual ~Parser();
     void addService( ServicePtr service );
     virtual void parse( std::shared_ptr<Task> task ) override;
@@ -97,6 +97,7 @@ private:
     std::vector<std::unique_ptr<Worker>> m_serviceWorkers;
 
     MediaLibrary* m_ml;
+    FsHolder* m_fsHolder;
     mutable compat::Mutex m_mutex;
     /* The fields below are protected by the mutex */
     IMediaLibraryCb* m_callback;

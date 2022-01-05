@@ -316,7 +316,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
     , m_fsHolder( this )
-    , m_parser( this )
+    , m_parser( this, &m_fsHolder )
     , m_discovererWorker( this, &m_fsHolder )
 {
     Log::setLogLevel( LogLevel::Error );
@@ -337,14 +337,12 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
 #endif
     m_parser.addService( std::make_shared<parser::MetadataAnalyzer>() );
     m_parser.addService( std::make_shared<parser::LinkService>() );
-    m_fsHolder.registerCallback( &m_parser );
 }
 
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     m_discovererWorker.stop();
-    m_fsHolder.unregisterCallback( &m_parser );
     m_parser.stop();
 }
 

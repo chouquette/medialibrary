@@ -39,8 +39,9 @@ namespace medialibrary
 namespace parser
 {
 
-Parser::Parser( MediaLibrary* ml )
+Parser::Parser( MediaLibrary* ml, FsHolder* fsHolder )
     : m_ml( ml )
+    , m_fsHolder( fsHolder )
     , m_callback( nullptr )
     , m_opScheduled( 0 )
     , m_opDone( 0 )
@@ -77,6 +78,7 @@ void Parser::start()
         assert( m_callback == nullptr );
         m_callback = m_ml->getCb();
     }
+    m_fsHolder->registerCallback( this );
     assert( m_serviceWorkers.size() == 3 );
     restore();
 }
@@ -101,6 +103,7 @@ void Parser::stop()
             return;
         m_callback = nullptr;
     }
+    m_fsHolder->unregisterCallback( this );
 
     for ( auto& s : m_serviceWorkers )
     {
@@ -170,9 +173,17 @@ void Parser::onDeviceDisappearing( int64_t )
 
 void Parser::refreshTaskList()
 {
-    /* If we haven't started the parset yet, there's nothing to refresh */
-    if ( m_callback == nullptr )
-        return;
+    /*
+     * Ideally we should assert that the callback is != nullptr here but we can't
+     * as things stand:
+     * - Checking the callback means locking the parser mutex
+     * - While in this scope we're being called from the FsHolder with its mutex held
+     * - While stopping, we can't lock the parser mutex then unregister the fs holder
+     *   callback as it would create a lock inversion
+     * - Not unregistering as part of the parser lock means there's a small window
+     *   in which the callback is nullptr but the FsHolder still has its callback
+     *   registered
+     */
     flush();
     restore();
 }
