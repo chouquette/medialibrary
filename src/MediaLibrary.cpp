@@ -1952,8 +1952,7 @@ bool MediaLibrary::forceParserRetry()
 
 bool MediaLibrary::clearDatabase( bool restorePlaylists )
 {
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    pauseBackgroundOperationsLocked();
+    pauseBackgroundOperations();
     auto parser = getParser();
     if ( parser != nullptr )
         parser->flush();
@@ -1962,7 +1961,7 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
     {
         if ( recreateDatabase() == false )
             return false;
-        resumeBackgroundOperationsLocked();
+        resumeBackgroundOperations();
         return true;
     }
 
@@ -2021,23 +2020,11 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
             }
         }
     }
-    resumeBackgroundOperationsLocked();
+    resumeBackgroundOperations();
     return true;
 }
 
 void MediaLibrary::pauseBackgroundOperations()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    pauseBackgroundOperationsLocked();
-}
-
-void MediaLibrary::resumeBackgroundOperations()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    resumeBackgroundOperationsLocked();
-}
-
-void MediaLibrary::pauseBackgroundOperationsLocked()
 {
     m_discovererWorker.pause();
     m_parser.pause();
@@ -2046,7 +2033,7 @@ void MediaLibrary::pauseBackgroundOperationsLocked()
         m_thumbnailerWorker->pause();
 }
 
-void MediaLibrary::resumeBackgroundOperationsLocked()
+void MediaLibrary::resumeBackgroundOperations()
 {
     m_discovererWorker.resume();
     m_parser.resume();

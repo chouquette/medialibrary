@@ -270,8 +270,6 @@ protected:
      * and before all tables are created
      */
     virtual void onDbConnectionReady( sqlite::Connection* dbConn );
-    void pauseBackgroundOperationsLocked();
-    void resumeBackgroundOperationsLocked();
 
 private:
     bool recreateDatabase();
