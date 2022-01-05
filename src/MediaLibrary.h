@@ -300,7 +300,6 @@ private:
     void registerEntityHooks();
     void removeThumbnails();
     void startThumbnailer() const;
-    virtual bool forceRescanLocked();
 
 protected:
     virtual void addLocalFsFactory();

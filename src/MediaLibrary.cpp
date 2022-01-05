@@ -1332,7 +1332,7 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
 
     if ( needRescan == true )
     {
-        if ( forceRescanLocked() == false )
+        if ( forceRescan() == false )
         {
             LOG_WARN( "Failed to force a rescan" );
         }
@@ -2232,12 +2232,6 @@ void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 }
 
 bool MediaLibrary::forceRescan()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    return forceRescanLocked();
-}
-
-bool MediaLibrary::forceRescanLocked()
 {
     /*
      * If the parser hasn't been initialized yet, don't force it to start until

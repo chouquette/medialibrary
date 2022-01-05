@@ -203,7 +203,7 @@ public:
      * Override forceRescanLocked to avoid removing all entities after the migration.
      * This allows more testing
      */
-    virtual bool forceRescanLocked() override { return true; }
+    virtual bool forceRescan() override { return true; }
 
     virtual void onDbConnectionReady( sqlite::Connection* ) override
     {
