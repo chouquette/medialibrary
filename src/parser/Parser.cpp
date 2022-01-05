@@ -41,7 +41,7 @@ namespace parser
 
 Parser::Parser( MediaLibrary* ml )
     : m_ml( ml )
-    , m_callback( ml->getCb() )
+    , m_callback( nullptr )
     , m_opScheduled( 0 )
     , m_opDone( 0 )
 {
@@ -71,6 +71,8 @@ void Parser::parse( std::shared_ptr<Task> task )
 
 void Parser::start()
 {
+    assert( m_callback == nullptr );
+    m_callback = m_ml->getCb();
     assert( m_serviceWorkers.size() == 3 );
     restore();
 }
@@ -97,6 +99,7 @@ void Parser::stop()
     {
         s->stop();
     }
+    m_callback = nullptr;
 }
 
 void Parser::flush()
