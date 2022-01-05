@@ -324,6 +324,8 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     {
         for ( const auto& p : cfg->deviceListers )
             m_fsHolder.registerDeviceLister( p.first, p.second );
+        for ( const auto& fsf : cfg->fsFactories )
+            m_fsHolder.addFsFactory( fsf );
     }
     if ( cfg != nullptr && cfg->parserServices.empty() == false )
     {
@@ -2134,11 +2136,6 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
 void MediaLibrary::discover( const std::string& entryPoint )
 {
     m_discovererWorker.discover( entryPoint );
-}
-
-bool MediaLibrary::addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
-{
-    return m_fsHolder.addFsFactory( std::move( fsFactory ) );
 }
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )

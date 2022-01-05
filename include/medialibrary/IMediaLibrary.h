@@ -197,6 +197,10 @@ struct SetupConfig
      * network shares.
      */
     std::unordered_map<std::string, DeviceListerPtr> deviceListers;
+    /**
+     * @brief fsFactories Provides an external filesystem factory implementation
+     */
+    std::vector<std::shared_ptr<fs::IFileSystemFactory>> fsFactories;
 };
 
 class IMediaLibraryCb
@@ -847,18 +851,6 @@ public:
     virtual void enableFailedThumbnailRegeneration() = 0;
 
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) = 0;
-
-    /**
-     * @brief addNetworkFileSystemFactory Provides a network filesystem factory implementation
-     * @return true if the factory is accepted & inserted
-     *
-     * This must be called *before* initialize()
-     * Only a single IFileSystemFactory instance per scheme is allowed.
-     * If a factory is passed to this method and the scheme is already handled
-     * by another factory, false will be returned.
-     * The provided factory won't be started until the media library itself is.
-     */
-    virtual bool addFileSystemFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory ) = 0;
 
     /**
      * @brief clearDatabase Will drop & recreate the database
