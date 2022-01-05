@@ -287,10 +287,10 @@ class Media : public IMedia,
 
         virtual ArtistPtr artist() const override;
         virtual int64_t artistId() const override;
-        virtual GenrePtr genre() override;
+        virtual GenrePtr genre() const override;
         virtual int64_t genreId() const override;
         virtual unsigned int trackNumber() const override;
-        virtual AlbumPtr album() override;
+        virtual AlbumPtr album() const override;
         virtual int64_t albumId() const override;
         virtual uint32_t discNumber() const override;
         virtual const std::string& lyrics() const override;

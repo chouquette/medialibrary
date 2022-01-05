@@ -1065,7 +1065,7 @@ int64_t Media::artistId() const
     return m_artistId;
 }
 
-GenrePtr Media::genre()
+GenrePtr Media::genre() const
 {
     if ( m_genreId == 0 )
         return nullptr;
@@ -1082,7 +1082,7 @@ unsigned int Media::trackNumber() const
     return m_trackNumber;
 }
 
-AlbumPtr Media::album()
+AlbumPtr Media::album() const
 {
     if ( m_albumId == 0 )
         return nullptr;
