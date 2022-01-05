@@ -859,8 +859,8 @@ void ResumeTests::InitializeCallback()
 
 void MediaLibraryResumeTest::forceParserStart()
 {
-    std::unique_lock<compat::Mutex> lock{ m_mutex };
-    MediaLibrary::startParser();
+    m_allowParser = true;
+    getParser()->start();
 }
 
 void MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
@@ -871,8 +871,11 @@ void MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
     t->commit();
 }
 
-void MediaLibraryResumeTest::startParser()
+parser::Parser* MediaLibraryResumeTest::getParser() const
 {
+    if ( m_allowParser == false )
+        return nullptr;
+    return MediaLibrary::getParser();
 }
 
 void RefreshTests::forceRefresh()

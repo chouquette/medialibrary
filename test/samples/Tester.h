@@ -139,8 +139,9 @@ public:
     using MediaLibrary::MediaLibrary;
     void forceParserStart();
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
+    virtual parser::Parser* getParser() const override;
 protected:
-    virtual void startParser() override;
+    bool m_allowParser = false;
 };
 
 struct ResumeTests : public Tests

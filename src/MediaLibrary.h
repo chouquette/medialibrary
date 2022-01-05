@@ -34,6 +34,7 @@
 #include "database/SqliteConnection.h"
 #include "filesystem/FsHolder.h"
 #include "discoverer/DiscovererWorker.h"
+#include "parser/Parser.h"
 
 #include <atomic>
 
@@ -210,20 +211,7 @@ public:
     sqlite::Connection* getConn() const;
     IMediaLibraryCb* getCb() const;
     std::shared_ptr<ModificationNotifier> getNotifier() const;
-    /**
-     * @brief getParser Returns a parser instance
-     *
-     * This will instantiate and start the parser if needed. It may still return
-     * a nullptr instance, in case no service are generated, or in some tests
-     * configurations
-     */
-    parser::Parser* getParser() const;
-    /**
-     * @brief tryGetParser Returns a parser instance if it exists.
-     *
-     * If no parser has been created, nullptr will be returned
-     */
-    parser::Parser* tryGetParser();
+    virtual parser::Parser* getParser() const;
     ThumbnailerWorker* thumbnailer() const;
 
     virtual void registerDeviceLister( DeviceListerPtr lister,
@@ -237,8 +225,6 @@ public:
     virtual bool forceRescan() override;
 
     virtual void enableFailedThumbnailRegeneration() override;
-
-    virtual void addParserService( std::shared_ptr<parser::IParserService> service ) override;
 
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) override;
 
@@ -277,7 +263,6 @@ private:
     static const std::vector<const char*> SupportedSubtitleExtensions;
 
 protected:
-    virtual void startParser();
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();
     /*
@@ -321,7 +306,6 @@ private:
     void registerEntityHooks();
     void removeThumbnails();
     void startThumbnailer() const;
-    parser::Parser* getParserLocked() const;
     virtual bool forceRescanLocked();
 
 protected:
@@ -348,15 +332,13 @@ protected:
 
     FsHolder m_fsHolder;
 
-    // User provided parser services
-    std::vector<std::shared_ptr<parser::IParserService>> m_services;
     mutable std::shared_ptr<IThumbnailer> m_thumbnailer;
     // Keep the parser as last field.
     // The parser holds a (raw) pointer to the media library. When MediaLibrary's destructor gets called
     // it might still finish a few operations before exiting the parser thread. Those operations are
     // likely to require a valid MediaLibrary, which would be compromised if some fields have already been
     // deleted/destroyed.
-    mutable std::unique_ptr<parser::Parser> m_parser;
+    parser::Parser m_parser;
     // Same reasoning applies here.
     //FIXME: Having to maintain a specific ordering sucks, let's use shared_ptr or something
     DiscovererWorker m_discovererWorker;

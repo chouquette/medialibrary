@@ -316,20 +316,36 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
     , m_fsHolder( this )
+    , m_parser( this )
     , m_discovererWorker( this, &m_fsHolder )
 {
     Log::setLogLevel( LogLevel::Error );
+    if ( cfg != nullptr && cfg->parserServices.empty() == false )
+    {
+        for ( const auto& s : cfg->parserServices )
+        {
+            if ( s->targetedStep() != parser::Step::MetadataExtraction )
+                return;
+            m_parser.addService( s );
+        }
+    }
+#ifdef HAVE_LIBVLC
+    else
+    {
+        m_parser.addService( std::make_shared<parser::VLCMetadataService>() );
+    }
+#endif
+    m_parser.addService( std::make_shared<parser::MetadataAnalyzer>() );
+    m_parser.addService( std::make_shared<parser::LinkService>() );
+    m_fsHolder.registerCallback( &m_parser );
 }
 
 MediaLibrary::~MediaLibrary()
 {
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     m_discovererWorker.stop();
-    if ( m_parser != nullptr )
-    {
-        m_fsHolder.unregisterCallback( m_parser.get() );
-        m_parser->stop();
-    }
+    m_fsHolder.unregisterCallback( &m_parser );
+    m_parser.stop();
 }
 
 bool MediaLibrary::createAllTables()
@@ -630,7 +646,9 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
         assert( res == InitializeResult::DbCorrupted );
         LOG_WARN( "Initialization complete; Database corruption was detected" );
     }
-
+    auto parser = getParser();
+    if ( parser != nullptr )
+        parser->start();
     m_initialized = true;
     return res;
 }
@@ -1090,31 +1108,6 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     res.playlists = searchPlaylists( pattern, params );
     res.shows = searchShows( pattern, params );
     return res;
-}
-
-void MediaLibrary::startParser()
-{
-    assert( m_parser == nullptr );
-    auto parser = std::make_unique<parser::Parser>( this );
-
-    if ( m_services.empty() == true )
-    {
-#ifdef HAVE_LIBVLC
-        parser->addService( std::make_shared<parser::VLCMetadataService>() );
-#else
-        return;
-#endif
-    }
-    else
-    {
-        assert( m_services[0]->targetedStep() == parser::Step::MetadataExtraction );
-        parser->addService( m_services[0] );
-    }
-    parser->addService( std::make_shared<parser::MetadataAnalyzer>() );
-    parser->addService( std::make_shared<parser::LinkService>() );
-    m_fsHolder.registerCallback( parser.get() );
-    parser->start();
-    m_parser = std::move( parser );
 }
 
 void MediaLibrary::startDeletionNotifier()
@@ -1963,7 +1956,7 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     pauseBackgroundOperationsLocked();
-    auto parser = getParserLocked();
+    auto parser = getParser();
     if ( parser != nullptr )
         parser->flush();
     // If we don't care about playlists, take a shortcut.
@@ -2049,8 +2042,7 @@ void MediaLibrary::resumeBackgroundOperations()
 void MediaLibrary::pauseBackgroundOperationsLocked()
 {
     m_discovererWorker.pause();
-    if ( m_parser != nullptr )
-        m_parser->pause();
+    m_parser.pause();
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->pause();
@@ -2059,8 +2051,7 @@ void MediaLibrary::pauseBackgroundOperationsLocked()
 void MediaLibrary::resumeBackgroundOperationsLocked()
 {
     m_discovererWorker.resume();
-    if ( m_parser != nullptr )
-        m_parser->resume();
+    m_parser.resume();
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->resume();
@@ -2127,26 +2118,9 @@ std::shared_ptr<ModificationNotifier> MediaLibrary::getNotifier() const
     return m_modificationNotifier;
 }
 
-parser::Parser *MediaLibrary::tryGetParser()
-{
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    return m_parser.get();
-}
-
-parser::Parser *MediaLibrary::getParserLocked() const
-{
-    if ( m_parser == nullptr )
-    {
-        auto self = const_cast<MediaLibrary*>( this );
-        self->startParser();
-    }
-    return m_parser.get();
-}
-
 parser::Parser* MediaLibrary::getParser() const
 {
-    std::unique_lock<compat::Mutex> lock{ m_mutex };
-    return getParserLocked();
+    return const_cast<parser::Parser*>( &m_parser );
 }
 
 ThumbnailerWorker* MediaLibrary::thumbnailer() const
@@ -2294,8 +2268,7 @@ bool MediaLibrary::forceRescanLocked()
      * MetadataParser to refuse to initialize since it can't fetch & cache the
      * unknown show
      */
-    if ( m_parser != nullptr )
-        m_parser->flush();
+    m_parser.flush();
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables
@@ -2323,35 +2296,14 @@ bool MediaLibrary::forceRescanLocked()
         t->commit();
     }
     removeThumbnails();
-    if ( m_parser != nullptr )
-    {
-        m_callback->onRescanStarted();
-        m_parser->rescan();
-    }
-    else
-    {
-        /*
-         * Implicitely create & start the parser, which will invoke restore()
-         * as its first operation, which will start the reset tasks parsing.
-         */
-        getParserLocked();
-    }
+    m_callback->onRescanStarted();
+    m_parser.rescan();
     return true;
 }
 
 void MediaLibrary::enableFailedThumbnailRegeneration()
 {
     Thumbnail::deleteFailureRecords( this );
-}
-
-void MediaLibrary::addParserService( std::shared_ptr<parser::IParserService> service )
-{
-    // For now we only support 1 external service of type MetadataExtraction
-    if ( service->targetedStep() != parser::Step::MetadataExtraction )
-        return;
-    if ( m_services.empty() == false )
-        return;
-    m_services.emplace_back( std::move( service ) );
 }
 
 void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )

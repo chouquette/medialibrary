@@ -854,8 +854,6 @@ public:
      */
     virtual void enableFailedThumbnailRegeneration() = 0;
 
-    virtual void addParserService( std::shared_ptr<parser::IParserService> service ) = 0;
-
     virtual void addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer ) = 0;
 
     /**

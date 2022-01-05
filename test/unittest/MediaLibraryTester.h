@@ -39,7 +39,7 @@ class MediaLibraryTester : public MediaLibrary
 public:
     MediaLibraryTester( const std::string& dbPath,
                         const std::string& mlFolderPath );
-    virtual void startParser() override { return; }
+    virtual parser::Parser* getParser() const override { return nullptr; }
     virtual void startDeletionNotifier() override {}
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
     std::vector<MediaPtr> files();

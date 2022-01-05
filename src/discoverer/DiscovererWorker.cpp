@@ -502,7 +502,7 @@ void DiscovererWorker::run()
                     if ( m_run == false )
                         continue;
                 }
-                auto parser = m_ml->tryGetParser();
+                auto parser = m_ml->getParser();
                 if ( parser != nullptr )
                     parser->refreshTaskList();
             }
