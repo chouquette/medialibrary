@@ -214,8 +214,6 @@ public:
     virtual parser::Parser* getParser() const;
     ThumbnailerWorker* thumbnailer() const;
 
-    virtual void registerDeviceLister( DeviceListerPtr lister,
-                                       const std::string& scheme ) override;
     virtual DeviceListerPtr deviceLister( const std::string& scheme ) const override;
 
     std::shared_ptr<fs::IFileSystemFactory> fsFactoryForMrl( const std::string& mrl ) const;

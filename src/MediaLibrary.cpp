@@ -320,6 +320,11 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_discovererWorker( this, &m_fsHolder )
 {
     Log::setLogLevel( LogLevel::Error );
+    if ( cfg != nullptr )
+    {
+        for ( const auto& p : cfg->deviceListers )
+            m_fsHolder.registerDeviceLister( p.first, p.second );
+    }
     if ( cfg != nullptr && cfg->parserServices.empty() == false )
     {
         for ( const auto& s : cfg->parserServices )
@@ -2114,13 +2119,6 @@ ThumbnailerWorker* MediaLibrary::thumbnailer() const
     if ( m_thumbnailerWorker == nullptr )
         startThumbnailer();
     return m_thumbnailerWorker.get();
-}
-
-void MediaLibrary::registerDeviceLister( DeviceListerPtr lister,
-                                         const std::string& scheme )
-{
-    assert( m_initialized == false );
-    m_fsHolder.registerDeviceLister( scheme, std::move( lister ) );
 }
 
 DeviceListerPtr MediaLibrary::deviceLister( const std::string& scheme ) const

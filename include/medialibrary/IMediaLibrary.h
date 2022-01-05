@@ -187,6 +187,16 @@ struct SetupConfig
      * @note This currently only supports MetadataExtraction services.
      */
     std::vector<std::shared_ptr<parser::IParserService>> parserServices;
+    /**
+     * @brief deviceListers Provides some external device listers.
+     *
+     * The key is the scheme (including the '://') and the value is a IDeviceLister
+     * implementation.
+     * This is meant for OSes with complicated/impossible to achieve device listing (due to
+     * missing APIs, permissions problems...), or for non-local devices, such as
+     * network shares.
+     */
+    std::unordered_map<std::string, DeviceListerPtr> deviceListers;
 };
 
 class IMediaLibraryCb
@@ -384,10 +394,6 @@ public:
     virtual ~IMediaLibrary() = default;
     /**
      * \brief  initialize Initializes the media library.
-     *
-     * In case the application uses a specific IDeviceLister, the device lister
-     * must be properly initialized and ready to return a list of all known
-     * devices before calling this method.
      *
      * \param mlCallback    A pointer to an IMediaLibraryCb that will be invoked
      *                      with various events during the medialibrary lifetime.
@@ -809,26 +815,12 @@ public:
     virtual bool forceParserRetry() = 0;
 
     /**
-     * @brief registerDeviceLister Registers a device lister for a given scheme
-     * This is meant for OSes with complicated/impossible to achieve device listing (due to
-     * missing APIs, permissions problems...), or for non-local devices, such as
-     * network shares.
-     * @param lister A device lister
-     * @param scheme The listed devices scheme (file://, smb://, foo://, ...)
-     *
-     * This must be called *before* initialize(). Calling it once the medialib
-     * has been initialized will have no effect.
-     * Any previously matching device lister will be overriden.
-     */
-    virtual void registerDeviceLister( DeviceListerPtr lister,
-                                       const std::string& scheme ) = 0;
-    /**
      * @brief deviceLister Get a device lister for the provided scheme
      * @param scheme The scheme for which a device lister is required
      * @return A device lister instance, if any.
      *
-     * This will return the device lister registered by registerDeviceLister()
-     * or a media library provided one.
+     * This will return the device lister provided to the constructor through
+     * SetupConfig, or a media library provided one.
      * If no device lister is available for this scheme, nullptr will be returned
      */
     virtual DeviceListerPtr deviceLister( const std::string& scheme ) const = 0;

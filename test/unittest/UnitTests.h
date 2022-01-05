@@ -55,18 +55,20 @@ struct UnitTests
 
     virtual void SetUp( const std::string& testSuite, const std::string& testName )
     {
-        InitTestFolder( testSuite, testName );
-        InstantiateMediaLibrary( getDbPath(), m_testDir, nullptr );
-        fsMock = std::make_shared<mock::FileSystemFactory>();
-        SetupMockFileSystem();
-        cbMock.reset( new CB );
-
         // Instantiate it here to avoid fiddling with multiple SetUp overloads
         if ( mockDeviceLister == nullptr )
             mockDeviceLister = std::make_shared<mock::MockDeviceLister>();
 
+        SetupConfig cfg;
+        cfg.deviceListers["file://"] = mockDeviceLister;
+
+        InitTestFolder( testSuite, testName );
+        InstantiateMediaLibrary( getDbPath(), m_testDir, &cfg );
+        fsMock = std::make_shared<mock::FileSystemFactory>();
+        SetupMockFileSystem();
+        cbMock.reset( new CB );
+
         ml->setFsFactory( fsMock );
-        ml->registerDeviceLister( mockDeviceLister, "file://" );
         ml->setVerbosity( LogLevel::Debug );
         Initialize();
         TestSpecificSetup();
