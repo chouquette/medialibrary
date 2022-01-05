@@ -65,14 +65,18 @@ void Parser::parse( std::shared_ptr<Task> task )
         return;
     assert( task != nullptr );
     m_serviceWorkers[0]->parse( std::move( task ) );
-    m_opScheduled.fetch_add( 1, std::memory_order_relaxed );
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    m_opScheduled += 1;
     updateStats();
 }
 
 void Parser::start()
 {
-    assert( m_callback == nullptr );
-    m_callback = m_ml->getCb();
+    {
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        assert( m_callback == nullptr );
+        m_callback = m_ml->getCb();
+    }
     assert( m_serviceWorkers.size() == 3 );
     restore();
 }
@@ -91,6 +95,13 @@ void Parser::resume()
 
 void Parser::stop()
 {
+    {
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        if ( m_callback == nullptr )
+            return;
+        m_callback = nullptr;
+    }
+
     for ( auto& s : m_serviceWorkers )
     {
         s->signalStop();
@@ -99,7 +110,6 @@ void Parser::stop()
     {
         s->stop();
     }
-    m_callback = nullptr;
 }
 
 void Parser::flush()
@@ -110,8 +120,9 @@ void Parser::flush()
      * The services are now paused so we are ensured we won't have a concurrent
      * update for the task counters
      */
-    m_opDone.store( 0, std::memory_order_release );
-    m_opScheduled.store( 0, std::memory_order_release );
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    m_opDone = 0;
+    m_opScheduled = 0;
 }
 
 void Parser::rescan()
@@ -133,8 +144,11 @@ void Parser::restore()
         return;
     }
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
-    m_opScheduled.fetch_add( tasks.size(), std::memory_order_relaxed );
-    updateStats();
+    {
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        m_opScheduled = tasks.size();
+        updateStats();
+    }
     m_serviceWorkers[0]->parse( std::move( tasks ) );
 }
 
@@ -165,15 +179,12 @@ void Parser::refreshTaskList()
 
 void Parser::updateStats()
 {
-    auto opScheduled = m_opScheduled.load( std::memory_order_relaxed );
-    auto opDone = m_opDone.load( std::memory_order_relaxed );
-
-    assert( opScheduled >= opDone );
-    if ( opDone % 10 == 0 || opScheduled == opDone )
+    assert( m_opScheduled >= m_opDone );
+    if ( m_opDone % 10 == 0 || m_opScheduled == m_opDone )
     {
-        LOG_DEBUG( "Updating progress: operations scheduled ", opScheduled,
-                   "; operations done: ", opDone );
-        m_callback->onParsingStatsUpdated( opDone, opScheduled );
+        LOG_DEBUG( "Updating progress: operations scheduled ", m_opScheduled,
+                   "; operations done: ", m_opDone );
+        m_callback->onParsingStatsUpdated( m_opDone, m_opScheduled );
     }
 }
 
@@ -186,9 +197,11 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
          status == Status::Discarded ||
          t->isCompleted() )
     {
-        m_opDone.fetch_add( 1, std::memory_order_relaxed );
-
-        updateStats();
+        {
+            std::lock_guard<compat::Mutex> lock{ m_mutex };
+            ++m_opDone;
+            updateStats();
+        }
         // We create a separate task for refresh, which doesn't count toward
         // (mrl,parent_playlist) uniqueness. In order to allow for a subsequent
         // refresh of the same file, we remove it once the refresh is complete.
@@ -206,7 +219,8 @@ void Parser::done( std::shared_ptr<Task> t, Status status )
         // forever.
         if ( t->attemptsRemaining() == 0 )
         {
-            m_opDone.fetch_add( 1, std::memory_order_relaxed );
+            std::lock_guard<compat::Mutex> lock{ m_mutex };
+            ++m_opDone;
             updateStats();
             return;
         }

@@ -97,9 +97,11 @@ private:
     std::vector<std::unique_ptr<Worker>> m_serviceWorkers;
 
     MediaLibrary* m_ml;
+    mutable compat::Mutex m_mutex;
+    /* The fields below are protected by the mutex */
     IMediaLibraryCb* m_callback;
-    std::atomic_uint m_opScheduled;
-    std::atomic_uint m_opDone;
+    uint32_t m_opScheduled;
+    uint32_t m_opDone;
 };
 
 }
