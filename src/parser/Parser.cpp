@@ -156,6 +156,9 @@ void Parser::onDeviceDisappearing( int64_t )
 
 void Parser::refreshTaskList()
 {
+    /* If we haven't started the parset yet, there's nothing to refresh */
+    if ( m_callback == nullptr )
+        return;
     flush();
     restore();
 }
