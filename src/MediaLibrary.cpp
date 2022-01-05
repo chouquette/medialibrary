@@ -1910,30 +1910,8 @@ void MediaLibrary::migrateModel33to34()
     t->commit();
 }
 
-void MediaLibrary::migrationEpilogue( uint32_t originalPreviousVersion )
+void MediaLibrary::migrationEpilogue( uint32_t )
 {
-    // Since we just changed the media model, the code that was used to migrate
-    // model 13 to 14 isn't valid anymore (as is any code that relies on the C++
-    // side of things instead of plain SQL requests). The filename would be loaded
-    // in the previous member variable, and the migration wouldn't behave as expected.
-    // We move it here, since this is only a problem when migrating from
-    // 13 or before to 17. Should a user perform a migration from 13 to 17, they
-    // wouldn't have the issue, as the new v17 model will not be implemented in
-    // their version.
-    if ( originalPreviousVersion <= 13 )
-    {
-        const std::string req = "SELECT * FROM " + Media::Table::Name +
-                " WHERE filename LIKE '%#%%' ESCAPE '#'";
-        auto media = Media::fetchAll<Media>( this, req );
-        for ( const auto& m : media )
-        {
-            // We must not call mrl() from here. We might not have all devices yet,
-            // and calling mrl would crash for files stored on removable devices.
-            auto newFileName = utils::url::decode( m->fileName() );
-            LOG_DEBUG( "Converting ", m->fileName(), " to ", newFileName );
-            m->setFileName( std::move( newFileName ) );
-        }
-    }
 }
 
 void MediaLibrary::reload()
