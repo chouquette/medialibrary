@@ -2211,15 +2211,6 @@ void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 
 bool MediaLibrary::forceRescan()
 {
-    /*
-     * If the parser hasn't been initialized yet, don't force it to start until
-     * we are done flushing entities from the database.
-     * This saves us from starting it only to pause/resume it immediately after
-     * Additionnaly, in the case of a migration from <24 to a later version, we
-     * don't create the unknown show during the migration, which causes the
-     * MetadataParser to refuse to initialize since it can't fetch & cache the
-     * unknown show
-     */
     m_parser.flush();
     {
         auto t = getConn()->newTransaction();
