@@ -122,6 +122,8 @@ static void usage(char** argv)
                  "-q: Use Error log level. Default is Debug\n"
                  "-n X: Run X discover of the provided entrypoint\n"
                  "-m: Migrate the provided database in-place.\n"
+                 "-r: When used in combination with -m, it will reload "
+                     "the database after it's been migrated\n\n"
                  "When using -m the required argument is an existing database to migrate."
               << std::endl;
 }
@@ -139,9 +141,10 @@ int main( int argc, char** argv )
     auto nbRuns = 1;
     auto quiet = false;
     auto migrate = false;
+    auto reload = false;
 
     int opt;
-    while ( ( opt = getopt(argc, argv, "qn:m") ) != -1 )
+    while ( ( opt = getopt(argc, argv, "qn:mr") ) != -1 )
     {
         switch ( opt )
         {
@@ -154,10 +157,19 @@ int main( int argc, char** argv )
             case 'm':
                 migrate = true;
                 break;
+            case 'r':
+                reload = true;
+                break;
             default:
                 usage(argv);
                 exit(1);
         }
+    }
+    if ( reload == true && migrate == false )
+    {
+        std::cerr << "-r is only valid when -m is also provided" << std::endl;
+        usage( argv );
+        exit( 1 );
     }
 
     if ( optind >= argc )
@@ -195,10 +207,19 @@ int main( int argc, char** argv )
                                       medialibrary::LogLevel::Debug );
     auto initRes = ml->initialize( testCb.get() );
     assert( initRes == InitializeResult::Success );
-    if ( migrate == true )
-        return 0;
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
+    if ( migrate == true )
+    {
+        if ( reload == true )
+        {
+            ml->reload();
+            res = testCb->waitForCompletion();
+            if ( res == false )
+                return 1;
+        }
+        return 0;
+    }
 
     for ( auto i = 0; i < nbRuns; ++i )
     {
