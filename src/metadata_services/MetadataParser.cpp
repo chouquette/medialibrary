@@ -1622,7 +1622,12 @@ void MetadataAnalyzer::onFlushing()
 
 void MetadataAnalyzer::onRestarted()
 {
-    // Reset locally cached entities
+    /*
+     * Reset locally cached entities
+     * If the service hasn't started yet, no need to restart anything
+     */
+    if ( m_ml == nullptr )
+        return;
     cacheUnknownArtist();
     cacheUnknownShow();
     m_stopped.store( false );
