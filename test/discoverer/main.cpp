@@ -116,35 +116,61 @@ private:
     bool m_error;
 };
 
+static void usage(char** argv)
+{
+    std::cerr << "usage: " << argv[0] << "[-q] [-n X] <entrypoint>\n"
+                 "-q: Use Error log level. Default is Debug\n"
+                 "-n X: Run X discover of the provided entrypoint\n"
+              << std::endl;
+}
+
 int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
-        std::cerr << "usage: " << argv[0] << " <entrypoint> [nb_runs] [-q]" << std::endl;
-        return 1;
+        usage(argv);
+        exit(1);
     }
 
     auto mlDir = getTempPath( "discoverer_test" );
     auto dbPath = mlDir + "/test.db";
     auto nbRuns = 1;
     auto quiet = false;
-    for ( auto i = 2; i < argc; ++i )
+
+    int opt;
+    while ( ( opt = getopt(argc, argv, "qn:") ) != -1 )
     {
-        if ( !strcmp( argv[i], "-q" ) )
-            quiet = true;
-        else
-            nbRuns = atoi( argv[i] );
+        switch ( opt )
+        {
+            case 'q':
+                quiet = true;
+                break;
+            case 'n':
+                nbRuns = atoi(optarg);
+                break;
+            default:
+                usage(argv);
+                exit(1);
+        }
     }
 
+    if ( optind >= argc )
+    {
+        std::cerr << "Missing entry point" << std::endl;
+        usage(argv);
+        exit(2);
+    }
+
+    auto entrypoint = argv[optind];
     std::string target;
     try
     {
-        utils::url::scheme( argv[1] );
-        target = argv[1];
+        utils::url::scheme( entrypoint );
+        target = entrypoint;
     }
     catch ( const medialibrary::fs::errors::UnhandledScheme& )
     {
-        target = utils::file::toMrl( argv[1] );
+        target = utils::file::toMrl( entrypoint );
     }
 
     unlink( dbPath.c_str() );
