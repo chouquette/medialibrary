@@ -82,6 +82,7 @@ public:
     virtual void refreshTaskList() override;
 
     void flush();
+    bool isRunning() const;
 
 private:
     void updateStats();

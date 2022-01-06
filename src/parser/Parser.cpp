@@ -83,6 +83,12 @@ void Parser::start()
     restore();
 }
 
+bool Parser::isRunning() const
+{
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    return m_callback != nullptr;
+}
+
 void Parser::pause()
 {
     for ( auto& s : m_serviceWorkers )
