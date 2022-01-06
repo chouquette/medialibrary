@@ -118,9 +118,11 @@ private:
 
 static void usage(char** argv)
 {
-    std::cerr << "usage: " << argv[0] << "[-q] [-n X] <entrypoint>\n"
+    std::cerr << "usage: " << argv[0] << "[-q] [-n X] <entrypoint|database>\n"
                  "-q: Use Error log level. Default is Debug\n"
                  "-n X: Run X discover of the provided entrypoint\n"
+                 "-m: Migrate the provided database in-place.\n"
+                 "When using -m the required argument is an existing database to migrate."
               << std::endl;
 }
 
@@ -136,9 +138,10 @@ int main( int argc, char** argv )
     auto dbPath = mlDir + "/test.db";
     auto nbRuns = 1;
     auto quiet = false;
+    auto migrate = false;
 
     int opt;
-    while ( ( opt = getopt(argc, argv, "qn:") ) != -1 )
+    while ( ( opt = getopt(argc, argv, "qn:m") ) != -1 )
     {
         switch ( opt )
         {
@@ -147,6 +150,9 @@ int main( int argc, char** argv )
                 break;
             case 'n':
                 nbRuns = atoi(optarg);
+                break;
+            case 'm':
+                migrate = true;
                 break;
             default:
                 usage(argv);
@@ -163,17 +169,22 @@ int main( int argc, char** argv )
 
     auto entrypoint = argv[optind];
     std::string target;
-    try
+    if ( migrate == false )
     {
-        utils::url::scheme( entrypoint );
-        target = entrypoint;
-    }
-    catch ( const medialibrary::fs::errors::UnhandledScheme& )
-    {
-        target = utils::file::toMrl( entrypoint );
-    }
+        try
+        {
+            utils::url::scheme( entrypoint );
+            target = entrypoint;
+        }
+        catch ( const medialibrary::fs::errors::UnhandledScheme& )
+        {
+            target = utils::file::toMrl( entrypoint );
+        }
 
-    unlink( dbPath.c_str() );
+        unlink( dbPath.c_str() );
+    }
+    else
+        dbPath = entrypoint;
 
     auto testCb = std::make_unique<TestCb>();
     std::unique_ptr<medialibrary::IMediaLibrary> ml{
@@ -182,9 +193,13 @@ int main( int argc, char** argv )
 
     ml->setVerbosity( quiet == true ? medialibrary::LogLevel::Error :
                                       medialibrary::LogLevel::Debug );
-    ml->initialize( testCb.get() );
+    auto initRes = ml->initialize( testCb.get() );
+    assert( initRes == InitializeResult::Success );
+    if ( migrate == true )
+        return 0;
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
+
     for ( auto i = 0; i < nbRuns; ++i )
     {
         ml->discover( target );
