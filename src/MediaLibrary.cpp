@@ -2211,7 +2211,8 @@ void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
 
 bool MediaLibrary::forceRescan()
 {
-    m_parser.flush();
+    if ( m_parser.isRunning() == true )
+        m_parser.flush();
     {
         auto t = getConn()->newTransaction();
         // Let the triggers clear out the Fts tables
@@ -2239,8 +2240,11 @@ bool MediaLibrary::forceRescan()
         t->commit();
     }
     removeThumbnails();
-    m_callback->onRescanStarted();
-    m_parser.rescan();
+    if ( m_parser.isRunning() == true )
+    {
+        m_callback->onRescanStarted();
+        m_parser.rescan();
+    }
     return true;
 }
 
