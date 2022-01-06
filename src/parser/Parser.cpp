@@ -190,6 +190,8 @@ void Parser::refreshTaskList()
 
 void Parser::updateStats()
 {
+    if ( m_callback == nullptr )
+        return;
     assert( m_opScheduled >= m_opDone );
     if ( m_opDone % 10 == 0 || m_opScheduled == m_opDone )
     {
