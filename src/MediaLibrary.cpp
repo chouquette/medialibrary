@@ -401,9 +401,59 @@ bool MediaLibrary::createAllTables()
 
 void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
 {
-    auto tables = sqlite::Tools::listTables( dbConn );
+    /*
+     * For the general case, don't probe the database to delete the active tables.
+     * If the database is badly corrupted, we might not get any table which would
+     * cause a failure down the line.
+     */
+    const std::string tables[] = {
+        Device::Table::Name,
+        Device::MountpointTable::Name,
+        Folder::Table::Name,
+        Folder::FtsTable::Name,
+        Thumbnail::Table::Name,
+        Thumbnail::LinkingTable::Name,
+        Thumbnail::CleanupTable::Name,
+        Media::Table::Name,
+        Media::FtsTable::Name,
+        File::Table::Name,
+        Label::Table::Name,
+        Label::FileRelationTable::Name,
+        Playlist::Table::Name,
+        Playlist::FtsTable::Name,
+        Playlist::MediaRelationTable::Name,
+        Genre::Table::Name,
+        Genre::FtsTable::Name,
+        Album::Table::Name,
+        Album::FtsTable::Name,
+        Show::Table::Name,
+        Show::FtsTable::Name,
+        ShowEpisode::Table::Name,
+        Movie::Table::Name,
+        VideoTrack::Table::Name,
+        AudioTrack::Table::Name,
+        Artist::Table::Name,
+        Artist::FtsTable::Name,
+        Artist::MediaRelationTable::Name,
+        parser::Task::Table::Name,
+        Metadata::Table::Name,
+        SubtitleTrack::Table::Name,
+        Chapter::Table::Name,
+        Bookmark::Table::Name,
+        MediaGroup::Table::Name,
+        MediaGroup::FtsTable::Name,
+        "Settings",
+    };
     for ( const auto& table : tables )
+        sqlite::Tools::executeRequest( dbConn, "DROP TABLE IF EXISTS " + table );
+    /*
+     * Keep probing the database in case it is quite old and still contains a
+     * deprecated table not listed above
+     */
+    const auto leftOverTables = sqlite::Tools::listTables( dbConn );
+    for ( const auto& table : leftOverTables )
         sqlite::Tools::executeRequest( dbConn, "DROP TABLE " + table );
+
 }
 
 void MediaLibrary::waitForBackgroundTasksIdle()
