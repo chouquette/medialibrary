@@ -1442,6 +1442,12 @@ bool MediaLibrary::recreateDatabase()
     if ( m_settings.load() == false )
         return false;
     t->commit();
+    /*
+     * Now that we removed all the tables, flush all the connections to avoid
+     * Database is locked errors.
+     * See https://www.sqlite.org/c3ref/close.html
+     */
+    m_dbConnection->flushAll();
 
     /*
      * We just delete all tables but this won't invoke the thumbnails deletion

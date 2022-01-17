@@ -259,6 +259,13 @@ const std::string&Connection::dbPath() const
     return m_dbPath;
 }
 
+void Connection::flushAll()
+{
+    Statement::FlushStatementCache();
+    std::unique_lock<compat::Mutex> lock( m_connMutex );
+    m_conns.clear();
+}
+
 std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
 {
     // Use a wrapper to allow make_shared to use the private Connection ctor

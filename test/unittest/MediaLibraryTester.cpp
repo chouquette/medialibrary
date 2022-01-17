@@ -53,6 +53,7 @@ void MediaLibraryTester::onDbConnectionReady( sqlite::Connection* dbConn )
     auto t = m_dbConnection->newTransaction();
     deleteAllTables( dbConn );
     t->commit();
+    m_dbConnection->flushAll();
 }
 
 std::shared_ptr<Media> MediaLibraryTester::media( int64_t id )

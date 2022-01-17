@@ -253,6 +253,7 @@ class MediaLibraryTester : public MediaLibrary
         auto t = m_dbConnection->newTransaction();
         deleteAllTables( dbConn );
         t->commit();
+        m_dbConnection->flushAll();
     }
 };
 }
@@ -869,6 +870,7 @@ void MediaLibraryResumeTest::onDbConnectionReady( sqlite::Connection *dbConn )
     auto t = m_dbConnection->newTransaction();
     deleteAllTables( dbConn );
     t->commit();
+    m_dbConnection->flushAll();
 }
 
 parser::Parser* MediaLibraryResumeTest::getParser() const

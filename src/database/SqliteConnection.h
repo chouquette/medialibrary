@@ -90,6 +90,7 @@ public:
     bool checkSchemaIntegrity();
     bool checkForeignKeysIntegrity();
     const std::string& dbPath() const;
+    void flushAll();
 
     static std::shared_ptr<Connection> connect( const std::string& dbPath );
 
