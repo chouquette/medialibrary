@@ -653,6 +653,8 @@ movie_test_exe = executable('movie_tests', 'MovieTests.cpp',
 movie_tests = [
   'Create',
   'Fetch',
+  'FetchAll',
+  'SortByAlpha',
   'SetShortSummary',
   'SetImdbId',
   'AssignToFile',

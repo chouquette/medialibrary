@@ -715,12 +715,17 @@ bool MediaLibrary::removeExternalMedia(MediaPtr media)
 
 Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 {
-    return Media::listAll( this, IMedia::Type::Audio, params );
+    return Media::listAll( this, IMedia::Type::Audio, params, IMedia::SubType::Unknown );
 }
 
 Query<IMedia> MediaLibrary::videoFiles( const QueryParameters* params ) const
 {
-    return Media::listAll( this, IMedia::Type::Video, params );
+    return Media::listAll( this, IMedia::Type::Video, params, IMedia::SubType::Unknown );
+}
+
+Query<IMedia> MediaLibrary::movies( const QueryParameters* params ) const
+{
+    return Media::listAll( this, IMedia::Type::Video, params, IMedia::SubType::Movie );
 }
 
 Query<IMedia> MediaLibrary::inProgressMedia( IMedia::Type type, const QueryParameters *params ) const

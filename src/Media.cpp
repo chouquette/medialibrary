@@ -1235,7 +1235,8 @@ std::string Media::sortRequest( const QueryParameters* params )
 }
 
 Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
-                              const QueryParameters* params )
+                              const QueryParameters* params,
+                              IMedia::SubType subType )
 {
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
     std::string req = "FROM " + Media::Table::Name + " m ";
@@ -1252,6 +1253,14 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
             " AND f.is_external = 0";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+
+    if ( subType != IMedia::SubType::Unknown )
+    {
+        req += " AND m.subtype = ?";
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                        sortRequest( params ), IMedia::Type::Audio,
+                                        IFile::Type::Main, IFile::Type::Disc, subType );
+    }
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), IMedia::Type::Audio,

@@ -296,7 +296,9 @@ class Media : public IMedia,
         virtual const std::string& lyrics() const override;
         bool setLyrics( std::string lyrics );
 
-        static Query<IMedia> listAll(MediaLibraryPtr ml, Type type, const QueryParameters* params );
+        static Query<IMedia> listAll( MediaLibraryPtr ml, Type type,
+                                     const QueryParameters* params,
+                                     Media::SubType subType );
         static Query<IMedia> listInProgress( MediaLibraryPtr ml, Type type,
                                              const QueryParameters* params );
 

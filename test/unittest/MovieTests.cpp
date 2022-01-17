@@ -52,6 +52,50 @@ static void Fetch( Tests* T )
     ASSERT_NE( m2, nullptr );
 }
 
+static void FetchAll( Tests* T )
+{
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    auto m = T->ml->createMovie( *media );
+
+    auto media2 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie2.mkv", IMedia::Type::Video ) );
+    auto m2 = T->ml->createMovie( *media2 );
+
+    auto movies = T->ml->movies( nullptr )->all();
+
+    ASSERT_EQ( 2u, movies.size() );
+    ASSERT_EQ( m->id(), movies[0]->id() );
+    ASSERT_EQ( m2->id(), movies[1]->id() );
+}
+
+static void SortByAlpha( Tests* T )
+{
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", Media::Type::Video ) );
+    media->setTitle( "Abcd", true );
+    auto m = T->ml->createMovie( *media );
+
+    auto media2 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie2.mkv", Media::Type::Video ) );
+    media2->setTitle( "Zyxw", true );
+    auto m2 = T->ml->createMovie( *media2 );
+
+    auto media3 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie3.mkv", Media::Type::Video ) );
+    media3->setTitle( "afterA-beforeZ", true );
+    auto m3 = T->ml->createMovie( *media3 );
+
+    QueryParameters params { SortingCriteria::Alpha, false };
+    auto medias = T->ml->movies( &params )->all();
+    ASSERT_EQ( 3u, medias.size() );
+    ASSERT_EQ( m->id(), medias[0]->id() );
+    ASSERT_EQ( m3->id(), medias[1]->id() );
+    ASSERT_EQ( m2->id(), medias[2]->id() );
+
+    params.desc = true;
+    medias = T->ml->movies( &params )->all();
+    ASSERT_EQ( 3u, medias.size() );
+    ASSERT_EQ( m2->id(), medias[0]->id() );
+    ASSERT_EQ( m3->id(), medias[1]->id() );
+    ASSERT_EQ( m->id(), medias[2]->id() );
+}
+
 static void SetShortSummary( Tests* T )
 {
     auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
@@ -122,6 +166,8 @@ int main( int ac, char** av )
 
     ADD_TEST( Create );
     ADD_TEST( Fetch );
+    ADD_TEST( FetchAll );
+    ADD_TEST( SortByAlpha );
     ADD_TEST( SetShortSummary );
     ADD_TEST( SetImdbId );
     ADD_TEST( AssignToFile );
