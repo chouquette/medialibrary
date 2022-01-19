@@ -68,6 +68,12 @@ if cxx.compiles('thread_local int seaOtter = 0; int main() {}')
         cdata.set('CXX11_THREAD_LOCAL', 1)
 endif
 
+message('Checking for C++11 condition_variable support')
+if cxx.compiles('''#include <condition_variable>
+  int main() { std::condition_variable cv; }''')
+    cdata.set('CXX11_CONDITION_VARIABLE', 1)
+endif
+
 if host_machine.system() == 'windows'
     threads_dep = []
 else

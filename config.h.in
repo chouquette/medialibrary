@@ -15,6 +15,7 @@
 #mesondefine CXX11_THREADS
 #mesondefine CXX11_MUTEX
 #mesondefine CXX11_THREAD_LOCAL
+#mesondefine CXX11_CONDITION_VARIABLE
 
 #mesondefine HAVE_LIBVLC
 #mesondefine HAVE_JPEG

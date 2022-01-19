@@ -24,7 +24,7 @@
 
 #include "compat/Mutex.h"
 
-#if CXX11_THREADS
+#if CXX11_CONDITION_VARIABLE
 
 #include <condition_variable>
 
@@ -115,4 +115,4 @@ private:
 #else //_WIN32
 # error "Missing condition variable implementation"
 #endif //_WIN32
-#endif // CXX11_THREADS
+#endif // CXX11_CONDITION_VARIABLE
