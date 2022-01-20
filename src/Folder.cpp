@@ -39,6 +39,7 @@
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "utils/Enums.h"
+#include "utils/ModificationsNotifier.h"
 
 #include <queue>
 
@@ -415,6 +416,9 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
         return nullptr;
     if ( device.isRemovable() == true )
         self->m_fullPath = deviceFs.absoluteMrl( self->m_path );
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyFolderCreation( self );
     return self;
 }
 
