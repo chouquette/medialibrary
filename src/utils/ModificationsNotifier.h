@@ -78,6 +78,10 @@ public:
     void notifyBookmarkModification( int64_t bookmarkId );
     void notifyBookmarkRemoval( int64_t bookmarkId );
 
+    void notifyFolderCreation( FolderPtr folder );
+    void notifyFolderModification( int64_t folderId );
+    void notifyFolderRemoval( int64_t folderId );
+
     void notifyThumbnailCleanupInserted( int64_t requestId );
 
     /**
@@ -225,6 +229,7 @@ private:
     Queue<IGenre> m_genres;
     Queue<IMediaGroup> m_mediaGroups;
     Queue<IBookmark> m_bookmarks;
+    Queue<IFolder> m_folders;
     Queue<void> m_thumbnailsCleanupRequests;
     Queue<void> m_convertedMedia;
 

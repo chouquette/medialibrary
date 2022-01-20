@@ -58,6 +58,9 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onBookmarksAdded( std::vector<BookmarkPtr> ) override {}
     virtual void onBookmarksModified( std::set<int64_t> ) override {}
     virtual void onBookmarksDeleted( std::set<int64_t> ) override {}
+    virtual void onFoldersAdded( std::vector<FolderPtr> ) override {};
+    virtual void onFoldersModified( std::set<int64_t> ) override {};
+    virtual void onFoldersDeleted( std::set<int64_t> ) override {};
     virtual void onEntryPointAdded( const std::string&, bool ) override {}
     virtual void onEntryPointRemoved( const std::string&, bool ) override {}
     virtual void onEntryPointBanned( const std::string&, bool ) override {}

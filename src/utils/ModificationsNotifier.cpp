@@ -178,6 +178,21 @@ void ModificationNotifier::notifyBookmarkRemoval( int64_t bookmarkId )
     notifyRemoval( bookmarkId, m_bookmarks );
 }
 
+void ModificationNotifier::notifyFolderCreation( FolderPtr folder )
+{
+    notifyCreation( std::move( folder ), m_folders );
+}
+
+void ModificationNotifier::notifyFolderModification( int64_t folderId )
+{
+    notifyModification( folderId, m_folders );
+}
+
+void ModificationNotifier::notifyFolderRemoval( int64_t folderId )
+{
+    notifyRemoval( folderId, m_folders );
+}
+
 void ModificationNotifier::notifyThumbnailCleanupInserted( int64_t requestId )
 {
     /*
@@ -212,6 +227,7 @@ void ModificationNotifier::run()
     Queue<IGenre> genres;
     Queue<IMediaGroup> mediaGroups;
     Queue<IBookmark> bookmarks;
+    Queue<IFolder> folders;
     Queue<void> thumbnailsCleanup;
     Queue<void> convertedMedia;
 
@@ -271,6 +287,7 @@ void ModificationNotifier::run()
             checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now, flushing );
             checkQueue( m_bookmarks, bookmarks, nextTimeout, now, flushing );
             checkQueue( m_convertedMedia, convertedMedia, nextTimeout, now, flushing );
+            checkQueue( m_folders, folders, nextTimeout, now, flushing );
             timeout = nextTimeout;
 
             notify( std::move( media ), &IMediaLibraryCb::onMediaAdded,
@@ -288,6 +305,8 @@ void ModificationNotifier::run()
             notify( std::move( bookmarks ), &IMediaLibraryCb::onBookmarksAdded,
                     &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
             notify( std::move( convertedMedia ), &IMediaLibraryCb::onMediaConvertedToExternal );
+            notify( std::move( folders ), &IMediaLibraryCb::onFoldersAdded,
+                    &IMediaLibraryCb::onFoldersModified, &IMediaLibraryCb::onFoldersDeleted );
 
             if ( thumbnailsCleanup.removed.empty() == false )
             {
