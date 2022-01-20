@@ -960,6 +960,18 @@ public:
 
 extern "C"
 {
+    /**
+     * @brief NewMediaLibrary Creates a media library instance
+     * @param dbPath The path to the database.
+     * @param mlFolderPath The path to the dedicated media library folder
+     * @param lockFile A boolean that represents the need for locking the media library
+     * @param cfg A pointer to additional configurations. Can be nullptr
+     * @return A media library instance
+     *
+     * If lockFile is true, nullptr will be returned if another instance holds
+     * the same media library directory.
+     * \see{SetupConfig}
+     */
     medialibrary::IMediaLibrary* NewMediaLibrary( const char* dbPath,
                                                   const char* mlFolderPath,
                                                   bool lockFile,
