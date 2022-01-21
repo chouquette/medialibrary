@@ -620,6 +620,35 @@ static void SortByLastModifDate( Tests* T )
     ASSERT_EQ( m1->id(), media[0]->id() );
 }
 
+static void SortByLastPlayedDate( Tests* T )
+{
+    auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
+    auto m1 = T->ml->addFile( file1, Media::Type::Video );
+    T->ml->setMediaLastPlayedDate( m1->id(), 100 );
+
+    auto file2 = std::make_shared<mock::NoopFile>( "media2.mkv" );
+    auto m2 = T->ml->addFile( file2, Media::Type::Video );
+    T->ml->setMediaLastPlayedDate( m2->id(), 10 );
+
+    auto file3 = std::make_shared<mock::NoopFile>( "media3.mkv" );
+    auto m3 = T->ml->addFile( file3, Media::Type::Video );
+    T->ml->setMediaLastPlayedDate( m3->id(), 0 );
+
+    QueryParameters params { SortingCriteria::LastPlaybackDate, false };
+    auto medias = T->ml->videoFiles( &params )->all();
+    ASSERT_EQ( 3u, medias.size() );
+    ASSERT_EQ( m3->id(), medias[0]->id() );
+    ASSERT_EQ( m2->id(), medias[1]->id() );
+    ASSERT_EQ( m1->id(), medias[2]->id() );
+
+    params.desc = true;
+    medias = T->ml->videoFiles( &params )->all();
+    ASSERT_EQ( 3u, medias.size() );
+    ASSERT_EQ( m1->id(), medias[0]->id() );
+    ASSERT_EQ( m2->id(), medias[1]->id() );
+    ASSERT_EQ( m3->id(), medias[2]->id() );
+}
+
 static void SortByFileSize( Tests* T )
 {
     auto file1 = std::make_shared<mock::NoopFile>( "media.mkv" );
@@ -1421,6 +1450,7 @@ int main( int ac, char** av )
     ADD_TEST( SearchAfterDelete );
     ADD_TEST( SearchByLabel );
     ADD_TEST( SearchTracks );
+    ADD_TEST( SortByLastPlayedDate );
     ADD_TEST( SearchWeirdPatterns );
     ADD_TEST( Favorite );
     ADD_TEST( History );

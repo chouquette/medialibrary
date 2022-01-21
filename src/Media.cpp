@@ -1211,6 +1211,9 @@ std::string Media::sortRequest( const QueryParameters* params )
     case SortingCriteria::Artist:
         req += "art.name";
         break;
+    case SortingCriteria::LastPlaybackDate:
+        req += "m.last_played_date";
+        break;
     case SortingCriteria::TrackId:
         if ( desc == true )
             req += "alb.title, m.track_number DESC, m.disc_number";

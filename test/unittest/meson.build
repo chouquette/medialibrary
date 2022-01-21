@@ -593,6 +593,7 @@ media_tests = [
   'SearchAfterDelete',
   'SearchByLabel',
   'SearchTracks',
+  'SortByLastPlayedDate',
   'SearchWeirdPatterns',
   'Favorite',
   'History',
