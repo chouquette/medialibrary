@@ -53,7 +53,15 @@ endif
 
 message('Checking for C++11 thread support')
 if cxx.compiles('''#include <thread>
-    int main() { std::thread t; }''')
+    struct ThreadRunner
+    {
+        void run();
+    };
+    int main() {
+        std::thread t;
+        ThreadRunner tr;
+        std::thread t2{ &ThreadRunner::run, tr };
+    }''')
         cdata.set('CXX11_THREADS', 1)
 endif
 
