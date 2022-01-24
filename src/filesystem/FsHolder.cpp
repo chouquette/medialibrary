@@ -90,6 +90,7 @@ bool FsHolder::addFsFactory( std::shared_ptr<fs::IFileSystemFactory> fsFactory )
 void FsHolder::registerDeviceLister( const std::string& scheme,
                                      DeviceListerPtr lister )
 {
+    LOG_DEBUG( "Registering device lister for scheme ", scheme );
     std::lock_guard<compat::Mutex> lock{ m_mutex };
 
     m_deviceListers[scheme] = std::move( lister );
