@@ -325,7 +325,10 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
         for ( const auto& p : cfg->deviceListers )
             m_fsHolder.registerDeviceLister( p.first, p.second );
         for ( const auto& fsf : cfg->fsFactories )
-            m_fsHolder.addFsFactory( fsf );
+        {
+            if ( m_fsHolder.addFsFactory( fsf ) == false )
+                assert( !"Can't initialize provided file system factory" );
+        }
     }
     if ( cfg != nullptr && cfg->parserServices.empty() == false )
     {
@@ -1155,7 +1158,10 @@ void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 void MediaLibrary::addLocalFsFactory()
 {
 #ifdef HAVE_LIBVLC
-    m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( "file://" ) );
+    if ( m_fsHolder.addFsFactory( std::make_shared<fs::libvlc::FileSystemFactory>( "file://" ) ) == false )
+    {
+        assert( !"Can't add local file system factory" );
+    }
 #endif
 }
 
