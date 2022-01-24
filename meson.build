@@ -96,7 +96,11 @@ if host_machine.system() == 'windows'
 else
     pthreads = dependency('threads', required: true)
     if get_option('libtool_workaround')
-      threads_dep = declare_dependency(link_args: '-lpthread', dependencies: pthreads)
+      libtool_forced_ldflags = ['-lpthread']
+      if cxx.find_library('atomic').found()
+        libtool_forced_ldflags += '-latomic'
+      endif
+      threads_dep = declare_dependency(link_args: libtool_forced_ldflags, dependencies: pthreads)
     else
       threads_dep = pthreads
     endif
