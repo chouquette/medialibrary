@@ -60,6 +60,11 @@ use_xxhash_dispatch = host_machine.cpu_family() == 'x86' or host_machine.cpu_fam
 
 if use_xxhash_dispatch
   add_project_arguments('-DXXHASH_DYNAMIC_DISPATCH=1', language: ['cpp'])
+  if libxxhash_dep.found() and \
+     not cxx.has_header('xxh_x86dispatch.h', dependencies: libxxhash_dep)
+      message('System provided libxxhash doesn\'t provide a dispatcher, using our version')
+      libxxhash_dep = disabler()
+  endif
 endif
 
 if not libxxhash_dep.found()
