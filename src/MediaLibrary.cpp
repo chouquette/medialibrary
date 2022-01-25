@@ -2322,34 +2322,7 @@ bool MediaLibrary::setExternalLibvlcInstance( libvlc_instance_t* inst )
     return false;
 #else
     LOG_INFO( "Setting external libvlc instance: ", inst );
-    if ( VLCInstance::isSet() == false )
-    {
-        /*
-         * If we never set the instance, we don't have to bother about background
-         * tasks using the previous one: take a shortcut.
-         */
-        VLCInstance::set( inst );
-        return true;
-    }
-    {
-        std::lock_guard<compat::Mutex> lock{ m_mutex };
-        m_discovererWorker.stop();
-
-        /*
-         * The VLCMetadataService will fetch the new instance during its next run
-         * The thumbnailer also fetches the instance before using it.
-         * However the discoverer and all FS related code is highly likely to use a
-         * cached/queued instance that will hold the old libvlc instance which
-         * we don't want, as the libvlc instance provided by an external user
-         * is our only way of leveraging libvlc's keystore and accessing password
-         * protected folders/shares
-         * Now that it is stopped, we can replace the old libvlc instance while
-         * holding the media library lock to avoid a concurrent call to a
-         * discovery related function to reuse the old instance behind our backs.
-         */
-        VLCInstance::set( inst );
-    }
-
+    VLCInstance::set( inst );
     return true;
 #endif
 }
