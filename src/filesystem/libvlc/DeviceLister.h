@@ -24,6 +24,7 @@
 
 #include "medialibrary/IDeviceLister.h"
 #include "medialibrary/filesystem/IDevice.h"
+#include "utils/VLCInstance.h"
 
 #include <vlcpp/vlc.hpp>
 
@@ -35,7 +36,7 @@ namespace fs
 namespace libvlc
 {
 
-class DeviceLister : public IDeviceLister
+class DeviceLister : public IDeviceLister, public VLCInstanceCb
 {
 private:
     struct SD
@@ -45,7 +46,7 @@ private:
     };
 public:
     DeviceLister( std::string protocol );
-    virtual ~DeviceLister() = default;
+    virtual ~DeviceLister();
 
     virtual void refresh() override;
     virtual bool start( IDeviceListerCb* cb ) override;
@@ -55,6 +56,7 @@ public:
 private:
     void onDeviceAdded( VLC::MediaPtr media );
     void onDeviceRemoved( VLC::MediaPtr media );
+    virtual void onInstanceReplaced( VLC::Instance& inst ) override;
 
 private:
     std::string m_protocol;

@@ -43,6 +43,12 @@ DeviceLister::DeviceLister( std::string protocol )
     : m_protocol( std::move( protocol ) )
     , m_cb( nullptr )
 {
+    VLCInstance::registerCb( this );
+}
+
+DeviceLister::~DeviceLister()
+{
+    VLCInstance::unregisterCb( this );
 }
 
 void DeviceLister::refresh()
@@ -118,6 +124,17 @@ void DeviceLister::onDeviceRemoved( VLC::MediaPtr media )
     LOG_DEBUG( "Mountpoint removed: ", mrl, " from device ", uuid );
 
     m_cb->onDeviceUnmounted( uuid, utils::file::toFolderPath( mrl ) );
+}
+
+void DeviceLister::onInstanceReplaced( VLC::Instance& inst )
+{
+    auto cb = m_cb;
+    if ( cb != nullptr )
+        stop();
+    for ( auto& sd : m_sds )
+        sd.discoverer = VLC::MediaDiscoverer{ inst, sd.name };
+    if ( cb != nullptr )
+        start( cb );
 }
 
 
