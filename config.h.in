@@ -1,3 +1,5 @@
+#define PROJECT_VERSION "@PROJECT_VERSION@"
+
 #mesondefine _FILE_OFFSET_BITS
 
 #ifndef _WIN32_WINNT

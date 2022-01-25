@@ -36,6 +36,7 @@ endforeach
 
 cdata = configuration_data()
 
+cdata.set('PROJECT_VERSION', meson.project_version())
 cdata.set('_FILE_OFFSET_BITS', 64)
 
 if host_machine.system() == 'windows'
