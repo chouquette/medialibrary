@@ -406,6 +406,14 @@ void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
         sqlite::Tools::executeRequest( dbConn, "DROP TABLE " + table );
 }
 
+void MediaLibrary::waitForBackgroundTasksIdle()
+{
+    std::unique_lock<compat::Mutex> lock{ m_mutex };
+    m_idleCond.wait( lock, [this]() {
+        return m_parserIdle == true && m_discovererIdle == true;
+    });
+}
+
 void MediaLibrary::createAllTriggers()
 {
     auto dbConn = m_dbConnection.get();
@@ -2061,13 +2069,15 @@ void MediaLibrary::onBackgroundTasksIdleChanged( bool idle )
     LOG_DEBUG( "Setting background idle state to ",
               idle ? "true" : "false" );
     m_callback->onBackgroundTasksIdleChanged( idle );
+    m_idleCond.notify_all();
 }
 
 void MediaLibrary::onDiscovererIdleChanged( bool idle )
 {
-    bool expected = !idle;
-    if ( m_discovererIdle.compare_exchange_strong( expected, idle ) == true )
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( m_discovererIdle != idle )
     {
+        m_discovererIdle = idle;
         // If any idle state changed to false, then we need to trigger the callback.
         // If switching to idle == true, then both background workers need to be idle before signaling.
         LOG_DEBUG( idle ? "Discoverer thread went idle" : "Discover thread was resumed" );
@@ -2078,9 +2088,10 @@ void MediaLibrary::onDiscovererIdleChanged( bool idle )
 
 void MediaLibrary::onParserIdleChanged( bool idle )
 {
-    bool expected = !idle;
-    if ( m_parserIdle.compare_exchange_strong( expected, idle ) == true )
+    std::lock_guard<compat::Mutex> lock{ m_mutex };
+    if ( m_parserIdle != idle )
     {
+        m_parserIdle = idle;
         LOG_DEBUG( idle ? "All parser services went idle" : "Parse services were resumed" );
         if ( idle == false || m_discovererIdle == true )
             onBackgroundTasksIdleChanged( idle );

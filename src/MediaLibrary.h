@@ -30,6 +30,7 @@
 #include "medialibrary/filesystem/IFileSystemFactory.h"
 #include "medialibrary/IMedia.h"
 #include "compat/Mutex.h"
+#include "compat/ConditionVariable.h"
 #include "LockFile.h"
 #include "database/SqliteConnection.h"
 #include "filesystem/FsHolder.h"
@@ -306,6 +307,7 @@ private:
 protected:
     virtual void addLocalFsFactory();
     void deleteAllTables( medialibrary::sqlite::Connection *dbConn );
+    void waitForBackgroundTasksIdle();
 
 protected:
     mutable compat::Mutex m_mutex;
@@ -313,8 +315,9 @@ protected:
 
     Settings m_settings;
     bool m_initialized;
-    std::atomic_bool m_discovererIdle;
-    std::atomic_bool m_parserIdle;
+    bool m_discovererIdle;
+    bool m_parserIdle;
+    compat::ConditionVariable m_idleCond;
 
     const std::string m_dbPath;
     const std::string m_mlFolderPath;
