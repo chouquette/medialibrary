@@ -153,7 +153,7 @@ void Parser::restore()
     LOG_INFO( "Resuming parsing on ", tasks.size(), " tasks" );
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
-        m_opScheduled = tasks.size();
+        m_opScheduled += tasks.size();
         updateStats();
     }
     m_serviceWorkers[0]->parse( std::move( tasks ) );
