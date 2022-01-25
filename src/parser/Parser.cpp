@@ -127,10 +127,6 @@ void Parser::flush()
 {
     for ( auto& s : m_serviceWorkers )
         s->flush();
-    /*
-     * The services are now paused so we are ensured we won't have a concurrent
-     * update for the task counters
-     */
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     m_opDone = 0;
     m_opScheduled = 0;
