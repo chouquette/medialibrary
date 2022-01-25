@@ -574,6 +574,8 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
         return InitializeResult::AlreadyInitialized;
 
     LOG_INFO( "Initializing medialibrary..." );
+    LOG_INFO( "Current version is " PROJECT_VERSION ". Database model is ",
+              Settings::DbModelVersion );
 
     auto mlFolder = utils::file::toFolderPath( m_mlFolderPath );
     if ( utils::fs::mkdir( m_thumbnailPath ) == false )
