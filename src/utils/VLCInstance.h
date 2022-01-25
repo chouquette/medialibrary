@@ -23,6 +23,7 @@
 #pragma once
 
 #include "compat/Mutex.h"
+#include <vector>
 
 namespace VLC
 {
@@ -34,15 +35,25 @@ struct libvlc_instance_t;
 namespace medialibrary
 {
 
+class VLCInstanceCb
+{
+public:
+    virtual ~VLCInstanceCb() = default;
+    virtual void onInstanceReplaced( VLC::Instance& ) = 0;
+};
+
 class VLCInstance
 {
 public:
     static VLC::Instance& get();
     static void set( libvlc_instance_t* instance );
     static bool isSet();
+    static void registerCb( VLCInstanceCb* cb );
+    static void unregisterCb( VLCInstanceCb* cb );
 private:
     static compat::Mutex s_lock;
     static VLC::Instance s_instance;
+    static std::vector<VLCInstanceCb*> s_cbs;
 };
 
 }

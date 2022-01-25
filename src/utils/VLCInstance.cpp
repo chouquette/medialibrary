@@ -39,17 +39,38 @@ namespace medialibrary
 
 compat::Mutex VLCInstance::s_lock;
 VLC::Instance VLCInstance::s_instance;
+std::vector<VLCInstanceCb*> VLCInstance::s_cbs;
 
 void VLCInstance::set( libvlc_instance_t* external_instance )
 {
     std::lock_guard<compat::Mutex> lock{ s_lock };
     s_instance = VLC::Instance{ external_instance };
+    for ( const auto cb : s_cbs )
+        cb->onInstanceReplaced( s_instance );
 }
 
 bool VLCInstance::isSet()
 {
     std::lock_guard<compat::Mutex> lock{ s_lock };
     return s_instance.isValid();
+}
+
+void VLCInstance::registerCb( VLCInstanceCb* cb )
+{
+    std::lock_guard<compat::Mutex> lock{ s_lock };
+    s_cbs.push_back( cb );
+}
+
+void VLCInstance::unregisterCb( VLCInstanceCb* cb )
+{
+    std::lock_guard<compat::Mutex> lock{ s_lock };
+    auto it = std::find( cbegin( s_cbs ), cend( s_cbs ), cb );
+    if ( it == cend( s_cbs ) )
+    {
+        assert( !"Unregistering unregistered callback" );
+        return;
+    }
+    s_cbs.erase( it );
 }
 
 VLC::Instance& VLCInstance::get()
