@@ -65,10 +65,12 @@ void Parser::parse( std::shared_ptr<Task> task )
     if ( m_serviceWorkers.empty() == true )
         return;
     assert( task != nullptr );
+    {
+        std::lock_guard<compat::Mutex> lock{ m_mutex };
+        m_opScheduled += 1;
+        updateStats();
+    }
     m_serviceWorkers[0]->parse( std::move( task ) );
-    std::lock_guard<compat::Mutex> lock{ m_mutex };
-    m_opScheduled += 1;
-    updateStats();
 }
 
 void Parser::start()
