@@ -2025,6 +2025,7 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
     auto parser = getParser();
     if ( parser != nullptr )
         parser->flush();
+    waitForBackgroundTasksIdle();
     // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
     {
