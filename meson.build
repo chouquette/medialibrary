@@ -34,6 +34,14 @@ foreach w : extra_warnings
   endif
 endforeach
 
+if get_option('b_sanitize') == 'thread'
+  if cxx.get_id() != 'clang'
+    error('thread sanitizer requires clang and libc++')
+  endif
+  add_project_arguments('-stdlib=libc++', language: 'cpp')
+  add_project_link_arguments('-stdlib=libc++', language: 'cpp')
+endif
+
 cdata = configuration_data()
 
 cdata.set('PROJECT_VERSION', meson.project_version())
@@ -165,7 +173,7 @@ if libvlc_dep.found() and not get_option('tests').disabled()
 endif
 
 benchmark_dep = dependency('benchmark', required: false, static: true)
-if benchmark_dep.found()
+if benchmark_dep.found() and get_option('b_sanitize') != 'thread'
   subdir('benchmark')
 endif
 
