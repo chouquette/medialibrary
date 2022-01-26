@@ -67,6 +67,7 @@ protected:
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
     virtual void onEntryPointRemoved( const std::string& entryPoint, bool res ) override;
+    virtual void onBackgroundTasksIdleChanged( bool idle ) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
     compat::Mutex m_parsingMutex;

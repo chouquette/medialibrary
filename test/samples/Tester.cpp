@@ -109,7 +109,6 @@ void MockCallback::onDiscoveryCompleted()
 {
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
-    m_parsingCompleteVar.notify_all();
 }
 
 void MockCallback::onParsingStatsUpdated( uint32_t done, uint32_t scheduled )
@@ -117,10 +116,6 @@ void MockCallback::onParsingStatsUpdated( uint32_t done, uint32_t scheduled )
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
 
     m_parserDone = done == scheduled;
-    if ( m_parserDone == false )
-        return;
-
-    m_parsingCompleteVar.notify_all();
 }
 
 void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
@@ -143,6 +138,12 @@ void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
     if ( --m_nbEntryPointsRemovalExpected > 0 )
         return;
     m_removalCompleted = true;
+}
+
+void MockCallback::onBackgroundTasksIdleChanged( bool idle )
+{
+    if ( idle == false )
+        return;
     m_parsingCompleteVar.notify_all();
 }
 
