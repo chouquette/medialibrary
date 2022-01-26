@@ -1,2 +1,6 @@
 race:libavcodec.so
 race:libavutil.so
+race:std::__1::ios_base::width
+race:libvlccore.so
+race:EventManager.hpp
+race:libtag.so
