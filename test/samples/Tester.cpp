@@ -56,11 +56,11 @@ MockCallback::MockCallback()
 {
 }
 
-bool MockCallback::waitForParsingComplete()
+void MockCallback::waitForParsingComplete()
 {
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
-    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+    m_parsingCompleteVar.wait( lock, [this]() {
         return m_parserDone && m_discoveryCompleted;
     });
 }
@@ -160,22 +160,21 @@ void MockResumeCallback::reinit()
     m_parserDone = false;
 }
 
-bool MockResumeCallback::waitForDiscoveryComplete()
+void MockResumeCallback::waitForDiscoveryComplete()
 {
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
-    return m_discoveryCompletedVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+    m_discoveryCompletedVar.wait( lock, [this]() {
         return m_discoveryCompleted;
     });
 }
 
-bool MockResumeCallback::waitForParsingComplete()
+void MockResumeCallback::waitForParsingComplete()
 {
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Reimplement without checking for discovery complete. This class is meant to be used
     // in 2 steps: waiting for discovery completed, then for parsing completed
     assert( m_discoveryCompleted == true );
-    // Wait for a while, generating snapshots can be heavy...
-    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+    m_parsingCompleteVar.wait( lock, [this]() {
         return m_parserDone;
     });
 }
@@ -917,11 +916,11 @@ void MockCallback::prepareForPlaylistReload()
     m_parserDone = false;
 }
 
-bool MockCallback::waitForPlaylistReload()
+void MockCallback::waitForPlaylistReload()
 {
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
-    return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
+    m_parsingCompleteVar.wait( lock, [this]() {
         return m_parserDone;
     });
 }

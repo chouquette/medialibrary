@@ -49,14 +49,14 @@ class MockCallback : public mock::NoopCallback
 {
 public:
     MockCallback();
-    virtual bool waitForParsingComplete();
-    virtual bool waitForDiscoveryComplete() { return true; }
+    virtual void waitForParsingComplete();
+    virtual void waitForDiscoveryComplete() {}
     virtual bool waitForRemovalComplete();
     virtual void reinit();
     void prepareWaitForThumbnail( MediaPtr media );
     bool waitForThumbnail();
     void prepareForPlaylistReload();
-    bool waitForPlaylistReload();
+    void waitForPlaylistReload();
     void prepareForDiscovery( uint32_t nbEntryPointsExpected );
     void prepareForRemoval( uint32_t nbEntryPointsRemovalExpected );
 
@@ -84,8 +84,8 @@ protected:
 class MockResumeCallback : public MockCallback
 {
 public:
-    virtual bool waitForDiscoveryComplete() override;
-    virtual bool waitForParsingComplete() override;
+    virtual void waitForDiscoveryComplete() override;
+    virtual void waitForParsingComplete() override;
     virtual void onDiscoveryCompleted() override;
     virtual void reinit() override;
 

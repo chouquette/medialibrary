@@ -37,14 +37,14 @@
 
 static void Parse( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
 
 static void ParseTwice( Tests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 
@@ -66,46 +66,46 @@ static void ParseTwice( Tests* T )
         T->m_ml->discover( utils::file::toMrl( samplesDir ) );
     }
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
 
 static void RunResumeTests( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
+    T->m_cb->waitForDiscoveryComplete();
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
 
 static void Rescan( ResumeTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
+    T->m_cb->waitForDiscoveryComplete();
     auto testMl = static_cast<MediaLibraryResumeTest*>( T->m_ml.get() );
     testMl->forceParserStart();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->m_cb->reinit();
     T->m_ml->forceRescan();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
 
 static void RunRefreshTests( RefreshTests* T )
 {
-    ASSERT_TRUE( T->m_cb->waitForDiscoveryComplete() );
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForDiscoveryComplete();
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 
     T->m_cb->reinit();
     T->forceRefresh();
 
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
@@ -116,7 +116,7 @@ static void ReplaceVlcInstance( Tests* T )
     T->m_ml->setExternalLibvlcInstance( inst.get() );
     /* Replacing the instance will stop the discoverer so let's resume it */
     T->m_ml->reload();
-    ASSERT_TRUE( T->m_cb->waitForParsingComplete() );
+    T->m_cb->waitForParsingComplete();
 
     T->runChecks();
 }
@@ -127,8 +127,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
     ASSERT_TRUE( utils::fs::isDirectory( samplesFolder ) );
     samplesFolder = utils::fs::toAbsolute( samplesFolder );
     T->m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    auto res = T->m_cb->waitForParsingComplete();
-    ASSERT_TRUE( res );
+    T->m_cb->waitForParsingComplete();
     // Now we should have discovered some media
 
     auto media = T->m_ml->audioFiles( nullptr )->all();
@@ -154,8 +153,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
     T->m_cb->prepareForPlaylistReload();
     T->m_ml->clearDatabase( true );
 
-    res = T->m_cb->waitForPlaylistReload();
-    ASSERT_TRUE( res );
+    T->m_cb->waitForPlaylistReload();
 
     auto playlists = T->m_ml->playlists( PlaylistType::All, nullptr )->all();
     ASSERT_EQ( 2u, playlists.size() );
@@ -178,8 +176,7 @@ static void RunBackupRestorePlaylist( BackupRestorePlaylistTests* T )
      */
     T->m_cb->reinit();
     T->m_ml->discover( utils::file::toMrl( samplesFolder ) );
-    res = T->m_cb->waitForParsingComplete();
-    ASSERT_TRUE( res );
+    T->m_cb->waitForParsingComplete();
     media = playlist1->media( nullptr )->all();
     ASSERT_EQ( m1->title(), media[0]->title() );
     ASSERT_EQ( m2->title(), media[1]->title() );
