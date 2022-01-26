@@ -49,7 +49,7 @@ const std::string Tests::Directory = SRC_DIR "/test/samples/";
 MockCallback::MockCallback()
     : m_thumbnailDone( false )
     , m_thumbnailSuccess( false )
-    , m_done( false )
+    , m_parserDone( false )
     , m_discoveryCompleted( false )
     , m_removalCompleted( false )
     , m_nbEntryPointsRemovalExpected( 0 )
@@ -61,7 +61,7 @@ bool MockCallback::waitForParsingComplete()
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
-        return m_done;
+        return m_parserDone;
     });
 }
 
@@ -77,7 +77,7 @@ void MockCallback::reinit()
 {
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = false;
-    m_done = false;
+    m_parserDone = false;
 }
 
 void MockCallback::prepareWaitForThumbnail( MediaPtr media )
@@ -118,7 +118,7 @@ void MockCallback::onParsingStatsUpdated( uint32_t done, uint32_t scheduled )
         std::lock_guard<compat::Mutex> lock( m_parsingMutex );
         if ( m_discoveryCompleted == false )
             return;
-        m_done = true;
+        m_parserDone = true;
         m_parsingCompleteVar.notify_all();
     }
 }
@@ -157,7 +157,7 @@ void MockResumeCallback::reinit()
 {
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
-    m_done = false;
+    m_parserDone = false;
 }
 
 bool MockResumeCallback::waitForDiscoveryComplete()
@@ -176,7 +176,7 @@ bool MockResumeCallback::waitForParsingComplete()
     assert( m_discoveryCompleted == true );
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
-        return m_done;
+        return m_parserDone;
     });
 }
 
@@ -914,7 +914,7 @@ void MockCallback::prepareForPlaylistReload()
     // event and just ignore it.
     std::lock_guard<compat::Mutex> lock{ m_parsingMutex };
     m_discoveryCompleted = true;
-    m_done = false;
+    m_parserDone = false;
 }
 
 bool MockCallback::waitForPlaylistReload()
@@ -922,7 +922,7 @@ bool MockCallback::waitForPlaylistReload()
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
-        return m_done;
+        return m_parserDone;
     });
 }
 

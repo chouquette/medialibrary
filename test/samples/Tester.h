@@ -75,7 +75,7 @@ protected:
     MediaPtr m_thumbnailTarget;
     bool m_thumbnailDone;
     bool m_thumbnailSuccess;
-    bool m_done;
+    bool m_parserDone;
     bool m_discoveryCompleted;
     bool m_removalCompleted;
     uint32_t m_nbEntryPointsRemovalExpected;
