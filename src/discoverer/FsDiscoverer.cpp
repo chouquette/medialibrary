@@ -165,9 +165,13 @@ void FsDiscoverer::resetInterrupt()
 void FsDiscoverer::waitIfPaused() const
 {
     std::unique_lock<compat::Mutex> lock{ m_mutex };
+    if ( m_paused == false )
+        return;
+    m_ml->onDiscovererIdleChanged( true );
     m_cond.wait( lock, [this](){
         return m_paused == false;
     });
+    m_ml->onDiscovererIdleChanged( false );
 }
 
 bool FsDiscoverer::reload()
