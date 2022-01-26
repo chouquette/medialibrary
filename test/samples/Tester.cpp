@@ -61,7 +61,7 @@ bool MockCallback::waitForParsingComplete()
     std::unique_lock<compat::Mutex> lock{ m_parsingMutex };
     // Wait for a while, generating snapshots can be heavy...
     return m_parsingCompleteVar.wait_for( lock, std::chrono::seconds{ 20 }, [this]() {
-        return m_parserDone;
+        return m_parserDone && m_discoveryCompleted;
     });
 }
 
@@ -109,18 +109,18 @@ void MockCallback::onDiscoveryCompleted()
 {
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     m_discoveryCompleted = true;
+    m_parsingCompleteVar.notify_all();
 }
 
 void MockCallback::onParsingStatsUpdated( uint32_t done, uint32_t scheduled )
 {
-    if ( done == scheduled )
-    {
-        std::lock_guard<compat::Mutex> lock( m_parsingMutex );
-        if ( m_discoveryCompleted == false )
-            return;
-        m_parserDone = true;
-        m_parsingCompleteVar.notify_all();
-    }
+    std::lock_guard<compat::Mutex> lock( m_parsingMutex );
+
+    m_parserDone = done == scheduled;
+    if ( m_parserDone == false )
+        return;
+
+    m_parsingCompleteVar.notify_all();
 }
 
 void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
