@@ -104,6 +104,7 @@ private:
     IMediaLibraryCb* m_callback;
     uint32_t m_opScheduled;
     uint32_t m_opDone;
+    bool m_completionSignaled;
 };
 
 }

@@ -45,6 +45,7 @@ Parser::Parser( MediaLibrary* ml, FsHolder* fsHolder )
     , m_callback( nullptr )
     , m_opScheduled( 0 )
     , m_opDone( 0 )
+    , m_completionSignaled( false )
 {
 }
 
@@ -197,11 +198,20 @@ void Parser::updateStats()
     if ( m_callback == nullptr )
         return;
     assert( m_opScheduled >= m_opDone );
-    if ( m_opDone % 10 == 0 || m_opScheduled == m_opDone )
+    /*
+     * We don't want to spam the callback receiver each time we're done parsing
+     * an item, however we must signal progress when:
+     * - All tasks have been processed
+     * - We signaled that all tasks were processed before, and we have new tasks
+     *   to process now.
+     */
+    if ( m_opDone % 10 == 0 || m_opScheduled == m_opDone ||
+         m_completionSignaled == true )
     {
         LOG_DEBUG( "Updating progress: operations scheduled ", m_opScheduled,
                    "; operations done: ", m_opDone );
         m_callback->onParsingStatsUpdated( m_opDone, m_opScheduled );
+        m_completionSignaled = m_opScheduled == m_opDone;
     }
 }
 
