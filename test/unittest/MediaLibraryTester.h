@@ -102,6 +102,11 @@ class MediaLibraryWithDiscoverer : public MediaLibraryTester
 {
     using MediaLibraryTester::MediaLibraryTester;
 
+    ~MediaLibraryWithDiscoverer()
+    {
+        m_discovererWorker.stop();
+    }
+
     virtual bool setupDummyFolder() override
     {
         return true;
