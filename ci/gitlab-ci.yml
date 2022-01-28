@@ -19,25 +19,6 @@ default:
     - amd64
   interruptible: true
 
-build:debian:
-  image: $MEDIALIBRARY_IMG
-  rules:
-    - if: $CI_MERGE_REQUEST_IID
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
-  stage: build
-  script:
-    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-    - export PATH=/tmp/meson:$PATH
-    - cd $CI_PROJECT_DIR
-    - meson.py -Db_coverage=true build
-    - cd build && ninja
-  artifacts:
-    expire_in: 1h
-    paths:
-      - $CI_PROJECT_DIR/build
-    when: on_success
-
 build:novlc:
   image: $MEDIALIBRARY_IMG
   stage: build
@@ -65,51 +46,6 @@ build:arch:
     - meson build
     - cd build && ninja
 
-build:win32:
-  image: $MEDIALIBRARY_WIN32_IMG
-  stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-  script:
-    - >
-      meson -Dpkg_config_path=/prefix/lib/pkgconfig
-      --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
-      -Ddefault_library=static
-      build
-    - cd build && ninja
-# Until the dynamic build behave properly, we'll just rebuild everything
-# before the tests. Otherwise the archive is >500MB which seems overkill just
-# to split build & tests
-#    artifacts:
-#      paths:
-#        - $CI_PROJECT_DIR/build
-#      expire_in: 1h
-#      when: on_success
-
-build:win64:
-  image: $MEDIALIBRARY_WIN64_IMG
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-  stage: build
-  script:
-    - >
-      PKG_CONFIG_PATH=/prefix/lib/pkgconfig
-      meson
-      --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson
-      build
-    - cd build && ninja
-  artifacts:
-    expire_in: 1h
-    paths:
-      - $CI_PROJECT_DIR/build
-    when: on_success
-
 test:debian:
   image: $MEDIALIBRARY_IMG
   rules:
@@ -117,13 +53,12 @@ test:debian:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: test
-  needs:
-    - job: "build:debian"
-      artifacts: true
   script:
     - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
     - export PATH=/tmp/meson:$PATH
-    - cd $CI_PROJECT_DIR/build
+    - cd $CI_PROJECT_DIR
+    - meson.py -Db_coverage=true build
+    - cd build
     - meson.py test --no-stdsplit
     - mkdir html/
     - >
@@ -153,16 +88,12 @@ test:win32:
   variables:
     MESON_TESTTHREADS: 8
   stage: test
-  needs: 
-    - job: "build:win32"
-      artifacts: false
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
   script:
-    - wineserver -p && wine wineboot
     - >
       meson -Dpkg_config_path=/prefix/lib/pkgconfig
       --cross-file=/opt/crossfiles/i686-w64-mingw32.meson
@@ -172,6 +103,7 @@ test:win32:
     - cp /prefix/dll/libvlc.dll .
     - cp /prefix/dll/libvlccore.dll .
     - ln -s /prefix/lib/vlc/plugins/ .
+    - wineserver -p && wine wineboot
     - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
   artifacts:
     when: always
@@ -192,11 +124,13 @@ test:win64:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
-  needs: 
-    - job: "build:win64"
-      artifacts: true
   script:
-    - cd build
+    - >
+      PKG_CONFIG_PATH=/prefix/lib/pkgconfig
+      meson
+      --cross-file=/opt/crossfiles/x86_64-w64-mingw32.meson
+      build
+    - cd build && ninja
     - wineserver -p && wine wineboot
     - cp /prefix/dll/libvlc.dll .
     - cp /prefix/dll/libvlccore.dll .
