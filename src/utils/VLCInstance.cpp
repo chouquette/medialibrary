@@ -73,7 +73,7 @@ void VLCInstance::unregisterCb( VLCInstanceCb* cb )
     s_cbs.erase( it );
 }
 
-VLC::Instance& VLCInstance::get()
+VLC::Instance VLCInstance::get()
 {
     std::lock_guard<compat::Mutex> lock{ s_lock };
     if ( s_instance.isValid() == false )

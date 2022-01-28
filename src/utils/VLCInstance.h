@@ -45,7 +45,7 @@ public:
 class VLCInstance
 {
 public:
-    static VLC::Instance& get();
+    static VLC::Instance get();
     static void set( libvlc_instance_t* instance );
     static bool isSet();
     static void registerCb( VLCInstanceCb* cb );
