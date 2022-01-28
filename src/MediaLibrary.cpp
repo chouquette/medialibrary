@@ -2031,10 +2031,10 @@ bool MediaLibrary::forceParserRetry()
 bool MediaLibrary::clearDatabase( bool restorePlaylists )
 {
     pauseBackgroundOperations();
+    waitForBackgroundTasksIdle();
     auto parser = getParser();
     if ( parser != nullptr )
         parser->flush();
-    waitForBackgroundTasksIdle();
     // If we don't care about playlists, take a shortcut.
     if ( restorePlaylists == false )
     {
