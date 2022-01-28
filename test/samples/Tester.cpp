@@ -247,6 +247,10 @@ namespace
 class MediaLibraryTester : public MediaLibrary
 {
     using MediaLibrary::MediaLibrary;
+    virtual ~MediaLibraryTester()
+    {
+        stopBackgroundJobs();
+    }
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override
     {
         sqlite::Connection::DisableForeignKeyContext ctx{ m_dbConnection.get() };
@@ -856,6 +860,11 @@ void ResumeTests::InitializeMediaLibrary( const std::string& dbPath,
 void ResumeTests::InitializeCallback()
 {
     m_cb.reset( new MockResumeCallback );
+}
+
+MediaLibraryResumeTest::~MediaLibraryResumeTest()
+{
+    stopBackgroundJobs();
 }
 
 void MediaLibraryResumeTest::forceParserStart()

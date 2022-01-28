@@ -138,6 +138,7 @@ class MediaLibraryResumeTest : public MediaLibrary
 {
 public:
     using MediaLibrary::MediaLibrary;
+    virtual ~MediaLibraryResumeTest();
     void forceParserStart();
     virtual void onDbConnectionReady( sqlite::Connection* dbConn ) override;
     virtual parser::Parser* getParser() const override;
