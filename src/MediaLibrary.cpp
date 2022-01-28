@@ -351,9 +351,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
 
 MediaLibrary::~MediaLibrary()
 {
-    // Explicitely stop the discoverer, to avoid it writting while tearing down.
-    m_discovererWorker.stop();
-    m_parser.stop();
+    stopBackgroundJobs();
 }
 
 bool MediaLibrary::createAllTables()
@@ -1218,6 +1216,13 @@ void MediaLibrary::populateNetworkFsFactories()
 
 void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 {
+}
+
+void MediaLibrary::stopBackgroundJobs()
+{
+    // Explicitely stop the discoverer, to avoid it writting while tearing down.
+    m_discovererWorker.stop();
+    m_parser.stop();
 }
 
 void MediaLibrary::addLocalFsFactory()

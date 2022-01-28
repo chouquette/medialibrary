@@ -269,6 +269,15 @@ protected:
      */
     virtual void onDbConnectionReady( sqlite::Connection* dbConn );
     void onBackgroundTasksIdleChanged( bool idle );
+    /**
+     * @brief stopBackgroundJobs Explicitely stop all background jobs
+     *
+     * This is intended to be used when tearing down the media library to ensure
+     * the background jobs don't use fields that would be destroyed before the
+     * worker instances, and from tests to avoid a 'data race on vptr' report
+     * from TSAN
+     */
+    void stopBackgroundJobs();
 
 private:
     bool recreateDatabase();
