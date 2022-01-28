@@ -884,7 +884,7 @@ void RefreshTests::forceRefresh()
 {
     auto ml = static_cast<MediaLibrary*>( m_ml.get() );
     auto files = medialibrary::File::fetchAll( ml );
-    for ( const auto& f : files )
+    for ( auto& f : files )
     {
         if ( f->isExternal() == true )
             continue;
@@ -900,7 +900,7 @@ void RefreshTests::forceRefresh()
                 return f->name() == fileName;
             });
         assert( fileFsIt != cend( filesFs ) );
-        ml->onUpdatedFile( f, *fileFsIt, std::move( folder ), std::move( folderFs ) );
+        ml->onUpdatedFile( std::move( f ), *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
 }
 
