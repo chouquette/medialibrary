@@ -1220,6 +1220,10 @@ void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 
 void MediaLibrary::stopBackgroundJobs()
 {
+    {
+        std::lock_guard<compat::Mutex> lock{ m_thumbnailerWorkerMutex };
+        m_thumbnailerWorker.reset();
+    }
     // Explicitely stop the discoverer, to avoid it writting while tearing down.
     m_discovererWorker.stop();
     m_parser.stop();
