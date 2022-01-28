@@ -89,12 +89,15 @@ void Directory::read() const
             cond.notify_all();
         });
 
-    std::unique_lock<compat::Mutex> lock( mutex );
-    media.parseWithOptions( VLC::Media::ParseFlags::Network |
-                            VLC::Media::ParseFlags::Local, -1 );
-    bool success = cond.wait_for( lock, std::chrono::seconds{ 5 }, [&res]() {
-        return res != VLC::Media::ParsedStatus::Skipped;
-    });
+    bool success;
+    {
+        std::unique_lock<compat::Mutex> lock( mutex );
+        media.parseWithOptions( VLC::Media::ParseFlags::Network |
+                                VLC::Media::ParseFlags::Local, -1 );
+        success = cond.wait_for( lock, std::chrono::seconds{ 5 }, [&res]() {
+            return res != VLC::Media::ParsedStatus::Skipped;
+        });
+    }
     eventHandler->unregister();
     if ( success == false )
         throw errors::System{ ETIMEDOUT,
