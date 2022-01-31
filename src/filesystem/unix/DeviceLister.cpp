@@ -138,18 +138,46 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
 {
     if ( devicePath.compare( 0, strlen( "/dev/mapper" ), "/dev/mapper" ) != 0 )
         return {};
-    char linkPath[PATH_MAX + 1];
-    auto linkSize = readlink( devicePath.c_str(), linkPath, PATH_MAX );
-    if ( linkSize < 0 )
+
+    struct stat s;
+    if ( stat(devicePath.c_str(), &s) == -1 )
     {
+        const std::string error = " stat on " + devicePath + " failed";
+        LOG_DEBUG( error );
         std::stringstream err;
-        err << "Failed to resolve device -> mapper link: "
-            << devicePath << " (" << strerror(errno) << ')';
+        err << error;
         throw fs::errors::DeviceMapper{ err.str() };
     }
-    linkPath[linkSize] = 0;
-    LOG_DEBUG( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
-    const auto dmName = utils::file::fileName( linkPath );
+
+    std::string dmName;
+    if (S_ISLNK( s.st_mode ))
+    {
+        char linkPath[PATH_MAX + 1];
+
+        auto linkSize = readlink( devicePath.c_str(), linkPath, PATH_MAX );
+        if ( linkSize < 0 )
+        {
+            std::stringstream err;
+            err << "Failed to resolve device -> mapper link: "
+                << devicePath << " (" << strerror(errno) << ')';
+            throw fs::errors::DeviceMapper{ err.str() };
+        }
+        linkPath[linkSize] = 0;
+        LOG_DEBUG( "Resolved ", devicePath, " to ", linkPath, " device mapper" );
+        dmName = utils::file::fileName( linkPath );
+    }
+    else if (S_ISBLK( s.st_mode ))
+    {
+        dmName = "dm-" + std::to_string( minor(s.st_rdev) );
+    }
+    else
+    {
+        std::stringstream err;
+        err << "Failed to open device-mapper slaves directory ("
+            << devicePath << "), unsupported format";
+        throw fs::errors::DeviceMapper{ err.str() };
+    }
+
     std::string dmSlavePath = "/sys/block/" + dmName + "/slaves";
     std::unique_ptr<DIR, int(*)(DIR*)> dir( opendir( dmSlavePath.c_str() ),
                                             &closedir );
@@ -157,8 +185,8 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
     if ( dir == nullptr )
     {
         std::stringstream err;
-        err << "Failed to open device-mapper slaves directory (" <<
-               linkPath << ')';
+        err << "Failed to open device-mapper slaves directory ("
+            << devicePath << ')';
         throw fs::errors::DeviceMapper{ err.str() };
     }
     dirent* result;
@@ -172,7 +200,7 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
         if ( res.empty() == true )
             res = result->d_name;
         else
-            LOG_WARN( "More than one slave for device mapper ", linkPath );
+            LOG_WARN( "More than one slave for device mapper ", devicePath );
     }
     LOG_INFO( "Device mapper ", dmName, " maps to ", res );
     return { dmName, res };
