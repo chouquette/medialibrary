@@ -151,16 +151,16 @@ bool Label::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FileRelationTable::Name, Settings::DbModelVersion ),
                                        FileRelationTable::Name ) &&
-           sqlite::Tools::checkTriggerStatement( ml->getConn(),
+           sqlite::Tools::checkTriggerStatement(
                  trigger( Triggers::DeleteFts, Settings::DbModelVersion ),
                  triggerName( Triggers::DeleteFts, Settings::DbModelVersion ) ) &&
-           sqlite::Tools::checkIndexStatement( ml->getConn(),
+           sqlite::Tools::checkIndexStatement(
                  index( Indexes::MediaId, Settings::DbModelVersion ),
                  indexName( Indexes::MediaId, Settings::DbModelVersion ) );
 

@@ -388,11 +388,10 @@ class Tools
             }
         }
 
-        static bool checkTriggerStatement( sqlite::Connection* dbConn,
-                                           const std::string& expectedStatement,
+        static bool checkTriggerStatement( const std::string& expectedStatement,
                                            const std::string& triggerName )
         {
-            auto actualStatement = fetchTriggerStatement( dbConn, triggerName );
+            auto actualStatement = fetchTriggerStatement( triggerName );
             if ( actualStatement == expectedStatement )
                 return true;
             LOG_ERROR( "Mismatching statement for trigger ", triggerName, "." );
@@ -401,11 +400,10 @@ class Tools
             return false;
         }
 
-        static bool checkIndexStatement( sqlite::Connection* dbConn,
-                                         const std::string& expectedStatement,
+        static bool checkIndexStatement( const std::string& expectedStatement,
                                          const std::string& indexName )
         {
-            auto actualStatement = fetchIndexStatement( dbConn, indexName );
+            auto actualStatement = fetchIndexStatement( indexName );
             if ( actualStatement == expectedStatement )
                 return true;
             LOG_ERROR( "Mismatching statement for index ", indexName, "." );
@@ -414,11 +412,10 @@ class Tools
             return false;
         }
 
-        static bool checkTableSchema( sqlite::Connection* dbConn,
-                                      const std::string& schema,
+        static bool checkTableSchema( const std::string& schema,
                                       const std::string& tableName )
         {
-            auto actualSchema = fetchTableSchema( dbConn, tableName );
+            auto actualSchema = fetchTableSchema( tableName );
             if ( actualSchema == schema )
                 return true;
             LOG_ERROR( "Mismatching schema for table ", tableName, "." );
@@ -466,8 +463,7 @@ class Tools
                 std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
 
-        static std::string fetchSchemaSql( sqlite::Connection* dbConn,
-                                           const std::string& type,
+        static std::string fetchSchemaSql( const std::string& type,
                                            const std::string& name )
         {
             const std::string req{ "SELECT sql FROM sqlite_master "
@@ -486,22 +482,19 @@ class Tools
             return res;
         }
 
-        static std::string fetchTableSchema( sqlite::Connection* dbConn,
-                                             const std::string& tableName )
+        static std::string fetchTableSchema( const std::string& tableName )
         {
-            return fetchSchemaSql( dbConn, "table", tableName );
+            return fetchSchemaSql( "table", tableName );
         }
 
-        static std::string fetchTriggerStatement( sqlite::Connection* dbConn,
-                                                  const std::string& triggerName )
+        static std::string fetchTriggerStatement( const std::string& triggerName )
         {
-            return fetchSchemaSql( dbConn, "trigger", triggerName );
+            return fetchSchemaSql( "trigger", triggerName );
         }
 
-        static std::string fetchIndexStatement( sqlite::Connection* dbConn,
-                                                const std::string& indexName )
+        static std::string fetchIndexStatement( const std::string& indexName )
         {
-            return fetchSchemaSql( dbConn, "index", indexName );
+            return fetchSchemaSql( "index", indexName );
         }
 };
 

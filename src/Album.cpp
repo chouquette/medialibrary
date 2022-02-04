@@ -815,29 +815,29 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
         return false;
 
-    if ( sqlite::Tools::checkIndexStatement( ml->getConn(),
+    if ( sqlite::Tools::checkIndexStatement(
             index( Indexes::ArtistId, Settings::DbModelVersion ),
             indexName( Indexes::ArtistId, Settings::DbModelVersion ) ) == false )
         return false;
 
-    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto check = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    return check( ml->getConn(), Triggers::IsPresent ) &&
-            check( ml->getConn(), Triggers::DeleteTrack ) &&
-            check( ml->getConn(), Triggers::InsertFts ) &&
-            check( ml->getConn(), Triggers::DeleteFts ) &&
-            check( ml->getConn(), Triggers::DeleteEmpty );
+    return check( Triggers::IsPresent ) &&
+            check( Triggers::DeleteTrack ) &&
+            check( Triggers::InsertFts ) &&
+            check( Triggers::DeleteFts ) &&
+            check( Triggers::DeleteEmpty );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, std::string title )

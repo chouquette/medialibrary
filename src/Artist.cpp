@@ -663,37 +663,37 @@ bool Artist::checkDbModel(MediaLibraryPtr ml)
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( MediaRelationTable::Name, Settings::DbModelVersion ),
                                        MediaRelationTable::Name ) == false )
         return false;
 
-    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto check = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
-        return sqlite::Tools::checkIndexStatement( dbConn,
+    auto checkIndex = []( Indexes i ) {
+        return sqlite::Tools::checkIndexStatement(
                                     index( i, Settings::DbModelVersion ),
                                     indexName( i, Settings::DbModelVersion ) );
     };
-    return check( ml->getConn(), Triggers::HasTrackPresent ) &&
-            check( ml->getConn(), Triggers::DeleteArtistsWithoutTracks ) &&
-            check( ml->getConn(), Triggers::IncrementNbTracks ) &&
-            check( ml->getConn(), Triggers::DecrementNbTracks ) &&
-            check( ml->getConn(), Triggers::UpdateNbAlbums ) &&
-            check( ml->getConn(), Triggers::DecrementNbAlbums ) &&
-            check( ml->getConn(), Triggers::IncrementNbAlbums ) &&
-            check( ml->getConn(), Triggers::InsertFts ) &&
-            check( ml->getConn(), Triggers::DeleteFts ) &&
-            checkIndex( ml->getConn(), Indexes::MediaRelArtistId );
+    return check( Triggers::HasTrackPresent ) &&
+            check( Triggers::DeleteArtistsWithoutTracks ) &&
+            check( Triggers::IncrementNbTracks ) &&
+            check( Triggers::DecrementNbTracks ) &&
+            check( Triggers::UpdateNbAlbums ) &&
+            check( Triggers::DecrementNbAlbums ) &&
+            check( Triggers::IncrementNbAlbums ) &&
+            check( Triggers::InsertFts ) &&
+            check( Triggers::DeleteFts ) &&
+            checkIndex( Indexes::MediaRelArtistId );
 }
 
 bool Artist::createDefaultArtists( sqlite::Connection* dbConnection )

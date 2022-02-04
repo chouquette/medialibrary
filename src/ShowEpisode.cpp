@@ -213,13 +213,13 @@ bool ShowEpisode::checkDbModel(MediaLibraryPtr ml)
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkIndexStatement( ml->getConn(),
+           sqlite::Tools::checkIndexStatement(
                 index( Indexes::MediaId, Settings::DbModelVersion ),
                 indexName( Indexes::MediaId, Settings::DbModelVersion ) ) &&
-            sqlite::Tools::checkIndexStatement( ml->getConn(),
+            sqlite::Tools::checkIndexStatement(
                  index( Indexes::ShowId, Settings::DbModelVersion ),
                  indexName( Indexes::ShowId, Settings::DbModelVersion ) );
 }

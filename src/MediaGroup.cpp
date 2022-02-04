@@ -1554,40 +1554,40 @@ bool MediaGroup::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
         return false;
 
-    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto check = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
-        return sqlite::Tools::checkIndexStatement( dbConn,
+    auto checkIndex = []( Indexes i ) {
+        return sqlite::Tools::checkIndexStatement(
                                     index( i, Settings::DbModelVersion ),
                                     indexName( i, Settings::DbModelVersion ) );
     };
 
-    return check( ml->getConn(), Triggers::InsertFts ) &&
-            check( ml->getConn(), Triggers::DeleteFts ) &&
-            check( ml->getConn(), Triggers::UpdateNbMediaPerType ) &&
-            check( ml->getConn(), Triggers::DecrementNbMediaOnDeletion ) &&
-            check( ml->getConn(), Triggers::DeleteEmptyGroups ) &&
-            check( ml->getConn(), Triggers::RenameForcedSingleton ) &&
-            check( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
-            check( ml->getConn(), Triggers::UpdateDurationOnMediaDeletion ) &&
-            check( ml->getConn(), Triggers::UpdateNbMediaPerType ) &&
-            check( ml->getConn(), Triggers::UpdateMediaCountOnPresenceChange ) &&
-            check( ml->getConn(), Triggers::UpdateNbMediaOnImportTypeChange ) &&
-            checkIndex( ml->getConn(), Indexes::ForcedSingleton ) &&
-            checkIndex( ml->getConn(), Indexes::Duration ) &&
-            checkIndex( ml->getConn(), Indexes::CreationDate ) &&
-            checkIndex( ml->getConn(), Indexes::LastModificationDate );
+    return check( Triggers::InsertFts ) &&
+            check( Triggers::DeleteFts ) &&
+            check( Triggers::UpdateNbMediaPerType ) &&
+            check( Triggers::DecrementNbMediaOnDeletion ) &&
+            check( Triggers::DeleteEmptyGroups ) &&
+            check( Triggers::RenameForcedSingleton ) &&
+            check( Triggers::UpdateDurationOnMediaChange ) &&
+            check( Triggers::UpdateDurationOnMediaDeletion ) &&
+            check( Triggers::UpdateNbMediaPerType ) &&
+            check( Triggers::UpdateMediaCountOnPresenceChange ) &&
+            check( Triggers::UpdateNbMediaOnImportTypeChange ) &&
+            checkIndex( Indexes::ForcedSingleton ) &&
+            checkIndex( Indexes::Duration ) &&
+            checkIndex( Indexes::CreationDate ) &&
+            checkIndex( Indexes::LastModificationDate );
 }
 
 bool MediaGroup::assignToGroup( MediaLibraryPtr ml, Media& m )

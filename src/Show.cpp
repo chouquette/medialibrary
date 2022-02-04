@@ -360,24 +360,24 @@ bool Show::checkDbModel(MediaLibraryPtr ml)
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
         return false;
 
-    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto checkTrigger = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    return checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
-            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
-            checkTrigger( ml->getConn(), Triggers::IncrementNbEpisode ) &&
-            checkTrigger( ml->getConn(), Triggers::DecrementNbEpisode ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateIsPresent );
+    return checkTrigger( Triggers::InsertFts ) &&
+            checkTrigger( Triggers::DeleteFts ) &&
+            checkTrigger( Triggers::IncrementNbEpisode ) &&
+            checkTrigger( Triggers::DecrementNbEpisode ) &&
+            checkTrigger( Triggers::UpdateIsPresent );
 }
 
 std::shared_ptr<Show> Show::create( MediaLibraryPtr ml, std::string name )

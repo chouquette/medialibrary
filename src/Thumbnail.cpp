@@ -748,35 +748,35 @@ bool Thumbnail::checkDbModel(MediaLibraryPtr ml)
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name )== false ||
-         sqlite::Tools::checkTableSchema( ml->getConn(),
+         sqlite::Tools::checkTableSchema(
                                        schema( LinkingTable::Name, Settings::DbModelVersion ),
                                        LinkingTable::Name ) == false ||
-         sqlite::Tools::checkTableSchema( ml->getConn(),
+         sqlite::Tools::checkTableSchema(
                                        schema( CleanupTable::Name, Settings::DbModelVersion ),
                                        CleanupTable::Name ) == false ||
-         sqlite::Tools::checkIndexStatement( ml->getConn(),
+         sqlite::Tools::checkIndexStatement(
                  index( Indexes::ThumbnailId, Settings::DbModelVersion ),
                  indexName( Indexes::ThumbnailId, Settings::DbModelVersion ) ) == false )
         return false;
 
 
 
-    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto checkTrigger = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    return checkTrigger( ml->getConn(), Triggers::AutoDeleteAlbum ) &&
-            checkTrigger( ml->getConn(), Triggers::AutoDeleteArtist ) &&
-            checkTrigger( ml->getConn(), Triggers::AutoDeleteMedia ) &&
-            checkTrigger( ml->getConn(), Triggers::IncrementRefcount ) &&
-            checkTrigger( ml->getConn(), Triggers::DecrementRefcount ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateRefcount ) &&
-            checkTrigger( ml->getConn(), Triggers::DeleteUnused ) &&
-            checkTrigger( ml->getConn(), Triggers::InsertCleanup );
+    return checkTrigger( Triggers::AutoDeleteAlbum ) &&
+            checkTrigger( Triggers::AutoDeleteArtist ) &&
+            checkTrigger( Triggers::AutoDeleteMedia ) &&
+            checkTrigger( Triggers::IncrementRefcount ) &&
+            checkTrigger( Triggers::DecrementRefcount ) &&
+            checkTrigger( Triggers::UpdateRefcount ) &&
+            checkTrigger( Triggers::DeleteUnused ) &&
+            checkTrigger( Triggers::InsertCleanup );
 }
 
 std::shared_ptr<Thumbnail> Thumbnail::fetch( MediaLibraryPtr ml, EntityType type,

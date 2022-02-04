@@ -1149,40 +1149,40 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false ||
-           sqlite::Tools::checkTableSchema( ml->getConn(),
+           sqlite::Tools::checkTableSchema(
                                        schema( MediaRelationTable::Name, Settings::DbModelVersion ),
                                        MediaRelationTable::Name ) == false )
         return false;
 
-    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto checkTrigger = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
 
-    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
-        return sqlite::Tools::checkIndexStatement( dbConn,
+    auto checkIndex = []( Indexes i ) {
+        return sqlite::Tools::checkIndexStatement(
                                     index( i, Settings::DbModelVersion ),
                                     indexName( i, Settings::DbModelVersion ) );
     };
 
-    return checkTrigger( ml->getConn(), Triggers::UpdateOrderOnInsert ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateOrderOnDelete ) &&
-            checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateFts ) &&
-            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaDeletion ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateDurationOnMediaChange ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateNbMediaOnMediaChange ) &&
-            checkTrigger( ml->getConn(), Triggers::CascadeFileDeletion ) &&
-            checkIndex( ml->getConn(), Indexes::PlaylistIdPosition ) &&
-            checkIndex( ml->getConn(), Indexes::PlaylistRelMediaId );
+    return checkTrigger( Triggers::UpdateOrderOnInsert ) &&
+            checkTrigger( Triggers::UpdateOrderOnDelete ) &&
+            checkTrigger( Triggers::InsertFts ) &&
+            checkTrigger( Triggers::UpdateFts ) &&
+            checkTrigger( Triggers::DeleteFts ) &&
+            checkTrigger( Triggers::UpdateNbMediaOnMediaDeletion ) &&
+            checkTrigger( Triggers::UpdateDurationOnMediaChange ) &&
+            checkTrigger( Triggers::UpdateNbMediaOnMediaChange ) &&
+            checkTrigger( Triggers::CascadeFileDeletion ) &&
+            checkIndex( Indexes::PlaylistIdPosition ) &&
+            checkIndex( Indexes::PlaylistRelMediaId );
 }
 
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,

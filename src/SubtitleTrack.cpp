@@ -175,12 +175,12 @@ bool SubtitleTrack::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    auto checkIndex = [ml]( Indexes idx ) {
-        return sqlite::Tools::checkIndexStatement( ml->getConn(),
+    auto checkIndex = []( Indexes idx ) {
+        return sqlite::Tools::checkIndexStatement(
              index( idx, Settings::DbModelVersion ),
              indexName( idx, Settings::DbModelVersion ) );
     };
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
            checkIndex( Indexes::MediaId ) &&

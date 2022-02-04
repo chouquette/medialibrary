@@ -2067,48 +2067,48 @@ std::string Media::indexName( Indexes index, uint32_t dbModel )
 bool Media::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-         sqlite::Tools::checkTableSchema( ml->getConn(),
+         sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
         return false;
 
-    auto checkTrigger = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto checkTrigger = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
 
-    auto checkIndex = []( sqlite::Connection* dbConn, Indexes i ) {
-        return sqlite::Tools::checkIndexStatement( dbConn,
+    auto checkIndex = []( Indexes i ) {
+        return sqlite::Tools::checkIndexStatement(
                                     index( i, Settings::DbModelVersion ),
                                     indexName( i, Settings::DbModelVersion ) );
     };
 
-    return checkTrigger( ml->getConn(), Triggers::IsPresent ) &&
-            checkTrigger( ml->getConn(), Triggers::CascadeFileDeletion ) &&
-            checkTrigger( ml->getConn(), Triggers::IncrementNbPlaylist ) &&
-            checkTrigger( ml->getConn(), Triggers::DecrementNbPlaylist ) &&
-            checkTrigger( ml->getConn(), Triggers::InsertFts ) &&
-            checkTrigger( ml->getConn(), Triggers::DeleteFts ) &&
-            checkTrigger( ml->getConn(), Triggers::UpdateFts ) &&
-            checkIndex( ml->getConn(), Indexes::LastPlayedDate ) &&
-            checkIndex( ml->getConn(), Indexes::Presence ) &&
-            checkIndex( ml->getConn(), Indexes::Types ) &&
-            checkIndex( ml->getConn(), Indexes::InsertionDate ) &&
-            checkIndex( ml->getConn(), Indexes::Folder ) &&
-            checkIndex( ml->getConn(), Indexes::MediaGroup ) &&
-            checkIndex( ml->getConn(), Indexes::Progress ) &&
-            checkIndex( ml->getConn(), Indexes::AlbumTrack ) &&
-            checkIndex( ml->getConn(), Indexes::Duration ) &&
-            checkIndex( ml->getConn(), Indexes::ReleaseDate ) &&
-            checkIndex( ml->getConn(), Indexes::PlayCount ) &&
-            checkIndex( ml->getConn(), Indexes::Title ) &&
-            checkIndex( ml->getConn(), Indexes::FileName ) &&
-            checkIndex( ml->getConn(), Indexes::GenreId ) &&
-            checkIndex( ml->getConn(), Indexes::ArtistId );
+    return checkTrigger( Triggers::IsPresent ) &&
+            checkTrigger( Triggers::CascadeFileDeletion ) &&
+            checkTrigger( Triggers::IncrementNbPlaylist ) &&
+            checkTrigger( Triggers::DecrementNbPlaylist ) &&
+            checkTrigger( Triggers::InsertFts ) &&
+            checkTrigger( Triggers::DeleteFts ) &&
+            checkTrigger( Triggers::UpdateFts ) &&
+            checkIndex( Indexes::LastPlayedDate ) &&
+            checkIndex( Indexes::Presence ) &&
+            checkIndex( Indexes::Types ) &&
+            checkIndex( Indexes::InsertionDate ) &&
+            checkIndex( Indexes::Folder ) &&
+            checkIndex( Indexes::MediaGroup ) &&
+            checkIndex( Indexes::Progress ) &&
+            checkIndex( Indexes::AlbumTrack ) &&
+            checkIndex( Indexes::Duration ) &&
+            checkIndex( Indexes::ReleaseDate ) &&
+            checkIndex( Indexes::PlayCount ) &&
+            checkIndex( Indexes::Title ) &&
+            checkIndex( Indexes::FileName ) &&
+            checkIndex( Indexes::GenreId ) &&
+            checkIndex( Indexes::ArtistId );
 }
 
 bool Media::addLabel( LabelPtr label )

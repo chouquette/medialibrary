@@ -655,13 +655,13 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    return sqlite::Tools::checkTableSchema( ml->getConn(),
+    return sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&
-           sqlite::Tools::checkTriggerStatement( ml->getConn(),
+           sqlite::Tools::checkTriggerStatement(
                 trigger( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ),
                 triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) ) &&
-           sqlite::Tools::checkIndexStatement( ml->getConn(),
+           sqlite::Tools::checkIndexStatement(
                 index( Indexes::ParentFolderId, Settings::DbModelVersion ),
                 indexName( Indexes::ParentFolderId, Settings::DbModelVersion ) );
 }

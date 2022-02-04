@@ -371,30 +371,30 @@ bool Folder::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    if ( sqlite::Tools::checkTableSchema( ml->getConn(),
+    if ( sqlite::Tools::checkTableSchema(
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
-        sqlite::Tools::checkTableSchema( ml->getConn(),
+        sqlite::Tools::checkTableSchema(
                                        schema( FtsTable::Name, Settings::DbModelVersion ),
                                        FtsTable::Name ) == false )
         return false;
 
-    auto check = []( sqlite::Connection* dbConn, Triggers t ) {
-        return sqlite::Tools::checkTriggerStatement( dbConn,
+    auto check = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
                                     trigger( t, Settings::DbModelVersion ),
                                     triggerName( t, Settings::DbModelVersion ) );
     };
-    if ( check( ml->getConn(), Triggers::InsertFts ) == false ||
-         check( ml->getConn(), Triggers::DeleteFts ) == false ||
-         check( ml->getConn(), Triggers::UpdateNbMediaOnIndex ) == false ||
-         check( ml->getConn(), Triggers::UpdateNbMediaOnUpdate ) == false ||
-         check( ml->getConn(), Triggers::UpdateNbMediaOnDelete )  == false )
+    if ( check( Triggers::InsertFts ) == false ||
+         check( Triggers::DeleteFts ) == false ||
+         check( Triggers::UpdateNbMediaOnIndex ) == false ||
+         check( Triggers::UpdateNbMediaOnUpdate ) == false ||
+         check( Triggers::UpdateNbMediaOnDelete )  == false )
         return false;
 
-    return sqlite::Tools::checkIndexStatement( ml->getConn(),
+    return sqlite::Tools::checkIndexStatement(
                 index( Indexes::DeviceId, Settings::DbModelVersion ),
                 indexName( Indexes::DeviceId, Settings::DbModelVersion ) ) &&
-           sqlite::Tools::checkIndexStatement( ml->getConn(),
+           sqlite::Tools::checkIndexStatement(
                 index( Indexes::ParentId, Settings::DbModelVersion ),
                 indexName( Indexes::ParentId, Settings::DbModelVersion ) );
 }
