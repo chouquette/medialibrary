@@ -243,7 +243,7 @@ struct DbModel : public Tests
                 auto writeCtx = dbConn->acquireWriteContext();
                 while( file.getline( buff, sizeof( buff ) ) )
                 {
-                    medialibrary::sqlite::Statement stmt( dbConn->handle(), buff );
+                    medialibrary::sqlite::Statement stmt( buff );
                     stmt.execute();
                     while ( stmt.row() != nullptr )
                         ;
@@ -252,7 +252,7 @@ struct DbModel : public Tests
             // Ensure we are doing a migration
             {
                 auto readCtx = dbConn->acquireReadContext();
-                medialibrary::sqlite::Statement stmt{ dbConn->handle(),
+                medialibrary::sqlite::Statement stmt{ readCtx.handle(),
                         "SELECT * FROM Settings" };
                 stmt.execute();
                 auto row = stmt.row();
@@ -267,7 +267,7 @@ struct DbModel : public Tests
     {
         OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
+        medialibrary::sqlite::Statement stmt{
                 "SELECT name FROM sqlite_master WHERE type='trigger' "
                     "ORDER BY name;"
         };
@@ -292,7 +292,7 @@ struct DbModel : public Tests
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
 
-        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
+        medialibrary::sqlite::Statement stmt{
                 "SELECT name FROM sqlite_master WHERE type='index' AND "
                 "name NOT LIKE 'sqlite_autoindex%' ORDER BY name" };
         stmt.execute();
@@ -314,7 +314,7 @@ struct DbModel : public Tests
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
 
-        medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
+        medialibrary::sqlite::Statement stmt{
                 "SELECT name FROM sqlite_master WHERE type='table' "
                 "AND name NOT LIKE '%#_%' ESCAPE '#' ORDER BY name"
         };
@@ -334,8 +334,7 @@ struct DbModel : public Tests
         {
             OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-            auto dbConn = sqlite::Connection::connect( getDbPath() );
-            medialibrary::sqlite::Statement stmt{ dbConn->handle(),
+            medialibrary::sqlite::Statement stmt{
                     "SELECT * FROM Settings" };
             stmt.execute();
             auto row = stmt.row();
@@ -395,7 +394,6 @@ static void Upgrade15to16( DbModel* T )
     OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
-        T->ml->getConn()->handle(),
         "SELECT playlist_id, position FROM PlaylistMediaRelation "
             "ORDER BY playlist_id, position"
     };
@@ -503,7 +501,6 @@ static void Upgrade22to23( DbModel* T )
         OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
 
         sqlite::Statement stmt{
-            T->ml->getConn()->handle(),
             "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
                 " WHERE file_type = " + utils::enum_to_string( IFile::Type::Playlist )
         };
@@ -563,7 +560,6 @@ static void Upgrade25to26( DbModel* T )
         OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
 
         sqlite::Statement stmt{
-            T->ml->getConn()->handle(),
             "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
                 " WHERE file_type = ? AND type = ? "
         };

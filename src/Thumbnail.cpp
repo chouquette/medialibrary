@@ -801,7 +801,7 @@ Thumbnail::fetchCleanups( MediaLibraryPtr ml )
     sqlite::Connection::ReadContext ctx;
     if ( sqlite::Transaction::isInProgress() == false )
         ctx = ml->getConn()->acquireReadContext();
-    sqlite::Statement stmt{ ml->getConn()->handle(), req };
+    sqlite::Statement stmt{ req };
     stmt.execute();
     sqlite::Row row;
     std::unordered_map<int64_t, std::string> res;

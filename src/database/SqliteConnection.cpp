@@ -194,14 +194,14 @@ void Connection::setForeignKeyEnabled( bool value )
     assert( sqlite::Transaction::isInProgress() == false );
     // Ensure no transaction will be started during the pragma change
     auto ctx = acquireWriteContext();
-    setPragma( handle(), "foreign_keys", value ? "1" : "0" );
+    setPragma( ctx.handle(), "foreign_keys", value ? "1" : "0" );
 }
 
 void Connection::setRecursiveTriggersEnabled( bool value )
 {
     // Ensure no request will run while we change this setting
     auto ctx = acquireWriteContext();
-    setPragma( handle(), "recursive_triggers", value == true ? "1" : "0" );
+    setPragma( ctx.handle(), "recursive_triggers", value == true ? "1" : "0" );
 }
 
 void Connection::registerUpdateHook( const std::string& table, Connection::UpdateHookCb cb )

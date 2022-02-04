@@ -99,7 +99,7 @@ void Metadata::init( int64_t entityId, uint32_t nbMeta )
             " WHERE id_media = ? AND entity_type = ?";
     auto conn = m_ml->getConn();
     auto ctx = conn->acquireReadContext();
-    sqlite::Statement stmt( conn->handle(), req );
+    sqlite::Statement stmt( ctx.handle(), req );
     stmt.execute( m_entityId, m_entityType );
     for ( sqlite::Row row = stmt.row(); row != nullptr; row = stmt.row() )
     {

@@ -205,7 +205,7 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
     assert( sqlite::Transaction::isInProgress() == true );
     std::string req = "SELECT rowid, mrl, playlist_id FROM " + Playlist::MediaRelationTable::Name + " "
             "WHERE media_id IS NULL";
-    sqlite::Statement stmt{ dbConn->handle(), req };
+    sqlite::Statement stmt{ req };
     stmt.execute();
     std::string updateReq = "UPDATE " + Playlist::MediaRelationTable::Name +
             " SET media_id = ? WHERE rowid = ?";
@@ -266,11 +266,10 @@ int64_t Playlist::mediaAt( uint32_t position )
     const std::string fetchReq = "SELECT media_id FROM " +
             Playlist::MediaRelationTable::Name +
             " WHERE playlist_id = ? AND position = ?";
-    auto dbConn = m_ml->getConn();
 
     OPEN_READ_CONTEXT( ctx, m_ml->getConn() );
 
-    sqlite::Statement stmt( dbConn->handle(), fetchReq );
+    sqlite::Statement stmt( fetchReq );
     stmt.execute( m_id, position );
     auto row = stmt.row();
     if ( row == nullptr )
@@ -1367,7 +1366,7 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
                 " (SELECT playlist_id FROM " + File::Table::Name +
                 " WHERE playlist_id IS NOT NULL)";
     }( dbModel );
-    sqlite::Statement stmt{ dbConn->handle(), req };
+    sqlite::Statement stmt{ ctx.handle(), req };
     stmt.execute();
     sqlite::Row row;
     while ( ( row = stmt.row() ) != nullptr )
@@ -1399,7 +1398,7 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
          * wouldn't work for media on removable devices.
          * If we find out that the file is not removable, then we don't need the device
          */
-        stmt = sqlite::Statement{ dbConn->handle(),
+        stmt = sqlite::Statement{ ctx.handle(),
             "SELECT f.mrl, f.is_removable, fo.path, d.uuid, d.scheme FROM " + File::Table::Name + " f"
             " INNER JOIN " + MediaRelationTable::Name + " pmr"
                 " ON f.media_id = pmr.media_id"

@@ -1405,7 +1405,7 @@ static void FlushUserProvidedThumbnails( Tests* T )
      */
     {
         auto ctx = T->ml->getConn()->acquireReadContext();
-        medialibrary::sqlite::Statement stmt{ T->ml->getConn()->handle(),
+        medialibrary::sqlite::Statement stmt{
                 "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
         };
         stmt.execute();

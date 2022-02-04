@@ -234,7 +234,6 @@ uint32_t MediaLibraryTester::countNbThumbnails()
 {
     auto ctx = getConn()->acquireReadContext();
     sqlite::Statement stmt{
-        getConn()->handle(),
         "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
     };
     uint32_t res;
@@ -248,7 +247,6 @@ uint32_t MediaLibraryTester::countNbTasks()
 {
     auto ctx = getConn()->acquireReadContext();
     sqlite::Statement stmt{
-        getConn()->handle(),
         "SELECT COUNT(*) FROM " + parser::Task::Table::Name
     };
     uint32_t res;

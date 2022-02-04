@@ -279,7 +279,7 @@ class Tools
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
-            Statement stmt( dbConnection->handle(), req );
+            Statement stmt( Connection::Context::handle(), req );
             stmt.execute( std::forward<Args>( args )... );
             Row sqliteRow;
             while ( ( sqliteRow = stmt.row() ) != nullptr )
@@ -303,7 +303,7 @@ class Tools
                 ctx = dbConnection->acquireReadContext();
             auto chrono = std::chrono::steady_clock::now();
 
-            Statement stmt( dbConnection->handle(), req );
+            Statement stmt( req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
             std::shared_ptr<T> res;
@@ -322,7 +322,7 @@ class Tools
             Connection::WriteContext ctx;
             if (Transaction::isInProgress() == false)
                 ctx = dbConnection->acquireWriteContext();
-            executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+            executeRequestLocked( Connection::Context::handle(), req, std::forward<Args>( args )... );
         }
 
         template <typename... Args>
@@ -335,7 +335,8 @@ class Tools
                 ctx = dbConnection->acquireWriteContext();
             try
             {
-                executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
+                executeRequestLocked( Connection::Context::handle(), req,
+                                      std::forward<Args>( args )... );
             }
             catch ( const sqlite::errors::Exception& ex )
             {
@@ -372,8 +373,9 @@ class Tools
                 ctx = dbConnection->acquireWriteContext();
             try
             {
-                executeRequestLocked( dbConnection, req, std::forward<Args>( args )... );
-                return sqlite3_last_insert_rowid( dbConnection->handle() );
+                auto handle = Connection::Context::handle();
+                executeRequestLocked( handle, req, std::forward<Args>( args )... );
+                return sqlite3_last_insert_rowid( handle );
             }
             catch ( const sqlite::errors::Exception& ex )
             {
@@ -429,7 +431,7 @@ class Tools
         {
             OPEN_READ_CONTEXT( ctx, dbConn );
             std::vector<std::string> tables;
-            medialibrary::sqlite::Statement stmt{ dbConn->handle(),
+            medialibrary::sqlite::Statement stmt{
                     "SELECT name FROM sqlite_master WHERE type='table' "
                     "AND name NOT LIKE '%#_%' ESCAPE '#'"
             };
@@ -451,11 +453,11 @@ class Tools
 
     private:
         template <typename... Args>
-        static void executeRequestLocked( sqlite::Connection* dbConnection,
+        static void executeRequestLocked( sqlite::Connection::Handle handle,
                                           const std::string& req, Args&&... args )
         {
             auto chrono = std::chrono::steady_clock::now();
-            Statement stmt( dbConnection->handle(), req );
+            Statement stmt( handle, req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;
@@ -471,7 +473,7 @@ class Tools
             const std::string req{ "SELECT sql FROM sqlite_master "
                                  "WHERE type=? AND name=?" };
             auto chrono = std::chrono::steady_clock::now();
-            Statement stmt( dbConn->handle(), req );
+            Statement stmt( req );
             stmt.execute( type, name );
             auto row = stmt.row();
             if ( row == nullptr )

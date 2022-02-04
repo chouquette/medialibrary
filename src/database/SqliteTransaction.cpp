@@ -42,7 +42,7 @@ ActualTransaction::ActualTransaction( sqlite::Connection* dbConn)
 {
     assert( CurrentTransaction == nullptr );
     LOG_VERBOSE( "Starting SQLite transaction" );
-    Statement s( dbConn->handle(), "BEGIN EXCLUSIVE" );
+    Statement s( m_ctx.handle(), "BEGIN EXCLUSIVE" );
     s.execute();
     while ( s.row() != nullptr )
         ;
@@ -53,7 +53,7 @@ void ActualTransaction::commit()
 {
     assert( CurrentTransaction != nullptr );
     auto chrono = std::chrono::steady_clock::now();
-    Statement s( m_dbConn->handle(), "COMMIT" );
+    Statement s( m_ctx.handle(), "COMMIT" );
     s.execute();
     while ( s.row() != nullptr )
         ;
@@ -75,7 +75,7 @@ ActualTransaction::~ActualTransaction()
     {
         try
         {
-            Statement s( m_dbConn->handle(), "ROLLBACK" );
+            Statement s( m_ctx.handle(), "ROLLBACK" );
             s.execute();
             while ( s.row() != nullptr )
                 ;

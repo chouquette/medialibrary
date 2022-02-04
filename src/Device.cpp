@@ -285,7 +285,7 @@ Device::fromMountpoint( MediaLibraryPtr ml, const std::string& mrl )
     sqlite::Connection::ReadContext ctx;
     if ( sqlite::Transaction::isInProgress() == false )
         ctx = dbConn->acquireReadContext();
-    sqlite::Statement stmt{ dbConn->handle(), req };
+    sqlite::Statement stmt{ req };
     stmt.execute( utils::url::scheme( mrl ) );
     for ( auto row = stmt.row(); row != nullptr; row = stmt.row() )
     {
@@ -315,7 +315,7 @@ std::string Device::cachedMountpoint() const
         MountpointTable::Name + " WHERE device_id = ? ORDER BY last_seen DESC";
     auto dbConn = m_ml->getConn();
     auto ctx = dbConn->acquireReadContext();
-    sqlite::Statement stmt{ dbConn->handle(), req };
+    sqlite::Statement stmt{ ctx.handle(), req };
     stmt.execute( m_id );
     auto row = stmt.row();
     if ( row == nullptr )

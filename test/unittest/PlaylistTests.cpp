@@ -44,7 +44,6 @@ struct PlaylistTests : public Tests
     {
         auto ctx = ml->getConn()->acquireReadContext();
         medialibrary::sqlite::Statement stmt{
-            ml->getConn()->handle(),
             "SELECT position FROM PlaylistMediaRelation "
                 "WHERE playlist_id=? ORDER BY position"
         };

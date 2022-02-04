@@ -816,7 +816,7 @@ bool Artist::checkDBConsistency( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
-    sqlite::Statement stmt{ ml->getConn()->handle(),
+    sqlite::Statement stmt{
                 "SELECT nb_tracks, is_present FROM " + Table::Name
     };
     stmt.execute();

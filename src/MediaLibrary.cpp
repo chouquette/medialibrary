@@ -1584,7 +1584,7 @@ void MediaLibrary::migrateModel17to18( uint32_t originalPreviousVersion )
                  * Since we change the parameter along the loop, we need to recreate
                  * the statement for each iteration, in order to reset the bindings
                  */
-                sqlite::Statement stmt{ dbConn->handle(), req };
+                sqlite::Statement stmt{ req };
                 stmt.execute( batchSize, offset );
                 auto nbRow = 0u;
                 while ( ( row = stmt.row() ) != nullptr )
@@ -1755,7 +1755,7 @@ void MediaLibrary::migrateModel23to24()
              * Since we change the parameter along the loop, we need to recreate
              * the statement for each iteration, in order to reset the bindings
              */
-            sqlite::Statement stmt{ dbConn->handle(), req };
+            sqlite::Statement stmt{ req };
             stmt.execute( Media::Type::Audio, batchSize, offset );
             auto nbRow = 0u;
             while ( ( row = stmt.row() ) != nullptr )
@@ -1832,7 +1832,7 @@ void MediaLibrary::migrateModel25to26()
              * Since we change the parameter along the loop, we need to recreate
              * the statement for each iteration, in order to reset the bindings
              */
-            sqlite::Statement stmt{ dbConn->handle(), req };
+            sqlite::Statement stmt{ req };
             stmt.execute( batchSize, offset );
             auto nbRow = 0u;
             while ( ( row = stmt.row() ) != nullptr )
@@ -1907,7 +1907,7 @@ void MediaLibrary::migrateModel28to29()
     const std::string req = "SELECT f.id_file, f.mrl FROM " + File::Table::Name + " f "
             "INNER JOIN " + Media::Table::Name + " m ON f.media_id = m.id_media "
             "WHERE f.type = ? AND m.nb_playlists > 0";
-    sqlite::Statement stmt{ dbConn->handle(), req };
+    sqlite::Statement stmt{ req };
     stmt.execute( IFile::Type::Main );
     sqlite::Row row;
     while ( ( row = stmt.row() ) != nullptr )
@@ -2067,8 +2067,8 @@ bool MediaLibrary::clearDatabase( bool restorePlaylists )
         uint32_t currentModel;
         {
             auto ctx = m_dbConnection->acquireReadContext();
-            sqlite::Statement s{ m_dbConnection->handle(),
-                                 "SELECT db_model_version FROM Settings"
+            sqlite::Statement s{ ctx.handle(),
+                        "SELECT db_model_version FROM Settings"
             };
             auto row = s.row();
             row >> currentModel;

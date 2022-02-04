@@ -975,7 +975,7 @@ Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params 
 bool Album::checkDBConsistency( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
-    sqlite::Statement stmt{ ml->getConn()->handle(),
+    sqlite::Statement stmt{
                 "SELECT nb_tracks, is_present FROM " +
                     Album::Table::Name
     };
