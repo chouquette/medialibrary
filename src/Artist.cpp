@@ -814,6 +814,8 @@ std::string Artist::sortRequest( const QueryParameters* params )
 
 bool Artist::checkDBConsistency( MediaLibraryPtr ml )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT nb_tracks, is_present FROM " + Table::Name
     };

@@ -268,6 +268,8 @@ int64_t Playlist::mediaAt( uint32_t position )
             " WHERE playlist_id = ? AND position = ?";
     auto dbConn = m_ml->getConn();
 
+    OPEN_READ_CONTEXT( ctx, m_ml->getConn() );
+
     sqlite::Statement stmt( dbConn->handle(), fetchReq );
     stmt.execute( m_id, position );
     auto row = stmt.row();

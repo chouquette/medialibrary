@@ -422,6 +422,7 @@ class Tools
 
         static std::vector<std::string> listTables( sqlite::Connection* dbConn )
         {
+            OPEN_READ_CONTEXT( ctx, dbConn );
             std::vector<std::string> tables;
             medialibrary::sqlite::Statement stmt{ dbConn->handle(),
                     "SELECT name FROM sqlite_master WHERE type='table' "

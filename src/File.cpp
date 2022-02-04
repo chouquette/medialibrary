@@ -437,6 +437,7 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
 
 bool File::exists( MediaLibraryPtr ml, const std::string& mrl )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
     sqlite::Statement stmt{ ml->getConn()->handle(), "SELECT EXISTS("
         "SELECT id_file FROM " + Table::Name + " WHERE mrl = ?)"
     };
