@@ -152,17 +152,17 @@ std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 
 Connection::ReadContext Connection::acquireReadContext()
 {
-    return ReadContext{ m_readLock };
+    return ReadContext{ this };
 }
 
 Connection::WriteContext Connection::acquireWriteContext()
 {
-    return WriteContext{ m_writeLock };
+    return WriteContext{ this };
 }
 
 Connection::PriorityContext Connection::acquirePriorityContext()
 {
-    return PriorityContext{ m_priorityLock };
+    return PriorityContext{ this };
 }
 
 void Connection::setPragma( Connection::Handle conn, const std::string& pragmaName,
