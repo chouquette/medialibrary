@@ -42,6 +42,7 @@ struct PlaylistTests : public Tests
 
     void CheckContiguity()
     {
+        auto ctx = ml->getConn()->acquireReadContext();
         medialibrary::sqlite::Statement stmt{
             ml->getConn()->handle(),
             "SELECT position FROM PlaylistMediaRelation "

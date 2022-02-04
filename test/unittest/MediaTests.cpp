@@ -1404,6 +1404,7 @@ static void FlushUserProvidedThumbnails( Tests* T )
      * the thumbnail as well and that we only have a single thumbnail in DB now
      */
     {
+        auto ctx = T->ml->getConn()->acquireReadContext();
         medialibrary::sqlite::Statement stmt{ T->ml->getConn()->handle(),
                 "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
         };

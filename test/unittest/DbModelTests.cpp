@@ -240,6 +240,7 @@ struct DbModel : public Tests
             char buff[4096];
             {
                 sqlite::Connection::WeakDbContext ctx{ dbConn.get() };
+                auto writeCtx = dbConn->acquireWriteContext();
                 while( file.getline( buff, sizeof( buff ) ) )
                 {
                     medialibrary::sqlite::Statement stmt( dbConn->handle(), buff );
@@ -250,6 +251,7 @@ struct DbModel : public Tests
             }
             // Ensure we are doing a migration
             {
+                auto readCtx = dbConn->acquireReadContext();
                 medialibrary::sqlite::Statement stmt{ dbConn->handle(),
                         "SELECT * FROM Settings" };
                 stmt.execute();
@@ -263,6 +265,8 @@ struct DbModel : public Tests
 
     void CheckTriggers( const std::vector<const char*>& expected )
     {
+        OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
         medialibrary::sqlite::Statement stmt{ ml->getConn()->handle(),
                 "SELECT name FROM sqlite_master WHERE type='trigger' "
                     "ORDER BY name;"
@@ -283,6 +287,8 @@ struct DbModel : public Tests
 
     void CheckIndexes( const std::vector<const char*>& expected )
     {
+        OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
 
@@ -303,6 +309,8 @@ struct DbModel : public Tests
 
     void CheckTables( const std::vector<const char*>& expected )
     {
+        OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
         auto res = checkAlphaOrderedVector( expected );
         ASSERT_TRUE( res );
 
@@ -324,6 +332,8 @@ struct DbModel : public Tests
     virtual void TearDown() override
     {
         {
+            OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
             auto dbConn = sqlite::Connection::connect( getDbPath() );
             medialibrary::sqlite::Statement stmt{ dbConn->handle(),
                     "SELECT * FROM Settings" };
@@ -382,6 +392,7 @@ static void Upgrade15to16( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v15.sql" );
 
+    OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
     // Check that playlists were properly migrated
     medialibrary::sqlite::Statement stmt{
         T->ml->getConn()->handle(),
@@ -489,6 +500,8 @@ static void Upgrade22to23( DbModel* T )
     // Ensure we now have one playlist task, which was tagged as a media task before
     uint32_t nbPlaylistTask;
     {
+        OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
+
         sqlite::Statement stmt{
             T->ml->getConn()->handle(),
             "SELECT COUNT(*) FROM " + parser::Task::Table::Name +
@@ -547,6 +560,8 @@ static void Upgrade25to26( DbModel* T )
     /* Ensure we don't have any restore task with unknown file_type field anymode */
     uint32_t nbUnknownFileTypeRestoreTask;
     {
+        OPEN_READ_CONTEXT( ctx, T->ml->getConn() );
+
         sqlite::Statement stmt{
             T->ml->getConn()->handle(),
             "SELECT COUNT(*) FROM " + parser::Task::Table::Name +

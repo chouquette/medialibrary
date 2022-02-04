@@ -310,6 +310,8 @@ void Tests::runChecks()
     }
     if ( expected.HasMember( "nbThumbnails" ) )
     {
+        auto ml = static_cast<MediaLibrary*>( m_ml.get() );
+        OPEN_READ_CONTEXT( ctx, ml->getConn() );
         sqlite::Statement stmt{
             static_cast<MediaLibrary*>( m_ml.get() )->getConn()->handle(),
             "SELECT COUNT(*) FROM " + Thumbnail::Table::Name
