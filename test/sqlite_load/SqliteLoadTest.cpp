@@ -180,6 +180,16 @@ struct Tester
             }
         }
     }
+
+    void clearDb()
+    {
+        while ( cbMock->isTestComplete() == false )
+        {
+            sleep( 10 );
+            ml->clearDatabase( true );
+            ml->discover( samplesFolder );
+        }
+    }
 };
 
 }
@@ -207,12 +217,14 @@ int main( int argc, char** argv)
     compat::Thread discoverer( &Tester::discovererMainLoop, &T );
     compat::Thread reader1( &Tester::readerMainLoop, &T );
     compat::Thread reader2( &Tester::readerMainLoop, &T );
+    compat::Thread chaosMonkey( &Tester::clearDb, &T );
 
     discoverer.join();
     cbMock->signalEnd();
 
     reader1.join();
     reader2.join();
+    chaosMonkey.join();
 
     return 0;
 }
