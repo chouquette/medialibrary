@@ -204,6 +204,8 @@ std::string Bookmark::indexName( Indexes index, uint32_t dbModel )
 
 bool Bookmark::checkDbModel( MediaLibraryPtr ml )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&

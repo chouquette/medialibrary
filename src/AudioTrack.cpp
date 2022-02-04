@@ -213,6 +213,8 @@ std::string AudioTrack::indexName( Indexes index, uint32_t dbModel )
 
 bool AudioTrack::checkDbModel( MediaLibraryPtr ml )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     auto checkIndex = [ml]( Indexes idx ) {
         return sqlite::Tools::checkIndexStatement( ml->getConn(),
              index( idx, Settings::DbModelVersion ),

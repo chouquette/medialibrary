@@ -358,6 +358,8 @@ std::string Show::triggerName( Triggers trigger, uint32_t dbModel )
 
 bool Show::checkDbModel(MediaLibraryPtr ml)
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||

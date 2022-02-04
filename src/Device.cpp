@@ -226,6 +226,8 @@ std::string Device::schema( const std::string& tableName, uint32_t dbModel )
 
 bool Device::checkDbModel( MediaLibraryPtr ml )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name );

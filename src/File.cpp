@@ -359,6 +359,8 @@ std::string File::indexName( File::Indexes index, uint32_t dbModel )
 
 bool File::checkDbModel(MediaLibraryPtr ml)
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     return sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) &&

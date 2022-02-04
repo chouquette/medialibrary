@@ -813,6 +813,8 @@ std::string Album::indexName( Album::Indexes index, uint32_t dbModel )
 
 bool Album::checkDbModel( MediaLibraryPtr ml )
 {
+    OPEN_READ_CONTEXT( ctx, ml->getConn() );
+
     if ( sqlite::Tools::checkTableSchema( ml->getConn(),
                                        schema( Table::Name, Settings::DbModelVersion ),
                                        Table::Name ) == false ||
