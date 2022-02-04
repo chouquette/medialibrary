@@ -177,6 +177,11 @@ public:
             m_isCommit = true;
     }
 
+    Statement( const std::string& req )
+        : Statement( Connection::Context::handle(), req )
+    {
+    }
+
     template <typename... Args>
     void execute(Args&&... args)
     {
