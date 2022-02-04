@@ -1438,7 +1438,8 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
     assert( previousVersion == Settings::DbModelVersion );
     assert( previousVersion == m_settings.dbModelVersion() );
 
-    auto ctx = getConn()->acquireWriteContext();
+
+    auto ctx = getConn()->acquireReadContext();
     if ( checkDatabaseIntegrity() == false )
         return InitializeResult::DbCorrupted;
 
