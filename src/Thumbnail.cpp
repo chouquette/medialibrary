@@ -398,7 +398,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
         if ( oldThumbnail->status() != ThumbnailStatus::Available )
         {
             if ( oldThumbnail->update( std::move( newThumbnail ) ) == false )
-                return nullptr; 
+                return nullptr;
             res = std::move( oldThumbnail );
         }
         else if ( shouldUpdateCb( *oldThumbnail ) == true )
