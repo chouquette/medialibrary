@@ -673,6 +673,7 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
     auto res = InitializeResult::Success;
     try
     {
+        auto t = m_dbConnection->newTransaction();
         Settings::createTable( m_dbConnection.get() );
         if ( m_settings.load() == false )
         {
@@ -682,19 +683,27 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
         auto dbModel = m_settings.dbModelVersion();
         if ( dbModel == 0 )
         {
-            auto t = m_dbConnection->newTransaction();
             if ( createAllTables() == false )
                 return InitializeResult::Failed;
             createAllTriggers();
             t->commit();
         }
-        else if ( dbModel != Settings::DbModelVersion )
+        else
         {
-            res = updateDatabaseModel( dbModel );
-            if ( res == InitializeResult::Failed )
+            /*
+             * Even though we didn't change anything, ensure we are not running
+             * a transaction anymore. Migrations will execute a transaction for
+             * each version migration
+             */
+            t->commit();
+            if ( dbModel != Settings::DbModelVersion )
             {
-                LOG_ERROR( "Failed to update database model" );
-                return res;
+                res = updateDatabaseModel( dbModel );
+                if ( res == InitializeResult::Failed )
+                {
+                    LOG_ERROR( "Failed to update database model" );
+                    return res;
+                }
             }
         }
     }
