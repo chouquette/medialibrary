@@ -33,6 +33,19 @@
 #include "compat/Thread.h"
 #include "utils/StringKey.h"
 
+/*
+ * Conditionally open a read context if no context is currently opened.
+ * The first macro parameter is the context instance name, the 2nd a pointer to
+ * a sqlite::Connection instance.
+ * The resulting object must not be used as it may be default constructed if
+ * a context was already opened.
+ */
+#define OPEN_READ_CONTEXT( name, dbConn ) \
+    sqlite::Connection::ReadContext name; \
+    if ( sqlite::Connection::Context::isOpened() == false ) { \
+        name = dbConn->acquireReadContext(); \
+    }
+
 namespace medialibrary
 {
 
