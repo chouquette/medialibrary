@@ -37,6 +37,8 @@ namespace medialibrary
 namespace sqlite
 {
 
+thread_local Connection::Handle Connection::Context::m_handle;
+
 Connection::Connection( const std::string& dbPath )
     : m_dbPath( dbPath )
     , m_readLock( m_contextLock )
@@ -363,6 +365,79 @@ Connection::DisableForeignKeyContext::DisableForeignKeyContext( Connection* conn
 Connection::DisableForeignKeyContext::~DisableForeignKeyContext()
 {
     m_conn->setForeignKeyEnabled( true );
+}
+
+Connection::Context::~Context()
+{
+    releaseHandle();
+}
+
+Connection::Handle Connection::Context::handle()
+{
+    assert( m_handle != nullptr );
+    return m_handle;
+}
+
+bool Connection::Context::isOpened()
+{
+    return m_handle != nullptr;
+}
+
+void Connection::Context::connect(Connection* c)
+{
+    assert( m_handle == nullptr );
+    m_handle = c->handle();
+    assert( m_handle != nullptr );
+    m_owning = true;
+}
+
+void Connection::Context::releaseHandle()
+{
+    /*
+             * We don't want to unset the current thread's context when destroying
+             * a default constructed Context
+             */
+    if ( m_owning == false )
+        return;
+    assert( m_handle != nullptr );
+    m_handle = nullptr;
+    m_owning = false;
+}
+
+Connection::Context::Context(Context&& ctx) noexcept
+{
+    *this = std::move( ctx );
+}
+
+Connection::Context& Connection::Context::operator=(Context&& ctx) noexcept
+{
+    m_owning = ctx.m_owning;
+    ctx.m_owning = false;
+    return *this;
+}
+
+Connection::ReadContext::ReadContext(Connection* c)
+    : m_lock( c->m_readLock )
+{
+    connect( c );
+}
+
+Connection::WriteContext::WriteContext(Connection* c)
+    : m_lock( c->m_writeLock )
+{
+    connect( c );
+}
+
+void Connection::WriteContext::unlock()
+{
+    m_lock.unlock();
+    releaseHandle();
+}
+
+Connection::PriorityContext::PriorityContext( Connection* c )
+    : m_lock( c->m_priorityLock )
+{
+    connect( c );
 }
 
 }

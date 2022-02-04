@@ -44,18 +44,36 @@ class Transaction;
 class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
+    using Handle = sqlite3*;
+
     class Context
     {
+    public:
+        Context() noexcept = default;
+        ~Context();
+
+        static Handle handle();
+        static bool isOpened();
+
+    protected:
+        void connect( Connection* c );
+        void releaseHandle();
+
+        Context( const Context& ) = delete;
+        Context& operator=( const Context& ) = delete;
+        Context( Context&& ctx ) noexcept;
+        Context& operator=( Context&& ctx ) noexcept;
+
+    private:
+        static thread_local Handle m_handle;
+        bool m_owning = false;
     };
 
     class ReadContext final : public Context
     {
     public:
         ReadContext() = default;
-        ReadContext( Connection* c ) noexcept
-            : m_lock( c->m_readLock )
-        {
-        }
+        ReadContext( Connection* c );
         ReadContext( const ReadContext& ) = delete;
         ReadContext& operator=( const ReadContext& ) = delete;
         ReadContext( ReadContext&& ) = default;
@@ -68,15 +86,9 @@ public:
     {
     public:
         WriteContext() = default;
-        WriteContext( Connection* c ) noexcept
-            : m_lock( c->m_writeLock )
-        {
-        }
+        WriteContext( Connection* c );
 
-        void unlock()
-        {
-            m_lock.unlock();
-        }
+        void unlock();
 
         WriteContext( const WriteContext& ) = delete;
         WriteContext& operator=( const WriteContext& ) = delete;
@@ -91,10 +103,7 @@ public:
     {
     public:
         PriorityContext() = default;
-        PriorityContext( Connection* c ) noexcept
-            : m_lock( c->m_priorityLock )
-        {
-        }
+        PriorityContext( Connection* c );
 
         PriorityContext( const PriorityContext& ) = delete;
         PriorityContext& operator=( const PriorityContext& ) = delete;
@@ -105,7 +114,6 @@ public:
         std::unique_lock<utils::PriorityLocker> m_lock;
     };
 
-    using Handle = sqlite3*;
     enum class HookReason
     {
         Insert,
