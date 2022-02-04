@@ -157,9 +157,6 @@ public:
 
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
-    // Returns the current thread's connection
-    // This will initiate a connection if required
-    Handle handle();
     std::unique_ptr<sqlite::Transaction> newTransaction();
     ReadContext acquireReadContext();
     WriteContext acquireWriteContext();
@@ -200,6 +197,10 @@ private:
      * This will not change existing connection in other threads
      */
     void setRecursiveTriggersEnabled( bool value );
+
+    // Returns the current thread's connection
+    // This will initiate a connection if required
+    Handle handle();
 
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
