@@ -1450,26 +1450,26 @@ bool MediaLibrary::recreateDatabase()
 {
     sqlite::Connection::DisableForeignKeyContext ctx{ m_dbConnection.get() };
     {
-    auto t = m_dbConnection->newTransaction();
-    deleteAllTables( m_dbConnection.get() );
-    sqlite::Statement::FlushStatementCache();
-    Settings::createTable( m_dbConnection.get() );
-    if ( createAllTables() == false )
-        return false;
-    createAllTriggers();
+        auto t = m_dbConnection->newTransaction();
+        deleteAllTables( m_dbConnection.get() );
+        sqlite::Statement::FlushStatementCache();
+        Settings::createTable( m_dbConnection.get() );
+        if ( createAllTables() == false )
+            return false;
+        createAllTriggers();
 
-    // We dropped the database, there is no setting to be read anymore
-    if ( m_settings.load() == false )
-        return false;
-    t->commitNoUnlock();
-    /*
-     * Now that we removed all the tables, flush all the connections to avoid
-     * Database is locked errors. This needs to be done while we still hold the
-     * sqlite lock to avoid concurrent access to the database with stalled
-     * connections or stalled precompiled requests.
-     * See https://www.sqlite.org/c3ref/close.html
-     */
-    m_dbConnection->flushAll();
+        // We dropped the database, there is no setting to be read anymore
+        if ( m_settings.load() == false )
+            return false;
+        t->commitNoUnlock();
+        /*
+         * Now that we removed all the tables, flush all the connections to avoid
+         * Database is locked errors. This needs to be done while we still hold the
+         * sqlite lock to avoid concurrent access to the database with stalled
+         * connections or stalled precompiled requests.
+         * See https://www.sqlite.org/c3ref/close.html
+         */
+        m_dbConnection->flushAll();
     }
 
     /*
