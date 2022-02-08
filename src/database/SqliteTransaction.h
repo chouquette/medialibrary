@@ -40,6 +40,11 @@ public:
     Transaction() = default;
     virtual ~Transaction() = default;
     virtual void commit() = 0;
+    /**
+     * @brief commitNoUnlock This will commit the current transaction but will
+     * keep the lock held until the transaction object is destroyed
+     */
+    virtual void commitNoUnlock() = 0;
 
     static bool isInProgress();
 
@@ -56,6 +61,7 @@ class ActualTransaction : public Transaction
 public:
     explicit ActualTransaction( sqlite::Connection* dbConn );
     virtual void commit() override;
+    virtual void commitNoUnlock() override;
 
     virtual ~ActualTransaction();
 
@@ -70,6 +76,7 @@ public:
     NoopTransaction();
     virtual ~NoopTransaction();
     virtual void commit() override;
+    virtual void commitNoUnlock() override;
 };
 
 }

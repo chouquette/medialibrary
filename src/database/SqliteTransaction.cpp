@@ -51,6 +51,12 @@ ActualTransaction::ActualTransaction( sqlite::Connection* dbConn)
 
 void ActualTransaction::commit()
 {
+    commitNoUnlock();
+    m_ctx.unlock();
+}
+
+void ActualTransaction::commitNoUnlock()
+{
     assert( CurrentTransaction != nullptr );
     auto chrono = std::chrono::steady_clock::now();
     Statement s( m_ctx.handle(), "COMMIT" );
@@ -61,7 +67,6 @@ void ActualTransaction::commit()
     LOG_VERBOSE( "Flushed transaction in ",
              std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
     CurrentTransaction = nullptr;
-    m_ctx.unlock();
 }
 
 bool Transaction::isInProgress()
@@ -101,6 +106,10 @@ NoopTransaction::~NoopTransaction()
 }
 
 void NoopTransaction::commit()
+{
+}
+
+void NoopTransaction::commitNoUnlock()
 {
 }
 
