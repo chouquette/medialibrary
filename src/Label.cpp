@@ -138,6 +138,7 @@ std::string Label::index( Label::Indexes index, uint32_t dbModel )
 
 std::string Label::indexName( Label::Indexes index, uint32_t dbModel )
 {
+    UNUSED_IN_RELEASE( dbModel );
     switch ( index )
     {
         case Indexes::MediaId:
