@@ -66,7 +66,6 @@ public:
     virtual ~ActualTransaction();
 
 private:
-    sqlite::Connection* m_dbConn;
     Connection::WriteContext m_ctx;
 };
 
