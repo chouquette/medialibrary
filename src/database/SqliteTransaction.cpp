@@ -36,7 +36,7 @@ namespace sqlite
 
 thread_local Transaction* Transaction::CurrentTransaction = nullptr;
 
-ActualTransaction::ActualTransaction( sqlite::Connection* dbConn)
+ActualTransaction::ActualTransaction( sqlite::Connection* dbConn )
     : m_ctx( dbConn )
 {
     assert( CurrentTransaction == nullptr );

@@ -282,7 +282,7 @@ std::shared_ptr<Connection> Connection::connect( const std::string& dbPath )
 }
 
 void Connection::updateHook( void* data, int reason, const char*,
-                                   const char* table, sqlite_int64 rowId )
+                             const char* table, sqlite_int64 rowId )
 {
     const auto self = reinterpret_cast<Connection*>( data );
     auto it = self->m_hooks.find( table );
@@ -386,7 +386,7 @@ bool Connection::Context::isOpened()
     return m_handle != nullptr;
 }
 
-void Connection::Context::connect(Connection* c)
+void Connection::Context::connect( Connection* c )
 {
     assert( m_handle == nullptr );
     m_handle = c->handle();
@@ -397,9 +397,9 @@ void Connection::Context::connect(Connection* c)
 void Connection::Context::releaseHandle()
 {
     /*
-             * We don't want to unset the current thread's context when destroying
-             * a default constructed Context
-             */
+     * We don't want to unset the current thread's context when destroying
+     * a default constructed Context
+     */
     if ( m_owning == false )
         return;
     assert( m_handle != nullptr );
@@ -407,25 +407,25 @@ void Connection::Context::releaseHandle()
     m_owning = false;
 }
 
-Connection::Context::Context(Context&& ctx) noexcept
+Connection::Context::Context( Context&& ctx ) noexcept
 {
     *this = std::move( ctx );
 }
 
-Connection::Context& Connection::Context::operator=(Context&& ctx) noexcept
+Connection::Context& Connection::Context::operator=( Context&& ctx ) noexcept
 {
     m_owning = ctx.m_owning;
     ctx.m_owning = false;
     return *this;
 }
 
-Connection::ReadContext::ReadContext(Connection* c)
+Connection::ReadContext::ReadContext( Connection* c )
     : m_lock( c->m_readLock )
 {
     connect( c );
 }
 
-Connection::WriteContext::WriteContext(Connection* c)
+Connection::WriteContext::WriteContext( Connection* c )
     : m_lock( c->m_writeLock )
 {
     connect( c );
