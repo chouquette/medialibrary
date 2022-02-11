@@ -124,7 +124,7 @@ std::string Label::triggerName( Triggers trigger, uint32_t )
     return "delete_label_fts";
 }
 
-std::string Label::index(Label::Indexes index, uint32_t dbModel)
+std::string Label::index( Label::Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
@@ -136,7 +136,7 @@ std::string Label::index(Label::Indexes index, uint32_t dbModel)
     return "<invalid request>";
 }
 
-std::string Label::indexName(Label::Indexes index, uint32_t dbModel)
+std::string Label::indexName( Label::Indexes index, uint32_t dbModel )
 {
     switch ( index )
     {
