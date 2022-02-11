@@ -109,7 +109,7 @@ bool Album::setReleaseYear( unsigned int date, bool force )
         return true;
     if ( force == false )
     {
-        if ( m_releaseYear != ~0u && date != m_releaseYear )
+        if ( m_releaseYear != ~0u )
         {
             // If we already have set the date back to 0, don't do it again.
             if ( m_releaseYear == 0 )
