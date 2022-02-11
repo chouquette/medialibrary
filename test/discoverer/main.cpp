@@ -116,7 +116,7 @@ private:
     bool m_error;
 };
 
-static void usage(char** argv)
+static void usage(const char* const* argv)
 {
     std::cerr << "usage: " << argv[0] << "[-q] [-n X] <entrypoint|database>\n"
                  "-q: Use Error log level. Default is Debug\n"
