@@ -129,7 +129,7 @@ void Worker::initialize( MediaLibrary* ml, IParserCb* parserCb,
 
 bool Worker::isIdle() const
 {
-    return m_idle;
+    return m_idle.load( std::memory_order_acquire );
 }
 
 void Worker::flush()
@@ -251,9 +251,9 @@ void Worker::setIdle(bool isIdle)
 {
     // Calling the idleChanged callback will trigger a call to isIdle, so set the value before
     // invoking it, otherwise we have an incoherent state.
-    if ( m_idle != isIdle )
+    auto expected = !isIdle;
+    if ( m_idle.compare_exchange_strong( expected, isIdle, std::memory_order_acq_rel ) == true )
     {
-        m_idle = isIdle;
         m_parserCb->onIdleChanged( isIdle );
     }
 }
