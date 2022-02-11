@@ -95,7 +95,11 @@ if host_machine.system() == 'windows'
     threads_dep = []
 else
     pthreads = dependency('threads', required: true)
-    threads_dep = declare_dependency(link_args: '-lpthread', dependencies: pthreads)
+    if get_option('libtool_workaround')
+      threads_dep = declare_dependency(link_args: '-lpthread', dependencies: pthreads)
+    else
+      threads_dep = pthreads
+    endif
 endif
 
 sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
