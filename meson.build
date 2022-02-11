@@ -1,12 +1,12 @@
 project('medialibrary', ['cpp','c'],
-        license: 'LGPLv2+',
-        version: '0.11.0',
-        default_options: [
-            'cpp_std=c++14',
-            'buildtype=debug',
-            'warning_level=3',
-            'b_ndebug=if-release'
-        ]
+  license: 'LGPLv2+',
+  version: '0.11.0',
+  default_options: [
+    'cpp_std=c++14',
+    'buildtype=debug',
+    'warning_level=3',
+    'b_ndebug=if-release'
+  ]
 )
 
 macosx_dep = []
@@ -48,16 +48,16 @@ cdata.set('PROJECT_VERSION', meson.project_version())
 cdata.set('_FILE_OFFSET_BITS', 64)
 
 if host_machine.system() == 'windows'
-    cdata.set('_WIN32_WINNT', '0x601')
-    cdata.set('_UNICODE', 1)
-    cdata.set('UNICODE', 1)
-    cdata.set('_POSIX_C_SOURCE', '200809L')
-    cdata.set('_BSD_SOURCE', 1)
-    cdata.set('_GNU_SOURCE', 1)
+  cdata.set('_WIN32_WINNT', '0x601')
+  cdata.set('_UNICODE', 1)
+  cdata.set('UNICODE', 1)
+  cdata.set('_POSIX_C_SOURCE', '200809L')
+  cdata.set('_BSD_SOURCE', 1)
+  cdata.set('_GNU_SOURCE', 1)
 endif
 
 if cxx.has_function('link')
-    cdata.set('HAVE_LINK', 1)
+  cdata.set('HAVE_LINK', 1)
 endif
 
 message('Checking for C++11 thread support')
@@ -71,39 +71,39 @@ if cxx.compiles('''#include <thread>
         ThreadRunner tr;
         std::thread t2{ &ThreadRunner::run, tr };
     }''')
-        cdata.set('CXX11_THREADS', 1)
+  cdata.set('CXX11_THREADS', 1)
 endif
 
 message('Checking for C++11 mutex support')
 if cxx.compiles('''#include <mutex>
     int main() { std::mutex m; }''')
-        cdata.set('CXX11_MUTEX', 1)
+  cdata.set('CXX11_MUTEX', 1)
 endif
 
 message('Checking for C++11 thread_local support')
 if cxx.compiles('thread_local int seaOtter = 0; int main() {}')
-        cdata.set('CXX11_THREAD_LOCAL', 1)
+  cdata.set('CXX11_THREAD_LOCAL', 1)
 endif
 
 message('Checking for C++11 condition_variable support')
 if cxx.compiles('''#include <condition_variable>
-  int main() { std::condition_variable cv; }''')
-    cdata.set('CXX11_CONDITION_VARIABLE', 1)
+    int main() { std::condition_variable cv; }''')
+  cdata.set('CXX11_CONDITION_VARIABLE', 1)
 endif
 
 if host_machine.system() == 'windows'
     threads_dep = []
 else
-    pthreads = dependency('threads', required: true)
-    if get_option('libtool_workaround')
-      libtool_forced_ldflags = ['-lpthread']
-      if cxx.find_library('atomic', required: false).found()
-        libtool_forced_ldflags += '-latomic'
-      endif
-      threads_dep = declare_dependency(link_args: libtool_forced_ldflags, dependencies: pthreads)
-    else
-      threads_dep = pthreads
+  pthreads = dependency('threads', required: true)
+  if get_option('libtool_workaround')
+    libtool_forced_ldflags = ['-lpthread']
+    if cxx.find_library('atomic', required: false).found()
+      libtool_forced_ldflags += '-latomic'
     endif
+    threads_dep = declare_dependency(link_args: libtool_forced_ldflags, dependencies: pthreads)
+  else
+    threads_dep = pthreads
+  endif
 endif
 
 sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
@@ -111,7 +111,7 @@ sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
 
 libvlc_dep = dependency('libvlc', version: '>= 3.0', required: get_option('libvlc'))
 if libvlc_dep.found()
-    cdata.set('HAVE_LIBVLC', 1)
+  cdata.set('HAVE_LIBVLC', 1)
 endif
 
 # We only require libjpeg when using the 3.0 thumbnailer, using vmem
@@ -133,18 +133,18 @@ else
 endif
 
 if libvlc_dep.found()
-    libvlcpp_dep = dependency('libvlcpp', required: false)
+  libvlcpp_dep = dependency('libvlcpp', required: false)
     if not libvlcpp_dep.found()
-        if cxx.has_header('vlc.hpp', args: '-I' + join_paths(meson.source_root(), 'libvlcpp/vlcpp'))
-            libvlcpp_dep = declare_dependency(
-                include_directories: include_directories('libvlcpp/')
-            )
-        else
-            error('libvlcpp not found. Please install it or initialize the submodule')
-        endif
+      if cxx.has_header('vlc.hpp', args: '-I' + join_paths(meson.source_root(), 'libvlcpp/vlcpp'))
+        libvlcpp_dep = declare_dependency(
+          include_directories: include_directories('libvlcpp/')
+          )
+      else
+        error('libvlcpp not found. Please install it or initialize the submodule')
+      endif
     endif
 else
-    libvlcpp_dep = []
+  libvlcpp_dep = []
 endif
 
 libxxhash_dep = dependency('libxxhash', required: false)
@@ -187,7 +187,7 @@ endif
 
 pkg = import('pkgconfig')
 pkg.generate(libraries: medialib,
-    version: meson.project_version(),
-    name: 'medialibrary',
-    description: 'cross platform medialibrary'
+  version: meson.project_version(),
+  name: 'medialibrary',
+  description: 'cross platform medialibrary'
 )
