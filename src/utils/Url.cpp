@@ -310,17 +310,17 @@ std::string toLocalPath( const std::string& mrl )
 {
     if ( mrl.compare( 0, 7, "file://" ) != 0 )
         throw fs::errors::UnhandledScheme( utils::url::scheme( mrl ) );
-    auto path = mrl.substr( 7 );
+    auto localPath = mrl.substr( 7 );
     // If the path is a local path (ie. X:\path\to and not \\path\to) skip the
     // initial backslash, as it is only part of our representation, and not
     // understood by the win32 API functions
     // Note that the initial '/' (after the 2 forward slashes from the scheme)
     // is not a backslash, as it is not a path separator, so do not use
     // DIR_SEPARATOR_CHAR here.
-    if ( path[0] == '/' && isalpha( path[1] ) )
-        path.erase( 0, 1 );
-    std::replace( begin( path ), end( path ), '/', '\\' );
-    return utils::url::decode( path );
+    if ( localPath[0] == '/' && isalpha( localPath[1] ) )
+        localPath.erase( 0, 1 );
+    std::replace( begin( localPath ), end( localPath ), '/', '\\' );
+    return utils::url::decode( localPath );
 }
 
 #endif
