@@ -167,15 +167,15 @@ std::string toMrl( const std::string& path )
 std::stack<std::string> splitPath( const std::string& path, bool isDirectory )
 {
     std::stack<std::string> res;
-    std::string currPath = isDirectory ? utils::file::toFolderPath( path )
-                                       : utils::file::directory( path );
-    auto ff = utils::file::firstFolder( path );
+    std::string currPath = isDirectory ? toFolderPath( path )
+                                       : directory( path );
+    auto ff = firstFolder( path );
     if ( isDirectory == false )
-        res.push( utils::file::fileName( path ) );
+        res.push( fileName( path ) );
     do
     {
-        res.push( utils::file::directoryName( currPath ) );
-        currPath = utils::file::parentDirectory( currPath );
+        res.push( directoryName( currPath ) );
+        currPath = parentDirectory( currPath );
     } while ( res.top() != ff );
     return res;
 }
