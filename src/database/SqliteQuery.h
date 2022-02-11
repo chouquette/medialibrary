@@ -49,9 +49,9 @@ protected:
     size_t executeCount( const std::string& req )
     {
         auto dbConn = m_ml->getConn();
-        auto ctx = dbConn->acquireReadContext();
+        OPEN_READ_CONTEXT( ctx, dbConn );
         auto chrono = std::chrono::steady_clock::now();
-        sqlite::Statement stmt( ctx.handle(), req );
+        sqlite::Statement stmt( req );
         stmt.execute( m_params );
         auto duration = std::chrono::steady_clock::now() - chrono;
         LOG_VERBOSE("Executed ", req, " in ",
