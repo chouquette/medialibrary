@@ -101,7 +101,7 @@ int main( int argc, char** argv )
 
     ml->discover( entrypoint );
 
-    for ( auto i = 0; i < 1000; ++i )
+    for ( auto i = 0; i < 500; ++i )
     {
         auto fsFactory = ml->fsFactoryForMrl( entrypoint );
         auto fsDir = fsFactory->createDirectory( entrypoint );
