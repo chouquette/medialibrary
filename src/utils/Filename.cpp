@@ -169,14 +169,14 @@ std::stack<std::string> splitPath( const std::string& path, bool isDirectory )
     std::stack<std::string> res;
     std::string currPath = isDirectory ? utils::file::toFolderPath( path )
                                        : utils::file::directory( path );
-    auto firstFolder = utils::file::firstFolder( path );
+    auto ff = utils::file::firstFolder( path );
     if ( isDirectory == false )
         res.push( utils::file::fileName( path ) );
     do
     {
         res.push( utils::file::directoryName( currPath ) );
         currPath = utils::file::parentDirectory( currPath );
-    } while ( res.top() != firstFolder );
+    } while ( res.top() != ff );
     return res;
 }
 
