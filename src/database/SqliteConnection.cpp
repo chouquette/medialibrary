@@ -154,16 +154,19 @@ std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 
 Connection::ReadContext Connection::acquireReadContext()
 {
+    assert( Context::isOpened() == false );
     return ReadContext{ this };
 }
 
 Connection::WriteContext Connection::acquireWriteContext()
 {
+    assert( Context::isOpened() == false );
     return WriteContext{ this };
 }
 
 Connection::PriorityContext Connection::acquirePriorityContext()
 {
+    assert( Context::isOpened() == false );
     return PriorityContext{ this };
 }
 
