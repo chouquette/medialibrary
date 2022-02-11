@@ -357,7 +357,7 @@ std::string File::indexName( File::Indexes index, uint32_t dbModel )
     return "<invalid trigger>";
 }
 
-bool File::checkDbModel(MediaLibraryPtr ml)
+bool File::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
