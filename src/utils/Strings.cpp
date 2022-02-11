@@ -97,7 +97,7 @@ size_t nbBytes( const std::string& input, size_t offset, size_t nbChars )
     {
         /* Skip over non-terminal UTF8 bytes */
         uint8_t c = input[i];
-        uint8_t nbBytes = 1;
+        uint8_t currentCharNbBytes = 1;
         if ( ( c & 0x80 ) != 0 )
         {
             c <<= 1;
@@ -110,14 +110,14 @@ size_t nbBytes( const std::string& input, size_t offset, size_t nbChars )
                 if ( ( nextByte & 0x80 ) != 0x80 )
                     return 0;
                 ++i;
-                nbBytes++;
+                currentCharNbBytes++;
                 c <<= 1;
             }
         }
         else
             ++i;
 
-        res += nbBytes;
+        res += currentCharNbBytes;
         --nbChars;
     }
     return res;
