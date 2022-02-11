@@ -173,20 +173,18 @@ asan-ubsan:
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
     expire_in: 1 week
 
-test:tsan:
+.base-sanitizer:
   image: $MEDIALIBRARY_IMG
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
   stage: test
-  variables:
-      TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
   script:
     - >
       CXX=clang++
       meson
       -Dpkg_config_path=$PKG_CONFIG_PATH:$CI_PROJECT_DIR/vlc/prefix/lib/pkgconfig
-      -Db_sanitize=thread
+      -Db_sanitize=$SANITIZERS
       -Db_lundef=false
       build
     - cd build && meson test --no-stdsplit
@@ -199,6 +197,12 @@ test:tsan:
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
     expire_in: 1 week
+
+test:tsan:
+  extends: .base-sanitizer
+  variables:
+      TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
+      SANITIZERS: thread
 
 gen-test-db:
   image: $MEDIALIBRARY_IMG
