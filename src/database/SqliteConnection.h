@@ -46,6 +46,12 @@
         name = dbConn->acquireReadContext(); \
     }
 
+#define OPEN_WRITE_CONTEXT( name, dbConn ) \
+    sqlite::Connection::WriteContext name; \
+    if ( sqlite::Connection::Context::isOpened() == false ) { \
+        name = dbConn->acquireWriteContext(); \
+    }
+
 namespace medialibrary
 {
 

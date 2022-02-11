@@ -273,9 +273,7 @@ class Tools
                                                             Args&&... args )
         {
             auto dbConnection = ml->getConn();
-            Connection::ReadContext ctx;
-            if (Transaction::isInProgress() == false)
-                ctx = dbConnection->acquireReadContext();
+            OPEN_READ_CONTEXT( ctx, dbConnection );
             auto chrono = std::chrono::steady_clock::now();
 
             std::vector<std::shared_ptr<INTF>> results;
@@ -298,9 +296,7 @@ class Tools
                                             const std::string& req, Args&&... args )
         {
             auto dbConnection = ml->getConn();
-            Connection::ReadContext ctx;
-            if (Transaction::isInProgress() == false)
-                ctx = dbConnection->acquireReadContext();
+            OPEN_READ_CONTEXT( ctx, dbConnection );
             auto chrono = std::chrono::steady_clock::now();
 
             Statement stmt( req );
@@ -319,9 +315,7 @@ class Tools
         static void executeRequest( sqlite::Connection* dbConnection,
                                     const std::string& req, Args&&... args )
         {
-            Connection::WriteContext ctx;
-            if (Transaction::isInProgress() == false)
-                ctx = dbConnection->acquireWriteContext();
+            OPEN_WRITE_CONTEXT( ctx, dbConnection );
             executeRequestLocked( Connection::Context::handle(), req, std::forward<Args>( args )... );
         }
 
@@ -330,9 +324,7 @@ class Tools
                                                  const std::string& req,
                                                  Args&&... args )
         {
-            Connection::WriteContext ctx;
-            if (Transaction::isInProgress() == false)
-                ctx = dbConnection->acquireWriteContext();
+            OPEN_WRITE_CONTEXT( ctx, dbConnection );
             try
             {
                 executeRequestLocked( Connection::Context::handle(), req,
@@ -368,9 +360,7 @@ class Tools
                                                     const std::string& req,
                                                     Args&&... args )
         {
-            Connection::WriteContext ctx;
-            if (Transaction::isInProgress() == false)
-                ctx = dbConnection->acquireWriteContext();
+            OPEN_WRITE_CONTEXT( ctx, dbConnection );
             try
             {
                 auto handle = Connection::Context::handle();
