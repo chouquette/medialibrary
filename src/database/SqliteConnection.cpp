@@ -167,7 +167,8 @@ Connection::WriteContext Connection::acquireWriteContext()
 
 Connection::PriorityContext Connection::acquirePriorityContext()
 {
-    assert( Context::isOpened( Context::Type::Priority ) == false );
+    assert( Context::isOpened( Context::Type::Read ) == false &&
+            Context::isOpened( Context::Type::Write ) == false );
     return PriorityContext{ this };
 }
 
@@ -410,12 +411,6 @@ bool Connection::Context::isOpened( Type t )
         assert( t == Type::Read );
         return true;
     }
-    case Type::Priority:
-        if ( t == Type::Read || t == Type::Write )
-            return true;
-        assert( !"Recursive acquisition of priority context is not supported."
-                " Please fix the calling code" );
-        return false;
     default:
         assert( !"Invalid context type provided" );
         return false;
@@ -424,19 +419,6 @@ bool Connection::Context::isOpened( Type t )
 
 void Connection::Context::connect( Connection* c, Type t )
 {
-    if ( m_handle != nullptr )
-    {
-        /*
-         * Priority contexts are acquired outside of the media library code so
-         * we have no control over potential recursive acquisition.
-         * We could mostly ignore those, but if the media library code needs to
-         * open a transaction while a priority context is held, we still need the
-         * transaction code to behave properly and open itself without
-         * acquiring a new context.
-         */
-        assert( m_type == Type::Priority );
-        return;
-    }
     assert( m_handle == nullptr );
     m_handle = c->handle();
     m_type = t;
@@ -491,7 +473,6 @@ void Connection::WriteContext::unlock()
 Connection::PriorityContext::PriorityContext( Connection* c )
     : m_lock( c->m_priorityLock )
 {
-    connect( c, Type::Priority );
 }
 
 }

@@ -75,7 +75,6 @@ public:
             None,
             Read,
             Write,
-            Priority,
         };
 
         Context() noexcept = default;
