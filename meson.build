@@ -97,7 +97,7 @@ else
     pthreads = dependency('threads', required: true)
     if get_option('libtool_workaround')
       libtool_forced_ldflags = ['-lpthread']
-      if cxx.find_library('atomic').found()
+      if cxx.find_library('atomic', required: false).found()
         libtool_forced_ldflags += '-latomic'
       endif
       threads_dep = declare_dependency(link_args: libtool_forced_ldflags, dependencies: pthreads)
