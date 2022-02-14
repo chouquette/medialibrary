@@ -82,6 +82,8 @@ void Parser::start()
         m_callback = m_ml->getCb();
     }
     m_fsHolder->registerCallback( this );
+    /* Since some services will need started FS factories, start then now */
+    m_fsHolder->startFsFactoriesAndRefresh();
     assert( m_serviceWorkers.size() == 3 );
     restore();
 }
