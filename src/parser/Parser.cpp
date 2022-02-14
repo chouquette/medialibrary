@@ -45,6 +45,7 @@ Parser::Parser( MediaLibrary* ml, FsHolder* fsHolder )
     , m_callback( nullptr )
     , m_opScheduled( 0 )
     , m_opDone( 0 )
+    , m_flushed( false )
     , m_completionSignaled( false )
 {
 }
@@ -69,6 +70,7 @@ void Parser::parse( std::shared_ptr<Task> task )
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
         m_opScheduled += 1;
+        m_flushed = false;
         updateStats();
     }
     m_serviceWorkers[0]->parse( std::move( task ) );
@@ -133,6 +135,7 @@ void Parser::flush()
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     m_opDone = 0;
     m_opScheduled = 0;
+    m_flushed = true;
 }
 
 void Parser::rescan()
@@ -157,6 +160,7 @@ void Parser::restore()
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
         m_opScheduled += tasks.size();
+        m_flushed = false;
         updateStats();
     }
     m_serviceWorkers[0]->parse( std::move( tasks ) );
@@ -199,7 +203,14 @@ void Parser::updateStats()
 {
     if ( m_callback == nullptr )
         return;
-    assert( m_opScheduled >= m_opDone );
+    if ( m_opScheduled < m_opDone )
+    {
+        /* Tolerate completing tasks after a flush */
+        if ( m_flushed == true )
+            m_opDone = m_opScheduled;
+        else
+            assert( !"Unexpected completed task" );
+    }
     /*
      * We don't want to spam the callback receiver each time we're done parsing
      * an item, however we must signal progress when:
