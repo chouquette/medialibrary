@@ -42,13 +42,15 @@
  */
 #define OPEN_READ_CONTEXT( name, dbConn ) \
     sqlite::Connection::ReadContext name; \
-    if ( sqlite::Connection::Context::isOpened() == false ) { \
+    if ( sqlite::Connection::Context::isOpened( \
+            sqlite::Connection::Context::Type::Read ) == false ) { \
         name = dbConn->acquireReadContext(); \
     }
 
 #define OPEN_WRITE_CONTEXT( name, dbConn ) \
     sqlite::Connection::WriteContext name; \
-    if ( sqlite::Connection::Context::isOpened() == false ) { \
+    if ( sqlite::Connection::Context::isOpened( \
+            sqlite::Connection::Context::Type::Write ) == false ) { \
         name = dbConn->acquireWriteContext(); \
     }
 
@@ -68,14 +70,22 @@ public:
     class Context
     {
     public:
+        enum class Type : uint8_t
+        {
+            None,
+            Read,
+            Write,
+            Priority,
+        };
+
         Context() noexcept = default;
         ~Context();
 
         static Handle handle();
-        static bool isOpened();
+        static bool isOpened( Type t );
 
     protected:
-        void connect( Connection* c );
+        void connect( Connection* c, Type t );
         void releaseHandle();
 
         Context( const Context& ) = delete;
@@ -85,6 +95,7 @@ public:
 
     private:
         static thread_local Handle m_handle;
+        static thread_local Type m_type;
         bool m_owning = false;
     };
 

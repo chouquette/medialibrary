@@ -38,6 +38,7 @@ namespace sqlite
 {
 
 thread_local Connection::Handle Connection::Context::m_handle;
+thread_local Connection::Context::Type Connection::Context::m_type;
 
 Connection::Connection( const std::string& dbPath )
     : m_dbPath( dbPath )
@@ -154,19 +155,19 @@ std::unique_ptr<sqlite::Transaction> Connection::newTransaction()
 
 Connection::ReadContext Connection::acquireReadContext()
 {
-    assert( Context::isOpened() == false );
+    assert( Context::isOpened( Context::Type::Read ) == false );
     return ReadContext{ this };
 }
 
 Connection::WriteContext Connection::acquireWriteContext()
 {
-    assert( Context::isOpened() == false );
+    assert( Context::isOpened( Context::Type::Write ) == false );
     return WriteContext{ this };
 }
 
 Connection::PriorityContext Connection::acquirePriorityContext()
 {
-    assert( Context::isOpened() == false );
+    assert( Context::isOpened( Context::Type::Priority ) == false );
     return PriorityContext{ this };
 }
 
@@ -381,15 +382,64 @@ Connection::Handle Connection::Context::handle()
     return m_handle;
 }
 
-bool Connection::Context::isOpened()
+bool Connection::Context::isOpened( Type t )
 {
-    return m_handle != nullptr;
+    if ( m_handle == nullptr )
+        return false;
+    switch ( m_type )
+    {
+    case Type::None:
+        assert( !"Context type can't be none if a handle is available" );
+        return false;
+    case Type::Write:
+    {
+        /*
+         * If a write context is already opened, it has an exclusive access and can
+         * be used to execute read requests
+         */
+        return true;
+    }
+    case Type::Read:
+    {
+        /*
+         * We can't open a write context if a read context is created, nor can we
+         * create a read context if a write context is created.
+         * The only configuration we support is to recursively create a context of the
+         * same type.
+         */
+        assert( t == Type::Read );
+        return true;
+    }
+    case Type::Priority:
+        if ( t == Type::Read || t == Type::Write )
+            return true;
+        assert( !"Recursive acquisition of priority context is not supported."
+                " Please fix the calling code" );
+        return false;
+    default:
+        assert( !"Invalid context type provided" );
+        return false;
+    }
 }
 
-void Connection::Context::connect( Connection* c )
+void Connection::Context::connect( Connection* c, Type t )
 {
+    if ( m_handle != nullptr )
+    {
+        /*
+         * Priority contexts are acquired outside of the media library code so
+         * we have no control over potential recursive acquisition.
+         * We could mostly ignore those, but if the media library code needs to
+         * open a transaction while a priority context is held, we still need the
+         * transaction code to behave properly and open itself without
+         * acquiring a new context.
+         */
+        assert( m_type == Type::Priority );
+        return;
+    }
     assert( m_handle == nullptr );
     m_handle = c->handle();
+    m_type = t;
     assert( m_handle != nullptr );
     m_owning = true;
 }
@@ -404,6 +454,7 @@ void Connection::Context::releaseHandle()
         return;
     assert( m_handle != nullptr );
     m_handle = nullptr;
+    m_type = Type::None;
     m_owning = false;
 }
 
@@ -422,13 +473,13 @@ Connection::Context& Connection::Context::operator=( Context&& ctx ) noexcept
 Connection::ReadContext::ReadContext( Connection* c )
     : m_lock( c->m_readLock )
 {
-    connect( c );
+    connect( c, Type::Read );
 }
 
 Connection::WriteContext::WriteContext( Connection* c )
     : m_lock( c->m_writeLock )
 {
-    connect( c );
+    connect( c, Type::Write );
 }
 
 void Connection::WriteContext::unlock()
@@ -440,7 +491,7 @@ void Connection::WriteContext::unlock()
 Connection::PriorityContext::PriorityContext( Connection* c )
     : m_lock( c->m_priorityLock )
 {
-    connect( c );
+    connect( c, Type::Priority );
 }
 
 }
