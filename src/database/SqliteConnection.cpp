@@ -466,8 +466,8 @@ Connection::WriteContext::WriteContext( Connection* c )
 
 void Connection::WriteContext::unlock()
 {
-    m_lock.unlock();
     releaseHandle();
+    m_lock.unlock();
 }
 
 Connection::PriorityContext::PriorityContext( Connection* c )
