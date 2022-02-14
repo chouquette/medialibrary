@@ -625,7 +625,7 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
 {
     assert( !m_dbPath.empty() );
     assert( !m_mlFolderPath.empty() );
-    std::lock_guard<compat::Mutex> lock( m_mutex );
+    std::unique_lock<compat::Mutex> lock( m_mutex );
     if ( m_initialized == true )
         return InitializeResult::AlreadyInitialized;
 
@@ -728,10 +728,15 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
         assert( res == InitializeResult::DbCorrupted );
         LOG_WARN( "Initialization complete; Database corruption was detected" );
     }
+    m_initialized = true;
+    /*
+     * Unlock the mutex before invoking the parser. If some tasks are restored,
+     * the idle callback will be invoked with the lock held, which would deadlock.
+     */
+    lock.unlock();
     auto parser = getParser();
     if ( parser != nullptr )
         parser->start();
-    m_initialized = true;
     return res;
 }
 
