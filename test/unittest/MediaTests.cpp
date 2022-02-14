@@ -1434,6 +1434,23 @@ static void Lyrics( Tests* T )
     ASSERT_EQ( lyrics, m->lyrics() );
 }
 
+static void ExternalMrlDifferentPorts( Tests* T )
+{
+    auto m = T->ml->addExternalMedia( "rtsp://192.168.1.172:8544/mystream", -1 );
+    ASSERT_NON_NULL( m );
+
+    auto fetched = T->ml->media( "rtsp://192.168.1.172:8544/mystream" );
+    ASSERT_NON_NULL( fetched );
+    // Try with a different port, it should not return anything
+    fetched = T->ml->media( "rtsp://192.168.1.172:8545/mystream" );
+    ASSERT_EQ( nullptr, fetched );
+
+    auto m2 = T->ml->addExternalMedia( "rtsp://192.168.1.172:8545/mystream", -1 );
+    ASSERT_NON_NULL( m2 );
+
+    ASSERT_NE( m2->id(), m->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1494,6 +1511,7 @@ int main( int ac, char** av )
     ADD_TEST( ConvertToExternal );
     ADD_TEST( FlushUserProvidedThumbnails );
     ADD_TEST( Lyrics );
+    ADD_TEST( ExternalMrlDifferentPorts );
 
     END_TESTS
 }

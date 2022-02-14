@@ -1,11 +1,11 @@
 # Declare 2 convenience libraries with common code, but do not link directly
-# with it, otherwise meson would propagate the sqlite dependency when linking 
-# with it, while medialibrary already linked with sqlite, causing multiple 
+# with it, otherwise meson would propagate the sqlite dependency when linking
+# with it, while medialibrary already linked with sqlite, causing multiple
 # definition of sqlite symbols
 
 common_test_code = static_library('common_test_code',
-  [ 
-    'MediaLibraryTester.cpp', 
+  [
+    'MediaLibraryTester.cpp',
     'mocks/FileSystem.cpp',
     'mocks/filesystem/MockDevice.cpp',
     'mocks/filesystem/MockDirectory.cpp',
@@ -59,7 +59,7 @@ album_tests = [
   'SortByDuration',
   'SortByInsertionDate',
 ]
-foreach t : album_tests 
+foreach t : album_tests
   test('Album.' + t, album_test_exe, args: t, suite: ['unittest', 'Album'])
 endforeach
 
@@ -636,6 +636,7 @@ media_tests = [
   'ConvertToExternal',
   'FlushUserProvidedThumbnails',
   'Lyrics',
+  'ExternalMrlDifferentPorts',
 ]
 
 foreach t : media_tests
