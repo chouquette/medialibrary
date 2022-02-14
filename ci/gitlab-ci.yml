@@ -85,6 +85,8 @@ test:debian:
 
 test:win32:
   image: $MEDIALIBRARY_WIN32_IMG
+  variables:
+    MESON_TESTTHREADS: 8
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -114,6 +116,8 @@ test:win32:
 
 test:win64:
   image: $MEDIALIBRARY_WIN64_IMG
+  variables:
+    MESON_TESTTHREADS: 8
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
