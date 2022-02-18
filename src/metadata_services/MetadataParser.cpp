@@ -1421,8 +1421,6 @@ void MetadataAnalyzer::link( IItem& item, Album& album,
 std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
                                                              Album* album )
 {
-    std::shared_ptr<Thumbnail> thumbnail;
-
     if ( item.media()->thumbnailStatus( ThumbnailSizeType::Thumbnail ) ==
          ThumbnailStatus::Available )
     {
@@ -1445,7 +1443,7 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
          * case. Either we'll be storing it for the first time, or we need to
          * be able to compare it later.
          */
-        thumbnail = std::make_shared<Thumbnail>( m_ml, embeddedThumbnails[0],
+        auto thumbnail = std::make_shared<Thumbnail>( m_ml, embeddedThumbnails[0],
                 ThumbnailSizeType::Thumbnail );
 
         auto fileSize = embeddedThumbnails[0]->size();
@@ -1459,11 +1457,7 @@ std::shared_ptr<Thumbnail> MetadataAnalyzer::fetchThumbnail( IItem& item,
      * cover file.
      */
     if ( album == nullptr )
-    {
-        if ( thumbnail != nullptr )
-            return thumbnail;
         return findAlbumArtwork( item );
-    }
     return album->thumbnail( ThumbnailSizeType::Thumbnail );
 }
 
