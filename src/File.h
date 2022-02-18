@@ -86,6 +86,8 @@ public:
     bool update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable );
     bool convertToExternal();
 
+    FilePtr cache( const std::string& mrl );
+
     static void createTable( sqlite::Connection* dbConnection );
     static void createIndexes( sqlite::Connection* dbConnection );
     static std::string schema( const std::string& tableName, uint32_t dbModel );
@@ -134,6 +136,9 @@ public:
      */
     static std::vector<std::shared_ptr<File>> fromParentFolder( MediaLibraryPtr ml,
                                                                 int64_t parentFolderId );
+
+    static std::vector<std::shared_ptr<File>> cachedFiles( MediaLibraryPtr ml );
+    static std::string cachedFileName( const File& f );
 
 private:
     MediaLibraryPtr m_ml;

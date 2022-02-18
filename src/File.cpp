@@ -200,7 +200,8 @@ bool File::isNetwork() const
 
 bool File::isMain() const
 {
-    return m_type == Type::Main;
+    return m_type == Type::Main ||
+           m_type == Type::Cache;
 }
 
 std::shared_ptr<Media> File::media() const
@@ -282,6 +283,14 @@ bool File::convertToExternal()
     const std::string req = "UPDATE " + Table::Name + " SET "
         "mrl = ?, folder_id = NULL, is_removable = 0, is_external = 1 WHERE id_file = ?";
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl(), m_id );
+}
+
+FilePtr File::cache( const std::string& mrl )
+{
+    if ( utils::url::schemeIs( "file://", mrl ) == false )
+        return nullptr;
+    LOG_DEBUG( "Marking ", mrl, " as a cached MRL for file #", m_id );
+    return File::createFromExternalMedia( m_ml, m_mediaId, Type::Cache, mrl );
 }
 
 void File::createTable( sqlite::Connection* dbConnection )
@@ -579,6 +588,19 @@ std::vector<std::shared_ptr<File>> File::fromParentFolder( MediaLibraryPtr ml,
     static const std::string req = "SELECT * FROM " + File::Table::Name
             + " WHERE folder_id = ?";
     return File::fetchAll<File>( ml, req, parentFolderId );
+}
+
+std::vector<std::shared_ptr<File> > File::cachedFiles( MediaLibraryPtr ml )
+{
+    const std::string req = "SELECT * FROM " + Table::Name +
+            " WHERE type = ?";
+    return fetchAll<File>( ml, req, Type::Cache );
+}
+
+std::string File::cachedFileName( const File& f )
+{
+    return std::to_string( f.id() ) + "_" +
+            utils::url::decode( utils::file::fileName( f.rawMrl() ) );
 }
 
 

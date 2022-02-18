@@ -238,6 +238,7 @@ public:
     virtual bool markAsPlayed() = 0;
     virtual ShowEpisodePtr showEpisode() const = 0;
     virtual const std::vector<FilePtr>& files() const = 0;
+    virtual FilePtr mainFile() const = 0;
     /**
      * @brief addFile Add a file to this media
      * @param mrl The new file mrl

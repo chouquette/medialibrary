@@ -199,6 +199,9 @@ class Media : public IMedia,
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
+        virtual FilePtr mainFile() const override;
+        bool cache( const std::string& mrl );
+        bool removeCached();
         virtual const std::string& fileName() const override;
         virtual MoviePtr movie() const override;
         bool setMovie( MoviePtr movie );

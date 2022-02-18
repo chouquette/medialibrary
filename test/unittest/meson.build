@@ -655,6 +655,7 @@ media_tests = [
   'MarkAsPlayed',
   'NbSubscriptions',
   'Description',
+  'AddCachedMrl'
 ]
 
 foreach t : media_tests

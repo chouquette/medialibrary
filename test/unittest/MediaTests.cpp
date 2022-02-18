@@ -1547,6 +1547,41 @@ static void Description( Tests* T )
     ASSERT_EQ( "desc", m->description() );
 }
 
+static void AddCachedMrl( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file:///path/to/media.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m );
+
+    auto res = m->cache( "smb://not/a/valid/cache/file.mkv" );
+    ASSERT_FALSE( res );
+
+    res = m->cache( "file:///cache/media.mkv" );
+    ASSERT_TRUE( res );
+
+    auto files = m->files();
+    ASSERT_EQ( files.size(), 2u );
+
+    auto f = m->mainFile();
+    ASSERT_NON_NULL( f );
+    ASSERT_EQ( IFile::Type::Cache, f->type() );
+
+    m = T->ml->media( m->id() );
+    f = m->mainFile();
+    ASSERT_NON_NULL( f );
+    ASSERT_EQ( IFile::Type::Cache, f->type() );
+
+    res = m->removeCached();
+    ASSERT_TRUE( res );
+
+    res = m->removeCached();
+    ASSERT_FALSE( res );
+
+    f = m->mainFile();
+    ASSERT_NON_NULL( f );
+    ASSERT_EQ( IFile::Type::Main, f->type() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1611,6 +1646,7 @@ int main( int ac, char** av )
     ADD_TEST( MarkAsPlayed );
     ADD_TEST( NbSubscriptions );
     ADD_TEST( Description );
+    ADD_TEST( AddCachedMrl );
 
     END_TESTS
 }

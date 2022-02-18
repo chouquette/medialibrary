@@ -882,6 +882,7 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
         case IFile::Type::Subtitles:
         case IFile::Type::Disc:
         case IFile::Type::Unknown:
+        case IFile::Type::Cache:
             break;
     }
     LOG_WARN( "Refreshing of file type ",

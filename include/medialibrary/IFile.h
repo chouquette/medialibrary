@@ -54,6 +54,8 @@ public:
         Disc,
         /// A resource describing a subscription.
         Subscription,
+        /// A cached version of the main file
+        Cache,
     };
 
     virtual ~IFile() = default;
