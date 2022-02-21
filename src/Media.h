@@ -279,7 +279,7 @@ class Media : public IMedia,
                                        bool isFolderFsRemovable, IFile::Type type );
         virtual FilePtr addFile( const std::string& mrl, IFile::Type fileType ) override;
         virtual FilePtr addExternalMrl( const std::string& mrl, IFile::Type type ) override;
-        void removeFile( File& file );
+        bool removeFile( File& file );
 
         virtual Query<IBookmark> bookmarks( const QueryParameters* params ) const override;
         virtual BookmarkPtr bookmark( int64_t time ) const override;

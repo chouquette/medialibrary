@@ -1059,14 +1059,16 @@ FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
     return res;
 }
 
-void Media::removeFile( File& file )
+bool Media::removeFile( File& file )
 {
-    file.destroy();
+    if ( file.destroy() == false )
+        return false;
     auto it = std::remove_if( begin( m_files ), end( m_files ), [&file]( const FilePtr& f ) {
         return f->id() == file.id();
     });
     if ( it != end( m_files ) )
         m_files.erase( it );
+    return true;
 }
 
 Query<IBookmark> Media::bookmarks( const QueryParameters* params ) const
