@@ -6,7 +6,7 @@ samples_src = [
 samples_exe = executable('samples', samples_src,
   link_with: [medialib],
   include_directories: [includes, test_include_dir],
-  cpp_args: '-DSRC_DIR="' + meson.source_root() + '"',
+  cpp_args: '-DSRC_DIR="' + meson.project_source_root() + '"',
   dependencies: [sqlite_dep, threads_dep, libvlc_dep, libvlcpp_dep],
   build_by_default: false
 )
