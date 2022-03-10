@@ -233,7 +233,6 @@ const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
     "wma",
     "wmv",
     "wmx",
-    "wpl",
     "wtv",
     "wv",
     "wvx",
@@ -255,6 +254,7 @@ const std::vector<const char*> MediaLibrary::SupportedPlaylistExtensions = {
     "sdp",
     "vlc",
     "wax",
+    "wpl",
     "xspf"
 };
 
