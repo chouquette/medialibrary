@@ -149,7 +149,7 @@ asan-ubsan:
   image: $VLC_DEBIAN_UNSTABLE_IMG
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
-  stage: build
+  stage: test
   variables:
     LSAN_OPTIONS: 'detect_leaks=0'
   script:
