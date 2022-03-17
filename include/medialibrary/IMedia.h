@@ -231,7 +231,7 @@ public:
      * @brief addFile Add a file to this media
      * @param mrl The new file mrl
      * @param fileType The new file type
-     * @return
+     * @return The file pointer
      */
     virtual FilePtr addFile( const std::string& mrl, IFile::Type fileType ) = 0;
     /**

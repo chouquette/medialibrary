@@ -164,7 +164,7 @@ public:
                                  const QueryParameters* params = nullptr ) = 0;
     /**
      * @brief searchMedia Search amongst the media belonging to this group
-     * @brief pattern The search pattern (3 characters minimum)
+     * @param pattern The search pattern (3 characters minimum)
      * @param mediaType The type of media to return, or Unknown to return them all
      * @param params Some query parameters
      * @return A query object representing the results

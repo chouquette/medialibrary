@@ -52,7 +52,7 @@ public:
     /**
      * @brief tracks fetches album tracks, filtered by genre
      * @param genre A musical genre. Only tracks of this genre will be returned
-     * @return
+     * @return the requested tracks
      */
     virtual Query<IMedia> tracks( GenrePtr genre, const QueryParameters* params = nullptr ) const = 0;
     /**
@@ -65,7 +65,7 @@ public:
      * @brief artists Returns a Query object representing all artists appearing
      *                on at least one track for this album.
      * Artists are sorted by name.
-     * @param desc
+     * @param params the query parameters
      */
     virtual Query<IArtist> artists( const QueryParameters* params = nullptr ) const = 0;
     /**

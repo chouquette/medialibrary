@@ -157,7 +157,7 @@ public:
     virtual bool move( uint32_t from, uint32_t to ) = 0;
     ///
     /// \brief remove Removes an item from the playlist
-    /// \param mediaId The position of the item to remove.
+    /// \param position The position of the item to remove.
     /// \return true on success, false on failure
     ///
     virtual bool remove( uint32_t position ) = 0;

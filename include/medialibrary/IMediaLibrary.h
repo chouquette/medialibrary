@@ -107,18 +107,18 @@ struct QueryParameters
 
 enum class InitializeResult
 {
-    //< Everything worked out fine
+    ///< Everything worked out fine
     Success,
-    //< Should be considered the same as Success, but is an indication of
-    // unrequired subsequent calls to initialize.
+    ///< Should be considered the same as Success, but is an indication of
+    /// unrequired subsequent calls to initialize.
     AlreadyInitialized,
-    //< A fatal error occurred, the IMediaLibrary instance should be destroyed
+    ///< A fatal error occurred, the IMediaLibrary instance should be destroyed
     Failed,
-    //< The database was reset, the caller needs to re-configure folders to
-    // discover at the bare minimum.
+    ///< The database was reset, the caller needs to re-configure folders to
+    /// discover at the bare minimum.
     DbReset,
-    //< Something is wrong with the database. It is up to the application to
-    //< chose what to do, the DB needs to be recovered or dropped in any case.
+    ///< Something is wrong with the database. It is up to the application to
+    ///< chose what to do, the DB needs to be recovered or dropped in any case.
     DbCorrupted,
 };
 
@@ -574,7 +574,7 @@ public:
      * @brief artists List all artists that have at least an album.
      * Artists that only appear on albums as guests won't be listed from here, but will be
      * returned when querying an album for all its appearing artists
-     * @param includeAll If true, all artists including those without album
+     * @param included If true, all artists including those without album
      *                   will be returned. If false, only artists which have
      *                   an album will be returned.
      * @param params Some query parameters
@@ -585,8 +585,7 @@ public:
                                     const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief genres Return the list of music genres
-     * @param sort A sorting criteria. So far, this is ignored, and artists are sorted by lexial order
-     * @param desc If true, the provided sorting criteria will be reversed.
+     * @param params Some query parameters
      */
     virtual Query<IGenre> genres( const QueryParameters* params = nullptr ) const = 0;
     virtual GenrePtr genre( int64_t id ) const = 0;

@@ -106,7 +106,7 @@ namespace fs
         virtual std::shared_ptr<fs::IDevice> createDevice( const std::string& uuid ) = 0;
         ///
         /// \brief createDeviceFromPath creates a representation of a device
-        /// \param path An MRL.
+        /// \param mrl An MRL.
         /// \return A representation of the device, or nullptr if none match.
         ///
         /// The provided path can and most often will refer to a file in that
