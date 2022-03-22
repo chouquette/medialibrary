@@ -420,6 +420,9 @@ void DiscovererWorker::run()
     m_fsHolder->registerCallback( this );
     m_ml->onDiscovererIdleChanged( false );
     runReloadAllDevices();
+
+    auto needTaskRefresh = false;
+
     while ( true )
     {
         ML_UNHANDLED_EXCEPTION_INIT
@@ -457,8 +460,25 @@ void DiscovererWorker::run()
                     continue;
                 m_currentTask = &task;
             }
+            /*
+             * In the event we have multiple ban/remove tasks in a row, those
+             * would trigger multiple task refresh, which is a waste.
+             * Instead, we postpone the task refresh to right before the next
+             * long running task, once the task list is expected to be stable
+             */
+            if ( needTaskRefresh == true && task.isLongRunning() == true )
+            {
+                {
+                    std::unique_lock<compat::Mutex> lock( m_mutex );
+                    if ( m_run == false )
+                        continue;
+                }
+                auto parser = m_ml->getParser();
+                if ( parser != nullptr )
+                    parser->refreshTaskList();
+                needTaskRefresh = false;
+            }
             LOG_DEBUG( "Running task of type ", task.type );
-            auto needTaskRefresh = false;
             switch ( task.type )
             {
             case Task::Type::Reload:
@@ -493,17 +513,6 @@ void DiscovererWorker::run()
                 break;
             default:
                 assert(false);
-            }
-            if ( needTaskRefresh == true )
-            {
-                {
-                    std::unique_lock<compat::Mutex> lock( m_mutex );
-                    if ( m_run == false )
-                        continue;
-                }
-                auto parser = m_ml->getParser();
-                if ( parser != nullptr )
-                    parser->refreshTaskList();
             }
         }
         ML_UNHANDLED_EXCEPTION_BODY( "DiscovererWorker" )
