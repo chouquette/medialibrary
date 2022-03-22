@@ -648,18 +648,19 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
     }
     catch ( const sqlite::errors::ConstraintUnique& ex )
     {
-        /* This can happen if we end up with two logically identical MRLs. The
-         * string representations differ, but they point to the same actual file.
-         * When inserting the File in DB, we account for multiple mountpoints and
-         * will end up adding a file with the same folder_id & mrl, which would
-         * be a UNIQUE constraint violation.
+        /*
+         * This can happen if:
+         * - We end up with two logically identical MRLs. The
+         *   string representations differ, but they point to the same actual file.
+         *   When inserting the File in DB, we account for multiple mountpoints and
+         *   will end up adding a file with the same folder_id & mrl, which would
+         *   be a UNIQUE constraint violation.
+         * - A long running discovery task gets interrupted and a new task
+         *   triggers a task refresh. Until #103 is fixed, we might re-run a
+         *   task that completed properly, which might case a constraint
+         *   violation later on (See #424)
          * If that happens, just discard the 2nd task.
-         * However, this is not expected for non removable devices, as their MRL
-         * should be identical. This might change in the future if we have
-         * multiple mountpoints for the same non-removable device though.
          */
-        if ( deviceFs->isRemovable() == false )
-            throw;
         LOG_INFO( "Failed to insert File in db: ", ex.what(), ". Assuming the"
                   " mrl is duplicated" );
         return Status::Discarded;
