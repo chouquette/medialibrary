@@ -294,6 +294,7 @@ bookmark_tests = [
   'OrderByCreationDate',
   'Fetch',
   'FetchByTime',
+  'DeleteMedia',
 ]
 
 foreach t : bookmark_tests

@@ -331,6 +331,17 @@ static void FetchByTime( BookmarkTests* T )
     ASSERT_EQ( b2->id(), fetched->id() );
 }
 
+static void DeleteMedia( BookmarkTests* T )
+{
+    auto b = T->m->addBookmark( 123 );
+    ASSERT_NON_NULL( b );
+
+    T->ml->deleteMedia( T->m->id() );
+
+    b = T->ml->bookmark( b->id() );
+    ASSERT_EQ( nullptr, b );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( BookmarkTests );
@@ -349,6 +360,7 @@ int main( int ac, char** av )
     ADD_TEST( OrderByCreationDate );
     ADD_TEST( Fetch );
     ADD_TEST( FetchByTime );
+    ADD_TEST( DeleteMedia );
 
     END_TESTS
 }
