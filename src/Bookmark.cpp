@@ -157,25 +157,33 @@ std::string Bookmark::schema( const std::string& tableName, uint32_t dbModel )
 
     assert( dbModel >= 17 );
     assert( tableName == Table::Name );
-    std::string req = "CREATE TABLE " + Table::Name +
+    if ( dbModel < 25 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "time UNSIGNED INTEGER NOT NULL,"
+            "name TEXT,"
+            "description TEXT,"
+            "media_id UNSIGNED INTEGER NOT NULL,"
+            "FOREIGN KEY(media_id) REFERENCES " +
+                Media::Table::Name + "(id_media),"
+            "UNIQUE(time,media_id) ON CONFLICT FAIL"
+        ")";
+    }
+    return "CREATE TABLE " + Table::Name +
     "("
         "id_bookmark INTEGER PRIMARY KEY AUTOINCREMENT,"
         "time UNSIGNED INTEGER NOT NULL,"
         "name TEXT,"
         "description TEXT,"
-        "media_id UNSIGNED INTEGER NOT NULL,";
-
-    if ( dbModel >= 25 )
-    {
-        req += "creation_date UNSIGNED INTEGER NOT NULL,"
-               "type UNSIGNED INTEGER NOT NULL,";
-    }
-
-    req += "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name +
-            "(id_media),"
-            "UNIQUE(time,media_id) ON CONFLICT FAIL"
+        "media_id UNSIGNED INTEGER NOT NULL,"
+        "creation_date UNSIGNED INTEGER NOT NULL,"
+        "type UNSIGNED INTEGER NOT NULL,"
+        "FOREIGN KEY(media_id) REFERENCES " +
+            Media::Table::Name + "(id_media),"
+        "UNIQUE(time,media_id) ON CONFLICT FAIL"
     ")";
-    return req;
 }
 
 std::string Bookmark::index( Indexes index, uint32_t dbModel )
