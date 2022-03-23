@@ -251,14 +251,26 @@ static void NbTracks( GenreTests* T )
     auto a = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+
     auto res = a->addTrack( m, 1, 1, T->g->id(), T->g.get() );
     ASSERT_TRUE( res );
+    res = a->addTrack( m2, 2, 1, T->g->id(), T->g.get() );
+    ASSERT_TRUE( res );
 
-    ASSERT_EQ( 1u, T->g->nbTracks() );
+    ASSERT_EQ( 2u, T->g->nbTracks() );
     T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
-    ASSERT_EQ( 1u, T->g->nbTracks() );
+    ASSERT_EQ( 2u, T->g->nbTracks() );
+    ASSERT_EQ( 2u, T->g->nbPresentTracks() );
 
     T->ml->deleteMedia( m->id() );
+
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 1u, T->g->nbTracks() );
+    ASSERT_EQ( 1u, T->g->nbPresentTracks() );
+
+    T->ml->deleteMedia( m2->id() );
 
     T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
     ASSERT_EQ( nullptr, T->g );
