@@ -180,15 +180,18 @@ asan-ubsan:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
   stage: test
   script:
+    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
+    - export PATH=/tmp/meson:$PATH
+    - cd $CI_PROJECT_DIR
     - >
       CXX=clang++
-      meson
+      meson.py
       -Dpkg_config_path=$PKG_CONFIG_PATH:$CI_PROJECT_DIR/vlc/prefix/lib/pkgconfig
       -Db_sanitize=$SANITIZERS
       -Db_lundef=false
       build
-    - cd build && meson test --no-stdsplit
-    - meson compile fast_discover_cancel fast_teardown
+    - cd build && meson.py test --no-stdsplit
+    - meson.py compile fast_discover_cancel fast_teardown
     - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
     - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
   artifacts:
