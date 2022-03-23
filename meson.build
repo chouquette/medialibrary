@@ -136,9 +136,10 @@ endif
 if libvlc_dep.found()
   libvlcpp_dep = dependency('libvlcpp', required: false)
     if not libvlcpp_dep.found()
-      if cxx.has_header('vlc.hpp', args: '-I' + join_paths(meson.source_root(), 'libvlcpp/vlcpp'))
+      vlcpp_inc_dir = include_directories('libvlcpp/')
+      if cxx.has_header('vlcpp/vlc.hpp', include_directories: vlcpp_inc_dir)
         libvlcpp_dep = declare_dependency(
-          include_directories: include_directories('libvlcpp/')
+          include_directories: vlcpp_inc_dir
           )
       else
         error('libvlcpp not found. Please install it or initialize the submodule')
