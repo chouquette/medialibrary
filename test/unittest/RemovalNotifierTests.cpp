@@ -28,6 +28,7 @@
 
 #include "Media.h"
 #include "File.h"
+#include "Playlist.h"
 #include "common/NoopCallback.h"
 #include "utils/ModificationsNotifier.h"
 #include "compat/Mutex.h"
@@ -45,11 +46,19 @@ private:
         m_cond.notify_all();
     }
 
+    virtual void onPlaylistsModified( std::set<int64_t> batch ) override
+    {
+        std::lock_guard<compat::Mutex> lock( m_lock );
+        m_playlistsModified.insert( cbegin( batch ), cend( batch ) );
+        m_cond.notify_all();
+    }
+
 public:
     void resetCount()
     {
         m_nbMedia = 0;
         m_nbTotalMedia = 0;
+        m_playlistsModified.clear();
     }
 
     std::unique_lock<compat::Mutex> prepareWait()
@@ -69,10 +78,23 @@ public:
         return m_nbMedia;
     }
 
+    bool waitForPlaylistNotif( std::unique_lock<compat::Mutex>& preparedLock,
+                               std::chrono::duration<int64_t> timeout )
+    {
+        return m_cond.wait_for( preparedLock, timeout, [this]() {
+            return m_playlistsModified.empty() == false;
+        });
+    }
+
     uint32_t getNbTotalMediaDeleted()
     {
         std::lock_guard<compat::Mutex> lock( m_lock );
         return m_nbTotalMedia;
+    }
+
+    std::set<int64_t> getPlaylistModified()
+    {
+        return m_playlistsModified;
     }
 
 private:
@@ -80,6 +102,7 @@ private:
     compat::ConditionVariable m_cond;
     uint32_t m_nbMedia;
     uint32_t m_nbTotalMedia;
+    std::set<int64_t> m_playlistsModified;
 };
 
 struct RemovalNotifierTests : public UnitTests<MockCallback>
@@ -169,6 +192,45 @@ static void Flush( RemovalNotifierTests* T )
     ASSERT_EQ( 10u, nbMediaSignaled );
 }
 
+static void ModifyPlaylists( RemovalNotifierTests* T )
+{
+    auto pl = T->ml->createPlaylist( "playlist" );
+    auto m = T->ml->addMedia( "media.mp3", IMedia::Type::Audio );
+    auto m2 = T->ml->addMedia( "media2.mp3", IMedia::Type::Audio );
+
+    std::set<int64_t> playlistModified;
+    {
+        auto lock = T->cbMock->prepareWait();
+        auto res = pl->append( m->id() );
+        ASSERT_TRUE( res );
+        res = pl->append( m2->id() );
+        ASSERT_TRUE( res );
+
+        res = T->cbMock->waitForPlaylistNotif( lock,
+                std::chrono::duration_cast<std::chrono::seconds>(
+                                                   std::chrono::milliseconds{ 2000 } ) );
+        ASSERT_TRUE( res );
+        playlistModified = T->cbMock->getPlaylistModified();
+    }
+
+    ASSERT_TRUE( playlistModified.count( pl->id() ) );
+    ASSERT_EQ( 1u, playlistModified.size() );
+
+    {
+        auto lock = T->cbMock->prepareWait();
+        T->cbMock->resetCount();
+        auto res = pl->move( 1, 2 );
+        ASSERT_TRUE( res );
+        res = T->cbMock->waitForPlaylistNotif( lock,
+                std::chrono::duration_cast<std::chrono::seconds>(
+                                                   std::chrono::milliseconds{ 2000 } ) );
+        ASSERT_TRUE( res );
+        playlistModified = T->cbMock->getPlaylistModified();
+    }
+    ASSERT_TRUE( playlistModified.count( pl->id() ) );
+    ASSERT_EQ( 1u, playlistModified.size() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( RemovalNotifierTests );
@@ -176,6 +238,8 @@ int main( int ac, char** av )
     ADD_TEST( DeleteOne );
     ADD_TEST( DeleteBatch );
     ADD_TEST( Flush );
+
+    ADD_TEST( ModifyPlaylists );
 
     END_TESTS
 }

@@ -727,6 +727,7 @@ removal_notifier_tests = [
   'DeleteOne',
   'DeleteBatch',
   'Flush',
+  'ModifyPlaylists',
 ]
 
 foreach t : removal_notifier_tests
