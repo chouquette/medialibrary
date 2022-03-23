@@ -117,6 +117,8 @@ Bookmark::schema( Bookmark::Table::Name, 25 ),
     " SELECT *, 0, " + utils::enum_to_string( IBookmark::Type::Simple ) +
     " FROM " + Bookmark::Table::Name + "_backup",
 
+"DROP TABLE " + Bookmark::Table::Name + "_backup",
+
 "CREATE TEMPORARY TABLE " + Device::Table::Name + "_backup"
 "("
     "id_device INTEGER PRIMARY KEY AUTOINCREMENT,"
