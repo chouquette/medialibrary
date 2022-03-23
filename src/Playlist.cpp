@@ -40,6 +40,7 @@
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "utils/Enums.h"
+#include "utils/ModificationsNotifier.h"
 
 #include <algorithm>
 
@@ -480,6 +481,10 @@ bool Playlist::move( uint32_t from, uint32_t position )
         return false;
     }
     t->commit();
+
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyPlaylistModification( m_id );
 
     return true;
 }
