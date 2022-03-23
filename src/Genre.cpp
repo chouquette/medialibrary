@@ -289,14 +289,27 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                                 " WHERE nb_tracks = 0;"
                        " END";
             }
+            if ( dbModel == 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER DELETE ON " + Media::Table::Name +
+                        " WHEN old.subtype = " +
+                            utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
+                       " BEGIN"
+                            " UPDATE " + Table::Name +
+                                " SET nb_tracks = nb_tracks - 1,"
+                                    " is_present = is_present - IIF(old.is_present != 0, 1, 0)"
+                                    " WHERE id_genre = old.genre_id;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER DELETE ON " + Media::Table::Name +
                     " WHEN old.subtype = " +
                         utils::enum_to_string( IMedia::SubType::AlbumTrack ) +
                    " BEGIN"
                         " UPDATE " + Table::Name +
-                            " SET nb_tracks = nb_tracks - 1,"
-                                " is_present = is_present - IIF(old.is_present != 0, 1, 0)"
+                            " SET is_present = is_present - IIF(old.is_present != 0, 1, 0),"
+                                " nb_tracks = nb_tracks - 1"
                                 " WHERE id_genre = old.genre_id;"
                    " END";
         case Triggers::UpdateIsPresent:
