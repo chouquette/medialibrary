@@ -342,11 +342,21 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
         case Triggers::DeleteEmpty:
         {
             assert( dbModel >= 34 );
+            if ( dbModel == 34 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF nb_tracks ON " + Table::Name +
+                       " WHEN new.nb_tracks = 0"
+                       " BEGIN"
+                            " DELETE FROM " + Table::Name + ";"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                    " AFTER UPDATE OF nb_tracks ON " + Table::Name +
                    " WHEN new.nb_tracks = 0"
                    " BEGIN"
-                        " DELETE FROM " + Table::Name + ";"
+                        " DELETE FROM " + Table::Name +
+                            " WHERE id_genre = old.id_genre;"
                    " END";
         }
         default:

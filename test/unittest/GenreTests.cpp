@@ -248,6 +248,10 @@ static void NbTracks( GenreTests* T )
 {
     ASSERT_EQ( 0u, T->g->nbTracks() );
 
+    auto extraGenre = T->ml->createGenre( "Progressive Otter Metal" );
+    auto genres = T->ml->genres( nullptr )->all();
+    ASSERT_EQ( 2u, genres.size() );
+
     auto a = T->ml->createAlbum( "album" );
     auto m = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
@@ -274,6 +278,10 @@ static void NbTracks( GenreTests* T )
 
     T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
     ASSERT_EQ( nullptr, T->g );
+
+    /* Ensure we don't delete everything once all tracks are gone (#425) */
+    genres = T->ml->genres( nullptr )->all();
+    ASSERT_EQ( 1u, genres.size() );
 }
 
 static void CaseInsensitive( GenreTests* T )
