@@ -48,12 +48,7 @@ namespace sqlite
 class Row
 {
 public:
-    explicit Row( sqlite3_stmt* stmt )
-        : m_stmt( stmt )
-        , m_idx( 0 )
-        , m_nbColumns( sqlite3_column_count( stmt ) )
-    {
-    }
+    explicit Row( sqlite3_stmt* stmt );
 
     constexpr Row()
         : m_stmt( nullptr )
@@ -90,17 +85,9 @@ public:
         return *this;
     }
 
-    unsigned int nbColumns() const
-    {
-        return m_nbColumns;
-    }
+    unsigned int nbColumns() const;
 
-    void advanceToColumn( unsigned int idx )
-    {
-        if ( idx >= m_nbColumns )
-            throw errors::ColumnOutOfRange( idx, m_nbColumns );
-        m_idx = idx;
-    }
+    void advanceToColumn( unsigned int idx );
 
     /**
      * @brief Returns the value in column idx, but doesn't advance to the next column
@@ -113,15 +100,9 @@ public:
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
-    bool operator==(std::nullptr_t) const
-    {
-        return m_stmt == nullptr;
-    }
+    bool operator==(std::nullptr_t) const;
 
-    bool operator!=(std::nullptr_t) const
-    {
-        return m_stmt != nullptr;
-    }
+    bool operator!=(std::nullptr_t) const;
 
     /**
      * @brief hasRemainingColumns Returns true if there are more column to extract
@@ -130,10 +111,7 @@ public:
      * When load() is used, the internal index isn't updated and this function
      * would always return true if there is at least one column.
      */
-    bool hasRemainingColumns() const
-    {
-        return m_idx < m_nbColumns;
-    }
+    bool hasRemainingColumns() const;
 
 private:
     sqlite3_stmt* m_stmt;
@@ -313,57 +291,15 @@ class Tools
         }
 
         static bool checkTriggerStatement( const std::string& expectedStatement,
-                                           const std::string& triggerName )
-        {
-            auto actualStatement = fetchTriggerStatement( triggerName );
-            if ( actualStatement == expectedStatement )
-                return true;
-            LOG_ERROR( "Mismatching statement for trigger ", triggerName, "." );
-            LOG_ERROR( "Expected: ", expectedStatement );
-            LOG_ERROR( "Actual:   ", actualStatement );
-            return false;
-        }
+                                           const std::string& triggerName );
 
         static bool checkIndexStatement( const std::string& expectedStatement,
-                                         const std::string& indexName )
-        {
-            auto actualStatement = fetchIndexStatement( indexName );
-            if ( actualStatement == expectedStatement )
-                return true;
-            LOG_ERROR( "Mismatching statement for index ", indexName, "." );
-            LOG_ERROR( "Expected: ", expectedStatement );
-            LOG_ERROR( "Actual:   ", actualStatement );
-            return false;
-        }
+                                         const std::string& indexName );
 
         static bool checkTableSchema( const std::string& schema,
-                                      const std::string& tableName )
-        {
-            auto actualSchema = fetchTableSchema( tableName );
-            if ( actualSchema == schema )
-                return true;
-            LOG_ERROR( "Mismatching schema for table ", tableName, "." );
-            LOG_ERROR( "Expected: ", schema );
-            LOG_ERROR( "Actual:   ", actualSchema );
-            return false;
-        }
+                                      const std::string& tableName );
 
-        static std::vector<std::string> listTables( sqlite::Connection* dbConn )
-        {
-            OPEN_READ_CONTEXT( ctx, dbConn );
-            std::vector<std::string> tables;
-            medialibrary::sqlite::Statement stmt{
-                    "SELECT name FROM sqlite_master WHERE type='table' "
-                    "AND name NOT LIKE '%#_%' ESCAPE '#'"
-            };
-            stmt.execute();
-            sqlite::Row row;
-            while ( ( row = stmt.row() ) != nullptr )
-            {
-                tables.push_back( row.load<std::string>( 0 ) );
-            }
-            return tables;
-        }
+        static std::vector<std::string> listTables( sqlite::Connection* dbConn );
 
         /**
          * @brief sanitizePattern Ensures the pattern is valid, and append a wildcard char
@@ -388,38 +324,13 @@ class Tools
         }
 
         static std::string fetchSchemaSql( const std::string& type,
-                                           const std::string& name )
-        {
-            const std::string req{ "SELECT sql FROM sqlite_master "
-                                 "WHERE type=? AND name=?" };
-            auto chrono = std::chrono::steady_clock::now();
-            Statement stmt( req );
-            stmt.execute( type, name );
-            auto row = stmt.row();
-            if ( row == nullptr )
-                return "";
-            assert( row.nbColumns() == 1 );
-            auto res = row.extract<std::string>();
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_VERBOSE("Executed ", req, " in ",
-                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
-            return res;
-        }
+                                           const std::string& name );
 
-        static std::string fetchTableSchema( const std::string& tableName )
-        {
-            return fetchSchemaSql( "table", tableName );
-        }
+        static std::string fetchTableSchema( const std::string& tableName );
 
-        static std::string fetchTriggerStatement( const std::string& triggerName )
-        {
-            return fetchSchemaSql( "trigger", triggerName );
-        }
+        static std::string fetchTriggerStatement( const std::string& triggerName );
 
-        static std::string fetchIndexStatement( const std::string& indexName )
-        {
-            return fetchSchemaSql( "index", indexName );
-        }
+        static std::string fetchIndexStatement( const std::string& indexName );
 };
 
 }

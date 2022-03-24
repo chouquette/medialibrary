@@ -36,6 +36,56 @@ std::unordered_map<Connection::Handle,
 
 compat::Mutex Statement::StatementsCacheLock;
 
+bool Tools::checkTriggerStatement(const std::string& expectedStatement, const std::string& triggerName)
+{
+    auto actualStatement = fetchTriggerStatement( triggerName );
+    if ( actualStatement == expectedStatement )
+        return true;
+    LOG_ERROR( "Mismatching statement for trigger ", triggerName, "." );
+    LOG_ERROR( "Expected: ", expectedStatement );
+    LOG_ERROR( "Actual:   ", actualStatement );
+    return false;
+}
+
+bool Tools::checkIndexStatement(const std::string& expectedStatement, const std::string& indexName)
+{
+    auto actualStatement = fetchIndexStatement( indexName );
+    if ( actualStatement == expectedStatement )
+        return true;
+    LOG_ERROR( "Mismatching statement for index ", indexName, "." );
+    LOG_ERROR( "Expected: ", expectedStatement );
+    LOG_ERROR( "Actual:   ", actualStatement );
+    return false;
+}
+
+bool Tools::checkTableSchema(const std::string& schema, const std::string& tableName)
+{
+    auto actualSchema = fetchTableSchema( tableName );
+    if ( actualSchema == schema )
+        return true;
+    LOG_ERROR( "Mismatching schema for table ", tableName, "." );
+    LOG_ERROR( "Expected: ", schema );
+    LOG_ERROR( "Actual:   ", actualSchema );
+    return false;
+}
+
+std::vector<std::string> Tools::listTables(Connection* dbConn)
+{
+    OPEN_READ_CONTEXT( ctx, dbConn );
+    std::vector<std::string> tables;
+    medialibrary::sqlite::Statement stmt{
+        "SELECT name FROM sqlite_master WHERE type='table' "
+        "AND name NOT LIKE '%#_%' ESCAPE '#'"
+    };
+    stmt.execute();
+    sqlite::Row row;
+    while ( ( row = stmt.row() ) != nullptr )
+    {
+        tables.push_back( row.load<std::string>( 0 ) );
+    }
+    return tables;
+}
+
 std::string Tools::sanitizePattern( const std::string& pattern )
 {
     // This assumes the input pattern is a regular user input, ie. that it is not
@@ -55,14 +105,47 @@ std::string Tools::sanitizePattern( const std::string& pattern )
     return res;
 }
 
+std::string Tools::fetchSchemaSql(const std::string& type, const std::string& name)
+{
+    const std::string req{ "SELECT sql FROM sqlite_master "
+                           "WHERE type=? AND name=?" };
+    auto chrono = std::chrono::steady_clock::now();
+    Statement stmt( req );
+    stmt.execute( type, name );
+    auto row = stmt.row();
+    if ( row == nullptr )
+        return "";
+    assert( row.nbColumns() == 1 );
+    auto res = row.extract<std::string>();
+    auto duration = std::chrono::steady_clock::now() - chrono;
+    LOG_VERBOSE("Executed ", req, " in ",
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+    return res;
+}
+
+std::string Tools::fetchTableSchema(const std::string& tableName)
+{
+    return fetchSchemaSql( "table", tableName );
+}
+
+std::string Tools::fetchTriggerStatement(const std::string& triggerName)
+{
+    return fetchSchemaSql( "trigger", triggerName );
+}
+
+std::string Tools::fetchIndexStatement(const std::string& indexName)
+{
+    return fetchSchemaSql( "index", indexName );
+}
+
 Statement::Statement(Connection::Handle dbConnection, const std::string& req)
     : m_stmt( nullptr, [](sqlite3_stmt* stmt) {
-        sqlite3_clear_bindings( stmt );
-        sqlite3_reset( stmt );
-    })
-    , m_dbConn( dbConnection )
-    , m_bindIdx( 0 )
-    , m_isCommit( false )
+    sqlite3_clear_bindings( stmt );
+    sqlite3_reset( stmt );
+})
+, m_dbConn( dbConnection )
+, m_bindIdx( 0 )
+, m_isCommit( false )
 {
     std::lock_guard<compat::Mutex> lock( StatementsCacheLock );
     auto& connMap = StatementsCache[ dbConnection ];
@@ -129,6 +212,40 @@ void Statement::FlushConnectionStatementCache( Connection::Handle h )
     auto it = StatementsCache.find( h );
     if ( it != end( StatementsCache ) )
         StatementsCache.erase( it );
+}
+
+Row::Row(sqlite3_stmt* stmt)
+    : m_stmt( stmt )
+    , m_idx( 0 )
+    , m_nbColumns( sqlite3_column_count( stmt ) )
+{
+}
+
+unsigned int Row::nbColumns() const
+{
+    return m_nbColumns;
+}
+
+void Row::advanceToColumn(unsigned int idx)
+{
+    if ( idx >= m_nbColumns )
+        throw errors::ColumnOutOfRange( idx, m_nbColumns );
+    m_idx = idx;
+}
+
+bool Row::operator==(std::nullptr_t) const
+{
+    return m_stmt == nullptr;
+}
+
+bool Row::operator!=(std::nullptr_t) const
+{
+    return m_stmt != nullptr;
+}
+
+bool Row::hasRemainingColumns() const
+{
+    return m_idx < m_nbColumns;
 }
 
 }
