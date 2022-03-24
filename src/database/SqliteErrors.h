@@ -42,34 +42,18 @@ namespace errors
 class Exception : public std::runtime_error
 {
 public:
-    Exception( const char* req, const char* errMsg, int extendedCode )
-        : std::runtime_error( std::string( "Failed to run request [" ) + req + "]: " +
-                    ( errMsg != nullptr ? errMsg : "" ) +
-                   "(" + std::to_string( extendedCode ) + ")" )
-        , m_errorCode( extendedCode )
-    {
-    }
+    Exception( const char* req, const char* errMsg, int extendedCode );
 
-    Exception( const std::string& msg, int errCode )
-        : std::runtime_error( msg )
-        , m_errorCode( errCode )
-    {
-    }
+    Exception( const std::string& msg, int errCode );
 
-    int code() const
-    {
-        return m_errorCode & 0xFF;
-    }
+    int code() const;
 
     /**
      * @brief requiresDbReset returns true if the error is critical enough
      *          to denote a need for a database reset, for instacne if sqlite
      *          reports the database as corrupted.
      */
-    virtual bool requiresDbReset() const
-    {
-        return false;
-    }
+    virtual bool requiresDbReset() const;
 
 private:
     int m_errorCode;
@@ -78,65 +62,43 @@ private:
 class ConstraintViolation : public Exception
 {
 public:
-    ConstraintViolation( const char* req, const char* err, int errCode )
-        : Exception( std::string( "Request [" ) + req + "] aborted due to "
-                    "constraint violation (" + err + ")", errCode )
-    {
-    }
+    ConstraintViolation( const char* req, const char* err, int errCode );
 };
 
 class ConstraintCheck : public ConstraintViolation
 {
 public:
-    ConstraintCheck( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintCheck( const char* req, const char* err, int errCode );
 };
 
 class ConstraintForeignKey : public ConstraintViolation
 {
 public:
-    ConstraintForeignKey( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintForeignKey( const char* req, const char* err, int errCode );
 };
 
 class ConstraintNotNull : public ConstraintViolation
 {
 public:
-    ConstraintNotNull( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintNotNull( const char* req, const char* err, int errCode );
 };
 
 class ConstraintPrimaryKey : public ConstraintViolation
 {
 public:
-    ConstraintPrimaryKey( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintPrimaryKey( const char* req, const char* err, int errCode );
 };
 
 class ConstraintRowId : public ConstraintViolation
 {
 public:
-    ConstraintRowId( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintRowId( const char* req, const char* err, int errCode );
 };
 
 class ConstraintUnique : public ConstraintViolation
 {
 public:
-    ConstraintUnique( const char* req, const char* err, int errCode )
-        : ConstraintViolation( req, err, errCode )
-    {
-    }
+    ConstraintUnique( const char* req, const char* err, int errCode );
 };
 
 /*
@@ -147,442 +109,292 @@ public:
 class GenericError : public Exception
 {
 public:
-    GenericError( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    GenericError( const char* req, const char* errMsg, int extendedCode );
 };
 
 class ErrorMissingColSeq : public GenericError
 {
 public:
-    ErrorMissingColSeq( const char* req, const char* errMsg, int extendedCode )
-        : GenericError( req, errMsg, extendedCode )
-    {
-    }
+    ErrorMissingColSeq( const char* req, const char* errMsg, int extendedCode );
 };
 
 class ErrorRetry : public GenericError
 {
 public:
-    ErrorRetry( const char* req, const char* errMsg, int extendedCode )
-        : GenericError( req, errMsg, extendedCode )
-    {
-    }
+    ErrorRetry( const char* req, const char* errMsg, int extendedCode );
 };
 
 class ErrorSnapshot : public GenericError
 {
 public:
-    ErrorSnapshot( const char* req, const char* errMsg, int extendedCode )
-        : GenericError( req, errMsg, extendedCode )
-    {
-    }
+    ErrorSnapshot( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseBusy : public Exception
 {
 public:
-    DatabaseBusy( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseBusy( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseBusyRecovery : public DatabaseBusy
 {
 public:
-    DatabaseBusyRecovery( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseBusy( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseBusyRecovery( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseBusySnapshot: public DatabaseBusy
 {
 public:
-    DatabaseBusySnapshot( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseBusy( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseBusySnapshot( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseLocked : public Exception
 {
 public:
-    DatabaseLocked( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseLocked( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseLockedSharedCache : public DatabaseLocked
 {
 public:
-    DatabaseLockedSharedCache( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseLocked( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseLockedSharedCache( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseLockedVtab : public DatabaseLocked
 {
 public:
-    DatabaseLockedVtab( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseLocked( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseLockedVtab( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseReadOnly : public Exception
 {
 public:
-    DatabaseReadOnly( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnly( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseReadOnlyRecovery : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyRecovery( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyRecovery( const char* req, const char* errMsg, int extendedCode );
 };
 
 
 class DatabaseReadOnlyCantLock : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyCantLock( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyCantLock( const char* req, const char* errMsg, int extendedCode );
 };
 
 
 class DatabaseReadOnlyRollback : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyRollback( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyRollback( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseReadOnlyDbMoved : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyDbMoved( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyDbMoved( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseReadOnlyCantInit : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyCantInit( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyCantInit( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseReadOnlyDirectory : public DatabaseReadOnly
 {
 public:
-    DatabaseReadOnlyDirectory( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseReadOnly( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseReadOnlyDirectory( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIOErr : public Exception
 {
 public:
-    DatabaseIOErr( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIOErr( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrAccess : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrAccess( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrAccess( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrRead : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrRead( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrRead( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrShortRead : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrShortRead( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrShortRead( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrWrite : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrWrite( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrWrite( const char* req, const char* errMsg, int extendedCode );
 };
-
 
 class DatabaseIoErrFsync : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrFsync( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrFsync( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrDirClose : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrDirClose( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrDirClose( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrDirFsync : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrDirFsync( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrDirFsync( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrTruncate : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrTruncate( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrTruncate( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrCheckReservedLock : public DatabaseIOErr
 {
 public:
     DatabaseIoErrCheckReservedLock( const char* req, const char* errMsg,
-                                    int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+                                    int extendedCode );
 };
 
 class DatabaseIoErrUnlock : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrUnlock( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrUnlock( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrRdLock : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrRdLock( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrRdLock( const char* req, const char* errMsg, int extendedCode );
 };
 
 
 class DatabaseIoErrDelete: public DatabaseIOErr
 {
 public:
-    DatabaseIoErrDelete( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrDelete( const char* req, const char* errMsg, int extendedCode );
 };
 
 
 class DatabaseIoErrDeleteNoEnt : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrDeleteNoEnt( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrDeleteNoEnt( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrLock : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrLock( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrLock( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrClose : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrClose( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrClose( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrShmOpen : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrShmOpen( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrShmOpen( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrShmSize: public DatabaseIOErr
 {
 public:
-    DatabaseIoErrShmSize( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrShmSize( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrShMmap : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrShMmap( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrShMmap( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrFstat : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrFstat( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrFstat( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrSeek : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrSeek( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrSeek( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrGetTempPath : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrGetTempPath( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrGetTempPath( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseIoErrMmap : public DatabaseIOErr
 {
 public:
-    DatabaseIoErrMmap( const char* req, const char* errMsg, int extendedCode )
-        : DatabaseIOErr( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseIoErrMmap( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseCorrupt : public Exception
 {
 public:
-    DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseCorrupt( const char* req, const char* errMsg, int extendedCode );
 
-    virtual bool requiresDbReset() const override
-    {
-        return true;
-    }
+    virtual bool requiresDbReset() const override;
 };
 
 class DatabaseFull: public Exception
 {
 public:
-    DatabaseFull( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseFull( const char* req, const char* errMsg, int extendedCode );
 };
 
 class ProtocolError : public Exception
 {
 public:
-    ProtocolError( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    ProtocolError( const char* req, const char* errMsg, int extendedCode );
 };
 
 class DatabaseSchemaChanged : public Exception
 {
 public:
-    DatabaseSchemaChanged( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    DatabaseSchemaChanged( const char* req, const char* errMsg, int extendedCode );
 };
 
 class TypeMismatch : public Exception
 {
 public:
-    TypeMismatch( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    TypeMismatch( const char* req, const char* errMsg, int extendedCode );
 };
 
 class LibMisuse : public Exception
 {
 public:
-    LibMisuse( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    LibMisuse( const char* req, const char* errMsg, int extendedCode );
 };
 
 class ColumnOutOfRange : public Exception
 {
 public:
-    ColumnOutOfRange( const char* req, const char* errMsg, int extendedCode )
-        : Exception( req, errMsg, extendedCode )
-    {
-    }
+    ColumnOutOfRange( const char* req, const char* errMsg, int extendedCode );
 
-    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns )
-        : Exception( "Attempting to extract column at index " + std::to_string( idx ) +
-                   " from a request with " + std::to_string( nbColumns ) + " columns",
-                   SQLITE_RANGE )
-    {
-    }
+    ColumnOutOfRange( unsigned int idx, unsigned int nbColumns );
 };
 
 static inline bool isInnocuous( int errCode )

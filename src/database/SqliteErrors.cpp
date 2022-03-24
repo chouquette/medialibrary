@@ -201,6 +201,313 @@ void mapToException( const char* reqStr, const char* errMsg, int extRes )
     }
 }
 
+Exception::Exception(const char* req, const char* errMsg, int extendedCode)
+    : std::runtime_error( std::string( "Failed to run request [" ) + req + "]: " +
+                          ( errMsg != nullptr ? errMsg : "" ) +
+                          "(" + std::to_string( extendedCode ) + ")" )
+    , m_errorCode( extendedCode )
+{
+}
+
+Exception::Exception(const std::string& msg, int errCode)
+    : std::runtime_error( msg )
+    , m_errorCode( errCode )
+{
+}
+
+int Exception::code() const
+{
+    return m_errorCode & 0xFF;
+}
+
+bool Exception::requiresDbReset() const
+{
+    return false;
+}
+
+ConstraintViolation::ConstraintViolation(const char* req, const char* err, int errCode)
+    : Exception( std::string( "Request [" ) + req + "] aborted due to "
+                                                    "constraint violation (" + err + ")", errCode )
+{
+}
+
+ConstraintCheck::ConstraintCheck(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+ConstraintForeignKey::ConstraintForeignKey(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+ConstraintNotNull::ConstraintNotNull(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+ConstraintPrimaryKey::ConstraintPrimaryKey(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+ConstraintRowId::ConstraintRowId(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+ConstraintUnique::ConstraintUnique(const char* req, const char* err, int errCode)
+    : ConstraintViolation( req, err, errCode )
+{
+}
+
+GenericError::GenericError(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+ErrorMissingColSeq::ErrorMissingColSeq(const char* req, const char* errMsg, int extendedCode)
+    : GenericError( req, errMsg, extendedCode )
+{
+}
+
+ErrorRetry::ErrorRetry(const char* req, const char* errMsg, int extendedCode)
+    : GenericError( req, errMsg, extendedCode )
+{
+}
+
+ErrorSnapshot::ErrorSnapshot(const char* req, const char* errMsg, int extendedCode)
+    : GenericError( req, errMsg, extendedCode )
+{
+}
+
+DatabaseBusy::DatabaseBusy(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+DatabaseBusyRecovery::DatabaseBusyRecovery(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseBusy( req, errMsg, extendedCode )
+{
+}
+
+DatabaseBusySnapshot::DatabaseBusySnapshot(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseBusy( req, errMsg, extendedCode )
+{
+}
+
+DatabaseLocked::DatabaseLocked(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+DatabaseLockedSharedCache::DatabaseLockedSharedCache(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseLocked( req, errMsg, extendedCode )
+{
+}
+
+DatabaseLockedVtab::DatabaseLockedVtab(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseLocked( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnly::DatabaseReadOnly(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyRecovery::DatabaseReadOnlyRecovery(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyCantLock::DatabaseReadOnlyCantLock(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyRollback::DatabaseReadOnlyRollback(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyDbMoved::DatabaseReadOnlyDbMoved(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyCantInit::DatabaseReadOnlyCantInit(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseReadOnlyDirectory::DatabaseReadOnlyDirectory(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseReadOnly( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIOErr::DatabaseIOErr(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrAccess::DatabaseIoErrAccess(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrRead::DatabaseIoErrRead(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrShortRead::DatabaseIoErrShortRead(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrWrite::DatabaseIoErrWrite(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrFsync::DatabaseIoErrFsync(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrDirClose::DatabaseIoErrDirClose(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrDirFsync::DatabaseIoErrDirFsync(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrTruncate::DatabaseIoErrTruncate(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrCheckReservedLock::DatabaseIoErrCheckReservedLock(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrUnlock::DatabaseIoErrUnlock(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrRdLock::DatabaseIoErrRdLock(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrDelete::DatabaseIoErrDelete(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrDeleteNoEnt::DatabaseIoErrDeleteNoEnt(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrLock::DatabaseIoErrLock(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrClose::DatabaseIoErrClose(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrShmOpen::DatabaseIoErrShmOpen(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrShmSize::DatabaseIoErrShmSize(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrShMmap::DatabaseIoErrShMmap(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrFstat::DatabaseIoErrFstat(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrSeek::DatabaseIoErrSeek(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrGetTempPath::DatabaseIoErrGetTempPath(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseIoErrMmap::DatabaseIoErrMmap(const char* req, const char* errMsg, int extendedCode)
+    : DatabaseIOErr( req, errMsg, extendedCode )
+{
+}
+
+DatabaseCorrupt::DatabaseCorrupt(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+bool DatabaseCorrupt::requiresDbReset() const
+{
+    return true;
+}
+
+DatabaseFull::DatabaseFull(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+ProtocolError::ProtocolError(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+DatabaseSchemaChanged::DatabaseSchemaChanged(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+TypeMismatch::TypeMismatch(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+LibMisuse::LibMisuse(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+ColumnOutOfRange::ColumnOutOfRange(const char* req, const char* errMsg, int extendedCode)
+    : Exception( req, errMsg, extendedCode )
+{
+}
+
+ColumnOutOfRange::ColumnOutOfRange(unsigned int idx, unsigned int nbColumns)
+    : Exception( "Attempting to extract column at index " + std::to_string( idx ) +
+                 " from a request with " + std::to_string( nbColumns ) + " columns",
+                 SQLITE_RANGE )
+{
+}
+
 } // namespace errors
 } // namespace sqlite
 } // namespace medialibrary
