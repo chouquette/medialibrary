@@ -24,6 +24,7 @@ medialib_src = [
   'database/SqliteConnection.cpp',
   'database/SqliteTools.cpp',
   'database/SqliteTransaction.cpp',
+  'database/SqliteErrors.cpp',
   'discoverer/DiscovererWorker.cpp',
   'discoverer/FsDiscoverer.cpp',
   'factory/DeviceListerFactory.cpp',
