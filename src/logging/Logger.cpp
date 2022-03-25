@@ -34,4 +34,34 @@ std::unique_ptr<ILogger> Log::s_defaultLogger = std::unique_ptr<ILogger>( new Io
 std::atomic<ILogger*> Log::s_logger;
 std::atomic<LogLevel> Log::s_logLevel;
 
+void Log::doLog( LogLevel lvl, const std::string& msg )
+{
+    auto l = s_logger.load( std::memory_order_consume );
+    if ( l == nullptr )
+    {
+        l = s_defaultLogger.get();
+        // In case we're logging early (as in, before the static default logger has been constructed, don't blow up)
+        if ( l == nullptr )
+            return;
+    }
+    switch ( lvl )
+    {
+    case LogLevel::Error:
+        l->Error( msg );
+        break;
+    case LogLevel::Warning:
+        l->Warning( msg );
+        break;
+    case LogLevel::Info:
+        l->Info( msg );
+        break;
+    case LogLevel::Debug:
+        l->Debug( msg );
+        break;
+    case LogLevel::Verbose:
+        l->Verbose( msg );
+        break;
+    }
+}
+
 }

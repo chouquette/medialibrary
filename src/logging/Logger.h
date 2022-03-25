@@ -57,37 +57,13 @@ private:
         return stream.str();
     }
 
+    static void doLog( LogLevel lvl, const std::string& msg );
+
     template <typename... Args>
     static void log( LogLevel lvl, Args&&... args)
     {
         auto msg = createMsg( std::forward<Args>( args )... );
-        auto l = s_logger.load( std::memory_order_consume );
-        if ( l == nullptr )
-        {
-            l = s_defaultLogger.get();
-            // In case we're logging early (as in, before the static default logger has been constructed, don't blow up)
-            if ( l == nullptr )
-                return;
-        }
-
-        switch ( lvl )
-        {
-        case LogLevel::Error:
-            l->Error( msg );
-            break;
-        case LogLevel::Warning:
-            l->Warning( msg );
-            break;
-        case LogLevel::Info:
-            l->Info( msg );
-            break;
-        case LogLevel::Debug:
-            l->Debug( msg );
-            break;
-        case LogLevel::Verbose:
-            l->Verbose( msg );
-            break;
-        }
+        doLog( lvl, msg );
     }
 
 public:
