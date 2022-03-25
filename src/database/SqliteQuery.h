@@ -46,7 +46,7 @@ protected:
     {
     }
 
-    size_t executeCount( const std::string& req )
+    size_t executeCount( const std::string& req ) const
     {
         auto dbConn = m_ml->getConn();
         OPEN_READ_CONTEXT( ctx, dbConn );
@@ -63,19 +63,19 @@ protected:
         return count;
     }
 
-    Result executeFetchItems( const std::string& req, uint32_t nbItems, uint32_t offset )
+    Result executeFetchItems( const std::string& req, uint32_t nbItems, uint32_t offset ) const
     {
         return Impl::template fetchAll<Intf>( m_ml, req, m_params, nbItems, offset );
     }
 
-    Result executeFetchAll( const std::string& req )
+    Result executeFetchAll( const std::string& req ) const
     {
         return Impl::template fetchAll<Intf>( m_ml, req, m_params );
     }
 
 private:
     MediaLibraryPtr m_ml;
-    std::tuple<typename std::decay<RequestParams>::type...> m_params;
+    const std::tuple<typename std::decay<RequestParams>::type...> m_params;
 };
 
 template <typename Impl, typename Intf, typename... Args>
@@ -119,9 +119,9 @@ public:
     }
 
 private:
-    std::string m_field;
-    std::string m_base;
-    std::string m_groupAndOrderBy;
+    const std::string m_field;
+    const std::string m_base;
+    const std::string m_groupAndOrderBy;
 };
 
 /**
@@ -163,8 +163,8 @@ public:
     }
 
 private:
-    std::string m_countReq;
-    std::string m_req;
+    const std::string m_countReq;
+    const std::string m_req;
 };
 
 template <typename Impl, typename Intf = Impl, typename... Args>
