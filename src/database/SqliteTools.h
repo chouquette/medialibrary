@@ -195,7 +195,7 @@ class Tools
             while ( ( sqliteRow = stmt.row() ) != nullptr )
             {
                 auto row = std::make_shared<IMPL>( ml, sqliteRow );
-                results.push_back( row );
+                results.push_back( std::move( row ) );
             }
             auto duration = std::chrono::steady_clock::now() - chrono;
             LOG_VERBOSE("Executed ", req, " in ",
