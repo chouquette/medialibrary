@@ -199,7 +199,14 @@ void Parser::updateStats()
 {
     if ( m_callback == nullptr )
         return;
-    assert( m_opScheduled >= m_opDone );
+    if ( m_opScheduled < m_opDone )
+    {
+        /* After flushing, a task may still complete while we don't expect it
+         * anymore. Handling this properly would be racy until we have a way to
+         * interrupt a task, which we don't for now
+         */
+        m_opDone = m_opScheduled;
+    }
     /*
      * We don't want to spam the callback receiver each time we're done parsing
      * an item, however we must signal progress when:
