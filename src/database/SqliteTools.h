@@ -169,6 +169,15 @@ private:
     static std::unordered_map<Connection::Handle, StatementsCacheMap> StatementsCache;
 };
 
+struct QueryTimer
+{
+    QueryTimer( const std::string& req );
+    ~QueryTimer();
+private:
+    const std::string& m_req;
+    std::chrono::steady_clock::time_point m_chrono;
+};
+
 class Tools
 {
     public:
@@ -186,7 +195,7 @@ class Tools
         {
             auto dbConnection = ml->getConn();
             OPEN_READ_CONTEXT( ctx, dbConnection );
-            auto chrono = std::chrono::steady_clock::now();
+            QueryTimer qt{ req };
 
             std::vector<std::shared_ptr<INTF>> results;
             Statement stmt( Connection::Context::handle(), req );
@@ -197,9 +206,6 @@ class Tools
                 auto row = std::make_shared<IMPL>( ml, sqliteRow );
                 results.push_back( std::move( row ) );
             }
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_VERBOSE("Executed ", req, " in ",
-                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return results;
         }
 
@@ -209,7 +215,7 @@ class Tools
         {
             auto dbConnection = ml->getConn();
             OPEN_READ_CONTEXT( ctx, dbConnection );
-            auto chrono = std::chrono::steady_clock::now();
+            QueryTimer qt{ req };
 
             Statement stmt( req );
             stmt.execute( std::forward<Args>( args )... );
@@ -217,9 +223,6 @@ class Tools
             std::shared_ptr<T> res;
             if ( row != nullptr )
                 res = std::make_shared<T>( ml, row );
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_VERBOSE("Executed ", req, " in ",
-                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
             return res;
         }
 
@@ -313,14 +316,12 @@ class Tools
         static void executeRequestLocked( sqlite::Connection::Handle handle,
                                           const std::string& req, Args&&... args )
         {
-            auto chrono = std::chrono::steady_clock::now();
+            QueryTimer qt{ req };
+
             Statement stmt( handle, req );
             stmt.execute( std::forward<Args>( args )... );
             while ( stmt.row() != nullptr )
                 ;
-            auto duration = std::chrono::steady_clock::now() - chrono;
-            LOG_VERBOSE("Executed ", req, " in ",
-                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         }
 
         static std::string fetchSchemaSql( const std::string& type,

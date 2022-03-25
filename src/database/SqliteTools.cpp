@@ -248,6 +248,19 @@ bool Row::hasRemainingColumns() const
     return m_idx < m_nbColumns;
 }
 
+QueryTimer::QueryTimer(const std::string& req)
+    : m_req( req )
+    , m_chrono( std::chrono::steady_clock::now() )
+{
+}
+
+QueryTimer::~QueryTimer()
+{
+    auto duration = std::chrono::steady_clock::now() - m_chrono;
+    LOG_VERBOSE("Executed ", m_req, " in ",
+                std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
+}
+
 }
 
 }
