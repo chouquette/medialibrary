@@ -220,10 +220,9 @@ class Tools
             Statement stmt( req );
             stmt.execute( std::forward<Args>( args )... );
             auto row = stmt.row();
-            std::shared_ptr<T> res;
             if ( row != nullptr )
-                res = std::make_shared<T>( ml, row );
-            return res;
+                return std::make_shared<T>( ml, row );
+            return nullptr;
         }
 
         template <typename... Args>
