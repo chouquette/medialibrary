@@ -50,12 +50,9 @@ protected:
     {
         auto dbConn = m_ml->getConn();
         OPEN_READ_CONTEXT( ctx, dbConn );
-        auto chrono = std::chrono::steady_clock::now();
+        sqlite::QueryTimer qt{ req };
         sqlite::Statement stmt( req );
         stmt.execute( m_params );
-        auto duration = std::chrono::steady_clock::now() - chrono;
-        LOG_VERBOSE("Executed ", req, " in ",
-                 std::chrono::duration_cast<std::chrono::microseconds>( duration ).count(), "µs" );
         auto row = stmt.row();
         size_t count;
         row >> count;
