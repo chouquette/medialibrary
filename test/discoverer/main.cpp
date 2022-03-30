@@ -48,6 +48,7 @@ public:
         , m_isIdle( false )
         , m_error( false )
         , m_generateThumbnails( generateThumbnails )
+        , m_nbThumbnails( 0 )
     {
     }
 
