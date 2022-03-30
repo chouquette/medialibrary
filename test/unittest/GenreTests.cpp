@@ -249,6 +249,7 @@ static void NbTracks( GenreTests* T )
     ASSERT_EQ( 0u, T->g->nbTracks() );
 
     auto extraGenre = T->ml->createGenre( "Progressive Otter Metal" );
+    ASSERT_NON_NULL( extraGenre );
     auto genres = T->ml->genres( nullptr )->all();
     ASSERT_EQ( 2u, genres.size() );
 
