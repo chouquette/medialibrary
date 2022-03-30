@@ -42,11 +42,12 @@
 class TestCb : public mock::NoopCallback
 {
 public:
-    TestCb()
+    explicit TestCb( bool generateThumbnails )
         : m_isDiscoveryCompleted( false )
         , m_isParsingCompleted( false )
         , m_isIdle( false )
         , m_error( false )
+        , m_generateThumbnails( generateThumbnails )
     {
     }
 
@@ -59,6 +60,14 @@ public:
                     m_isIdle == true) || m_error;
         });
         return m_error == false;
+    }
+
+    void waitForThumbnails()
+    {
+        std::unique_lock<compat::Mutex> lock{ m_mutex };
+        m_thumbnailsCond.wait( lock, [this]() {
+            return m_nbThumbnails == 0;
+        });
     }
 
 private:
@@ -107,6 +116,41 @@ private:
         m_cond.notify_all();
     }
 
+    virtual void onMediaAdded( std::vector<MediaPtr> media ) override
+    {
+        if ( m_generateThumbnails == false )
+            return;
+        for ( const auto& m : media )
+        {
+            if ( m->type() != IMedia::Type::Video )
+                continue;
+            {
+                std::unique_lock<compat::Mutex> lock( m_mutex );
+                m_nbThumbnails++;
+            }
+            auto res = m->requestThumbnail( ThumbnailSizeType::Thumbnail, 320, 0, 0.3f );
+            assert( res == true );
+        }
+    }
+
+    virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType, bool success ) override
+    {
+        if ( success == false )
+        {
+            std::cerr << "Failed to generate thumbnail for media "
+                      << media->id() << std::endl;
+            return;
+        }
+        std::unique_lock<compat::Mutex> lock( m_mutex );
+        assert( m_nbThumbnails != 0 );
+        --m_nbThumbnails;
+        if ( m_nbThumbnails == 0 && m_isParsingCompleted == true
+             && m_isDiscoveryCompleted == true )
+        {
+            m_thumbnailsCond.notify_all();
+        }
+    }
+
 private:
     compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
@@ -114,13 +158,17 @@ private:
     bool m_isParsingCompleted;
     bool m_isIdle;
     bool m_error;
+    bool m_generateThumbnails;
+    size_t m_nbThumbnails;
+    compat::ConditionVariable m_thumbnailsCond;
 };
 
 static void usage(const char* const* argv)
 {
-    std::cerr << "usage: " << argv[0] << "[-q] [-n X] <entrypoint|database>\n"
+    std::cerr << "usage: " << argv[0] << "[-q] [-n X] [-t] <entrypoint|database>\n"
                  "-q: Use Error log level. Default is Debug\n"
                  "-n X: Run X discover of the provided entrypoint\n"
+                 "-t: Generate thumbnails for discovered videos\n"
                  "-m: Migrate the provided database in-place.\n"
                  "-r: When used in combination with -m, it will reload "
                      "the database after it's been migrated\n\n"
@@ -142,9 +190,10 @@ int main( int argc, char** argv )
     auto quiet = false;
     auto migrate = false;
     auto reload = false;
+    auto thumbnails = false;
 
     int opt;
-    while ( ( opt = getopt(argc, argv, "qn:mr") ) != -1 )
+    while ( ( opt = getopt(argc, argv, "qn:mrt") ) != -1 )
     {
         switch ( opt )
         {
@@ -159,6 +208,9 @@ int main( int argc, char** argv )
                 break;
             case 'r':
                 reload = true;
+                break;
+            case 't':
+                thumbnails = true;
                 break;
             default:
                 usage(argv);
@@ -198,7 +250,7 @@ int main( int argc, char** argv )
     else
         dbPath = entrypoint;
 
-    auto testCb = std::make_unique<TestCb>();
+    auto testCb = std::make_unique<TestCb>(thumbnails);
     std::unique_ptr<medialibrary::IMediaLibrary> ml{
         NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false, nullptr )
     };
@@ -229,6 +281,10 @@ int main( int argc, char** argv )
             return 1;
         if ( i < nbRuns - 1 )
             ml->forceRescan();
+    }
+    if ( thumbnails == true )
+    {
+        testCb->waitForThumbnails();
     }
     return 0;
 }
