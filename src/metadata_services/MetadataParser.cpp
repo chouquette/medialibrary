@@ -495,7 +495,15 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     auto title = utils::title::sanitize( item.media()->fileName() );
     auto showInfo = utils::title::analyze( title );
 
-    const auto& artworkMrl = item.meta( IItem::Metadata::ArtworkUrl );
+    const auto& embeddedThumbnails = item.embeddedThumbnails();
+    std::shared_ptr<Thumbnail> thumbnail;
+    if ( embeddedThumbnails.empty() == false )
+    {
+        thumbnail = std::make_shared<Thumbnail>( m_ml, embeddedThumbnails[0],
+                ThumbnailSizeType::Thumbnail );
+        auto fileSize = embeddedThumbnails[0]->size();
+        thumbnail->setHash( embeddedThumbnails[0]->hash(), fileSize );
+    }
 
     auto t = m_ml->getConn()->newTransaction();
     media->setTitle( title, false );
@@ -504,12 +512,10 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
     {
         assignMediaToGroup( item );
     }
-
-    if ( artworkMrl.empty() == false )
+    if ( thumbnail != nullptr )
     {
-        media->setThumbnail( std::make_shared<Thumbnail>( m_ml, artworkMrl,
-                                Thumbnail::Origin::Media,
-                                ThumbnailSizeType::Thumbnail, false ) );
+        if ( media->setThumbnail( std::move( thumbnail ) ) == false )
+            return false;
     }
     if ( std::get<0>( showInfo ) == true )
     {
@@ -532,15 +538,6 @@ bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
         // How do we know if it's a movie or a random video?
     }
     t->commit();
-    auto thumbnail = media->thumbnail( ThumbnailSizeType::Thumbnail );
-    // before relocating the thumbnail of a video media, bear in mind that the
-    // thumbnailer thread might be processing the same media, and can be generating
-    // a thumbnail right now
-    if ( thumbnail != nullptr && thumbnail->status() == ThumbnailStatus::Available &&
-         thumbnail->isOwned() == false )
-    {
-        thumbnail->relocate();
-    }
     return true;
 }
 
