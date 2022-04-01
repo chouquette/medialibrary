@@ -390,7 +390,6 @@ bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
      */
     auto t = m_ml->getConn()->newTransaction();
     static const std::string req = "UPDATE " + Table::Name + " SET "
-        "nb_tracks = nb_tracks + 1, is_present = is_present + 1,"
         "duration = duration + ? "
         "WHERE id_album = ?";
     auto duration = media->duration() >= 0 ? media->duration() : 0;
@@ -431,7 +430,6 @@ bool Album::removeTrack( Media& media )
         return false;
 
     static const std::string req = "UPDATE " + Table::Name + " SET "
-        "nb_tracks = nb_tracks - 1, is_present = is_present - 1,"
         "duration = duration - ? "
         "WHERE id_album = ?";
     auto duration = media.duration() >= 0 ? media.duration() : 0;
@@ -554,6 +552,9 @@ void Album::createTriggers( sqlite::Connection* dbConnection )
                                    trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeleteEmpty, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::UpdateOnMediaAlbumIdChange,
+                                            Settings::DbModelVersion ) );
 }
 
 void Album::createIndexes( sqlite::Connection* dbConnection )
@@ -744,6 +745,23 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                             " WHERE id_album=new.id_album;"
                    " END";
         }
+        case Triggers::UpdateOnMediaAlbumIdChange:
+        {
+            assert( dbModel >= 36 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF album_id ON " + Media::Table::Name +
+                       " WHEN IFNULL(old.album_id, 0) != IFNULL(new.album_id, 0)"
+                       " BEGIN"
+                           " UPDATE " + Table::Name + " SET "
+                               " is_present = is_present - IIF(old.is_present != 0, 1, 0),"
+                               " nb_tracks = nb_tracks - 1"
+                               " WHERE old.album_id IS NOT NULL AND id_album = old.album_id;"
+                           " UPDATE " + Table::Name + " SET "
+                               " is_present = is_present + IIF(old.is_present != 0, 1, 0),"
+                               " nb_tracks = nb_tracks + 1"
+                               " WHERE new.album_id IS NOT NULL AND id_album = new.album_id;"
+                       " END";
+        }
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -774,6 +792,9 @@ std::string Album::triggerName( Album::Triggers trigger, uint32_t dbModel )
         case Triggers::DeleteEmpty:
             assert( dbModel >= 34 );
             return "album_delete_empty";
+        case Triggers::UpdateOnMediaAlbumIdChange:
+            assert( dbModel >= 36 );
+            return "album_update_on_media_album_id";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -837,7 +858,8 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
             check( Triggers::DeleteTrack ) &&
             check( Triggers::InsertFts ) &&
             check( Triggers::DeleteFts ) &&
-            check( Triggers::DeleteEmpty );
+            check( Triggers::DeleteEmpty ) &&
+            check( Triggers::UpdateOnMediaAlbumIdChange );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, std::string title )

@@ -59,6 +59,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
             InsertFts,
             DeleteFts,
             DeleteEmpty, // Introduced in model 34
+            UpdateOnMediaAlbumIdChange, // Introduced in model 36
         };
         enum class Indexes : uint8_t
         {

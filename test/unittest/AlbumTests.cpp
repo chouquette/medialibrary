@@ -881,6 +881,62 @@ static void SortByInsertionDate( Tests* T )
     ASSERT_EQ( albums[1]->id(), alb1->id() );
 }
 
+static void ConvertToExternal( Tests* T )
+{
+    auto a = T->ml->createAlbum( "album" );
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+
+    auto res = a->addTrack( m, 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+    res = a->addTrack( m2, 2, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, a->nbTracks() );
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( 2u, a->nbTracks() );
+    ASSERT_EQ( 2u, a->nbPresentTracks() );
+
+    auto deviceId = m->deviceId();
+    auto folderId = m->folderId();
+    res = m->convertToExternal();
+    ASSERT_TRUE( res );
+
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( 1u, a->nbTracks() );
+    ASSERT_EQ( 1u, a->nbPresentTracks() );
+
+    res = m->markAsInternal( IMedia::Type::Audio, m->duration(), deviceId, folderId );
+    ASSERT_TRUE( res );
+
+    /*
+     * The swich to internal in itself doesn't add the genre back. Outside of a
+     * test configuration, a switch back to internal is followed by a refresh
+     * for the media.
+     * Here, we need to simulate this
+     */
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( 1u, a->nbTracks() );
+    ASSERT_EQ( 1u, a->nbPresentTracks() );
+
+    res = m->markAsAlbumTrack( a->id(), 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( 2u, a->nbTracks() );
+    ASSERT_EQ( 2u, a->nbPresentTracks() );
+
+    res = m->convertToExternal();
+    ASSERT_TRUE( res );
+    res = m2->convertToExternal();
+    ASSERT_TRUE( res );
+
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( nullptr, a );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Album )
@@ -916,6 +972,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByDuration );
     ADD_TEST( SortByInsertionDate );
+    ADD_TEST( ConvertToExternal );
 
     END_TESTS
 }

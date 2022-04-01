@@ -47,6 +47,7 @@ namespace
         "album_delete_empty",
         "album_delete_track",
         "album_is_present",
+        "album_update_on_media_album_id",
         "artist_decrement_nb_albums",
         "artist_decrement_nb_tracks",
         "artist_has_tracks_present",
