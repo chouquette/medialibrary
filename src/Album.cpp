@@ -382,20 +382,7 @@ Query<IMedia> Album::searchTracks( const std::string& pattern,
 bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
                       unsigned int discNumber, int64_t artistId, Genre* genre )
 {
-    /*
-     * The transaction should already exist, but in order to avoid sprinkling
-     * all the tests with a transaction block, we just create one here. It's
-     * likely to be a noop transaction outside of the tests but it doesn't matter
-     * much.
-     */
-    auto t = m_ml->getConn()->newTransaction();
-    static const std::string req = "UPDATE " + Table::Name + " SET "
-        "duration = duration + ? "
-        "WHERE id_album = ?";
     auto duration = media->duration() >= 0 ? media->duration() : 0;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, duration,
-                                       m_id ) == false )
-        return false;
     if ( media->markAsAlbumTrack( m_id, trackNb, discNumber, artistId, genre ) == false )
         return false;
     if ( genre != nullptr && genre->updateNbTracks( 1 ) == false )
@@ -413,7 +400,6 @@ bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
     if ( ( m_tracks.empty() == true && m_nbTracks == 1 ) ||
          ( m_tracks.empty() == false && m_nbTracks > 1 ) )
         m_tracks.push_back( std::move( media ) );
-    t->commit();
     return true;
 }
 
@@ -754,11 +740,13 @@ std::string Album::trigger( Triggers trigger, uint32_t dbModel )
                        " BEGIN"
                            " UPDATE " + Table::Name + " SET "
                                " is_present = is_present - IIF(old.is_present != 0, 1, 0),"
-                               " nb_tracks = nb_tracks - 1"
+                               " nb_tracks = nb_tracks - 1,"
+                               " duration = duration - IIF(old.duration >= 0, old.duration, 0)"
                                " WHERE old.album_id IS NOT NULL AND id_album = old.album_id;"
                            " UPDATE " + Table::Name + " SET "
                                " is_present = is_present + IIF(old.is_present != 0, 1, 0),"
-                               " nb_tracks = nb_tracks + 1"
+                               " nb_tracks = nb_tracks + 1,"
+                               " duration = duration + IIF(new.duration >= 0, new.duration, 0)"
                                " WHERE new.album_id IS NOT NULL AND id_album = new.album_id;"
                        " END";
         }

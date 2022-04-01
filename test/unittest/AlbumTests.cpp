@@ -888,16 +888,22 @@ static void ConvertToExternal( Tests* T )
                 T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+    auto res = m->setDuration( 10 );
+    ASSERT_TRUE( res );
+    res = m2->setDuration( 90 );
+    ASSERT_TRUE( res );
 
-    auto res = a->addTrack( m, 1, 1, 0, nullptr );
+    res = a->addTrack( m, 1, 1, 0, nullptr );
     ASSERT_TRUE( res );
     res = a->addTrack( m2, 2, 1, 0, nullptr );
     ASSERT_TRUE( res );
 
     ASSERT_EQ( 2u, a->nbTracks() );
+    ASSERT_EQ( 100, a->duration() );
     a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
     ASSERT_EQ( 2u, a->nbTracks() );
     ASSERT_EQ( 2u, a->nbPresentTracks() );
+    ASSERT_EQ( 100, a->duration() );
 
     auto deviceId = m->deviceId();
     auto folderId = m->folderId();
@@ -920,6 +926,7 @@ static void ConvertToExternal( Tests* T )
     a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
     ASSERT_EQ( 1u, a->nbTracks() );
     ASSERT_EQ( 1u, a->nbPresentTracks() );
+    ASSERT_EQ( 90, a->duration() );
 
     res = m->markAsAlbumTrack( a->id(), 1, 1, 0, nullptr );
     ASSERT_TRUE( res );
@@ -927,6 +934,7 @@ static void ConvertToExternal( Tests* T )
     a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
     ASSERT_EQ( 2u, a->nbTracks() );
     ASSERT_EQ( 2u, a->nbPresentTracks() );
+    ASSERT_EQ( 100, a->duration() );
 
     res = m->convertToExternal();
     ASSERT_TRUE( res );
