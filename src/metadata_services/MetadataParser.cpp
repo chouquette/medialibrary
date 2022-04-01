@@ -602,6 +602,8 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
             return Status::Fatal;
         }
         auto res = overrideExternalMedia( item, *media, *file, mediaType );
+        if ( res != Status::Success )
+            return res;
         // IItem::setFile will update the task in db, so run it as part of
         // the transation
         item.setFile( std::move( file ) );
