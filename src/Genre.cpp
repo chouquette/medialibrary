@@ -83,11 +83,6 @@ uint32_t Genre::nbPresentTracks() const
 
 bool Genre::updateNbTracks( int increment )
 {
-    static const std::string req = "UPDATE " + Table::Name +
-            " SET nb_tracks = nb_tracks + ?1,"
-            " is_present = is_present + ?1 WHERE id_genre = ?2";
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, increment, m_id ) == false )
-        return false;
     m_nbTracks += increment;
     m_nbPresentTracks += increment;
     return true;
@@ -216,6 +211,9 @@ void Genre::createTriggers( sqlite::Connection* dbConn )
                                    trigger( Triggers::UpdateIsPresent, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
                                    trigger( Triggers::DeleteEmpty, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+                                   trigger( Triggers::UpdateOnMediaGenreIdChange,
+                                            Settings::DbModelVersion ) );
 }
 
 std::string Genre::schema( const std::string& tableName, uint32_t dbModel )
@@ -359,6 +357,28 @@ std::string Genre::trigger( Triggers trigger, uint32_t dbModel )
                             " WHERE id_genre = old.id_genre;"
                    " END";
         }
+        case Triggers::UpdateOnMediaGenreIdChange:
+        {
+            assert( dbModel >= 36 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                   " AFTER UPDATE OF genre_id ON " + Media::Table::Name +
+                   " WHEN IFNULL(new.genre_id, 0) != IFNULL(old.genre_id, 0)"
+                   " BEGIN"
+                    /* Decrement the old genre first */
+                   " UPDATE " + Table::Name +
+                       " SET is_present = is_present -"
+                            " IIF(old.is_present != 0, 1, 0),"
+                       " nb_tracks = nb_tracks - 1"
+                       " WHERE old.genre_id IS NOT NULL AND id_genre = old.genre_id;"
+                   /* And increment the new one afterward */
+                   " UPDATE " + Table::Name +
+                       " SET is_present = is_present +"
+                            " IIF(old.is_present != 0, 1, 0),"
+                       " nb_tracks = nb_tracks + 1"
+                       " WHERE new.genre_id IS NOT NULL AND id_genre = new.genre_id;"
+                   " END";
+
+        }
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -386,6 +406,9 @@ std::string Genre::triggerName( Triggers trigger, uint32_t dbModel )
         case Triggers::DeleteEmpty:
             assert( dbModel >= 34 );
             return "genre_delete_empty";
+        case Triggers::UpdateOnMediaGenreIdChange:
+            assert( dbModel >= 36 );
+            return "genre_update_on_media_genre_id_change";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -412,7 +435,8 @@ bool Genre::checkDbModel(MediaLibraryPtr ml)
             check( Triggers::DeleteFts ) &&
             check( Triggers::UpdateOnTrackDelete ) &&
             check( Triggers::UpdateIsPresent ) &&
-            check( Triggers::DeleteEmpty );
+            check( Triggers::DeleteEmpty ) &&
+            check( Triggers::UpdateOnMediaGenreIdChange );
 }
 
 std::shared_ptr<Genre> Genre::create( MediaLibraryPtr ml, std::string name )

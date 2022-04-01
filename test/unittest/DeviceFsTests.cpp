@@ -779,6 +779,30 @@ static void GenrePresence( DeviceFsTests* T )
     ASSERT_EQ( 3u, genre->nbTracks() );
     ASSERT_EQ( 1u, genre->nbPresentTracks() );
 
+    /*
+     * Convert the missing track to external and check that nb_tracks gets updated
+     * but is_present doesn't
+     */
+    auto deviceId = media1->deviceId();
+    auto folderId = media1->folderId();
+    auto res = media1->convertToExternal();
+    ASSERT_TRUE( res );
+
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 2u, genre->nbTracks() );
+    ASSERT_EQ( 0u, genre->nbPresentTracks() );
+
+    res = media1->markAsInternal( IMedia::Type::Audio, media1->duration(),
+                                  deviceId, folderId );
+    ASSERT_TRUE( res );
+
+    res = media1->markAsAlbumTrack( album->id(), 1, 1, 0, genre.get() );
+    ASSERT_TRUE( res );
+
+    genre = std::static_pointer_cast<Genre>( T->ml->genre( genre->id() ) );
+    ASSERT_EQ( 3u, genre->nbTracks() );
+    ASSERT_EQ( 1u, genre->nbPresentTracks() );
+
     /* Remove the present track */
     T->ml->deleteMedia( media1->id() );
 

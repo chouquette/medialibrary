@@ -51,6 +51,7 @@ public:
         UpdateOnTrackDelete,
         UpdateIsPresent,
         DeleteEmpty, // Introduced in model 34
+        UpdateOnMediaGenreIdChange, // Introduced in model 36
     };
 
     Genre( MediaLibraryPtr ml, sqlite::Row& row );

@@ -65,6 +65,7 @@ namespace
         "folder_update_nb_media_on_media_update",
         "genre_delete_empty",
         "genre_update_is_present",
+        "genre_update_on_media_genre_id_change",
         "genre_update_on_track_deleted",
         "incr_thumbnail_refcount",
         "increment_media_nb_playlist", "insert_album_fts", "insert_artist_fts",

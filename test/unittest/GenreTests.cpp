@@ -449,6 +449,69 @@ static void GetThumbnails( GenreTests* T )
     ASSERT_EQ( 1u, T->ml->countNbThumbnails() );
 }
 
+static void ConvertToExternal( GenreTests* T )
+{
+    ASSERT_EQ( 0u, T->g->nbTracks() );
+
+    auto extraGenre = T->ml->createGenre( "Progressive Otter Metal" );
+    ASSERT_NON_NULL( extraGenre );
+    auto genres = T->ml->genres( nullptr )->all();
+    ASSERT_EQ( 2u, genres.size() );
+
+    auto a = T->ml->createAlbum( "album" );
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "track.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "track2.mp3", IMedia::Type::Audio ) );
+
+    auto res = a->addTrack( m, 1, 1, 0, T->g.get() );
+    ASSERT_TRUE( res );
+    res = a->addTrack( m2, 2, 1, 0, T->g.get() );
+    ASSERT_TRUE( res );
+
+    ASSERT_EQ( 2u, T->g->nbTracks() );
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 2u, T->g->nbTracks() );
+    ASSERT_EQ( 2u, T->g->nbPresentTracks() );
+
+    auto deviceId = m->deviceId();
+    auto folderId = m->folderId();
+    res = m->convertToExternal();
+    ASSERT_TRUE( res );
+
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 1u, T->g->nbTracks() );
+    ASSERT_EQ( 1u, T->g->nbPresentTracks() );
+
+    res = m->markAsInternal( IMedia::Type::Audio, m->duration(), deviceId, folderId );
+    ASSERT_TRUE( res );
+
+    /*
+     * The swich to internal in itself doesn't add the genre back. Outside of a
+     * test configuration, a switch back to internal is followed by a refresh
+     * for the media.
+     * Here, we need to simulate this
+     */
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 1u, T->g->nbTracks() );
+    ASSERT_EQ( 1u, T->g->nbPresentTracks() );
+
+    res = m->markAsAlbumTrack( a->id(), 1, 1, 0, T->g.get() );
+    ASSERT_TRUE( res );
+
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( 2u, T->g->nbTracks() );
+    ASSERT_EQ( 2u, T->g->nbPresentTracks() );
+
+    res = m->convertToExternal();
+    ASSERT_TRUE( res );
+    res = m2->convertToExternal();
+    ASSERT_TRUE( res );
+
+    T->g = std::static_pointer_cast<Genre>( T->ml->genre( T->g->id() ) );
+    ASSERT_EQ( nullptr, T->g );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( GenreTests );
@@ -470,6 +533,7 @@ int main( int ac, char** av )
     ADD_TEST( WithThumbnail );
     ADD_TEST( CheckDbModel );
     ADD_TEST( GetThumbnails );
+    ADD_TEST( ConvertToExternal );
 
     END_TESTS
 }
