@@ -32,7 +32,7 @@
 namespace medialibrary
 {
 
-const uint32_t Settings::DbModelVersion = 35u;
+const uint32_t Settings::DbModelVersion = 36u;
 const uint32_t Settings::MaxTaskAttempts = 2u;
 const uint32_t Settings::MaxLinkTaskAttempts = 6u;
 

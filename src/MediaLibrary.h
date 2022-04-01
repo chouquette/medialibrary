@@ -302,6 +302,7 @@ private:
     void migrateModel32to33();
     void migrateModel33to34();
     void migrateModel34to35();
+    void migrateModel35to36();
     /**
      * Runs some migration steps that depend on the actual C++ code, and that
      * therefor require the migration to have already completed
