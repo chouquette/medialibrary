@@ -65,7 +65,6 @@ public:
                                       const QueryParameters* params );
 
 private:
-    MediaLibraryPtr m_ml;
     int64_t m_id;
     int64_t m_offset;
     int64_t m_duration;

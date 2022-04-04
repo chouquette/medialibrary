@@ -146,9 +146,8 @@ Query<IChapter> Chapter::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
     return make_query<Chapter, IChapter>( ml, "*", req, orderBy, mediaId );
 }
 
-Chapter::Chapter( MediaLibraryPtr ml, sqlite::Row& row )
-    : m_ml( ml )
-    , m_id( row.extract<decltype(m_id)>() )
+Chapter::Chapter( MediaLibraryPtr, sqlite::Row& row )
+    : m_id( row.extract<decltype(m_id)>() )
     , m_offset( row.extract<decltype(m_offset)>() )
     , m_duration( row.extract<decltype(m_offset)>() )
     , m_name( row.extract<decltype(m_name)>() )
@@ -158,10 +157,9 @@ Chapter::Chapter( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Chapter::Chapter( MediaLibraryPtr ml, int64_t offset, int64_t duration,
+Chapter::Chapter( MediaLibraryPtr, int64_t offset, int64_t duration,
                   std::string name )
-    : m_ml( ml )
-    , m_id( 0 )
+    : m_id( 0 )
     , m_offset( offset )
     , m_duration( duration )
     , m_name( std::move( name ) )
