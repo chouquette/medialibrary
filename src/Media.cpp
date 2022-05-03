@@ -856,6 +856,9 @@ bool Media::markAsInternal( Type type, int64_t duration, int64_t deviceId, int64
                                        deviceId, folderId, ImportType::Internal,
                                        m_id ) == false )
         return false;
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifyMediaConvertedToInternal( m_id );
     m_type = type;
     m_duration = duration;
     m_deviceId = deviceId;
