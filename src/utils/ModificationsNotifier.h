@@ -231,7 +231,7 @@ private:
     Queue<IBookmark> m_bookmarks;
     Queue<IFolder> m_folders;
     Queue<void> m_thumbnailsCleanupRequests;
-    Queue<void> m_convertedMedia;
+    Queue<void> m_convertedToExternalMedia;
 
     // Notifier thread
     compat::Mutex m_lock;
