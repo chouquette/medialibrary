@@ -83,16 +83,6 @@ void ModificationNotifier::notifyMediaRemoval( int64_t mediaId )
     notifyRemoval( mediaId, m_media );
 }
 
-void ModificationNotifier::notifyMediaConvertedToExternal( int64_t mediaId )
-{
-    notifyRemoval( mediaId, m_convertedToExternalMedia );
-}
-
-void ModificationNotifier::notifyMediaConvertedToInternal( int64_t mediaId )
-{
-    notifyRemoval( mediaId, m_convertedToInternalMedia );
-}
-
 void ModificationNotifier::notifyArtistCreation( ArtistPtr artist )
 {
     notifyCreation( std::move( artist ), m_artists );
@@ -234,8 +224,6 @@ void ModificationNotifier::run()
     Queue<IBookmark> bookmarks;
     Queue<IFolder> folders;
     Queue<void> thumbnailsCleanup;
-    Queue<void> convertedToExternalMedia;
-    Queue<void> convertedToInternalMedia;
 
     TimeoutChrono timeout = ZeroTimeout;
 
@@ -292,8 +280,6 @@ void ModificationNotifier::run()
             checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now, flushing );
             checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now, flushing );
             checkQueue( m_bookmarks, bookmarks, nextTimeout, now, flushing );
-            checkQueue( m_convertedToExternalMedia, convertedToExternalMedia, nextTimeout, now, flushing );
-            checkQueue( m_convertedToInternalMedia, convertedToInternalMedia, nextTimeout, now, flushing );
             checkQueue( m_folders, folders, nextTimeout, now, flushing );
             timeout = nextTimeout;
 
@@ -311,8 +297,6 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onMediaGroupsModified, &IMediaLibraryCb::onMediaGroupsDeleted );
             notify( std::move( bookmarks ), &IMediaLibraryCb::onBookmarksAdded,
                     &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
-            notify( std::move( convertedToExternalMedia ), &IMediaLibraryCb::onMediaConvertedToExternal );
-            notify( std::move( convertedToInternalMedia ), &IMediaLibraryCb::onMediaConvertedToInternal );
             notify( std::move( folders ), &IMediaLibraryCb::onFoldersAdded,
                     &IMediaLibraryCb::onFoldersModified, &IMediaLibraryCb::onFoldersDeleted );
 

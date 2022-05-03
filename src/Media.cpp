@@ -858,7 +858,7 @@ bool Media::markAsInternal( Type type, int64_t duration, int64_t deviceId, int64
         return false;
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
-        notifier->notifyMediaConvertedToInternal( m_id );
+        notifier->notifyMediaCreation( shared_from_this() );
     m_type = type;
     m_duration = duration;
     m_deviceId = deviceId;
@@ -904,7 +904,7 @@ bool Media::convertToExternal()
     t->commit();
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
-        notifier->notifyMediaConvertedToExternal( m_id );
+        notifier->notifyMediaRemoval( m_id );
     m_subType = IMedia::SubType::Unknown;
     m_importType = ImportType::External;
     m_deviceId = 0;

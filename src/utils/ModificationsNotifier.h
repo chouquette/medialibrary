@@ -52,9 +52,6 @@ public:
     void notifyMediaModification( int64_t media );
     void notifyMediaRemoval( int64_t media );
 
-    void notifyMediaConvertedToExternal( int64_t mediaId );
-    void notifyMediaConvertedToInternal( int64_t mediaId );
-
     void notifyArtistCreation( ArtistPtr artist );
     void notifyArtistModification( int64_t artist );
     void notifyArtistRemoval( int64_t artist );
@@ -232,8 +229,6 @@ private:
     Queue<IBookmark> m_bookmarks;
     Queue<IFolder> m_folders;
     Queue<void> m_thumbnailsCleanupRequests;
-    Queue<void> m_convertedToExternalMedia;
-    Queue<void> m_convertedToInternalMedia;
 
 
     // Notifier thread

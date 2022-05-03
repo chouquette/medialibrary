@@ -222,18 +222,6 @@ public:
     virtual void onMediaModified( std::set<int64_t> mediaIds ) = 0;
 
     virtual void onMediaDeleted( std::set<int64_t> mediaIds ) = 0;
-    /**
-     * @brief onMediaConvertedToExternal Will be invoked when some media are converted
-     * from internal to external
-     * @param mediaIds The converted media IDs
-     *
-     * A media will be converted from internal to external if the entrypoint which
-     * contains it gets removed from the list of known entry points. The media
-     * will only be deleted at a later point from the database, if they haven't
-     * been played for around 6 months, and are not part of any playlist
-     */
-    virtual void onMediaConvertedToExternal( std::set<int64_t> mediaIds ) = 0;
-    virtual void onMediaConvertedToInternal( std::set<int64_t> mediaIds ) = 0;
 
     virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
     virtual void onArtistsModified( std::set<int64_t> artistsIds ) = 0;
