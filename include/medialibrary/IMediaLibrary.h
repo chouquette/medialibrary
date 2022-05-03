@@ -233,6 +233,7 @@ public:
      * been played for around 6 months, and are not part of any playlist
      */
     virtual void onMediaConvertedToExternal( std::set<int64_t> mediaIds ) = 0;
+    virtual void onMediaConvertedToInternal( std::set<int64_t> mediaIds ) = 0;
 
     virtual void onArtistsAdded( std::vector<ArtistPtr> artists ) = 0;
     virtual void onArtistsModified( std::set<int64_t> artistsIds ) = 0;
