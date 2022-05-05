@@ -1422,6 +1422,11 @@ InitializeResult MediaLibrary::updateDatabaseModel( unsigned int previousVersion
                 previousVersion = 36;
                 needRescan = true;
             }
+            if ( previousVersion == 36 )
+            {
+                migrateModel36to37();
+                previousVersion = 37;
+            }
             // To be continued in the future!
 
             migrationEpilogue( originalPreviousVersion );
@@ -2066,6 +2071,16 @@ void MediaLibrary::migrateModel35to36()
         sqlite::Tools::executeRequest( dbConn, req );
 
     m_settings.setDbModelVersion( 36 );
+    t->commit();
+}
+
+void MediaLibrary::migrateModel36to37()
+{
+    auto dbConn = getConn();
+    sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
+    auto t = dbConn->newTransaction();
+
+    m_settings.setDbModelVersion( 37 );
     t->commit();
 }
 
