@@ -225,6 +225,17 @@ public:
      */
     virtual bool setPlayCount( uint32_t playCount ) = 0;
     virtual time_t lastPlayedDate() const = 0;
+    /**
+     * @brief markAsPlayed Will mark the media as played and will bump it in the
+     *                     history
+     * @return true in case of success, false otherwise
+     *
+     * This is intended as an alternative to setLastPosition/setLastTime in case
+     * where the user isn't interested in saving the progression in database, but
+     * still cares about the media appearing in the history and using its play
+     * count.
+     */
+    virtual bool markAsPlayed() = 0;
     virtual ShowEpisodePtr showEpisode() const = 0;
     virtual const std::vector<FilePtr>& files() const = 0;
     /**

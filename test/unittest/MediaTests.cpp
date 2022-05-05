@@ -1451,6 +1451,49 @@ static void ExternalMrlDifferentPorts( Tests* T )
     ASSERT_NE( m2->id(), m->id() );
 }
 
+static void MarkAsPlayed( Tests* T )
+{
+    auto m = T->ml->addMedia( "file:///path/to/movie.mkv", IMedia::Type::Video );
+    ASSERT_NON_NULL( m );
+
+    ASSERT_EQ( 0u, m->lastPlayedDate() );
+    ASSERT_EQ( 0u, m->playCount() );
+    ASSERT_EQ( -1, m->lastTime() );
+    ASSERT_TRUE( m->lastPosition() < .0f );
+
+    auto history = T->ml->history()->all();
+    ASSERT_EQ( 0u, history.size() );
+
+    auto res = m->markAsPlayed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, m->playCount() );
+    ASSERT_NE( 0u, m->lastPlayedDate() );
+    ASSERT_EQ( -1, m->lastTime() );
+    ASSERT_TRUE( m->lastPosition() < .0f );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 1u, m->playCount() );
+    ASSERT_NE( 0u, m->lastPlayedDate() );
+    ASSERT_EQ( -1, m->lastTime() );
+    ASSERT_TRUE( m->lastPosition() < .0f );
+
+    history = T->ml->history()->all();
+    ASSERT_EQ( 1u, history.size() );
+
+    res = m->markAsPlayed();
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2u, m->playCount() );
+    ASSERT_NE( 0u, m->lastPlayedDate() );
+    ASSERT_EQ( -1, m->lastTime() );
+    ASSERT_TRUE( m->lastPosition() < .0f );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 2u, m->playCount() );
+    ASSERT_NE( 0u, m->lastPlayedDate() );
+    ASSERT_EQ( -1, m->lastTime() );
+    ASSERT_TRUE( m->lastPosition() < .0f );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1512,6 +1555,7 @@ int main( int ac, char** av )
     ADD_TEST( FlushUserProvidedThumbnails );
     ADD_TEST( Lyrics );
     ADD_TEST( ExternalMrlDifferentPorts );
+    ADD_TEST( MarkAsPlayed );
 
     END_TESTS
 }

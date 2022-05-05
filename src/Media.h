@@ -191,6 +191,7 @@ class Media : public IMedia,
         virtual ProgressResult setLastTime( int64_t lastTime ) override;
         virtual bool setPlayCount( uint32_t playCount ) override;
         virtual time_t lastPlayedDate() const override;
+        virtual bool markAsPlayed() override;
         virtual bool removeFromHistory() override;
         virtual bool isFavorite() const override;
         virtual bool setFavorite( bool favorite ) override;

@@ -642,6 +642,7 @@ media_tests = [
   'FlushUserProvidedThumbnails',
   'Lyrics',
   'ExternalMrlDifferentPorts',
+  'MarkAsPlayed',
 ]
 
 foreach t : media_tests

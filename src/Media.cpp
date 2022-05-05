@@ -440,6 +440,21 @@ IMedia::ProgressResult Media::setLastTime( int64_t lastTime )
     return setLastPositionAndTime( positionType, position, lastTime );
 }
 
+
+bool Media::markAsPlayed()
+{
+    auto lastPlayedDate = time( nullptr );
+    const std::string req = "UPDATE " + Table::Name +
+            " SET last_played_date = ?, play_count = play_count + 1"
+            " WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, lastPlayedDate,
+                                       m_id ) == false )
+        return false;
+    m_lastPlayedDate = lastPlayedDate;
+    ++m_playCount;
+    return true;
+}
+
 bool Media::setPlayCount( uint32_t playCount )
 {
     static const std::string req = "UPDATE " + Media::Table::Name + " SET "
