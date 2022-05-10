@@ -130,6 +130,7 @@ const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
     "alac",
     "amb",
     "amr",
+    "amrec",
     "amv",
     "aob",
     "ape",
