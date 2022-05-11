@@ -59,6 +59,7 @@ bool VmemThumbnailer::generate( const IMedia& media, const std::string& mrl,
     vlcMedia.addOption( ":input-fast-seek" );
     vlcMedia.addOption( ":avcodec-hw=none" );
     vlcMedia.addOption( ":no-mkv-preload-local-dir" );
+    vlcMedia.addOption( ":no-interact" );
 #if defined(__APPLE__)
     vlcMedia.addOption( ":no-videotoolbox" );
 #endif
