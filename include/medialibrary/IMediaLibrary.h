@@ -201,6 +201,12 @@ struct SetupConfig
      * @brief fsFactories Provides an external filesystem factory implementation
      */
     std::vector<std::shared_ptr<fs::IFileSystemFactory>> fsFactories;
+
+    /**
+     * @brief logLevel The default log level to initialize the medialibrary with.
+     * This can be overwriten at a later point using IMediaLibrary::setVerbosity
+     */
+    LogLevel logLevel = LogLevel::Error;
 };
 
 class IMediaLibraryCb

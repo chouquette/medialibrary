@@ -320,7 +320,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_parser( this, &m_fsHolder )
     , m_discovererWorker( this, &m_fsHolder )
 {
-    Log::setLogLevel( LogLevel::Error );
+    Log::setLogLevel( cfg != nullptr ? cfg->logLevel : LogLevel::Error );
     if ( cfg != nullptr )
     {
         for ( const auto& p : cfg->deviceListers )
