@@ -67,9 +67,9 @@ private:
     }
 
 public:
-    static void SetLogger( ILogger* logger )
+    static void SetLogger( std::shared_ptr<ILogger> logger )
     {
-        s_logger.store( logger, std::memory_order_relaxed );
+        s_logger = std::move( logger );
     }
 
     static void setLogLevel( LogLevel level )
@@ -123,8 +123,7 @@ public:
 private:
 
 private:
-    static std::unique_ptr<ILogger> s_defaultLogger;
-    static std::atomic<ILogger*> s_logger;
+    static std::shared_ptr<ILogger> s_logger;
     static std::atomic<LogLevel> s_logLevel;
 };
 

@@ -46,6 +46,7 @@
 #include "MediaLibrary.h"
 #include "Label.h"
 #include "logging/Logger.h"
+#include "logging/IostreamLogger.h"
 #include "Movie.h"
 #include "parser/Parser.h"
 #include "Playlist.h"
@@ -320,6 +321,10 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_parser( this, &m_fsHolder )
     , m_discovererWorker( this, &m_fsHolder )
 {
+    if ( cfg != nullptr && cfg->logger != nullptr )
+        Log::SetLogger( cfg->logger );
+    else
+        Log::SetLogger( std::make_shared<IostreamLogger>() );
     Log::setLogLevel( cfg != nullptr ? cfg->logLevel : LogLevel::Error );
     if ( cfg != nullptr )
     {
@@ -2349,11 +2354,6 @@ const std::string& MediaLibrary::thumbnailPath() const
 const std::string& MediaLibrary::playlistPath() const
 {
     return m_playlistPath;
-}
-
-void MediaLibrary::setLogger( ILogger* logger )
-{
-    Log::SetLogger( logger );
 }
 
 void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const

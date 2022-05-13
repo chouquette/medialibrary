@@ -207,6 +207,13 @@ struct SetupConfig
      * This can be overwriten at a later point using IMediaLibrary::setVerbosity
      */
     LogLevel logLevel = LogLevel::Error;
+
+    /**
+     * @brief logger An ILogger instance if the application wishes to use a
+     * custom one.
+     * If nullptr is provided, the default IOstream logger will be used.
+     */
+    std::shared_ptr<ILogger> logger;
 };
 
 class IMediaLibraryCb
@@ -790,7 +797,6 @@ public:
      * hierarchy isn't preserved, and the results are flattened.
      */
     virtual Query<IFolder> bannedEntryPoints() const = 0;
-    virtual void setLogger( ILogger* logger ) = 0;
     /**
      * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
      * operations, until resumeBackgroundOperations() is called.

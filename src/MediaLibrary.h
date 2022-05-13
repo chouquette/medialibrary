@@ -198,7 +198,6 @@ public:
 
     const std::string& thumbnailPath() const;
     const std::string& playlistPath() const;
-    virtual void setLogger( ILogger* logger ) override;
     //Temporarily public, move back to private as soon as we start monitoring the FS
     virtual void reload() override;
     virtual void reload( const std::string& entryPoint ) override;
