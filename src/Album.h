@@ -175,6 +175,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         int64_t m_duration;
         uint32_t m_nbDiscs;
         uint32_t m_nbPresentTracks;
+        bool m_publicOnlyListing;
 
         mutable std::vector<MediaPtr> m_tracks;
         mutable std::shared_ptr<Artist> m_albumArtist;

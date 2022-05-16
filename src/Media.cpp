@@ -2308,7 +2308,9 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
                                       type, ImportType::Internal ).build();
 }
 
-Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
+Query<IMedia> Media::searchAlbumTracks( MediaLibraryPtr ml, const std::string& pattern,
+                                        int64_t albumId, const QueryParameters* params,
+                                        bool forcePublic )
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
@@ -2320,6 +2322,11 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    if ( ( params != nullptr && params->publicOnly == true ) ||
+         forcePublic == true )
+    {
+        req += " AND m.is_public = 1";
+    }
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),

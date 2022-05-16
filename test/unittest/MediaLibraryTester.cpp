@@ -307,3 +307,10 @@ void MediaLibraryTester::deleteAllTables( sqlite::Connection* dbConn )
 {
     MediaLibrary::deleteAllTables( dbConn );
 }
+
+bool MediaLibraryTester::markMediaAsPublic( int64_t mediaId )
+{
+    static const std::string req = "UPDATE " + Media::Table::Name +
+            " SET is_public = TRUE WHERE id_media = ?";
+    return sqlite::Tools::executeUpdate( getConn(), req, mediaId );
+}

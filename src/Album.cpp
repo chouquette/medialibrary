@@ -58,6 +58,10 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     , m_nbDiscs( row.extract<decltype(m_nbDiscs)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -71,6 +75,7 @@ Album::Album( MediaLibraryPtr ml, std::string title )
     , m_duration( 0 )
     , m_nbDiscs( 1 )
     , m_nbPresentTracks( 0 )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -83,6 +88,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_duration( 0 )
     , m_nbDiscs( 1 )
     , m_nbPresentTracks( 0 )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -286,6 +292,12 @@ std::string Album::orderBy( const QueryParameters* params )
     std::string req = " ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
+    if ( params != nullptr && params->publicOnly == true &&
+         ( sort == SortingCriteria::TrackNumber ) )
+    {
+        LOG_WARN( "Unsupported sort for public entities. Falling back to Default" );
+        sort = SortingCriteria::Default;
+    }
     switch ( sort )
     {
     case SortingCriteria::Artist:
@@ -349,8 +361,11 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
         " WHERE med.album_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) || m_publicOnlyListing;
+    if ( publicOnly == true )
+        req += " AND med.is_public != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-            orderTracksBy( params ), m_id ).build();
+            orderTracksBy( params ), m_id ).markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) const
@@ -362,6 +377,8 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
             " AND med.genre_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
+    if ( ( params != nullptr && params->publicOnly == true ) || m_publicOnlyListing == true )
+        req += " AND med.is_public != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
                                       orderTracksBy( params ), m_id, genre->id() ).build();
 }
@@ -376,7 +393,8 @@ std::vector<MediaPtr> Album::cachedTracks() const
 Query<IMedia> Album::searchTracks( const std::string& pattern,
                                    const QueryParameters* params ) const
 {
-    return Media::searchAlbumTracks( m_ml, pattern, m_id, params );
+    return Media::searchAlbumTracks( m_ml, pattern, m_id, params,
+                                     m_publicOnlyListing );
 }
 
 bool Album::addTrack( std::shared_ptr<Media> media, unsigned int trackNb,
@@ -440,11 +458,15 @@ bool Album::removeTrack( Media& media )
 
 unsigned int Album::nbTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbTracks;
 }
 
 uint32_t Album::nbPresentTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentTracks;
 }
 
@@ -512,6 +534,11 @@ Query<IArtist> Album::artists( const QueryParameters* params ) const
     std::string orderBy = "GROUP BY art.id_artist ORDER BY art.name";
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
+    if ( ( params != nullptr && params->publicOnly == true ) ||
+         m_publicOnlyListing == true )
+    {
+        req += " AND m.is_public = 1";
+    }
     return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ),
                                         std::move( orderBy ), m_id ).build();
 }
@@ -880,6 +907,9 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
             FtsTable::Name + " MATCH ?)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND alb.is_present != 0";
+    if ( params != nullptr && params->publicOnly == true )
+        req += " AND EXISTS(SELECT album_id FROM " + Media::Table::Name +
+                   " WHERE is_public != 0 AND album_id = alb.id_album)";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ) ).build();
@@ -896,6 +926,9 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
             " AND artist_id = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND alb.is_present != 0";
+    if ( params != nullptr && params->publicOnly == true )
+        req += " AND EXISTS(SELECT album_id FROM " + Media::Table::Name +
+                   " WHERE is_public != 0 AND album_id = alb.id_album)";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -910,6 +943,8 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
                     "WHERE (m.artist_id = ? OR alb.artist_id = ?)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    if ( params != nullptr && params->publicOnly == true )
+        req += " AND m.is_public != 0";
     std::string groupAndOrder = " GROUP BY m.album_id ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
@@ -970,13 +1005,31 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string countReq = "SELECT COUNT(*) FROM " + Table::Name;
-    std::string req = "SELECT alb.* FROM " + Table::Name + " alb ";
+    std::string req = "SELECT alb.*";
+    auto publicOnly = params != nullptr && params->publicOnly;
+    if ( publicOnly == true )
+        req += ", TRUE ";
+    req += " FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
-    if ( params == nullptr || params->includeMissing == false )
+    if ( publicOnly )
+    {
+        auto clause = " WHERE EXISTS(SELECT album_id FROM " + Media::Table::Name +
+                " WHERE is_public != 0 AND album_id = id_album)";
+
+        req += clause;
+        countReq += clause;
+        if ( params == nullptr || params->includeMissing == false )
+        {
+            countReq += " AND is_present != 0";
+            req += "AND alb.is_present != 0";
+        }
+    }
+    else if ( params == nullptr || params->includeMissing == false )
     {
         countReq += " WHERE is_present != 0";
         req += "WHERE alb.is_present != 0 ";
     }
+
     req += orderBy( params );
     return make_query_with_count<Album, IAlbum>( ml, std::move( countReq ),
                                                  std::move( req ) );

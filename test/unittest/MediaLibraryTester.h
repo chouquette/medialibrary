@@ -84,6 +84,7 @@ public:
     bool markMediaAsInternal( int64_t mediaId );
     bool setMediaFolderId( int64_t mediaId, int64_t folderId );
     void deleteAllTables( sqlite::Connection* dbConn );
+    bool markMediaAsPublic( int64_t mediaId );
 
 private:
     std::shared_ptr<Media> addFile( std::shared_ptr<fs::IFile> fileFs,
