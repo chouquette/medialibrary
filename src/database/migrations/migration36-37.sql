@@ -95,6 +95,7 @@ Media::schema( Media::Table::Name, 37 ),
 Media::trigger( Media::Triggers::InsertFts, 37 ),
 Media::trigger( Media::Triggers::UpdateFts, 37 ),
 Media::trigger( Media::Triggers::DeleteFts, 37 ),
+Media::trigger( Media::Triggers::UpdateIsPublic, 37 ),
 
 Media::index( Media::Indexes::LastPlayedDate, 37 ),
 Media::index( Media::Indexes::Presence, 37 ),

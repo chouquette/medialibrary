@@ -1043,22 +1043,32 @@ static void SetPublic( FolderTests* T )
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
+    auto checkMediaPublicness = []( const IFolder& f, bool expectedPublicness ) {
+        auto media = f.media( IMedia::Type::Unknown, nullptr )->all();
+        ASSERT_FALSE( media.empty() );
+        for ( const auto& m : media )
+            ASSERT_EQ( m->isPublic(), expectedPublicness );
+    };
+
     auto root = T->ml->folder( 1 );
     ASSERT_NON_NULL( root );
     ASSERT_FALSE( root->isPublic() );
     auto subFolder = T->ml->folder( 2 );
     ASSERT_NON_NULL( subFolder );
     ASSERT_FALSE( subFolder->isPublic() );
+    checkMediaPublicness( *subFolder, false );
 
     auto res = subFolder->setPublic( true );
     ASSERT_TRUE( res );
     ASSERT_TRUE( subFolder->isPublic() );
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_TRUE( subFolder->isPublic() );
+    checkMediaPublicness( *subFolder, true );
 
     /* Ensure publicness didn't propagate to parent folders */
     root = T->ml->folder( root->id() );
     ASSERT_FALSE( root->isPublic() );
+    checkMediaPublicness( *root, false );
 
     /*
      * Set the subfolder back to private and check for propagations through the
@@ -1069,27 +1079,33 @@ static void SetPublic( FolderTests* T )
     ASSERT_FALSE( subFolder->isPublic() );
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_FALSE ( subFolder->isPublic() );
+    checkMediaPublicness( *subFolder, false );
 
     root = T->ml->folder( root->id() );
     ASSERT_FALSE( root->isPublic() );
+    checkMediaPublicness( *root, false );
 
     res = root->setPublic( true );
     ASSERT_TRUE( res );
     ASSERT_TRUE( root->isPublic() );
     root = T->ml->folder( root->id() );
     ASSERT_TRUE( root->isPublic() );
+    checkMediaPublicness( *root, true );
 
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_TRUE( subFolder->isPublic() );
+    checkMediaPublicness( *subFolder, true );
 
     res = root->setPublic( false );
     ASSERT_TRUE( res );
     ASSERT_FALSE( root->isPublic() );
     root = T->ml->folder( root->id() );
     ASSERT_FALSE( root->isPublic() );
+    checkMediaPublicness( *root, false );
 
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_FALSE( subFolder->isPublic() );
+    checkMediaPublicness( *subFolder, false );
 }
 
 int main( int ac, char** av )

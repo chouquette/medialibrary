@@ -79,6 +79,7 @@ class Media : public IMedia,
             InsertFts,
             DeleteFts,
             UpdateFts,
+            UpdateIsPublic,
         };
         enum class Indexes : uint8_t
         {

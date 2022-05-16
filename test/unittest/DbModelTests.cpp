@@ -87,6 +87,7 @@ namespace
         "media_group_update_nb_media_types",
         "media_group_update_nb_media_types_presence",
         "media_update_device_presence",
+        "media_update_is_public",
         "playlist_cascade_file_deletion",
         "playlist_update_duration_on_media_change",
         "playlist_update_nb_media_on_media_change",

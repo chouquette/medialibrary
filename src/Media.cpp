@@ -1469,6 +1469,9 @@ void Media::createTriggers( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::DecrementNbPlaylist,
                                             Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateIsPublic,
+                                            Settings::DbModelVersion ) );
 }
 
 void Media::createIndexes( sqlite::Connection* connection )
@@ -1946,7 +1949,15 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                        " UPDATE " + FtsTable::Name + " SET title = new.title"
                            " WHERE rowid = new.id_media;"
                    " END";
-
+        case Triggers::UpdateIsPublic:
+            assert( dbModel >= 37 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF is_public ON " + Folder::Table::Name +
+                       " WHEN new.is_public != old.is_public"
+                   " BEGIN"
+                       " UPDATE " + Table::Name + " SET is_public = new.is_public"
+                           " WHERE folder_id = new.id_folder;"
+                   " END";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -1984,6 +1995,9 @@ std::string Media::triggerName( Triggers trigger, uint32_t dbModel )
             return "delete_media_fts";
         case Triggers::UpdateFts:
             return "update_media_title_fts";
+        case Triggers::UpdateIsPublic:
+            assert( dbModel >= 37 );
+            return "media_update_is_public";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -2162,6 +2176,7 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkTrigger( Triggers::InsertFts ) &&
             checkTrigger( Triggers::DeleteFts ) &&
             checkTrigger( Triggers::UpdateFts ) &&
+            checkTrigger( Triggers::UpdateIsPublic ) &&
             checkIndex( Indexes::LastPlayedDate ) &&
             checkIndex( Indexes::Presence ) &&
             checkIndex( Indexes::Types ) &&
