@@ -36,11 +36,12 @@ Label::trigger( Label::Triggers::DeleteMediaLabel, 37 ),
     "SELECT * FROM " + Folder::Table::Name,
 
 "DROP TABLE " + Folder::Table::Name,
+
 Folder::schema( Folder::Table::Name, 37 ),
 
 "INSERT INTO " + Folder::Table::Name +
     " SELECT *, (SELECT TOTAL(IIF(duration > 0, duration, 0)) FROM "
-        + Media::Table::Name + " WHERE folder_id = id_folder)"
+        + Media::Table::Name + " WHERE folder_id = id_folder), FALSE"
     " FROM " + Folder::Table::Name + "_backup",
 
 

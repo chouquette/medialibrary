@@ -69,6 +69,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
      * Folder instances.
      */
     , m_duration( row.hasRemainingColumns() == true ? row.extract<decltype(m_duration)>() : 0 )
+    , m_isPublic( row.hasRemainingColumns() == true ? row.extract<decltype(m_isPublic)>() : false )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -86,6 +87,7 @@ Folder::Folder(MediaLibraryPtr ml, std::string path, std::string name,
     , m_nbAudio( 0 )
     , m_nbVideo( 0 )
     , m_duration( 0 )
+    , m_isPublic( false )
 {
 }
 
@@ -180,6 +182,7 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         "nb_audio UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+        "is_public BOOLEAN NOT NULL,"
 
         "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
         "(id_folder) ON DELETE CASCADE,"
@@ -517,9 +520,9 @@ std::shared_ptr<Folder> Folder::create( MediaLibraryPtr ml, const std::string& m
     auto self = std::make_shared<Folder>( ml, std::move( path ), std::move( name ),
                                           parentId, device.id(), deviceFs.isRemovable() );
     static const std::string req = "INSERT INTO " + Folder::Table::Name +
-            "(path, name, parent_id, device_id, is_removable) VALUES(?, ?, ?, ?, ?)";
+            "(path, name, parent_id, device_id, is_removable, is_public) VALUES(?, ?, ?, ?, ?, ?)";
     if ( insert( ml, self, req, self->m_path, self->m_name, sqlite::ForeignKey( parentId ),
-                 device.id(), deviceFs.isRemovable() ) == false )
+                 device.id(), deviceFs.isRemovable(), self->m_isPublic ) == false )
         return nullptr;
     if ( device.isRemovable() == true )
         self->m_fullPath = deviceFs.absoluteMrl( self->m_path );
@@ -573,8 +576,8 @@ bool Folder::ban( MediaLibraryPtr ml, const std::string& mrl )
     else
         path = mrl;
     static const std::string req = "INSERT INTO " + Folder::Table::Name +
-            "(path, parent_id, is_banned, device_id, is_removable) "
-            "VALUES(?, ?, ?, ?, ?)";
+            "(path, parent_id, is_banned, device_id, is_removable, is_public) "
+            "VALUES(?, ?, ?, ?, ?, FALSE)";
     auto res = sqlite::Tools::executeInsert( ml->getConn(), req, path,
                                              nullptr, true, device->id(),
                                              deviceFs->isRemovable() ) != 0;
@@ -1000,6 +1003,11 @@ bool Folder::isPresent() const
 bool Folder::isBanned() const
 {
     return m_isBanned;
+}
+
+bool Folder::isPublic() const
+{
+    return m_isPublic;
 }
 
 bool Folder::isRootFolder() const

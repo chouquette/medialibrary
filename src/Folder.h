@@ -153,6 +153,7 @@ public:
     virtual bool isRemovable() const override;
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
+    virtual bool isPublic() const override;
     bool isRootFolder() const;
     virtual Query<IMedia> media( IMedia::Type type,
                                  const QueryParameters* params ) const override;
@@ -196,6 +197,7 @@ private:
     uint32_t m_nbAudio;
     uint32_t m_nbVideo;
     int64_t m_duration;
+    bool m_isPublic;
 
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,
