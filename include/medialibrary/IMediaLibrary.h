@@ -103,6 +103,14 @@ struct QueryParameters
     bool desc = false;
     /* If true, media that are stored on missing devices will still be returned */
     bool includeMissing = false;
+    /*
+     * If true, only public entities will be returned.
+     * When fetching public entities only, some features related to counters
+     * will be disabled, for instance, it will not be possible to sort an artist
+     * by its number of tracks since the triggers don't maintain a count for
+     * public entities only.
+     */
+    bool publicOnly = false;
 };
 
 enum class InitializeResult
