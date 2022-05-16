@@ -296,6 +296,7 @@ class Media : public IMedia,
         virtual uint32_t discNumber() const override;
         virtual const std::string& lyrics() const override;
         bool setLyrics( std::string lyrics );
+        virtual bool isPublic() const override;
 
         static Query<IMedia> listAll( MediaLibraryPtr ml, Type type,
                                      const QueryParameters* params,
@@ -426,6 +427,7 @@ private:
         int64_t m_albumId;
         uint32_t m_discNumber;
         std::string m_lyrics;
+        bool m_isPublic;
 
         // Auto fetched related properties
         mutable ShowEpisodePtr m_showEpisode;

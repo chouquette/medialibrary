@@ -486,6 +486,8 @@ public:
      * @brief lyrics returns the lyrics associated with this media, if any
      */
     virtual const std::string& lyrics() const = 0;
+
+    virtual bool isPublic() const = 0;
 };
 
 }
