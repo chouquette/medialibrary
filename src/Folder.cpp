@@ -116,6 +116,9 @@ void Folder::createTriggers( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::UpdateNbMediaOnUpdate,
                                             Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::UpdateIsPublic,
+                                            Settings::DbModelVersion ) );
 }
 
 void Folder::createIndexes( sqlite::Connection* connection )
@@ -414,6 +417,15 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                     "WHERE id_folder = old.folder_id;"
                 "END";
 
+        case Triggers::UpdateIsPublic:
+            assert( dbModel >= 37 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF is_public ON " + Table::Name +
+                       " WHEN new.is_public != old.is_public"
+                   " BEGIN"
+                       " UPDATE " + Table::Name + " SET is_public = new.is_public"
+                           " WHERE parent_id = new.id_folder;"
+                   " END";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -439,6 +451,9 @@ std::string Folder::triggerName( Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
             return "update_folder_nb_media_on_delete";
+        case Triggers::UpdateIsPublic:
+            assert( dbModel >= 37 );
+            return "folder_update_is_public";
     default:
         assert( !"Invalid trigger provided" );
     }
@@ -496,7 +511,8 @@ bool Folder::checkDbModel( MediaLibraryPtr ml )
          check( Triggers::DeleteFts ) == false ||
          check( Triggers::UpdateNbMediaOnIndex ) == false ||
          check( Triggers::UpdateNbMediaOnUpdate ) == false ||
-         check( Triggers::UpdateNbMediaOnDelete )  == false )
+         check( Triggers::UpdateNbMediaOnDelete )  == false ||
+         check( Triggers::UpdateIsPublic )  == false )
         return false;
 
     return sqlite::Tools::checkIndexStatement(
@@ -1008,6 +1024,16 @@ bool Folder::isBanned() const
 bool Folder::isPublic() const
 {
     return m_isPublic;
+}
+
+bool Folder::setPublic( bool isPublic )
+{
+    const std::string req = "UPDATE " + Table::Name +
+            " SET is_public = ? WHERE id_folder = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, isPublic, m_id ) == false )
+        return false;
+    m_isPublic = isPublic;
+    return true;
 }
 
 bool Folder::isRootFolder() const

@@ -419,6 +419,7 @@ folder_tests = [
   'CheckDbModel',
   'NbMediaAfterExternalInternalConversion',
   'Duration',
+  'SetPublic',
 ]
 
 foreach t : folder_tests

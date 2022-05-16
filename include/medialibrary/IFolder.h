@@ -59,6 +59,7 @@ public:
      */
     virtual bool isBanned() const = 0;
     virtual bool isPublic() const = 0;
+    virtual bool setPublic( bool isPublic ) = 0;
     /**
      * @brief media Returns the media contained by this folder.
      * @param type The media type, or IMedia::Type::Unknown for all types

@@ -63,6 +63,7 @@ public:
         UpdateNbMediaOnIndex,
         UpdateNbMediaOnUpdate,
         UpdateNbMediaOnDelete,
+        UpdateIsPublic,
     };
 
     enum class Indexes : uint8_t
@@ -154,6 +155,7 @@ public:
     virtual bool isPresent() const override;
     virtual bool isBanned() const override;
     virtual bool isPublic() const override;
+    virtual bool setPublic( bool isPublic ) override;
     bool isRootFolder() const;
     virtual Query<IMedia> media( IMedia::Type type,
                                  const QueryParameters* params ) const override;

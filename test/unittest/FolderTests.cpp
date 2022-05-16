@@ -1034,6 +1034,62 @@ static void Duration( FolderTests* T )
     T->ml->deleteMedia( m->id() );
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_EQ( 0, subFolder->duration() );
+
+}
+
+static void SetPublic( FolderTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto root = T->ml->folder( 1 );
+    ASSERT_NON_NULL( root );
+    ASSERT_FALSE( root->isPublic() );
+    auto subFolder = T->ml->folder( 2 );
+    ASSERT_NON_NULL( subFolder );
+    ASSERT_FALSE( subFolder->isPublic() );
+
+    auto res = subFolder->setPublic( true );
+    ASSERT_TRUE( res );
+    ASSERT_TRUE( subFolder->isPublic() );
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_TRUE( subFolder->isPublic() );
+
+    /* Ensure publicness didn't propagate to parent folders */
+    root = T->ml->folder( root->id() );
+    ASSERT_FALSE( root->isPublic() );
+
+    /*
+     * Set the subfolder back to private and check for propagations through the
+     * parent folder
+     */
+    res = subFolder->setPublic( false );
+    ASSERT_TRUE( res );
+    ASSERT_FALSE( subFolder->isPublic() );
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_FALSE ( subFolder->isPublic() );
+
+    root = T->ml->folder( root->id() );
+    ASSERT_FALSE( root->isPublic() );
+
+    res = root->setPublic( true );
+    ASSERT_TRUE( res );
+    ASSERT_TRUE( root->isPublic() );
+    root = T->ml->folder( root->id() );
+    ASSERT_TRUE( root->isPublic() );
+
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_TRUE( subFolder->isPublic() );
+
+    res = root->setPublic( false );
+    ASSERT_TRUE( res );
+    ASSERT_FALSE( root->isPublic() );
+    root = T->ml->folder( root->id() );
+    ASSERT_FALSE( root->isPublic() );
+
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_FALSE( subFolder->isPublic() );
 }
 
 int main( int ac, char** av )
@@ -1082,6 +1138,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( NbMediaAfterExternalInternalConversion );
     ADD_TEST( Duration );
+    ADD_TEST( SetPublic );
 
     END_TESTS
 }

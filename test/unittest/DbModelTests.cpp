@@ -63,6 +63,7 @@ namespace
         "delete_folder_fts", "delete_genre_fts", "delete_label_fts",
         "delete_media_fts", "delete_playlist_fts", "delete_playlist_linking_tasks",
         "delete_show_fts", "delete_unused_thumbnail",
+        "folder_update_is_public",
         "folder_update_nb_media_on_media_update",
         "genre_delete_empty",
         "genre_update_is_present",

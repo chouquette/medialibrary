@@ -50,6 +50,8 @@ Folder::schema( Folder::Table::Name, 37 ),
 /* Triggers and indexes deleted by the table deletion */
 Folder::trigger( Folder::Triggers::InsertFts, 37 ),
 Folder::trigger( Folder::Triggers::DeleteFts, 37 ),
+Folder::trigger( Folder::Triggers::UpdateIsPublic, 37 ),
+
 Folder::index( Folder::Indexes::DeviceId, 37 ),
 Folder::index( Folder::Indexes::ParentId, 37 ),
 
