@@ -162,7 +162,10 @@ bool Artist::addMedia( const Media& media )
 {
     static const std::string req = "INSERT INTO " + MediaRelationTable::Name +
             " VALUES(?, ?)";
-    return sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id ) != 0;
+    if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(), m_id ) == 0 )
+        return false;
+    ++m_nbTracks;
+    return true;
 }
 
 ThumbnailStatus Artist::thumbnailStatus( ThumbnailSizeType sizeType ) const
