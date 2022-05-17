@@ -35,7 +35,7 @@ static void ListAllAudioMedia( benchmark::State& state )
     params.sort = static_cast<SortingCriteria>( state.range( 0 ) );
     for ( auto _ : state )
     {
-        auto albums = bml.ml->audioFiles( &params );
+        auto albums = bml.ml->audioFiles( &params )->all();
         benchmark::DoNotOptimize( albums );
     }
 }

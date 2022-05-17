@@ -35,7 +35,7 @@ static void ListAllAlbums( benchmark::State& state )
     params.sort = static_cast<SortingCriteria>( state.range( 0 ) );
     for ( auto _ : state )
     {
-        auto albums = bml.ml->albums( &params );
+        auto albums = bml.ml->albums( &params )->all();
         benchmark::DoNotOptimize( albums );
     }
 }
