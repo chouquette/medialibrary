@@ -40,6 +40,18 @@ static void ListAllAlbums( benchmark::State& state )
     }
 }
 
+static void ListAllPublicAlbums( benchmark::State& state )
+{
+    auto bml = commonInit();
+    QueryParameters params{};
+    params.publicOnly = true;
+    for ( auto _ : state )
+    {
+        auto albums = bml.ml->albums( &params )->all();
+        assert(albums.empty() == true);
+        benchmark::DoNotOptimize( albums );
+    }
+}
 
 BENCHMARK( ListAllAlbums )
     ->Arg( toInt( SortingCriteria::Artist ) )
@@ -49,3 +61,5 @@ BENCHMARK( ListAllAlbums )
     ->Arg( toInt( SortingCriteria::PlayCount ) )
     ->Arg( toInt( SortingCriteria::InsertionDate ) )
     ->Arg( toInt( SortingCriteria::Default ) );
+
+BENCHMARK( ListAllPublicAlbums );
