@@ -53,6 +53,10 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_mbId( row.extract<decltype(m_mbId)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -63,6 +67,7 @@ Artist::Artist( MediaLibraryPtr ml, std::string name )
     , m_nbAlbums( 0 )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -116,10 +121,14 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     {
         req += "INNER JOIN Album alb ON alb.id_album = med.album_id ";
     }
-    req += "WHERE mar.artist_id = ? ";
+    req += "WHERE mar.artist_id = ?";
 
     if ( params == nullptr || params->includeMissing == false )
-        req += "AND med.is_present != 0";
+        req += " AND med.is_present != 0";
+    auto publicOnly = ( params != nullptr && params->publicOnly ) ||
+            m_publicOnlyListing == true;
+    if ( publicOnly == true )
+        req += " AND med.is_public != 0";
     std::string orderBy = "ORDER BY ";
     switch ( sort )
     {
@@ -150,12 +159,14 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     if ( desc == true && sort != SortingCriteria::Album )
         orderBy += " DESC";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      std::move( orderBy ), m_id ).build();
+                                      std::move( orderBy ), m_id )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Artist::searchTracks( const std::string& pattern, const QueryParameters* params ) const
 {
-    return Media::searchArtistTracks( m_ml, pattern, m_id, params );
+    return Media::searchArtistTracks( m_ml, pattern, m_id, params,
+                                      m_publicOnlyListing );
 }
 
 bool Artist::addMedia( const Media& media )
@@ -287,16 +298,22 @@ bool Artist::setMusicBrainzId( const std::string& mbId )
 
 unsigned int Artist::nbAlbums() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbAlbums;
 }
 
 unsigned int Artist::nbTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbTracks;
 }
 
 unsigned int Artist::nbPresentTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentTracks;
 }
 
@@ -744,14 +761,26 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
     std::string req = "FROM " + Table::Name + " art";
     req += addRequestJoin( params );
     req += " WHERE ";
-    if ( included == ArtistIncluded::AlbumArtistOnly )
-        req += "art.nb_albums > 0";
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+    {
+        if ( included != ArtistIncluded::All )
+            LOG_WARN( "Filtering by album artist is unsupported for public listing" );
+        req += " EXISTS(SELECT artist_id FROM " + Media::Table::Name +
+                " WHERE artist_id = art.id_artist AND is_public != 0)";
+    }
     else
-        req += "art.nb_tracks > 0";
+    {
+        if ( included == ArtistIncluded::AlbumArtistOnly )
+            req += "art.nb_albums > 0";
+        else
+            req += "art.nb_tracks > 0";
+    }
     if ( params == nullptr || params->includeMissing == false )
         req += " AND art.is_present != 0";
     return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
-                                        sortRequest( params ) ).build();
+                                        sortRequest( params ) )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
@@ -790,6 +819,13 @@ std::string Artist::sortRequest( const QueryParameters* params )
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
     std::string req = " ORDER BY ";
+    if ( params != nullptr && params->publicOnly == true &&
+         ( sort == SortingCriteria::TrackNumber ||
+           sort == SortingCriteria::NbAlbum ) )
+    {
+        LOG_WARN( "Unsupported sort for public entities. Falling back to Default" );
+        sort = SortingCriteria::Default;
+    }
     switch ( sort )
     {
         default:

@@ -961,6 +961,8 @@ static void Public( Tests* T )
 
     /* Check that we can't access the counters when fetching an album as public */
     ASSERT_EQ( 2u, a->nbTracks() );
+    a = std::static_pointer_cast<Album>( T->ml->album( a->id() ) );
+    ASSERT_EQ( 2u, a->nbTracks() );
     QueryParameters params;
     params.publicOnly = true;
     auto albumQuery = T->ml->albums( &params );

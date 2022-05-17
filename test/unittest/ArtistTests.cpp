@@ -833,6 +833,62 @@ static void SortByLastPlayedDate( Tests* T )
     ASSERT_EQ( artist1->id(), artists[1]->id() );
 }
 
+static void Public( Tests* T )
+{
+    auto a = T->ml->createArtist( "Cepheide" );
+    auto album = T->ml->createAlbum( "Les Échappées" );
+    ASSERT_NON_NULL( a );
+    ASSERT_NON_NULL( album );
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "Le sang.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m1 );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "Les Cris.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m2 );
+    auto res = album->addTrack( m1, 1, 1, a->id(), nullptr );
+    ASSERT_TRUE( res );
+    res = a->addMedia( *m1 );
+    ASSERT_TRUE( res );
+    res = album->addTrack( m2, 2, 1, a->id(), nullptr );
+    ASSERT_TRUE( res );
+    res = a->addMedia( *m2 );
+    ASSERT_TRUE( res );
+
+    /* Check that we can't access the counters when fetching an artist as public */
+    ASSERT_EQ( 2u, a->nbTracks() );
+    a = std::static_pointer_cast<Artist>( T->ml->artist( a->id() ) );
+    ASSERT_EQ( 2u, a->nbTracks() );
+    QueryParameters params;
+    params.publicOnly = true;
+    auto artistsQuery = T->ml->artists( ArtistIncluded::All, &params );
+    ASSERT_EQ( 0u, artistsQuery->count() );
+    auto artists = artistsQuery->all();
+    ASSERT_EQ( 0u, artists.size() );
+
+    T->ml->markMediaAsPublic( m2->id() );
+
+    artists = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( 1u, artists.size() );
+    auto pa = artists[0];
+    ASSERT_EQ( a->id(), pa->id() );
+    /*
+     * While we can fetch the public track, the counters are deactivated since
+     * the artist was fetched as a public one
+     */
+    ASSERT_EQ( 0u, pa->nbTracks() );
+
+    /*
+     * The artist should already be marked as coming from a public listing and
+     * should propagate its publicness when using its accessors.
+     * This should only fetch the public tracks without providing any QueryParameters
+     */
+    auto tracksQuery = pa->tracks( nullptr );
+    ASSERT_EQ( 1u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( 1u, tracks.size() );
+    ASSERT_TRUE( tracks[0]->isPublic() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Artist )
@@ -865,6 +921,7 @@ int main( int ac, char** av )
     ADD_TEST( SortByNbAlbums );
     ADD_TEST( SortByNbTracks );
     ADD_TEST( SortByLastPlayedDate );
+    ADD_TEST( Public );
 
     END_TESTS
 }

@@ -248,6 +248,7 @@ artist_tests = [
   'SortByNbAlbums',
   'SortByNbTracks',
   'SortByLastPlayedDate',
+  'Public',
 ]
 
 foreach t : artist_tests

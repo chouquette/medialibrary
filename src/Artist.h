@@ -166,6 +166,7 @@ private:
     unsigned int m_nbTracks;
     std::string m_mbId;
     unsigned int m_nbPresentTracks;
+    bool m_publicOnlyListing;
 
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
