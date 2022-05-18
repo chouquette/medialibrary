@@ -144,9 +144,10 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         static Query<IAlbum> searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
                                                int64_t artistId, const QueryParameters* params );
         static Query<IAlbum> fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params );
-        static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params );
-        static Query<IAlbum> searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
-                                              int64_t genreId, const QueryParameters* params );
+        static Query<IAlbum> fromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                        const QueryParameters* params, bool forcePublic );
+        static Query<IAlbum> searchFromGenre(MediaLibraryPtr ml, const std::string& pattern,
+                                              int64_t genreId, const QueryParameters* params , bool forcePublic);
         static Query<IAlbum> listAll( MediaLibraryPtr ml, const QueryParameters* params );
         /**
          * @brief checkDBConsistency Checks the consistency of all artists records

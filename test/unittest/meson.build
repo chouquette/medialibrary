@@ -481,6 +481,7 @@ genre_tests = [
   'CheckDbModel',
   'GetThumbnails',
   'ConvertToExternal',
+  'Public',
 ]
 
 foreach t : genre_tests

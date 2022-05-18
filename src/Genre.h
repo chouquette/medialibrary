@@ -99,6 +99,7 @@ private:
     const std::string m_name;
     uint32_t m_nbTracks;
     uint32_t m_nbPresentTracks;
+    bool m_publicOnlyListing;
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
     friend Genre::Table;

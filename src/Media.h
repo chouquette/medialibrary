@@ -316,7 +316,8 @@ class Media : public IMedia,
                                                  int64_t artistId, const QueryParameters* params,
                                                  bool forcePublic);
         static Query<IMedia> searchGenreTracks( MediaLibraryPtr ml, const std::string& pattern,
-                                                 int64_t genreId, const QueryParameters* params );
+                                                int64_t genreId, const QueryParameters* params,
+                                                bool forcePublic );
         static Query<IMedia> searchShowEpisodes( MediaLibraryPtr ml, const std::string& pattern,
                                                  int64_t showId, const QueryParameters* params );
         static Query<IMedia> searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
@@ -357,7 +358,8 @@ class Media : public IMedia,
 
         static Query<IMedia> tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
                                               IGenre::TracksIncluded included,
-                                              const QueryParameters* params );
+                                              const QueryParameters* params,
+                                              bool forcePublic );
 
 private:
         enum class PositionTypes : uint8_t

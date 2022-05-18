@@ -976,18 +976,25 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
                                       artistId, artistId ).build();
 }
 
-Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
+Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                const QueryParameters* params, bool forcePublic )
 {
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, true );
     req += "WHERE m.genre_id = ?";
+    if ( ( params != nullptr && params->publicOnly == true ) ||
+         forcePublic == true )
+    {
+        req += " AND m.is_public != 0";
+    }
     std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ), genreId ).build();
 }
 
 Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
-                                      int64_t genreId, const QueryParameters* params )
+                                      int64_t genreId, const QueryParameters* params,
+                                      bool forcePublic )
 {
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, true );
@@ -995,6 +1002,11 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)"
             "AND m.genre_id = ?";
+    if ( ( params != nullptr && params->publicOnly == true ) ||
+         forcePublic == true )
+    {
+        req += " AND m.is_public != 0";
+    }
     std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ),

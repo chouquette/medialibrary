@@ -49,6 +49,10 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -58,6 +62,7 @@ Genre::Genre( MediaLibraryPtr ml, std::string name )
     , m_name( std::move( name ) )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -73,11 +78,15 @@ const std::string& Genre::name() const
 
 uint32_t Genre::nbTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbTracks;
 }
 
 uint32_t Genre::nbPresentTracks() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentTracks;
 }
 
@@ -93,6 +102,10 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
     std::string req = "FROM " + Artist::Table::Name + " a "
             "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
             "WHERE m.genre_id = ?";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
+                        m_publicOnlyListing == true;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
     std::string groupAndOrderBy = "GROUP BY m.artist_id ORDER BY a.name";
     if ( params != nullptr )
     {
@@ -102,35 +115,37 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
             groupAndOrderBy += " DESC";
     }
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
-                                        std::move( groupAndOrderBy ), m_id ).build();
+                                        std::move( groupAndOrderBy ), m_id )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IArtist> Genre::searchArtists( const std::string& pattern,
                                     const QueryParameters* params ) const
 {
-    return Artist::searchByGenre( m_ml, pattern, params, m_id );
+    return Artist::searchByGenre( m_ml, pattern, params, m_id, m_publicOnlyListing );
 }
 
 Query<IMedia> Genre::tracks( TracksIncluded included,
                              const QueryParameters* params ) const
 {
-    return Media::tracksFromGenre( m_ml, m_id, included, params );
+    return Media::tracksFromGenre( m_ml, m_id, included, params, m_publicOnlyListing );
 }
 
 Query<IMedia> Genre::searchTracks( const std::string& pattern, const QueryParameters* params ) const
 {
-    return Media::searchGenreTracks( m_ml, pattern, m_id, params );
+    return Media::searchGenreTracks( m_ml, pattern, m_id, params,
+                                     m_publicOnlyListing );
 }
 
 Query<IAlbum> Genre::albums( const QueryParameters* params ) const
 {
-    return Album::fromGenre( m_ml, m_id, params );
+    return Album::fromGenre( m_ml, m_id, params, m_publicOnlyListing );
 }
 
 Query<IAlbum> Genre::searchAlbums( const std::string& pattern,
                                    const QueryParameters* params ) const
 {
-    return Album::searchFromGenre( m_ml, pattern, m_id, params );
+    return Album::searchFromGenre( m_ml, pattern, m_id, params, m_publicOnlyListing );
 }
 
 const std::string&Genre::thumbnailMrl( ThumbnailSizeType sizeType ) const
@@ -477,6 +492,12 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name;
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+    {
+        req += " WHERE EXISTS(SELECT genre_id FROM " + Media::Table::Name +
+                " WHERE genre_id = id_genre AND is_public != 0)";
+    }
     std::string orderBy = " ORDER BY name";
     if ( params != nullptr )
     {
@@ -486,7 +507,8 @@ Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params 
             orderBy += " DESC";
     }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
-                                      std::move( orderBy ) ).build();
+                                      std::move( orderBy ) )
+            .markPublic( publicOnly ).build();
 }
 
 }

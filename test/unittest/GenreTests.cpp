@@ -512,6 +512,60 @@ static void ConvertToExternal( GenreTests* T )
     ASSERT_EQ( nullptr, T->g );
 }
 
+static void Public( GenreTests* T )
+{
+    ASSERT_EQ( 0u, T->g->nbTracks() );
+
+    auto extraGenre = T->ml->createGenre( "Atmospheric Black Metal" );
+    ASSERT_NON_NULL( extraGenre );
+    auto genres = T->ml->genres( nullptr )->all();
+    ASSERT_EQ( 2u, genres.size() );
+
+    auto a = T->ml->createAlbum( "Kadath" );
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "Xasthur.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "Kadath.mp3", IMedia::Type::Audio ) );
+
+    auto res = a->addTrack( m, 1, 1, T->g->id(), extraGenre.get() );
+    ASSERT_TRUE( res );
+    res = a->addTrack( m2, 2, 1, T->g->id(), extraGenre.get() );
+    ASSERT_TRUE( res );
+
+    QueryParameters params{};
+    params.publicOnly = true;
+    auto genresQuery = T->ml->genres( &params );
+    ASSERT_EQ( 0u, genresQuery->count() );
+    genres = genresQuery->all();
+    ASSERT_EQ( 0u, genres.size() );
+
+    auto artistsQuery = extraGenre->artists( &params );
+    ASSERT_EQ( 0u, artistsQuery->count() );
+    auto artists = artistsQuery->all();
+    ASSERT_EQ( 0u, artists.size() );
+
+    res = T->ml->markMediaAsPublic( m->id() );
+    ASSERT_TRUE( res );
+
+    genresQuery = T->ml->genres( &params );
+    ASSERT_EQ( 1u, genresQuery->count() );
+    genres = genresQuery->all();
+    ASSERT_EQ( 1u, genres.size() );
+    auto genre = genres[0];
+    ASSERT_EQ( genre->id(), extraGenre->id() );
+
+    artistsQuery = extraGenre->artists( &params );
+    ASSERT_EQ( 1u, artistsQuery->count() );
+    artists = artistsQuery->all();
+    ASSERT_EQ( 1u, artists.size() );
+
+    auto tracksQuery = genre->tracks( Genre::TracksIncluded::All, nullptr );
+    ASSERT_EQ( 1u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( 1u, tracks.size() );
+
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( GenreTests );
@@ -534,6 +588,7 @@ int main( int ac, char** av )
     ADD_TEST( CheckDbModel );
     ADD_TEST( GetThumbnails );
     ADD_TEST( ConvertToExternal );
+    ADD_TEST( Public );
 
     END_TESTS
 }

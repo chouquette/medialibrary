@@ -784,13 +784,16 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
 }
 
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
-                                      const QueryParameters* params, int64_t genreId )
+                                      const QueryParameters* params, int64_t genreId,
+                                      bool forcePublic )
 {
     std::string req = "FROM " + Table::Name + " a "
                 "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
                 "WHERE id_artist IN "
                     "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)"
                 "AND m.genre_id = ? ";
+    if ( ( params != nullptr && params->publicOnly == true ) || forcePublic == true )
+        req += "AND m.is_public != 0 ";
 
     std::string groupBy = "GROUP BY m.artist_id "
                           "ORDER BY a.name";

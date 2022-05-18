@@ -128,7 +128,8 @@ public:
     static Query<IArtist> listAll( MediaLibraryPtr ml, ArtistIncluded included,
                                    const QueryParameters* params );
     static Query<IArtist> searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
-                                         const QueryParameters* params, int64_t genreId );
+                                         const QueryParameters* params, int64_t genreId,
+                                         bool forcePublic );
     /**
      * @brief dropMediaArtistRelation Drops any relation between a media and N artists
      * @param ml A media library instance
