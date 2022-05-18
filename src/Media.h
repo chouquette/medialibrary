@@ -374,7 +374,7 @@ private:
              */
             Any,
         };
-        static std::string addRequestJoin(const QueryParameters* params, bool forceFile );
+        static std::string addRequestJoin( const QueryParameters* params );
         static std::string sortRequest( const QueryParameters* params );
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );

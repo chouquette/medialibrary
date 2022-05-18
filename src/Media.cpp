@@ -1134,11 +1134,11 @@ bool Media::setLyrics( std::string lyrics )
     return true;
 }
 
-std::string Media::addRequestJoin( const QueryParameters* params, bool forceFile )
+std::string Media::addRequestJoin( const QueryParameters* params )
 {
     bool artist = false;
     bool album = false;
-    bool file = forceFile;
+    bool file = false;
     auto sort = params != nullptr ? params->sort : SortingCriteria::Alpha;
 
     switch( sort )
@@ -1259,7 +1259,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     // We want to include unknown media to the video listing, so we invert the
     // filter to exclude Audio (ie. we include Unknown & Video)
     // If we only want audio media, then we just filter 'type = Audio'
@@ -1289,7 +1289,7 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req += " WHERE (m.last_position >= 0 OR m.last_time > 0)";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
@@ -2189,7 +2189,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
@@ -2208,7 +2208,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
@@ -2226,7 +2226,7 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
@@ -2244,7 +2244,7 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
@@ -2263,7 +2263,7 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
@@ -2283,7 +2283,7 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
 
     req +=  " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = m.id_media "
             " WHERE"
@@ -2304,7 +2304,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
 
     req += "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr "
            "ON pmr.media_id = m.id_media "
@@ -2366,7 +2366,7 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
      * to them.
      */
     std::string req = "FROM " + Table::Name +  " m ";
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req += " WHERE m.folder_id = ?";
     if ( type != Type::Unknown )
     {
@@ -2386,7 +2386,7 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                          const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name +  " m ";
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req += " WHERE m.folder_id = ?";
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
     " WHERE " + Media::FtsTable::Name + " MATCH ?)";
@@ -2407,7 +2407,7 @@ Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type ty
                                      const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " m ";
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req += " WHERE m.group_id = ? AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
@@ -2429,7 +2429,7 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
     if ( pattern.size() < 3 )
         return nullptr;
     std::string req = "FROM " + Table::Name + " m ";
-    req += addRequestJoin( params, false );
+    req += addRequestJoin( params );
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
             " WHERE " + FtsTable::Name + " MATCH ?)"
            " AND m.group_id = ? AND m.import_type = ?";
