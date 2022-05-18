@@ -1259,7 +1259,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
     // We want to include unknown media to the video listing, so we invert the
     // filter to exclude Audio (ie. we include Unknown & Video)
     // If we only want audio media, then we just filter 'type = Audio'
@@ -1267,8 +1267,7 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
         req += " WHERE m.type != ?";
     else
         req += " WHERE m.type = ?";
-    req +=  " AND (f.type = ? OR f.type = ?)"
-            " AND f.is_external = 0";
+    req +=  " AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
 
@@ -1277,12 +1276,12 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
         req += " AND m.subtype = ?";
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                         sortRequest( params ), IMedia::Type::Audio,
-                                        IFile::Type::Main, IFile::Type::Disc, subType );
+                                        ImportType::Internal, subType );
     }
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), IMedia::Type::Audio,
-                                      IFile::Type::Main, IFile::Type::Disc );
+                                      ImportType::Internal );
 }
 
 Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
