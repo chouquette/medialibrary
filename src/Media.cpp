@@ -2209,11 +2209,10 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
-            " AND (f.type = ? OR f.type = ?)"
             " AND m.type = ?"
             " AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
@@ -2221,7 +2220,6 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      File::Type::Main, File::Type::Disc,
                                       type, ImportType::Internal );
 }
 
@@ -2229,59 +2227,56 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.album_id = ?"
-            " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      albumId, File::Type::Main, Media::SubType::AlbumTrack );
+                                      albumId, Media::SubType::AlbumTrack );
 }
 
 Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t artistId, const QueryParameters* params)
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.artist_id = ?"
-            " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      artistId, File::Type::Main, Media::SubType::AlbumTrack );
+                                      artistId, Media::SubType::AlbumTrack );
 }
 
 Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t genreId, const QueryParameters* params)
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
 
     req +=  " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.genre_id = ?"
-            " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      genreId, File::Type::Main, Media::SubType::AlbumTrack );
+                                      genreId, Media::SubType::AlbumTrack );
 }
 
 Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& pattern,
@@ -2289,21 +2284,20 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
 
     req +=  " INNER JOIN " + ShowEpisode::Table::Name + " ep ON ep.media_id = m.id_media "
             " WHERE"
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND ep.show_id = ?"
-            " AND f.type = ?"
             " AND m.subtype = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      showId, File::Type::Main, Media::SubType::ShowEpisode );
+                                      showId, Media::SubType::ShowEpisode );
 }
 
 Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
@@ -2311,7 +2305,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    req += addRequestJoin( params, true );
+    req += addRequestJoin( params, false );
 
     req += "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr "
            "ON pmr.media_id = m.id_media "
