@@ -69,6 +69,10 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_duration( row.extract<decltype(m_duration)>() )
     , m_nbUnknownDuration( row.extract<decltype(m_nbUnknownDuration)>() )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -85,6 +89,7 @@ Playlist::Playlist( MediaLibraryPtr ml, std::string name )
     , m_nbPresentUnknown( 0 )
     , m_duration( 0 )
     , m_nbUnknownDuration( 0 )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -132,51 +137,71 @@ const std::string& Playlist::artworkMrl() const
 
 uint32_t Playlist::nbMedia() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbVideo + m_nbAudio + m_nbUnknown;
 }
 
 uint32_t Playlist::nbVideo() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbVideo;
 }
 
 uint32_t Playlist::nbAudio() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbAudio;
 }
 
 uint32_t Playlist::nbUnknown() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbUnknown;
 }
 
 uint32_t Playlist::nbPresentMedia() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentVideo + m_nbPresentAudio + m_nbPresentUnknown;
 }
 
 uint32_t Playlist::nbPresentVideo() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentVideo;
 }
 
 uint32_t Playlist::nbPresentAudio() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentAudio;
 }
 
 uint32_t Playlist::nbPresentUnknown() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbPresentUnknown;
 }
 
 int64_t Playlist::duration() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_duration;
 }
 
 uint32_t Playlist::nbDurationUnknown() const
 {
+    if ( m_publicOnlyListing == true )
+        return 0;
     return m_nbUnknownDuration;
 }
 
@@ -187,6 +212,10 @@ Query<IMedia> Playlist::media( const QueryParameters* params ) const
         "WHERE pmr.playlist_id = ?";
     if ( params == nullptr || params->includeMissing == false )
          base += " AND m.is_present != 0";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
+                        m_publicOnlyListing == true;
+    if ( publicOnly == true )
+        base += " AND m.is_public != 0";
     const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
     const std::string countReq = "SELECT COUNT(*) " + base;
     return make_query_with_count<Media, IMedia>( m_ml, countReq, req, m_id );
@@ -197,7 +226,7 @@ Query<IMedia> Playlist::searchMedia( const std::string& pattern,
 {
     if ( pattern.size() < 3 )
         return {};
-    return Media::searchInPlaylist( m_ml, pattern, m_id, params );
+    return Media::searchInPlaylist( m_ml, pattern, m_id, params, m_publicOnlyListing );
 }
 
 void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
@@ -1208,6 +1237,7 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
 {
     std::string req = "FROM " + Playlist::Table::Name;
     auto includeMissing = params != nullptr && params->includeMissing == true;
+    auto whereInserted = false;
     switch ( type )
     {
     case PlaylistType::VideoOnly:
@@ -1216,6 +1246,7 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
         else
             req += " WHERE (nb_present_video > 0 OR nb_present_unknown > 0)"
                    " AND nb_present_audio = 0";
+        whereInserted = true;
         break;
     case PlaylistType::AudioOnly:
         if ( includeMissing == true )
@@ -1223,14 +1254,28 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
         else
             req += " WHERE nb_present_video = 0 AND nb_present_unknown = 0"
                    " AND nb_present_audio > 0";
+        whereInserted = true;
         break;
     case PlaylistType::All:
     default:
         break;
     }
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly )
+    {
+        if ( whereInserted == true )
+            req += " AND";
+        else
+            req += " WHERE";
+        req += " EXISTS(SELECT id_media FROM " + Media::Table::Name + " m"
+               " LEFT JOIN " + MediaRelationTable::Name + " mrt"
+               " ON mrt.media_id = m.id_media"
+               " WHERE mrt.playlist_id = id_playlist AND m.is_public != 0)";
+    }
 
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
-                                            sortRequest( params ) ).build();
+                                            sortRequest( params ) )
+            .markPublic( publicOnly ).build();
 }
 
 bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)

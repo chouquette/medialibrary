@@ -178,6 +178,7 @@ private:
     uint32_t m_nbPresentUnknown;
     int64_t m_duration;
     uint32_t m_nbUnknownDuration;
+    bool m_publicOnlyListing;
 
     friend Playlist::Table;
 };

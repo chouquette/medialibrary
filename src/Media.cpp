@@ -2407,7 +2407,8 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
 }
 
 Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
-                                       int64_t playlistId, const QueryParameters* params )
+                                       int64_t playlistId, const QueryParameters* params,
+                                       bool forcePublic )
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
@@ -2419,6 +2420,8 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
 
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    if ( ( params != nullptr && params->publicOnly == true ) || forcePublic == true )
+        req += " AND m.is_public != 0";
 
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
            " WHERE " + Media::FtsTable::Name + " MATCH ?)";

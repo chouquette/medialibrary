@@ -1078,6 +1078,49 @@ static void FilterByMediaType( PlaylistTests* T )
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
 }
 
+static void Public( PlaylistTests* T )
+{
+    auto pl2 = T->ml->createPlaylist( "pl2" );
+    auto m1 = T->ml->addMedia( "media1.mp3", IMedia::Type::Audio );
+    auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+
+    res = pl2->append( *m1 );
+    ASSERT_TRUE( res );
+    res = pl2->append( *m2 );
+    ASSERT_TRUE( res );
+
+    auto playlistQuery = T->ml->playlists( PlaylistType::All, nullptr );
+    ASSERT_EQ( 2u, playlistQuery->count() );
+    auto playlists = playlistQuery->all();
+    ASSERT_EQ( 2u, playlists.size() );
+
+    QueryParameters params{};
+    params.publicOnly = true;
+
+    playlistQuery = T->ml->playlists( PlaylistType::All, &params );
+    ASSERT_EQ( 0u, playlistQuery->count() );
+    playlists = playlistQuery->all();
+    ASSERT_EQ( 0u, playlists.size() );
+
+    res = T->ml->markMediaAsPublic( m2->id() );
+    ASSERT_TRUE( res );
+
+    playlistQuery = T->ml->playlists( PlaylistType::All, &params );
+    ASSERT_EQ( 1u, playlistQuery->count() );
+    playlists = playlistQuery->all();
+    ASSERT_EQ( 1u, playlists.size() );
+
+    auto pl = playlists[0];
+    ASSERT_EQ( pl->id(), pl2->id() );
+
+    auto tracksQuery = pl->media( nullptr );
+    ASSERT_EQ( 1u, tracksQuery->count() );
+    auto tracks = tracksQuery->all();
+    ASSERT_EQ( 1u, tracks.size() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -1115,6 +1158,7 @@ int main( int ac, char** av )
     ADD_TEST( UpdateNbMediaOnMediaRemoval );
     ADD_TEST( UpdateNbMediaOnMediaTypeChange );
     ADD_TEST( FilterByMediaType );
+    ADD_TEST( Public );
 
     END_TESTS
 }

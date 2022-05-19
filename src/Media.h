@@ -321,7 +321,8 @@ class Media : public IMedia,
         static Query<IMedia> searchShowEpisodes( MediaLibraryPtr ml, const std::string& pattern,
                                                  int64_t showId, const QueryParameters* params );
         static Query<IMedia> searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
-                                                 int64_t playlistId, const QueryParameters* params );
+                                               int64_t playlistId, const QueryParameters* params,
+                                               bool forcePublic );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml, IMedia::Type type );
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
