@@ -32,51 +32,51 @@ namespace medialibrary
 
 class Label : public ILabel, public DatabaseHelpers<Label>
 {
-    public:
-        struct Table
-        {
-            static const std::string Name;
-            static const std::string PrimaryKeyColumn;
-            static int64_t Label::*const PrimaryKey;
-        };
-        struct FileRelationTable
-        {
-            static const std::string Name;
-        };
-        enum class Triggers : uint8_t
-        {
-            DeleteFts,
-        };
-        enum class Indexes : uint8_t
-        {
-            MediaId,
-        };
+public:
+    struct Table
+    {
+        static const std::string Name;
+        static const std::string PrimaryKeyColumn;
+        static int64_t Label::*const PrimaryKey;
+    };
+    struct FileRelationTable
+    {
+        static const std::string Name;
+    };
+    enum class Triggers : uint8_t
+    {
+        DeleteFts,
+    };
+    enum class Indexes : uint8_t
+    {
+        MediaId,
+    };
 
-        Label( MediaLibraryPtr ml, sqlite::Row& row );
-        Label( MediaLibraryPtr ml, const std::string& name );
+    Label( MediaLibraryPtr ml, sqlite::Row& row );
+    Label( MediaLibraryPtr ml, const std::string& name );
 
-    public:
-        virtual int64_t id() const override;
-        virtual const std::string& name() const override;
-        virtual Query<IMedia> media() override;
+public:
+    virtual int64_t id() const override;
+    virtual const std::string& name() const override;
+    virtual Query<IMedia> media() override;
 
-        static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
-        static std::string schema( const std::string& tableName, uint32_t dbModel );
-        static std::string trigger( Triggers trigger, uint32_t dbModel );
-        static std::string triggerName( Triggers trigger, uint32_t dbModel );
-        static std::string index( Indexes index, uint32_t dbModel );
-        static std::string indexName( Indexes index, uint32_t dbModel );
-        static bool checkDbModel( MediaLibraryPtr ml );
-        static void createTable( sqlite::Connection* dbConnection );
-        static void createTriggers( sqlite::Connection* dbConnection );
-        static void createIndexes( sqlite::Connection* dbConnection );
+    static LabelPtr create( MediaLibraryPtr ml, const std::string& name );
+    static std::string schema( const std::string& tableName, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string triggerName( Triggers trigger, uint32_t dbModel );
+    static std::string index( Indexes index, uint32_t dbModel );
+    static std::string indexName( Indexes index, uint32_t dbModel );
+    static bool checkDbModel( MediaLibraryPtr ml );
+    static void createTable( sqlite::Connection* dbConnection );
+    static void createTriggers( sqlite::Connection* dbConnection );
+    static void createIndexes( sqlite::Connection* dbConnection );
 
-    private:
-        MediaLibraryPtr m_ml;
-        int64_t m_id;
-        const std::string m_name;
+private:
+    MediaLibraryPtr m_ml;
+    int64_t m_id;
+    const std::string m_name;
 
-        friend struct Label::Table;
+    friend struct Label::Table;
 };
 
 }

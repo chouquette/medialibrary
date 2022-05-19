@@ -113,7 +113,7 @@ std::string Label::trigger( Triggers trigger, uint32_t dbModel )
            " UPDATE " + Media::FtsTable::Name +
                 " SET labels = TRIM(REPLACE(labels, old.name, ''))"
                 " WHERE labels MATCH old.name;"
-                " END";
+           " END";
 }
 
 std::string Label::triggerName( Triggers trigger, uint32_t )
