@@ -713,12 +713,15 @@ public:
     virtual bool isDiscoverNetworkEnabled() const = 0;
     /**
      * @brief roots List the main folders that are managed by the medialibrary
+     * @param params A pointer to a QueryParameters structure or nullptr for the default
      *
      * This is essentially a way of knowing what has been passed to discover()
      * throughout the database life.
      * The resulting list includes entry points on device that are currently unmounted.
+     * If the passed params field publicOnly is true, this function will list
+     * top level public folders instead of the folders provided to discover()
      */
-    virtual Query<IFolder> roots() const = 0;
+    virtual Query<IFolder> roots( const QueryParameters* params ) const = 0;
     /**
      * @brief isIndexed Returns true if the mrl point to a file of folder in an
      *                  indexed entrypoint

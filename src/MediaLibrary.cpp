@@ -2304,9 +2304,9 @@ bool MediaLibrary::isDiscoverNetworkEnabled() const
     return m_fsHolder.isNetworkEnabled();
 }
 
-Query<IFolder> MediaLibrary::roots() const
+Query<IFolder> MediaLibrary::roots( const QueryParameters* params ) const
 {
-    return Folder::roots( this, false, 0 );
+    return Folder::roots( this, false, 0, params );
 }
 
 bool MediaLibrary::isIndexed( const std::string& mrl ) const
@@ -2364,7 +2364,7 @@ void MediaLibrary::unbanFolder( const std::string& entryPoint )
 
 Query<IFolder> MediaLibrary::bannedEntryPoints() const
 {
-    return Folder::roots( this, true, 0 );
+    return Folder::roots( this, true, 0, nullptr );
 }
 
 const std::string& MediaLibrary::thumbnailPath() const

@@ -440,7 +440,7 @@ static void FetchEntryPoints( FolderTests* T )
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto eps = T->ml->roots()->all();
+    auto eps = T->ml->roots( nullptr )->all();
     ASSERT_EQ( 1u, eps.size() );
     ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->mrl() );
 
@@ -448,7 +448,7 @@ static void FetchEntryPoints( FolderTests* T )
     T->ml->banFolder( mock::FileSystemFactory::SubFolder );
     auto res = T->cbMock->waitBanFolder();
     ASSERT_TRUE( res );
-    eps = T->ml->roots()->all();
+    eps = T->ml->roots( nullptr )->all();
     ASSERT_EQ( 1u, eps.size() );
 }
 
@@ -494,7 +494,7 @@ static void RemoveRootEntryPoint( FolderTests* T )
     ASSERT_NE( nullptr, m );
     ASSERT_TRUE( m->isExternalMedia() );
 
-    auto eps = T->ml->roots()->all();
+    auto eps = T->ml->roots( nullptr )->all();
     ASSERT_EQ( 0u, eps.size() );
 }
 
@@ -518,7 +518,7 @@ static void RemoveEntryPoint( FolderTests* T )
     media = T->ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto eps = T->ml->roots()->all();
+    auto eps = T->ml->roots( nullptr )->all();
     ASSERT_EQ( 1u, eps.size() );
 
     m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -844,7 +844,7 @@ static void ListSubFolders( FolderTests* T )
 
     enforceFakeMediaTypes( T->ml.get() );
 
-    auto entryPoints = T->ml->roots()->all();
+    auto entryPoints = T->ml->roots( nullptr )->all();
     ASSERT_EQ( 1u, entryPoints.size() );
 
     auto root = entryPoints[0];
@@ -959,7 +959,7 @@ static void BannedEntryPoints( FolderTests* T )
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
 
-    res = T->ml->roots();
+    res = T->ml->roots( nullptr );
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
@@ -1070,6 +1070,15 @@ static void SetPublic( FolderTests* T )
     ASSERT_FALSE( root->isPublic() );
     checkMediaPublicness( *root, false );
 
+    /* Ensure we can list public "root" folders without fetching the actual entry point */
+    QueryParameters params{};
+    params.publicOnly = true;
+    auto rootsQuery = T->ml->roots( &params );
+    ASSERT_EQ( 1u, rootsQuery->count() );
+    auto roots = rootsQuery->all();
+    ASSERT_EQ( 1u, roots.size() );
+    ASSERT_EQ( roots[0]->id(), subFolder->id() );
+
     /*
      * Set the subfolder back to private and check for propagations through the
      * parent folder
@@ -1085,6 +1094,11 @@ static void SetPublic( FolderTests* T )
     ASSERT_FALSE( root->isPublic() );
     checkMediaPublicness( *root, false );
 
+    rootsQuery = T->ml->roots( &params );
+    ASSERT_EQ( 0u, rootsQuery->count() );
+    roots = rootsQuery->all();
+    ASSERT_EQ( 0u, roots.size() );
+
     res = root->setPublic( true );
     ASSERT_TRUE( res );
     ASSERT_TRUE( root->isPublic() );
@@ -1095,6 +1109,13 @@ static void SetPublic( FolderTests* T )
     subFolder = T->ml->folder( subFolder->id() );
     ASSERT_TRUE( subFolder->isPublic() );
     checkMediaPublicness( *subFolder, true );
+
+    /* Check that roots() will return the actual entrypoint if public */
+    rootsQuery = T->ml->roots( &params );
+    ASSERT_EQ( 1u, rootsQuery->count() );
+    roots = rootsQuery->all();
+    ASSERT_EQ( 1u, roots.size() );
+    ASSERT_EQ( roots[0]->id(), root->id() );
 
     res = root->setPublic( false );
     ASSERT_TRUE( res );

@@ -328,11 +328,13 @@ class Media : public IMedia,
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
-                                           const QueryParameters* params );
+                                           const QueryParameters* params,
+                                           bool forcePublic);
         static Query<IMedia> searchFromFolderId( MediaLibraryPtr ml,
                                                  const std::string& pattern,
                                                  Type type, int64_t folderId,
-                                                 const QueryParameters* params );
+                                                 const QueryParameters* params,
+                                                 bool forcePublic );
         static Query<IMedia> fromMediaGroup( MediaLibraryPtr ml,
                                              int64_t groupId, Type type,
                                              const QueryParameters* params );

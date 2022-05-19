@@ -2467,7 +2467,8 @@ Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
-                                   int64_t folderId, const QueryParameters* params )
+                                   int64_t folderId, const QueryParameters* params,
+                                   bool forcePublic )
 {
     /*
      * We don't need to filter by presence. If the user is trying to list their
@@ -2478,39 +2479,52 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params );
     req += " WHERE m.folder_id = ?";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
+                      forcePublic;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                          folderId, type ).build();
+                                          folderId, type )
+                .markPublic( publicOnly ).build();
     }
     // Don't explicitely filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      folderId ).build();
+                                      folderId )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                          const std::string& pattern,
                                          IMedia::Type type, int64_t folderId,
-                                         const QueryParameters* params )
+                                         const QueryParameters* params,
+                                         bool forcePublic )
 {
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params );
     req += " WHERE m.folder_id = ?";
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
     " WHERE " + Media::FtsTable::Name + " MATCH ?)";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
+                      forcePublic;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
-                                          folderId, pattern, type ).build();
+                                          folderId, pattern, type )
+                .markPublic( publicOnly ).build();
     }
     // Don't explicitely filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       folderId,
-                                      sqlite::Tools::sanitizePattern( pattern ) ).build();
+                                      sqlite::Tools::sanitizePattern( pattern ) )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type type,

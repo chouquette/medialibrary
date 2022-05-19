@@ -71,6 +71,10 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_duration( row.hasRemainingColumns() == true ? row.extract<decltype(m_duration)>() : 0 )
     , m_isPublic( row.hasRemainingColumns() == true ? row.extract<decltype(m_isPublic)>() : false )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -88,6 +92,7 @@ Folder::Folder(MediaLibraryPtr ml, std::string path, std::string name,
     , m_nbVideo( 0 )
     , m_duration( 0 )
     , m_isPublic( false )
+    , m_publicOnlyListing( false )
 {
 }
 
@@ -785,7 +790,11 @@ Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
     req += " WHERE " + filterByMediaType( type );
     if ( includeMissing == false )
         req += " AND d.is_present != 0";
-    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) ).build();
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly )
+        req += " AND d.is_public != 0";
+    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
@@ -805,19 +814,36 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
                 FtsTable::Name + " MATCH ?) ";
     if ( includeMissing == false )
         req += "AND d.is_present != 0 ";
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+        req += " AND d.is_public != 0";
     req += "AND " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ),
-                                        sqlite::Tools::sanitizePattern( pattern ) ).build();
+                                        sqlite::Tools::sanitizePattern( pattern ) )
+            .markPublic( publicOnly ).build();
 }
 
-Query<IFolder> Folder::roots( MediaLibraryPtr ml, bool banned, int64_t deviceId )
+Query<IFolder> Folder::roots( MediaLibraryPtr ml, bool banned, int64_t deviceId,
+                              const QueryParameters* params )
 {
-    std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
-            " AND is_banned = ?";
+    std::string req = "FROM " + Folder::Table::Name + " f WHERE"
+            " f.is_banned = ?";
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+    {
+        req += " AND f.is_public != 0 AND"
+               " (parent_id IS NULL OR"
+               " NOT EXISTS (SELECT TRUE FROM " + Table::Name +
+               " WHERE is_public != 0 AND id_folder = f.parent_id))";
+    }
+    else
+        req += " AND parent_id IS NULL";
     if ( deviceId == 0 )
-        return make_query<Folder, IFolder>( ml, "*", req, "", banned ).build();
+        return make_query<Folder, IFolder>( ml, "f.*", req, "", banned )
+                .markPublic( publicOnly ).build();
     req += " AND device_id = ?";
-    return make_query<Folder, IFolder>( ml, "*", req, "", banned, deviceId ).build();
+    return make_query<Folder, IFolder>( ml, "f.*", req, "", banned, deviceId )
+            .markPublic( publicOnly ).build();
 }
 
 bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
@@ -1043,7 +1069,7 @@ bool Folder::isRootFolder() const
 
 Query<IMedia> Folder::media( IMedia::Type type, const QueryParameters* params ) const
 {
-    return Media::fromFolderId( m_ml, type, m_id, params );
+    return Media::fromFolderId( m_ml, type, m_id, params, m_publicOnlyListing );
 }
 
 Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type,
@@ -1051,18 +1077,20 @@ Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type
 {
     if ( pattern.size() < 3 )
         return {};
-    return Media::searchFromFolderId( m_ml, pattern, type, m_id, params );
+    return Media::searchFromFolderId( m_ml, pattern, type, m_id, params,
+                                      m_publicOnlyListing );
 }
 
 Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
-    return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id ).build();
+    return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id )
+            .markPublic( m_publicOnlyListing ).build();
 }
 
 Query<IPlaylist> Folder::playlists(const QueryParameters* params) const
 {
-    return Playlist::fromFolder( m_ml, m_id, params );
+    return Playlist::fromFolder( m_ml, m_id, params, m_publicOnlyListing );
 }
 
 uint32_t Folder::nbVideo() const

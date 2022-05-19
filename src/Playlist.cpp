@@ -281,14 +281,24 @@ void Playlist::recoverNullMediaID( MediaLibraryPtr ml )
 }
 
 Query<IPlaylist> Playlist::fromFolder( MediaLibraryPtr ml, int64_t folderId,
-                                      const QueryParameters* params )
+                                       const QueryParameters* params, bool forcePublic )
 {
     std::string req = "FROM " + Playlist::Table::Name + " pl "
         " INNER JOIN " + File::Table::Name + " fil ON pl.id_playlist = fil.playlist_id"
         " INNER JOIN " + Folder::Table::Name + " fol ON fol.id_folder = fil.folder_id"
         " WHERE fol.id_folder = ?";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
+                forcePublic == true;
+    if ( publicOnly )
+    {
+        req += " AND EXISTS(SELECT id_media FROM " + Media::Table::Name + " m"
+               " LEFT JOIN " + MediaRelationTable::Name + " mrt"
+               " ON mrt.media_id = m.id_media"
+               " WHERE mrt.playlist_id = pl.id_playlist AND m.is_public != 0)";
+    }
     return make_query<Playlist, IPlaylist>( ml, "pl.*", std::move( req ),
-                                            sortRequest( params ), folderId ).build();
+                                            sortRequest( params ), folderId )
+            .markPublic( publicOnly ).build();
 }
 
 int64_t Playlist::mediaAt( uint32_t position )

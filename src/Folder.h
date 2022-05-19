@@ -123,7 +123,7 @@ public:
                                            IMedia::Type type,
                                            const QueryParameters* params );
     static Query<IFolder> roots( MediaLibraryPtr ml, bool banned,
-                                 int64_t deviceId );
+                                 int64_t deviceId, const QueryParameters* params );
     /**
      * @brief deleteFolder Mark a folder in database as removed
      * @param ml The media library instance
@@ -200,6 +200,7 @@ private:
     uint32_t m_nbVideo;
     int64_t m_duration;
     bool m_isPublic;
+    bool m_publicOnlyListing;
 
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,

@@ -147,7 +147,7 @@ public:
     static std::shared_ptr<Playlist> fromFile( MediaLibraryPtr ml, int64_t fileId );
     static void recoverNullMediaID( MediaLibraryPtr ptr );
     static Query<IPlaylist> fromFolder( MediaLibraryPtr ml, int64_t folderId,
-                                        const QueryParameters* params );
+                                        const QueryParameters* params, bool forcePublic );
 private:
     static std::string sortRequest( const QueryParameters* params );
     static bool writeBackup( const std::string& name,
