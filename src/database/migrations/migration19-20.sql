@@ -161,6 +161,8 @@ Label::schema( Label::FileRelationTable::Name, 20 ),
 "INSERT INTO " + Label::FileRelationTable::Name + " "
     "SELECT * FROM " + Label::FileRelationTable::Name + "_backup",
 
+"DROP TABLE " + Label::FileRelationTable::Name + "_backup",
+
 /* Playlist table */
 "CREATE TEMPORARY TABLE " + Playlist::Table::Name + "_backup"
 "("
