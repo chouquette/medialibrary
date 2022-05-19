@@ -733,6 +733,13 @@ static void Upgrade35to36( DbModel* T )
 static void Upgrade36to37( DbModel* T )
 {
     T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v36.sql" );
+    auto folders = T->ml->folders( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_FALSE( folders.empty() );
+    for ( const auto& f : folders )
+    {
+        /* Each dummy album is its own folder and has 10 tracks of 639ms each */
+        ASSERT_EQ( 639 * 10, f->duration() );
+    }
 }
 
 int main( int ac, char** av )

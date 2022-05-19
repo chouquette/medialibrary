@@ -63,6 +63,12 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_nbAudio( row.extract<decltype(m_nbAudio)>() )
     , m_nbVideo( row.extract<decltype(m_nbVideo)>() )
+    /*
+     * 15 to 16 migration uses fetchAll, meaning that the code need to adapt to
+     * the missing column, or we need to reimplement the migration without using
+     * Folder instances.
+     */
+    , m_duration( row.hasRemainingColumns() == true ? row.extract<decltype(m_duration)>() : 0 )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -79,6 +85,7 @@ Folder::Folder(MediaLibraryPtr ml, std::string path, std::string name,
     , m_isRemovable( isRemovable )
     , m_nbAudio( 0 )
     , m_nbVideo( 0 )
+    , m_duration( 0 )
 {
 }
 
@@ -138,17 +145,41 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         ")";
     }
     assert( tableName == Table::Name );
+    if ( dbModel < 37 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "path TEXT,"
+            "name TEXT" + (dbModel >= 15 ? " COLLATE NOCASE" : "") + ","
+            "parent_id UNSIGNED INTEGER,"
+            "is_banned BOOLEAN NOT NULL DEFAULT 0,"
+            "device_id UNSIGNED INTEGER,"
+            "is_removable BOOLEAN NOT NULL,"
+            "nb_audio UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+
+            "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
+            "(id_folder) ON DELETE CASCADE,"
+
+            "FOREIGN KEY(device_id) REFERENCES " + Device::Table::Name +
+            "(id_device) ON DELETE CASCADE,"
+
+            "UNIQUE(path,device_id) ON CONFLICT FAIL"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
         "path TEXT,"
-        "name TEXT" + (dbModel >= 15 ? " COLLATE NOCASE" : "") + ","
+        "name TEXT COLLATE NOCASE,"
         "parent_id UNSIGNED INTEGER,"
         "is_banned BOOLEAN NOT NULL DEFAULT 0,"
         "device_id UNSIGNED INTEGER,"
         "is_removable BOOLEAN NOT NULL,"
         "nb_audio UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+        "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
 
         "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
         "(id_folder) ON DELETE CASCADE,"
@@ -240,10 +271,55 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                            "WHERE id_folder = new.folder_id;"
                        "END";
             }
+            if ( dbModel < 37 )
+            {
+                return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                       " AFTER UPDATE OF folder_id, type ON " + Media::Table::Name +
+                       " WHEN IFNULL(old.folder_id, 0) != IFNULL(new.folder_id, 0)"
+                           " OR old.type != new.type"
+                       " BEGIN"
+                          /* Increment the count for the new type/folder_id */
+                           " UPDATE " + Table::Name + " SET"
+                           " nb_audio = nb_audio + "
+                               "(CASE new.type "
+                                   "WHEN " +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       " THEN 1 "
+                                   "ELSE 0 "
+                               "END)"
+                           ","
+                           "nb_video = nb_video + "
+                               "(CASE new.type "
+                                   "WHEN " +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       " THEN 1 "
+                                   "ELSE 0 "
+                               "END)"
+                               "WHERE new.folder_id IS NOT NULL AND id_folder = new.folder_id;"
+                           /* And decrement the count for the old type/folder_id */
+                           "UPDATE " + Table::Name + " SET"
+                           " nb_audio = nb_audio - "
+                               "(CASE old.type "
+                                   "WHEN " +
+                                       utils::enum_to_string( IMedia::Type::Audio ) +
+                                       " THEN -1 "
+                                   "ELSE 0 "
+                               "END)"
+                           ","
+                           "nb_video = nb_video - "
+                               "(CASE old.type "
+                                   "WHEN " +
+                                       utils::enum_to_string( IMedia::Type::Video ) +
+                                       " THEN 1 "
+                                   "ELSE 0 "
+                               "END)"
+                               "WHERE old.folder_id IS NOT NULL AND id_folder = old.folder_id;"
+                       " END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-                   " AFTER UPDATE OF folder_id, type ON " + Media::Table::Name +
+                   " AFTER UPDATE OF folder_id, type, duration ON " + Media::Table::Name +
                    " WHEN IFNULL(old.folder_id, 0) != IFNULL(new.folder_id, 0)"
-                       " OR old.type != new.type"
+                       " OR old.type != new.type OR old.duration != new.duration"
                    " BEGIN"
                       /* Increment the count for the new type/folder_id */
                        " UPDATE " + Table::Name + " SET"
@@ -262,6 +338,8 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                                    " THEN 1 "
                                "ELSE 0 "
                            "END)"
+                       ","
+                       "duration = duration + IIF(new.duration > 0, new.duration, 0) "
                            "WHERE new.folder_id IS NOT NULL AND id_folder = new.folder_id;"
                        /* And decrement the count for the old type/folder_id */
                        "UPDATE " + Table::Name + " SET"
@@ -280,31 +358,58 @@ std::string Folder::trigger( Triggers trigger, uint32_t dbModel )
                                    " THEN 1 "
                                "ELSE 0 "
                            "END)"
+                       ","
+                       "duration = duration - IIF(old.duration > 0, old.duration, 0) "
                            "WHERE old.folder_id IS NOT NULL AND id_folder = old.folder_id;"
                    " END";
         case Triggers::UpdateNbMediaOnDelete:
             assert( dbModel >= 14 );
+            if ( dbModel < 37 )
+            {
+                 return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                            " AFTER DELETE ON " + Media::Table::Name +
+                            " WHEN old.folder_id IS NOT NULL "
+                        "BEGIN "
+                            "UPDATE " + Table::Name + " SET "
+                            "nb_audio = nb_audio + "
+                                "(CASE old.type "
+                                    "WHEN " +
+                                        utils::enum_to_string( IMedia::Type::Audio ) +
+                                        " THEN -1 "
+                                    "ELSE 0 "
+                                "END),"
+                            "nb_video = nb_video + "
+                                "(CASE old.type "
+                                    "WHEN " +
+                                        utils::enum_to_string( IMedia::Type::Video ) +
+                                        " THEN -1 "
+                                    "ELSE 0 "
+                                "END) "
+                            "WHERE id_folder = old.folder_id;"
+                        "END";
+            }
             return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-                        " AFTER DELETE ON " + Media::Table::Name +
-                        " WHEN old.folder_id IS NOT NULL "
-                    "BEGIN "
-                        "UPDATE " + Table::Name + " SET "
-                        "nb_audio = nb_audio + "
-                            "(CASE old.type "
-                                "WHEN " +
-                                    utils::enum_to_string( IMedia::Type::Audio ) +
-                                    " THEN -1 "
-                                "ELSE 0 "
-                            "END),"
-                        "nb_video = nb_video + "
-                            "(CASE old.type "
-                                "WHEN " +
-                                    utils::enum_to_string( IMedia::Type::Video ) +
-                                    " THEN -1 "
-                                "ELSE 0 "
-                            "END) "
-                        "WHERE id_folder = old.folder_id;"
-                    "END";
+                    " AFTER DELETE ON " + Media::Table::Name +
+                    " WHEN old.folder_id IS NOT NULL "
+                "BEGIN "
+                    "UPDATE " + Table::Name + " SET "
+                    "nb_audio = nb_audio + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                utils::enum_to_string( IMedia::Type::Audio ) +
+                                " THEN -1 "
+                            "ELSE 0 "
+                        "END),"
+                    "nb_video = nb_video + "
+                        "(CASE old.type "
+                            "WHEN " +
+                                utils::enum_to_string( IMedia::Type::Video ) +
+                                " THEN -1 "
+                            "ELSE 0 "
+                        "END),"
+                    "duration = duration - IIF(old.duration > 0, old.duration, 0) "
+                    "WHERE id_folder = old.folder_id;"
+                "END";
 
         default:
             assert( !"Invalid trigger provided" );
@@ -939,6 +1044,11 @@ uint32_t Folder::nbAudio() const
 uint32_t Folder::nbMedia() const
 {
     return m_nbAudio + m_nbVideo;
+}
+
+int64_t Folder::duration() const
+{
+    return m_duration;
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )

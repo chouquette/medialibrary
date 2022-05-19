@@ -1002,6 +1002,40 @@ static void NbMediaAfterExternalInternalConversion( FolderTests* T )
     ASSERT_EQ( 1u, subFolder->nbVideo() );
 }
 
+static void Duration( FolderTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto root = T->ml->folder( 1 );
+    ASSERT_NON_NULL( root );
+    ASSERT_EQ( 0u, root->duration() );
+    auto subFolder = T->ml->folder( 2 );
+    ASSERT_NON_NULL( subFolder );
+    ASSERT_EQ( 0u, subFolder->duration() );
+
+    auto media = subFolder->media( IMedia::Type::Unknown, nullptr )->all();
+    ASSERT_TRUE( media.size() >= 1 );
+    auto m = std::static_pointer_cast<Media>( media[0] );
+    m->setDuration( 1234 );
+
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 1234, subFolder->duration() );
+
+    m->setDuration( -1 );
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 0, subFolder->duration() );
+
+    m->setDuration( 4321 );
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 4321, subFolder->duration() );
+
+    T->ml->deleteMedia( m->id() );
+    subFolder = T->ml->folder( subFolder->id() );
+    ASSERT_EQ( 0, subFolder->duration() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( FolderTests );
@@ -1047,6 +1081,7 @@ int main( int ac, char** av )
     ADD_TEST( BannedEntryPoints );
     ADD_TEST( CheckDbModel );
     ADD_TEST( NbMediaAfterExternalInternalConversion );
+    ADD_TEST( Duration );
 
     END_TESTS
 }

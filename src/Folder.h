@@ -166,6 +166,7 @@ public:
     virtual uint32_t nbVideo() const override;
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbMedia() const override;
+    virtual int64_t duration() const override;
 
     static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,
                                             const std::string& mrl,
@@ -194,6 +195,7 @@ private:
     bool m_isRemovable;
     uint32_t m_nbAudio;
     uint32_t m_nbVideo;
+    int64_t m_duration;
 
     mutable std::shared_ptr<Device> m_device;
     // This contains the full path, including device mountpoint (and mrl scheme,

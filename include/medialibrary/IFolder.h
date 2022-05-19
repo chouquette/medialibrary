@@ -126,6 +126,13 @@ public:
     virtual uint32_t nbVideo() const = 0;
     virtual uint32_t nbAudio() const = 0;
     virtual uint32_t nbMedia() const = 0;
+    /**
+     * @brief duration Returns this group duration
+     *
+     * Which is equal to the sum of all its member's durations
+     * If some media duration is unknown, it is ignored in this total.
+     */
+    virtual int64_t duration() const = 0;
 };
 
 }
