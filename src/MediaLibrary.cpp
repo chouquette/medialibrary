@@ -499,7 +499,6 @@ void MediaLibrary::createAllTriggers()
     parser::Task::createIndex( dbConn );
     Bookmark::createIndexes( dbConn );
     Chapter::createIndexes( dbConn );
-    Label::createIndexes( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()
@@ -2079,6 +2078,13 @@ void MediaLibrary::migrateModel36to37()
     auto dbConn = getConn();
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
+
+    std::string reqs[] = {
+#       include "database/migrations/migration36-37.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
 
     m_settings.setDbModelVersion( 37 );
     t->commit();

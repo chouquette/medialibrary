@@ -46,10 +46,15 @@ public:
     enum class Triggers : uint8_t
     {
         DeleteFts,
+        DeleteMediaLabel,
     };
     enum class Indexes : uint8_t
     {
-        MediaId,
+        MediaId, // Removed in model 37
+    };
+    enum class EntityType : uint8_t
+    {
+        Media,
     };
 
     Label( MediaLibraryPtr ml, sqlite::Row& row );
@@ -69,7 +74,6 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
-    static void createIndexes( sqlite::Connection* dbConnection );
 
 private:
     MediaLibraryPtr m_ml;

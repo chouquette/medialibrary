@@ -300,8 +300,8 @@ Query<ILabel> Media::labels() const
 {
     static const std::string req = "FROM " + Label::Table::Name + " l "
             "INNER JOIN " + Label::FileRelationTable::Name + " lfr ON lfr.label_id = l.id_label "
-            "WHERE lfr.media_id = ?";
-    return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id );
+            "WHERE lfr.entity_id = ? AND entity_type = ?";
+    return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id, Label::EntityType::Media );
 }
 
 uint32_t Media::playCount() const
@@ -2139,8 +2139,9 @@ bool Media::addLabel( LabelPtr label )
     {
         auto t = m_ml->getConn()->newTransaction();
 
-        std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?)";
-        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(), m_id ) == 0 )
+        std::string req = "INSERT INTO " + Label::FileRelationTable::Name + " VALUES(?, ?, ?)";
+        if ( sqlite::Tools::executeInsert( m_ml->getConn(), req, label->id(),
+                                           m_id, Label::EntityType::Media ) == 0 )
             return false;
         const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
             "SET labels = labels || ' ' || ? WHERE rowid = ?";
@@ -2167,8 +2168,10 @@ bool Media::removeLabel( LabelPtr label )
     {
         auto t = m_ml->getConn()->newTransaction();
 
-        std::string req = "DELETE FROM " + Label::FileRelationTable::Name + " WHERE label_id = ? AND media_id = ?";
-        if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(), m_id ) == false )
+        std::string req = "DELETE FROM " + Label::FileRelationTable::Name +
+                " WHERE label_id = ? AND entity_id = ? AND entity_type = ?";
+        if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, label->id(),
+                                           m_id, Label::EntityType::Media ) == false )
             return false;
         const std::string reqFts = "UPDATE " + Media::FtsTable::Name + " "
                 "SET labels = TRIM(REPLACE(labels, ?, '')) WHERE rowid = ?";
