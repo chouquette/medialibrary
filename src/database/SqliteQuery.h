@@ -165,26 +165,24 @@ private:
 };
 
 template <typename Impl, typename Intf = Impl, typename... Args>
-Query<Intf> make_query( MediaLibraryPtr ml, std::string field, std::string base,
-                        std::string orderAndGroupBy, Args&&... args )
+std::unique_ptr<SqliteQuery<Impl, Intf, Args...>>
+make_query( MediaLibraryPtr ml, std::string field, std::string base,
+            std::string orderAndGroupBy, Args&&... args )
 {
-    return std::unique_ptr<IQuery<Intf>>(
-        new SqliteQuery<Impl, Intf, Args...>( ml, std::move( field ),
+    return std::make_unique<SqliteQuery<Impl, Intf, Args...>>( ml, std::move( field ),
                                             std::move( base ),
                                             std::move( orderAndGroupBy ),
-                                            std::forward<Args>( args )... )
-    );
+                                            std::forward<Args>( args )... );
 }
 
 template <typename Impl, typename Intf = Impl, typename... Args>
-Query<Intf> make_query_with_count( MediaLibraryPtr ml, std::string countReq,
-                                   std::string req, Args&&... args )
+std::unique_ptr<SqliteQueryWithCount<Impl, Intf, Args...>>
+make_query_with_count( MediaLibraryPtr ml, std::string countReq, std::string req,
+                       Args&&... args )
 {
-    return std::unique_ptr<IQuery<Intf>>(
-        new SqliteQueryWithCount<Impl, Intf, Args...>(
+    return std::make_unique<SqliteQueryWithCount<Impl, Intf, Args...>>(
                     ml, std::move( countReq ), std::move( req ),
-                    std::forward<Args>( args )... )
-    );
+                    std::forward<Args>( args )... );
 }
 
 
