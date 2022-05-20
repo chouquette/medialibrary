@@ -143,7 +143,7 @@ Query<IChapter> Chapter::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
     if ( desc == true )
         orderBy += " DESC";
 
-    return make_query<Chapter, IChapter>( ml, "*", req, orderBy, mediaId );
+    return make_query<Chapter, IChapter>( ml, "*", req, orderBy, mediaId ).build();
 }
 
 Chapter::Chapter( MediaLibraryPtr, sqlite::Row& row )

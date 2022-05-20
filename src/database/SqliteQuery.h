@@ -171,14 +171,29 @@ private:
 };
 
 template <typename Impl, typename Intf = Impl, typename... Args>
-std::unique_ptr<SqliteQuery<Impl, Intf, Args...>>
+class QueryBuilder
+{
+public:
+    using Query = std::unique_ptr<SqliteQuery<Impl, Intf, Args...>>;
+    QueryBuilder( Query q ) : m_query( std::move( q ) ) {}
+    QueryBuilder& markPublic( bool p ) { m_query->markPublic( p ); return *this; }
+    Query build() { return std::move( m_query ); }
+
+private:
+    Query m_query;
+};
+
+template <typename Impl, typename Intf = Impl, typename... Args>
+QueryBuilder<Impl, Intf, Args...>
 make_query( MediaLibraryPtr ml, std::string field, std::string base,
             std::string orderAndGroupBy, Args&&... args )
 {
-    return std::make_unique<SqliteQuery<Impl, Intf, Args...>>( ml, std::move( field ),
+    return QueryBuilder<Impl, Intf, Args...>{
+            std::make_unique<SqliteQuery<Impl, Intf, Args...>>( ml, std::move( field ),
                                             std::move( base ),
                                             std::move( orderAndGroupBy ),
-                                            std::forward<Args>( args )... );
+                                            std::forward<Args>( args )... )
+    };
 }
 
 template <typename Impl, typename Intf = Impl, typename... Args>

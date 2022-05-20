@@ -290,7 +290,7 @@ Query<IBookmark> Bookmark::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
     }
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
-    return make_query<Bookmark, IBookmark>( ml, "*", req, orderBy, mediaId );
+    return make_query<Bookmark, IBookmark>( ml, "*", req, orderBy, mediaId ).build();
 }
 
 std::shared_ptr<Bookmark> Bookmark::fromMedia( MediaLibraryPtr ml, int64_t mediaId,

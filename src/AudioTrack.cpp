@@ -262,7 +262,7 @@ Query<IAudioTrack> AudioTrack::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
     std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
     if ( internalTracksOnly == true )
         req += " AND attached_file_id IS NULL";
-    return make_query<AudioTrack, IAudioTrack>( ml, "*", req, "", mediaId );
+    return make_query<AudioTrack, IAudioTrack>( ml, "*", req, "", mediaId ).build();
 }
 
 }

@@ -489,7 +489,7 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
             break;
         }
     }
-    return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) );
+    return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) ).build();
 }
 
 Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pattern,
@@ -503,7 +503,7 @@ Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pa
     else
         req += " AND nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
-                                                sqlite::Tools::sanitizePattern( pattern ) );
+                                                sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 void MediaGroup::createTable(sqlite::Connection* dbConnection )

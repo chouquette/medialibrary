@@ -71,7 +71,7 @@ Query<IMedia> Label::media()
             "INNER JOIN " + FileRelationTable::Name + " lfr ON lfr.entity_id = m.id_media "
             "WHERE lfr.label_id = ? "
             "AND lfr.entity_type = " + utils::enum_to_string( EntityType::Media );
-    return make_query<Media, IMedia>( m_ml, "m.*", req, "", m_id );
+    return make_query<Media, IMedia>( m_ml, "m.*", req, "", m_id ).build();
 }
 
 LabelPtr Label::create( MediaLibraryPtr ml, const std::string& name )

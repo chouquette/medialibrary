@@ -785,7 +785,7 @@ Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
     req += " WHERE " + filterByMediaType( type );
     if ( includeMissing == false )
         req += " AND d.is_present != 0";
-    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) );
+    return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) ).build();
 }
 
 Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
@@ -807,7 +807,7 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
         req += "AND d.is_present != 0 ";
     req += "AND " + filterByMediaType( type );
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ),
-                                        sqlite::Tools::sanitizePattern( pattern ) );
+                                        sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId )
@@ -815,9 +815,9 @@ Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t dev
     std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
             " AND is_banned = ?";
     if ( deviceId == 0 )
-        return make_query<Folder, IFolder>( ml, "*", req, "", banned );
+        return make_query<Folder, IFolder>( ml, "*", req, "", banned ).build();
     req += " AND device_id = ?";
-    return make_query<Folder, IFolder>( ml, "*", req, "", banned, deviceId );
+    return make_query<Folder, IFolder>( ml, "*", req, "", banned, deviceId ).build();
 }
 
 bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
@@ -1057,7 +1057,7 @@ Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type
 Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     static const std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
-    return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id );
+    return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id ).build();
 }
 
 Query<IPlaylist> Folder::playlists(const QueryParameters* params) const

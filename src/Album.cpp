@@ -350,7 +350,7 @@ Query<IMedia> Album::tracks( const QueryParameters* params ) const
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      orderTracksBy( params ), m_id );
+            orderTracksBy( params ), m_id ).build();
 }
 
 Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) const
@@ -363,7 +363,7 @@ Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) con
     if ( params == nullptr || params->includeMissing == false )
         req += " AND med.is_present != 0";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      orderTracksBy( params ), m_id, genre->id() );
+                                      orderTracksBy( params ), m_id, genre->id() ).build();
 }
 
 std::vector<MediaPtr> Album::cachedTracks() const
@@ -513,7 +513,7 @@ Query<IArtist> Album::artists( const QueryParameters* params ) const
     if ( params != nullptr && params->desc == true )
         orderBy += " DESC";
     return make_query<Artist, IArtist>( m_ml, "art.*", std::move( req ),
-                                        std::move( orderBy ), m_id );
+                                        std::move( orderBy ), m_id ).build();
 }
 
 void Album::createTable( sqlite::Connection* dbConnection )
@@ -882,7 +882,7 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
         req += " AND alb.is_present != 0";
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
-                                      sqlite::Tools::sanitizePattern( pattern ) );
+                                      sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pattern,
@@ -899,7 +899,7 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      artistId );
+                                      artistId ).build();
 }
 
 Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const QueryParameters* params )
@@ -938,7 +938,7 @@ Query<IAlbum> Album::fromArtist( MediaLibraryPtr ml, int64_t artistId, const Que
 
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrder ),
-                                      artistId, artistId );
+                                      artistId, artistId ).build();
 }
 
 Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const QueryParameters* params )
@@ -948,7 +948,7 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId, const Query
     req += "WHERE m.genre_id = ?";
     std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
-                                      std::move( groupAndOrderBy ), genreId );
+                                      std::move( groupAndOrderBy ), genreId ).build();
 }
 
 Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pattern,
@@ -964,7 +964,7 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      genreId );
+                                      genreId ).build();
 }
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )

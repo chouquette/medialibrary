@@ -304,7 +304,7 @@ Query<ILabel> Media::labels() const
     static const std::string req = "FROM " + Label::Table::Name + " l "
             "INNER JOIN " + Label::FileRelationTable::Name + " lfr ON lfr.label_id = l.id_label "
             "WHERE lfr.entity_id = ? AND entity_type = ?";
-    return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id, Label::EntityType::Media );
+    return make_query<Label, ILabel>( m_ml, "l.*", req, "", m_id, Label::EntityType::Media ).build();
 }
 
 uint32_t Media::playCount() const
@@ -563,7 +563,7 @@ Query<IVideoTrack> Media::videoTracks() const
 {
     static const std::string req = "FROM " + VideoTrack::Table::Name +
             " WHERE media_id = ?";
-    return make_query<VideoTrack, IVideoTrack>( m_ml, "*", req, "", m_id );
+    return make_query<VideoTrack, IVideoTrack>( m_ml, "*", req, "", m_id ).build();
 }
 
 bool Media::addAudioTrack( std::string codec, unsigned int bitrate,
@@ -1284,12 +1284,12 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
         req += " AND m.subtype = ?";
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                         sortRequest( params ), IMedia::Type::Audio,
-                                        ImportType::Internal, subType );
+                                        ImportType::Internal, subType ).build();
     }
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), IMedia::Type::Audio,
-                                      ImportType::Internal );
+                                      ImportType::Internal ).build();
 }
 
 Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
@@ -1304,11 +1304,11 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
     if ( type == IMedia::Type::Unknown )
     {
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                          sortRequest( params ) );
+                                          sortRequest( params ) ).build();
     }
     req += " AND m.type = ?";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      sortRequest( params ), type );
+                                      sortRequest( params ), type ).build();
 }
 
 int64_t Media::id() const
@@ -2269,7 +2269,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      ImportType::Internal );
+                                      ImportType::Internal ).build();
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
@@ -2288,7 +2288,7 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      type, ImportType::Internal );
+                                      type, ImportType::Internal ).build();
 }
 
 Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t albumId, const QueryParameters* params)
@@ -2306,7 +2306,7 @@ Query<IMedia> Media::searchAlbumTracks(MediaLibraryPtr ml, const std::string& pa
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      albumId, Media::SubType::AlbumTrack );
+                                      albumId, Media::SubType::AlbumTrack ).build();
 }
 
 Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t artistId, const QueryParameters* params)
@@ -2325,7 +2325,7 @@ Query<IMedia> Media::searchArtistTracks(MediaLibraryPtr ml, const std::string& p
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      artistId, Media::SubType::AlbumTrack );
+                                      artistId, Media::SubType::AlbumTrack ).build();
 }
 
 Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pattern, int64_t genreId, const QueryParameters* params)
@@ -2344,7 +2344,7 @@ Query<IMedia> Media::searchGenreTracks(MediaLibraryPtr ml, const std::string& pa
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      genreId, Media::SubType::AlbumTrack );
+                                      genreId, Media::SubType::AlbumTrack ).build();
 }
 
 Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& pattern,
@@ -2365,7 +2365,7 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      showId, Media::SubType::ShowEpisode );
+                                      showId, Media::SubType::ShowEpisode ).build();
 }
 
 Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
@@ -2386,7 +2386,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
            " WHERE " + Media::FtsTable::Name + " MATCH ?)";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), playlistId,
-                                      sqlite::Tools::sanitizePattern( pattern ) );
+                                      sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
@@ -2396,7 +2396,7 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
             " AND import_type != ?";
     return make_query<Media, IMedia>( ml, "*", req,
                                       "ORDER BY last_played_date DESC",
-                                      ImportType::Stream );
+                                      ImportType::Stream ).build();
 }
 
 Query<IMedia> Media::fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type )
@@ -2406,7 +2406,7 @@ Query<IMedia> Media::fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type )
             " AND type = ? AND import_type = ?";
     return make_query<Media, IMedia>( ml, "*", req,
                                       "ORDER BY last_played_date DESC", type,
-                                      ImportType::Internal );
+                                      ImportType::Internal ).build();
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
@@ -2422,7 +2422,7 @@ Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
             " AND import_type = ?";
     return make_query<Media, IMedia>( ml, "*", req,
                                       "ORDER BY last_played_date DESC",
-                                      ImportType::Stream );
+                                      ImportType::Stream ).build();
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
@@ -2441,12 +2441,12 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                          folderId, type );
+                                          folderId, type ).build();
     }
     // Don't explicitely filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      folderId );
+                                      folderId ).build();
 }
 
 Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
@@ -2463,13 +2463,13 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "*", req, sortRequest( params ),
-                                          folderId, pattern, type );
+                                          folderId, pattern, type ).build();
     }
     // Don't explicitely filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       folderId,
-                                      sqlite::Tools::sanitizePattern( pattern ) );
+                                      sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type type,
@@ -2484,10 +2484,10 @@ Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type ty
     {
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                          groupId, ImportType::Internal, type );
+                                          groupId, ImportType::Internal, type ).build();
     }
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
-                                      groupId, ImportType::Internal );
+                                      groupId, ImportType::Internal ).build();
 }
 
 Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
@@ -2509,11 +2509,11 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
         req += " AND m.type = ?";
         return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                           sqlite::Tools::sanitizePattern( pattern ),
-                                          groupId, ImportType::Internal, type );
+                                          groupId, ImportType::Internal, type ).build();
     }
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
-                                      groupId, ImportType::Internal );
+                                      groupId, ImportType::Internal ).build();
 }
 
 bool Media::clearHistory( MediaLibraryPtr ml )
@@ -2622,9 +2622,9 @@ Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
     if ( included == IGenre::TracksIncluded::WithThumbnailOnly )
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                           std::move( orderBy ), genreId,
-                                          Thumbnail::EntityType::Media );
+                                          Thumbnail::EntityType::Media ).build();
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      std::move( orderBy ), genreId );
+                                      std::move( orderBy ), genreId ).build();
 }
 
 }

@@ -175,7 +175,7 @@ Query<IMedia> Show::episodes( const QueryParameters* params ) const
 
     }
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      std::move( orderBy), m_id );
+                                      std::move( orderBy), m_id ).build();
 }
 
 Query<IMedia> Show::searchEpisodes( const std::string& pattern,
@@ -395,7 +395,7 @@ Query<IShow> Show::listAll( MediaLibraryPtr ml, const QueryParameters* params )
     std::string req = "FROM " + Show::Table::Name;
     if ( params == nullptr || params->includeMissing == false )
         req += " WHERE is_present != 0";
-    return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) );
+    return make_query<Show, IShow>( ml, "*", std::move( req ), orderBy( params ) ).build();
 }
 
 std::string Show::orderBy( const QueryParameters* params )
@@ -429,7 +429,7 @@ Query<IShow> Show::search( MediaLibraryPtr ml, const std::string& pattern,
         req += " AND is_present != 0";
     return make_query<Show, IShow>( ml, "*", std::move( req ),
                                     orderBy( params ),
-                                    sqlite::Tools::sanitizePattern( pattern ) );
+                                    sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
 bool Show::createUnknownShow( sqlite::Connection* dbConn )

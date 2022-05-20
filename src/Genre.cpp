@@ -102,7 +102,7 @@ Query<IArtist> Genre::artists( const QueryParameters* params ) const
             groupAndOrderBy += " DESC";
     }
     return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
-                                        std::move( groupAndOrderBy ), m_id );
+                                        std::move( groupAndOrderBy ), m_id ).build();
 }
 
 Query<IArtist> Genre::searchArtists( const std::string& pattern,
@@ -471,7 +471,7 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
     }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
                                       std::move( orderBy ),
-                                      sqlite::Tools::sanitizePattern( name ) );
+                                      sqlite::Tools::sanitizePattern( name ) ).build();
 }
 
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
@@ -486,7 +486,7 @@ Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params 
             orderBy += " DESC";
     }
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
-                                      std::move( orderBy ) );
+                                      std::move( orderBy ) ).build();
 }
 
 }

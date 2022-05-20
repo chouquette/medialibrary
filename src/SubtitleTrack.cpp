@@ -219,7 +219,7 @@ Query<ISubtitleTrack> SubtitleTrack::fromMedia( MediaLibraryPtr ml, int64_t medi
     std::string req = "FROM " + Table::Name + " WHERE media_id = ?";
     if ( internalTracksOnly == true )
         req += " AND attached_file_id IS NULL";
-    return make_query<SubtitleTrack, ISubtitleTrack>( ml, "*", req, "", mediaId );
+    return make_query<SubtitleTrack, ISubtitleTrack>( ml, "*", req, "", mediaId ).build();
 }
 
 }

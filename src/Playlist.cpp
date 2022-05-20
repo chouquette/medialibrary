@@ -259,7 +259,7 @@ Query<IPlaylist> Playlist::fromFolder( MediaLibraryPtr ml, int64_t folderId,
         " INNER JOIN " + Folder::Table::Name + " fol ON fol.id_folder = fil.folder_id"
         " WHERE fol.id_folder = ?";
     return make_query<Playlist, IPlaylist>( ml, "pl.*", std::move( req ),
-                                            sortRequest( params ), folderId );
+                                            sortRequest( params ), folderId ).build();
 }
 
 int64_t Playlist::mediaAt( uint32_t position )
@@ -1200,7 +1200,7 @@ Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                " OR nb_present_unknown > 0)";
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ),
-                                            sqlite::Tools::sanitizePattern( name ) );
+                                            sqlite::Tools::sanitizePattern( name ) ).build();
 }
 
 Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
@@ -1230,7 +1230,7 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
     }
 
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
-                                            sortRequest( params ) );
+                                            sortRequest( params ) ).build();
 }
 
 bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)

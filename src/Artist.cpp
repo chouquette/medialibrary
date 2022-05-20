@@ -150,7 +150,7 @@ Query<IMedia> Artist::tracks( const QueryParameters* params ) const
     if ( desc == true && sort != SortingCriteria::Album )
         orderBy += " DESC";
     return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      std::move( orderBy ), m_id );
+                                      std::move( orderBy ), m_id ).build();
 }
 
 Query<IMedia> Artist::searchTracks( const std::string& pattern, const QueryParameters* params ) const
@@ -732,7 +732,7 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
         req += " AND art.nb_tracks > 0";
     return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
                                         sortRequest( params ),
-                                        sqlite::Tools::sanitizePattern( name ) );
+                                        sqlite::Tools::sanitizePattern( name ) ).build();
 }
 
 Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
@@ -748,7 +748,7 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
     if ( params == nullptr || params->includeMissing == false )
         req += " AND art.is_present != 0";
     return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
-                                        sortRequest( params ) );
+                                        sortRequest( params ) ).build();
 }
 
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
@@ -772,7 +772,7 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
     return make_query<Artist, IArtist>( ml, "a.*", std::move( req ),
                                         std::move( groupBy ),
                                         sqlite::Tools::sanitizePattern( pattern ),
-                                        genreId );
+                                        genreId ).build();
 }
 
 bool Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
