@@ -92,6 +92,12 @@ public:
     {
     }
 
+    void markPublic( bool isPublic )
+    {
+        if ( isPublic == true )
+            m_field += ", TRUE";
+    }
+
     virtual size_t count() override
     {
         std::string req = "SELECT COUNT(DISTINCT " + Impl::Table::PrimaryKeyColumn +
@@ -116,7 +122,7 @@ public:
     }
 
 private:
-    const std::string m_field;
+    std::string m_field;
     const std::string m_base;
     const std::string m_groupAndOrderBy;
 };
