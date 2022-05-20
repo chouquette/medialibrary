@@ -429,6 +429,7 @@ private:
         uint32_t m_discNumber;
         std::string m_lyrics;
         bool m_isPublic;
+        bool m_publicOnlyListing;
 
         // Auto fetched related properties
         mutable ShowEpisodePtr m_showEpisode;

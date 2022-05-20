@@ -101,6 +101,10 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
 {
+    if ( row.hasRemainingColumns() == true )
+        m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
+    else
+        m_publicOnlyListing = false;
     assert( row.hasRemainingColumns() == false );
 }
 
@@ -134,6 +138,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_isPublic( false )
+    , m_publicOnlyListing( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
 {
 }
@@ -167,6 +172,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_isPublic( false )
+    , m_publicOnlyListing( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
 {
 }
@@ -1278,18 +1284,23 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     req +=  " AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
 
     if ( subType != IMedia::SubType::Unknown )
     {
         req += " AND m.subtype = ?";
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                         sortRequest( params ), IMedia::Type::Audio,
-                                        ImportType::Internal, subType ).build();
+                                        ImportType::Internal, subType )
+                .markPublic( publicOnly ).build();
     }
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ), IMedia::Type::Audio,
-                                      ImportType::Internal ).build();
+                                      ImportType::Internal )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
@@ -2266,10 +2277,14 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    auto publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
-                                      ImportType::Internal ).build();
+                                      ImportType::Internal )
+            .markPublic( publicOnly ).build();
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
@@ -2285,6 +2300,8 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " AND m.import_type = ?";
     if ( params == nullptr || params->includeMissing == false )
         req += " AND m.is_present != 0";
+    if ( params != nullptr && params->publicOnly == true )
+        req += " AND m.is_public != 0";
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
@@ -2589,6 +2606,9 @@ Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
         req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
                " WHERE entity_id = m.id_media AND entity_type = ?2)";
     }
+    auto publicOnly = ( params != nullptr && params->publicOnly == true );
+    if ( publicOnly == true )
+        req += " AND m.is_public = 1";
     std::string orderBy = "ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
@@ -2624,7 +2644,8 @@ Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
                                           std::move( orderBy ), genreId,
                                           Thumbnail::EntityType::Media ).build();
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
-                                      std::move( orderBy ), genreId ).build();
+                                      std::move( orderBy ), genreId )
+            .markPublic( publicOnly ).build();
 }
 
 }
