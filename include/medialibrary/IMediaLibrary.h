@@ -712,11 +712,13 @@ public:
     virtual bool setDiscoverNetworkEnabled( bool enabled ) = 0;
     virtual bool isDiscoverNetworkEnabled() const = 0;
     /**
-     * @brief entryPoints List the entrypoints that are managed by the medialibrary
+     * @brief roots List the main folders that are managed by the medialibrary
      *
-     * The resulting list includes entry points on device that are currently unmounted
+     * This is essentially a way of knowing what has been passed to discover()
+     * throughout the database life.
+     * The resulting list includes entry points on device that are currently unmounted.
      */
-    virtual Query<IFolder> entryPoints() const = 0;
+    virtual Query<IFolder> roots() const = 0;
     /**
      * @brief isIndexed Returns true if the mrl point to a file of folder in an
      *                  indexed entrypoint

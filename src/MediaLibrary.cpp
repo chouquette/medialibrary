@@ -2304,7 +2304,7 @@ bool MediaLibrary::isDiscoverNetworkEnabled() const
     return m_fsHolder.isNetworkEnabled();
 }
 
-Query<IFolder> MediaLibrary::entryPoints() const
+Query<IFolder> MediaLibrary::roots() const
 {
     return Folder::entryPoints( this, false, 0 );
 }

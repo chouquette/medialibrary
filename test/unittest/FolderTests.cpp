@@ -440,7 +440,7 @@ static void FetchEntryPoints( FolderTests* T )
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    auto eps = T->ml->entryPoints()->all();
+    auto eps = T->ml->roots()->all();
     ASSERT_EQ( 1u, eps.size() );
     ASSERT_EQ( mock::FileSystemFactory::Root, eps[0]->mrl() );
 
@@ -448,7 +448,7 @@ static void FetchEntryPoints( FolderTests* T )
     T->ml->banFolder( mock::FileSystemFactory::SubFolder );
     auto res = T->cbMock->waitBanFolder();
     ASSERT_TRUE( res );
-    eps = T->ml->entryPoints()->all();
+    eps = T->ml->roots()->all();
     ASSERT_EQ( 1u, eps.size() );
 }
 
@@ -494,7 +494,7 @@ static void RemoveRootEntryPoint( FolderTests* T )
     ASSERT_NE( nullptr, m );
     ASSERT_TRUE( m->isExternalMedia() );
 
-    auto eps = T->ml->entryPoints()->all();
+    auto eps = T->ml->roots()->all();
     ASSERT_EQ( 0u, eps.size() );
 }
 
@@ -518,7 +518,7 @@ static void RemoveEntryPoint( FolderTests* T )
     media = T->ml->files();
     ASSERT_NE( 0u, media.size() );
 
-    auto eps = T->ml->entryPoints()->all();
+    auto eps = T->ml->roots()->all();
     ASSERT_EQ( 1u, eps.size() );
 
     m = T->ml->media( mock::FileSystemFactory::SubFolder + "subfile.mp4" );
@@ -844,7 +844,7 @@ static void ListSubFolders( FolderTests* T )
 
     enforceFakeMediaTypes( T->ml.get() );
 
-    auto entryPoints = T->ml->entryPoints()->all();
+    auto entryPoints = T->ml->roots()->all();
     ASSERT_EQ( 1u, entryPoints.size() );
 
     auto root = entryPoints[0];
@@ -959,7 +959,7 @@ static void BannedEntryPoints( FolderTests* T )
     ASSERT_EQ( 1u, res->count() );
     ASSERT_EQ( mock::FileSystemFactory::SubFolder, res->all()[0]->mrl() );
 
-    res = T->ml->entryPoints();
+    res = T->ml->roots();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );

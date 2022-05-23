@@ -181,7 +181,7 @@ public:
     virtual void discover( const std::string& entryPoint ) override;
     virtual bool setDiscoverNetworkEnabled( bool enabled ) override;
     virtual bool isDiscoverNetworkEnabled() const override;
-    virtual Query<IFolder> entryPoints() const override;
+    virtual Query<IFolder> roots() const override;
     virtual bool isIndexed( const std::string& mrl ) const override;
     virtual bool isBanned( const std::string& mrl ) const override;
     virtual Query<IFolder> folders( IMedia::Type type,
