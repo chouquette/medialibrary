@@ -810,7 +810,7 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
                                         sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
-Query<IFolder> Folder::entryPoints( MediaLibraryPtr ml, bool banned, int64_t deviceId )
+Query<IFolder> Folder::roots( MediaLibraryPtr ml, bool banned, int64_t deviceId )
 {
     std::string req = "FROM " + Folder::Table::Name + " WHERE parent_id IS NULL"
             " AND is_banned = ?";

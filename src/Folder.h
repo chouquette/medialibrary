@@ -122,8 +122,8 @@ public:
                                            const std::string& pattern,
                                            IMedia::Type type,
                                            const QueryParameters* params );
-    static Query<IFolder> entryPoints( MediaLibraryPtr ml, bool banned,
-                                       int64_t deviceId );
+    static Query<IFolder> roots( MediaLibraryPtr ml, bool banned,
+                                 int64_t deviceId );
     /**
      * @brief deleteFolder Mark a folder in database as removed
      * @param ml The media library instance
