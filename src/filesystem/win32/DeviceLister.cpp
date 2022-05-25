@@ -90,7 +90,7 @@ std::vector<CommonDeviceLister::Device> DeviceLister::localDevices() const
     if ( handle == INVALID_HANDLE_VALUE )
     {
         std::stringstream ss;
-        ss << "error code" << GetLastError();
+        ss << "FindFirstVolume error: #" << GetLastError();
         throw fs::errors::DeviceListing{ ss.str() };
     }
     std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&FindVolumeClose)>
@@ -104,7 +104,7 @@ std::vector<CommonDeviceLister::Device> DeviceLister::localDevices() const
             if ( err == ERROR_NO_MORE_FILES )
                 break;
             std::stringstream ss;
-            ss << "error code" << err;
+            ss << "FindNextVolume error: #" << err;
             throw fs::errors::DeviceListing{ ss.str() };
         }
 
