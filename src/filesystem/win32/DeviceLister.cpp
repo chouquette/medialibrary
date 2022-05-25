@@ -43,7 +43,7 @@ namespace medialibrary
 namespace fs
 {
 
-std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
+std::vector<CommonDeviceLister::Device> DeviceLister::localDevices() const
 {
     wchar_t volumeName[MAX_PATH];
     auto handle = FindFirstVolume( volumeName, sizeof(volumeName)/sizeof(volumeName[0]) );
@@ -95,6 +95,12 @@ std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
                           type == DRIVE_REMOVABLE );
     }
     return res;
+}
+
+std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
+{
+    auto devs = localDevices();
+    return devs;
 }
 
 }

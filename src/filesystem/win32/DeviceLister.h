@@ -37,6 +37,9 @@ class DeviceLister : public CommonDeviceLister
 {
 public:
     virtual std::vector<Device> devices() const override;
+
+private:
+    std::vector<Device> localDevices() const;
 };
 
 }
