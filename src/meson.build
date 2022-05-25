@@ -120,6 +120,12 @@ else
     medialib_soversion = medialib_major_version
 endif
 
+if host_machine.system() == 'windows'
+  mpr_dep = cxx.find_library('mpr', required: true)
+else
+  mpr_dep = []
+endif
+
 medialib = library('medialibrary', medialib_src,
     dependencies: [
         sqlite_dep,
@@ -129,6 +135,7 @@ medialib = library('medialibrary', medialib_src,
         threads_dep,
         libxxhash_dep,
         macosx_dep,
+        mpr_dep,
     ],
     install: true,
     soversion: medialib_soversion,

@@ -37,11 +37,51 @@
 #include <sstream>
 
 #include <windows.h>
+#include <winnetwk.h>
 
 namespace medialibrary
 {
 namespace fs
 {
+
+std::vector<CommonDeviceLister::Device> DeviceLister::networkDevices() const
+{
+    std::vector<Device> devs;
+    DWORD cbBuffer = 16384;
+    DWORD cEntries = -1;
+
+    HANDLE enumHandle;
+    if ( WNetOpenEnum( RESOURCE_CONNECTED, RESOURCETYPE_DISK, 0, nullptr, &enumHandle ) != NO_ERROR )
+    {
+        std::stringstream ss;
+        ss << "WNetOpenEnum error: #" << GetLastError();
+        throw fs::errors::DeviceListing{ ss.str() };
+    }
+    std::unique_ptr<typename std::remove_pointer<HANDLE>::type, decltype(&WNetCloseEnum)> handlePtr {
+        enumHandle, &WNetCloseEnum
+    };
+
+    auto buffer = std::make_unique<char[]>( cbBuffer );
+    auto netResources = reinterpret_cast<LPNETRESOURCE>( buffer.get() );
+    do
+    {
+        auto res = WNetEnumResource( enumHandle, &cEntries, netResources, &cbBuffer );
+        if ( res == ERROR_NO_MORE_ITEMS )
+            break;
+        if ( res != NO_ERROR )
+        {
+            std::stringstream ss;
+            ss << "WNetEnumResource error: #" << GetLastError();
+            throw fs::errors::DeviceListing{ ss.str() };
+        }
+        std::string mountpoint = charset::FromWide( netResources->lpLocalName ).get();
+        std::string uuid = charset::FromWide( netResources->lpRemoteName ).get();
+        devs.emplace_back( std::move( uuid ),
+            std::vector<std::string>{ utils::file::toMrl( mountpoint ) }, true );
+    } while ( true );
+
+    return devs;
+}
 
 std::vector<CommonDeviceLister::Device> DeviceLister::localDevices() const
 {
@@ -100,6 +140,17 @@ std::vector<CommonDeviceLister::Device> DeviceLister::localDevices() const
 std::vector<CommonDeviceLister::Device> DeviceLister::devices() const
 {
     auto devs = localDevices();
+    try
+    {
+        auto netDevs = networkDevices();
+        devs.insert(devs.end(), std::make_move_iterator( begin( netDevs ) ),
+                    std::make_move_iterator( end( netDevs ) ) );
+    }
+    catch ( const fs::errors::DeviceListing& ex )
+    {
+        LOG_DEBUG( "Failed to list network devices: ", ex.what() );
+    }
+
     return devs;
 }
 

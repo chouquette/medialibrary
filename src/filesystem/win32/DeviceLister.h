@@ -40,6 +40,7 @@ public:
 
 private:
     std::vector<Device> localDevices() const;
+    std::vector<Device> networkDevices() const;
 };
 
 }
