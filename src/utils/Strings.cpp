@@ -39,10 +39,10 @@ namespace str
 
 std::string trim( std::string value )
 {
-    value.erase( begin( value ), std::find_if( cbegin( value ), cend( value ), []( char c ) {
+    value.erase( begin( value ), std::find_if( begin( value ), end( value ), []( char c ) {
             return isspace( c ) == false;
         }));
-    value.erase( std::find_if( value.crbegin(), value.crend(), []( char c ) {
+    value.erase( std::find_if( value.rbegin(), value.rend(), []( char c ) {
             return isspace( c ) == false;
         }).base(), value.end() );
     return value;
