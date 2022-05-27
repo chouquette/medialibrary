@@ -5,7 +5,7 @@ NB_ALBUMS_PER_ARTIST=10
 NB_TRACKS_PER_ALBUM=10
 
 SCRIPT_DIRECTORY=$(dirname "$0")
-CORPUS_DIRECTORY=/tmp/medialib_samples/
+CORPUS_DIRECTORY=${TMPDIR:=/tmp}/medialib_samples/
 
 command -v id3tag >/dev/null 2>&1 || (echo "Could not find id3tag, exiting." >&2; exit 1)
 command -v shuf >/dev/null 2>&1 || (echo "Could not find shuf, exiting." >&2; exit 1)
