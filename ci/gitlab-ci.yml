@@ -75,7 +75,9 @@ test:debian:
       -j 4
   artifacts:
     reports:
-      cobertura: build/cobertura.xml
+      coverage_report: 
+        coverage_format: cobertura
+        path: build/cobertura.xml
       junit: build/meson-logs/testlog.junit.xml
     name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
     paths:
