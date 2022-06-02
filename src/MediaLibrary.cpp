@@ -291,8 +291,13 @@ std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
                                                     const std::string& mlFolderPath,
                                                     bool lockFile, const SetupConfig* cfg )
 {
-    std::unique_ptr<LockFile> lock;
+    if ( cfg != nullptr && cfg->logger != nullptr )
+        Log::SetLogger( cfg->logger );
+    else
+        Log::SetLogger( std::make_shared<IostreamLogger>() );
+    Log::setLogLevel( cfg != nullptr ? cfg->logLevel : LogLevel::Error );
 
+    std::unique_ptr<LockFile> lock;
     if ( lockFile )
     {
         lock = LockFile::lock( mlFolderPath );
@@ -321,11 +326,6 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_parser( this, &m_fsHolder )
     , m_discovererWorker( this, &m_fsHolder )
 {
-    if ( cfg != nullptr && cfg->logger != nullptr )
-        Log::SetLogger( cfg->logger );
-    else
-        Log::SetLogger( std::make_shared<IostreamLogger>() );
-    Log::setLogLevel( cfg != nullptr ? cfg->logLevel : LogLevel::Error );
     if ( cfg != nullptr )
     {
         for ( const auto& p : cfg->deviceListers )
