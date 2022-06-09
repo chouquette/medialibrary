@@ -742,6 +742,12 @@ static void Upgrade36to37( DbModel* T )
         /* Each dummy album is its own folder and has 10 tracks of 639ms each */
         ASSERT_EQ( 639 * 10, f->duration() );
     }
+    /*
+     * Pick one media "randomly" and ensure that its date isn't just a year but
+     * an actual timestamp (assuming the test won't run in a few centuries)
+     */
+    auto media = T->ml->media( 1 );
+    ASSERT_TRUE( media->releaseDate() > 3000 );
 }
 
 int main( int ac, char** av )
