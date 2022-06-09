@@ -106,6 +106,9 @@ private:
     static int toInt( IItem& item, IItem::Metadata meta );
     IMedia::Type guessMediaType( const IItem &item ) const;
 
+    // The value at which we consider a date to be a timestamp and not a year
+    static constexpr uint32_t TimestampThreshold = 3000;
+
 private:
     MediaLibrary* m_ml;
     std::shared_ptr<ModificationNotifier> m_notifier;

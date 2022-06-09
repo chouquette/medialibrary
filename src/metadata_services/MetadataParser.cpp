@@ -38,10 +38,12 @@
 #include "Show.h"
 #include "ShowEpisode.h"
 #include "Movie.h"
+#include "utils/Defer.h"
 #include "utils/Directory.h"
 #include "utils/File.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "utils/Date.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/TitleAnalyzer.h"
 #include "discoverer/FsDiscoverer.h"
@@ -1326,11 +1328,29 @@ std::shared_ptr<Media> MetadataAnalyzer::handleTrack( Album& album, IItem& item,
         return nullptr;
     }
 
-    const auto& releaseDate = item.meta( IItem::Metadata::Date );
-    if ( releaseDate.empty() == false )
+    const auto& releaseDateStr = item.meta( IItem::Metadata::Date );
+    if ( releaseDateStr.empty() == false )
     {
-        auto releaseYear = atoi( releaseDate.c_str() );
-        if ( media->setReleaseDate( releaseYear ) == false )
+        time_t releaseDate = atoi( releaseDateStr.c_str() );
+        unsigned int releaseYear;
+        if ( releaseDate > 0 && (unsigned int)releaseDate < TimestampThreshold &&
+             releaseDate >= 1900 )
+        {
+            struct tm t{};
+            t.tm_year = releaseDate - 1900;
+            t.tm_mday = 1;
+            releaseYear = releaseDate;
+            releaseDate = utils::date::mktime( &t );
+        }
+        else if ( releaseDate != 0 )
+        {
+            struct tm t{};
+            gmtime_r(&releaseDate, &t);
+            releaseYear = t.tm_year + 1900;
+        }
+        else
+            releaseYear = 0;
+        if ( media->setReleaseDate( releaseDate ) == false )
             return nullptr;
         // Let the album handle multiple dates. In order to do this properly, we need
         // to know if the date has been changed before, which can be known only by
