@@ -333,7 +333,7 @@ public:
     virtual bool removeThumbnail( ThumbnailSizeType sizeType ) = 0;
 
     virtual unsigned int insertionDate() const = 0;
-    virtual unsigned int releaseDate() const = 0;
+    virtual time_t releaseDate() const = 0;
 
     /// Metadata
     ///

@@ -235,7 +235,7 @@ class Media : public IMedia,
         bool setThumbnail( std::shared_ptr<Thumbnail> thumbnail );
         virtual bool removeThumbnail( ThumbnailSizeType sizeType ) override;
         virtual unsigned int insertionDate() const override;
-        virtual unsigned int releaseDate() const override;
+        virtual time_t releaseDate() const override;
         /**
          * @brief nbPlaylists Returns the number of occurence of this media in playlists
          *
@@ -416,7 +416,7 @@ private:
         unsigned int m_playCount;
         time_t m_lastPlayedDate;
         const time_t m_insertionDate;
-        unsigned int m_releaseDate;
+        time_t m_releaseDate;
         std::string m_title;
         // We store the filename as a shortcut when sorting. The filename (*not* the title
         // might be used as a fallback

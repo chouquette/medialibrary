@@ -653,7 +653,7 @@ unsigned int Media::insertionDate() const
     return static_cast<unsigned int>( m_insertionDate );
 }
 
-unsigned int Media::releaseDate() const
+time_t Media::releaseDate() const
 {
     return m_releaseDate;
 }
