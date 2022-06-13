@@ -37,6 +37,7 @@
 #include "compat/Thread.h"
 #include "Playlist.h"
 #include "Device.h"
+#include "Subscription.h"
 
 static void Create( Tests* T )
 {
@@ -1494,6 +1495,43 @@ static void MarkAsPlayed( Tests* T )
     ASSERT_TRUE( m->lastPosition() < .0f );
 }
 
+static void NbSubscriptions( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media.mkv", -1 ) );
+    ASSERT_EQ( 0u, m->nbSubscriptions() );
+
+    auto subscription = Subscription::create( T->ml.get(), Service::Podcast, "subscription", 0 );
+    ASSERT_NON_NULL( subscription );
+
+    auto res = subscription->addMedia( *m );
+    ASSERT_TRUE( res );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 1u, m->nbSubscriptions() );
+
+    subscription = Subscription::fetch( T->ml.get(), subscription->id() );
+    res = subscription->removeMedia( m->id() );
+    ASSERT_TRUE( res );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 0u, m->nbSubscriptions() );
+
+    subscription = Subscription::fetch( T->ml.get(), subscription->id() );
+    res = subscription->addMedia( *m );
+    ASSERT_TRUE( res );
+
+    m = T->ml->media( m->id() );
+    subscription = Subscription::fetch( T->ml.get(), subscription->id() );
+
+    ASSERT_EQ( 1u, m->nbSubscriptions() );
+
+    res = T->ml->removeSubscription( subscription->id() );
+    ASSERT_TRUE( res );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( 0u, m->nbSubscriptions() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1556,6 +1594,7 @@ int main( int ac, char** av )
     ADD_TEST( Lyrics );
     ADD_TEST( ExternalMrlDifferentPorts );
     ADD_TEST( MarkAsPlayed );
+    ADD_TEST( NbSubscriptions );
 
     END_TESTS
 }

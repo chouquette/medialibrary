@@ -488,6 +488,7 @@ public:
     virtual const std::string& lyrics() const = 0;
 
     virtual bool isPublic() const = 0;
+    virtual uint32_t nbSubscriptions() const = 0;
 };
 
 }

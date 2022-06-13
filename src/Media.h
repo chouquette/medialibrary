@@ -80,6 +80,8 @@ class Media : public IMedia,
             DeleteFts,
             UpdateFts,
             UpdateIsPublic,
+            IncrementNbSubscription,
+            DecrementNbSubscription,
         };
         enum class Indexes : uint8_t
         {
@@ -298,6 +300,7 @@ class Media : public IMedia,
         virtual const std::string& lyrics() const override;
         bool setLyrics( std::string lyrics );
         virtual bool isPublic() const override;
+        virtual uint32_t nbSubscriptions() const override;
 
         static Query<IMedia> listAll( MediaLibraryPtr ml, Type type,
                                      const QueryParameters* params,
@@ -438,6 +441,8 @@ private:
         uint32_t m_discNumber;
         std::string m_lyrics;
         bool m_isPublic;
+        uint32_t m_nbSubscriptions;
+
         bool m_publicOnlyListing;
 
         // Auto fetched related properties

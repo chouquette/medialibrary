@@ -98,6 +98,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_discNumber( row.extract<decltype(m_discNumber)>() )
     , m_lyrics( row.extract<decltype(m_lyrics)>() )
     , m_isPublic( row.extract<decltype(m_isPublic)>() )
+    , m_nbSubscriptions( row.extract<decltype(m_nbSubscriptions)>() )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
@@ -139,6 +140,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_isPublic( false )
+    , m_nbSubscriptions( 0 )
     , m_publicOnlyListing( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
 {
@@ -173,6 +175,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& fileName,
     , m_albumId( 0 )
     , m_discNumber( 0 )
     , m_isPublic( false )
+    , m_nbSubscriptions( 0 )
     , m_publicOnlyListing( false )
     , m_metadata( m_ml, IMetadata::EntityType::Media )
 {
@@ -1163,6 +1166,11 @@ bool Media::isPublic() const
     return m_isPublic;
 }
 
+uint32_t Media::nbSubscriptions() const
+{
+    return m_nbSubscriptions;
+}
+
 std::string Media::addRequestJoin( const QueryParameters* params )
 {
     bool artist = false;
@@ -1497,6 +1505,12 @@ void Media::createTriggers( sqlite::Connection* connection )
                                             Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
                                    trigger( Triggers::UpdateIsPublic,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::IncrementNbSubscription,
+                                            Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+                                   trigger( Triggers::DecrementNbSubscription,
                                             Settings::DbModelVersion ) );
 }
 
@@ -1863,6 +1877,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "disc_number UNSIGNED INTEGER,"
         "lyrics TEXT,"
         "is_public BOOLEAN NOT NULL DEFAULT FALSE,"
+        "nb_subscriptions UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
             "(id_group) ON DELETE RESTRICT,"
         "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
@@ -1984,8 +1999,24 @@ std::string Media::trigger( Triggers trigger, uint32_t dbModel )
                        " UPDATE " + Table::Name + " SET is_public = new.is_public"
                            " WHERE folder_id = new.id_folder;"
                    " END";
-        default:
-            assert( !"Invalid trigger provided" );
+        case Triggers::IncrementNbSubscription:
+            assert( dbModel >= 37 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER INSERT ON " + Subscription::MediaRelationTable::Name +
+                    " BEGIN"
+                        " UPDATE " + Table::Name + " SET nb_subscriptions = nb_subscriptions + 1 "
+                            " WHERE id_media = new.media_id;"
+                    " END";
+        case Triggers::DecrementNbSubscription:
+            assert( dbModel >= 37 );
+            return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                        " AFTER DELETE ON " + Subscription::MediaRelationTable::Name +
+                    " BEGIN"
+                        " UPDATE " + Table::Name + " SET nb_subscriptions = nb_subscriptions - 1 "
+                            " WHERE id_media = old.media_id;"
+                    " END";
+            default:
+                assert( !"Invalid trigger provided" );
     }
     return "<invalid request>";
 }
@@ -2024,6 +2055,12 @@ std::string Media::triggerName( Triggers trigger, uint32_t dbModel )
         case Triggers::UpdateIsPublic:
             assert( dbModel >= 37 );
             return "media_update_is_public";
+        case Triggers::IncrementNbSubscription:
+            assert( dbModel >= 37 );
+            return "media_increment_nb_subscriptions";
+        case Triggers::DecrementNbSubscription:
+            assert( dbModel >= 37 );
+            return "media_decrement_nb_subscriptions";
         default:
             assert( !"Invalid trigger provided" );
     }
@@ -2203,6 +2240,8 @@ bool Media::checkDbModel( MediaLibraryPtr ml )
             checkTrigger( Triggers::DeleteFts ) &&
             checkTrigger( Triggers::UpdateFts ) &&
             checkTrigger( Triggers::UpdateIsPublic ) &&
+            checkTrigger( Triggers::IncrementNbSubscription ) &&
+            checkTrigger( Triggers::DecrementNbSubscription ) &&
             checkIndex( Indexes::LastPlayedDate ) &&
             checkIndex( Indexes::Presence ) &&
             checkIndex( Indexes::Types ) &&
@@ -2611,7 +2650,8 @@ bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime
             "WHERE ( last_played_date < ? OR "
                 "( last_played_date IS NULL AND insertion_date < ? ) )"
             "AND import_type != ? "
-            "AND nb_playlists = 0";
+            "AND nb_playlists = 0 "
+            "AND nb_subscriptions = 0";
     auto deadline = std::chrono::duration_cast<std::chrono::seconds>(
                 (std::chrono::system_clock::now() - maxLifeTime).time_since_epoch() );
     return sqlite::Tools::executeDelete( ml->getConn(), req, deadline.count(),
