@@ -23,6 +23,7 @@ medialib_headers = [
 	'ISubtitleTrack.h',
 	'IThumbnailer.h',
 	'IMediaGroup.h',
+    'ISubscription.h',
 ]
 
 subdir('filesystem')

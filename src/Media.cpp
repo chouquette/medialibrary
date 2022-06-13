@@ -47,6 +47,7 @@
 #include "parser/Task.h"
 #include "parser/Parser.h"
 #include "Genre.h"
+#include "Subscription.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -768,6 +769,19 @@ bool Media::setMediaGroup( MediaLibraryPtr ml, int64_t mediaId, int64_t groupId 
     const std::string req = "UPDATE " + Table::Name + " SET group_id = ?"
             " WHERE id_media = ?";
     return sqlite::Tools::executeUpdate( ml->getConn(), req, groupId, mediaId );
+}
+
+Query<IMedia> Media::fromSubscription( MediaLibraryPtr ml, int64_t subscriptionId,
+                                       const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m "
+        "INNER JOIN " + Subscription::MediaRelationTable::Name + " "
+            "cmr ON cmr.media_id = m.id_media "
+        "WHERE cmr.subscription_id = ?";
+    //fixme: does it make sense to filter by import_type and/or presence here?
+    req += addRequestJoin( params );
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
+                                      subscriptionId ).build();
 }
 
 bool Media::addToGroup( IMediaGroup& group )

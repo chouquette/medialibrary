@@ -900,3 +900,23 @@ video_track_tests = [
 foreach t : video_track_tests
   test('VideoTrack.' + t, video_track_test_exe, args: t, suite: ['unittest', 'VideoTrack'])
 endforeach
+
+subscription_test_exe = executable('subscription_tests', 'SubscriptionTests.cpp',
+  objects: common_test_objs,
+  link_with: [medialib],
+  include_directories: [includes, test_include_dir],
+  dependencies: [sqlite_dep],
+  build_by_default: false,
+)
+
+subscription_tests = [
+  'Create',
+  'ListFromService',
+  'ChildSubscriptions',
+  'ListMedia',
+  'CheckDbModel',
+]
+
+foreach t : subscription_tests
+  test('Subscription.' + t, subscription_test_exe, args: t, suite: ['unittest', 'Subscription'])
+endforeach

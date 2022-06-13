@@ -188,6 +188,11 @@ enum class PlaylistType : uint8_t
     VideoOnly,
 };
 
+enum class Service : uint8_t
+{
+    Podcast,
+};
+
 struct SetupConfig
 {
     /**
@@ -1040,6 +1045,11 @@ public:
      * thumbnail for will not have a thumbnail associated with it anymore.
      */
     virtual bool flushUserProvidedThumbnails() = 0;
+
+    virtual bool isServiceSupported( Service s ) const = 0;
+    virtual Query<ISubscription> subscriptions( Service s,
+                                            const QueryParameters* params = nullptr ) = 0;
+    virtual bool removeSubscription( int64_t subscriptionId ) = 0;
 };
 
 }

@@ -71,6 +71,7 @@
 #include "MediaGroup.h"
 #include "utils/Enums.h"
 #include "Deprecated.h"
+#include "Subscription.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -400,6 +401,7 @@ bool MediaLibrary::createAllTables()
     Chapter::createTable( dbConn );
     Bookmark::createTable( dbConn );
     MediaGroup::createTable( dbConn );
+    Subscription::createTable( dbConn );
     return true;
 }
 
@@ -499,6 +501,7 @@ void MediaLibrary::createAllTriggers()
     parser::Task::createIndex( dbConn );
     Bookmark::createIndexes( dbConn );
     Chapter::createIndexes( dbConn );
+    Subscription::createIndexes( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()
@@ -523,7 +526,8 @@ bool MediaLibrary::checkDatabaseIntegrity()
             SubtitleTrack::checkDbModel( this ) &&
             Chapter::checkDbModel( this ) &&
             Bookmark::checkDbModel( this ) &&
-            MediaGroup::checkDbModel( this );
+            MediaGroup::checkDbModel( this ) &&
+            Subscription::checkDbModel( this );
     return schemaOk == true &&
             m_dbConnection->checkSchemaIntegrity() == true &&
             m_dbConnection->checkForeignKeysIntegrity() == true;
@@ -2490,6 +2494,27 @@ PriorityAccess MediaLibrary::acquirePriorityAccess()
 bool MediaLibrary::flushUserProvidedThumbnails()
 {
     return Thumbnail::flushUserProvided( this );
+}
+
+bool MediaLibrary::isServiceSupported( Service s ) const
+{
+    switch ( s )
+    {
+    case Service::Podcast:
+        return true;
+    }
+    return false;
+}
+
+Query<ISubscription> MediaLibrary::subscriptions( Service s,
+                                              const QueryParameters* params )
+{
+    return Subscription::fromService( this, s, params );
+}
+
+bool MediaLibrary::removeSubscription( int64_t subscriptionId )
+{
+    return Subscription::destroy( this, subscriptionId );
 }
 
 }

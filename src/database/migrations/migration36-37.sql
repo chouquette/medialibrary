@@ -53,6 +53,12 @@ Folder::trigger( Folder::Triggers::UpdateIsPublic, 37 ),
 Folder::index( Folder::Indexes::DeviceId, 37 ),
 Folder::index( Folder::Indexes::ParentId, 37 ),
 
+Subscription::schema( Subscription::Table::Name, 37 ),
+Subscription::schema( Subscription::MediaRelationTable::Name, 37 ),
+Subscription::index( Subscription::Indexes::ServiceId, 37 ),
+Subscription::index( Subscription::Indexes::RelationMediaId, 37 ),
+Subscription::index( Subscription::Indexes::RelationSubscriptionId, 37 ),
+
 "CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
 "("
     "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"

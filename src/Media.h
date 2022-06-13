@@ -343,6 +343,8 @@ class Media : public IMedia,
                                                    const std::string& pattern,
                                                    const QueryParameters* params );
         static bool setMediaGroup(MediaLibraryPtr ml, int64_t mediaId, int64_t groupId );
+        static Query<IMedia> fromSubscription( MediaLibraryPtr ml, int64_t collectionId,
+                                             const QueryParameters* params );
 
         static bool clearHistory( MediaLibraryPtr ml );
         static bool removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
