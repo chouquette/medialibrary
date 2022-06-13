@@ -52,6 +52,8 @@ public:
         Playlist,
         /// A disc file. Also considered to be a "main" file
         Disc,
+        /// A resource describing a subscription.
+        Subscription,
     };
 
     virtual ~IFile() = default;

@@ -29,6 +29,7 @@
 #include "Media.h"
 #include "Folder.h"
 #include "Playlist.h"
+#include "Subscription.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
 #include "medialibrary/filesystem/IFile.h"
@@ -55,6 +56,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isRemovable( row.extract<decltype(m_isRemovable)>() )
     , m_isExternal( row.extract<decltype(m_isExternal)>() )
     , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
+    , m_subscriptionId( row.hasRemainingColumns() ? row.extract<decltype(m_subscriptionId)>() : 0 )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -65,6 +67,10 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
     , m_id( 0 )
     , m_mediaId( mediaId )
     , m_playlistId( playlistId )
+    /*
+     * We don't expect a subscription with an actual file on the file system
+     * at least for now.
+     */
     , m_mrl( isRemovable == true ? file.name() : file.mrl() )
     , m_type( type )
     , m_lastModificationDate( file.lastModificationDate() )
@@ -73,12 +79,13 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
     , m_isRemovable( isRemovable )
     , m_isExternal( false )
     , m_isNetwork( file.isNetwork() )
+    , m_subscriptionId( 0 )
 {
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
 }
 
-File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type type,
-            const std::string& mrl )
+File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
+            int64_t subscriptionId, IFile::Type type, const std::string& mrl )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -91,9 +98,12 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, IFile::Type
     , m_isRemovable( false )
     , m_isExternal( true )
     , m_isNetwork( utils::url::schemeIs( "file://", mrl ) == false )
+    , m_subscriptionId( subscriptionId )
     , m_fullPath( mrl )
 {
-    assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
+    assert( ( mediaId == 0 && playlistId != 0 && subscriptionId == 0 ) ||
+            ( mediaId != 0 && playlistId == 0 && subscriptionId == 0 ) ||
+            ( mediaId == 0 && playlistId == 0 && subscriptionId != 0 ) );
 }
 
 int64_t File::id() const
@@ -290,11 +300,39 @@ void File::createIndexes( sqlite::Connection* dbConnection )
                                    index( Indexes::PlaylistId, Settings::DbModelVersion ) );
 }
 
-std::string File::schema( const std::string& tableName, uint32_t )
+std::string File::schema( const std::string& tableName, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( tableName );
 
     assert( tableName == Table::Name );
+    if ( dbModel < 37 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "media_id UNSIGNED INT DEFAULT NULL,"
+            "playlist_id UNSIGNED INT DEFAULT NULL,"
+            "mrl TEXT,"
+            "type UNSIGNED INTEGER,"
+            "last_modification_date UNSIGNED INT,"
+            "size UNSIGNED INT,"
+            "folder_id UNSIGNED INTEGER,"
+            "is_removable BOOLEAN NOT NULL,"
+            "is_external BOOLEAN NOT NULL,"
+            "is_network BOOLEAN NOT NULL,"
+
+            "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
+            + "(id_media) ON DELETE CASCADE,"
+
+            "FOREIGN KEY(playlist_id) REFERENCES " + Playlist::Table::Name
+            + "(id_playlist) ON DELETE CASCADE,"
+
+            "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
+            + "(id_folder) ON DELETE CASCADE,"
+
+            "UNIQUE(mrl,folder_id) ON CONFLICT FAIL"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -308,6 +346,7 @@ std::string File::schema( const std::string& tableName, uint32_t )
         "is_removable BOOLEAN NOT NULL,"
         "is_external BOOLEAN NOT NULL,"
         "is_network BOOLEAN NOT NULL,"
+        "subscription_id UNSIGNED INTEGER UNIQUE,"
 
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
         + "(id_media) ON DELETE CASCADE,"
@@ -318,8 +357,11 @@ std::string File::schema( const std::string& tableName, uint32_t )
         "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name
         + "(id_folder) ON DELETE CASCADE,"
 
+        "FOREIGN KEY(subscription_id) REFERENCES " + Subscription::Table::Name
+        + "(id_subscription) ON DELETE CASCADE,"
+
         "UNIQUE(mrl,folder_id) ON CONFLICT FAIL"
-          ")";
+    ")";
 }
 
 std::string File::index( Indexes index, uint32_t dbModel )
@@ -408,7 +450,7 @@ std::shared_ptr<File> File::createFromExternalMedia( MediaLibraryPtr ml, int64_t
     if ( existing != nullptr )
         return nullptr;
 
-    auto self = std::make_shared<File>( ml, mediaId, 0, type, mrl );
+    auto self = std::make_shared<File>( ml, mediaId, 0, 0, type, mrl );
     static const std::string req = "INSERT INTO " + File::Table::Name +
             "(media_id, mrl, type, folder_id, is_removable, is_external, is_network) "
             "VALUES(?, ?, ?, NULL, 0, 1, ?)";
@@ -434,6 +476,23 @@ std::shared_ptr<File> File::createFromPlaylist( MediaLibraryPtr ml, int64_t play
                  self->m_isNetwork ) == false )
         return nullptr;
     self->m_fullPath = fileFs.mrl();
+    return self;
+}
+
+std::shared_ptr<File> File::createFromSubscription( MediaLibraryPtr ml,
+                                                    std::string mrl,
+                                                    int64_t subscriptionId )
+{
+    assert( subscriptionId > 0 );
+    auto self = std::make_shared<File>( ml, 0, 0, subscriptionId,
+                                        IFile::Type::Subscription, mrl );
+    const std::string req = "INSERT INTO " + Table::Name +
+            "(mrl, type, is_removable, is_external, is_network, subscription_id) "
+            "VALUES(?, ?, ?, ?, ?, ?)";
+    if ( insert( ml, self, req, self->mrl(), IFile::Type::Subscription,
+                 false, true, false, subscriptionId ) == false )
+        return nullptr;
+    self->m_fullPath = self->mrl();
     return self;
 }
 

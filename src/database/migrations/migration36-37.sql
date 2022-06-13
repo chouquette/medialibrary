@@ -152,6 +152,42 @@ Artist::trigger( Artist::Triggers::HasTrackPresent, 37 ),
 Label::trigger( Label::Triggers::DeleteMediaLabel, 37 ),
 Album::index( Album::Indexes::Title, 37 ),
 
+
 "ALTER TABLE " + Album::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
 "ALTER TABLE " + Artist::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
 "ALTER TABLE " + Genre::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
+
+"CREATE TEMPORARY TABLE " + File::Table::Name + "_backup"
+"("
+    "id_file INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "media_id UNSIGNED INT DEFAULT NULL,"
+    "playlist_id UNSIGNED INT DEFAULT NULL,"
+    "mrl TEXT,"
+    "type UNSIGNED INTEGER,"
+    "last_modification_date UNSIGNED INT,"
+    "size UNSIGNED INT,"
+    "folder_id UNSIGNED INTEGER,"
+    "is_removable BOOLEAN NOT NULL,"
+    "is_external BOOLEAN NOT NULL,"
+    "is_network BOOLEAN NOT NULL"
+")",
+
+"INSERT INTO " + File::Table::Name + "_backup "
+    "SELECT * FROM " + File::Table::Name,
+
+"DROP TABLE " + File::Table::Name,
+File::schema( File::Table::Name, 37 ),
+
+"INSERT INTO " + File::Table::Name +
+    " SELECT *, NULL FROM " + File::Table::Name + "_backup",
+
+"DROP TABLE " + File::Table::Name + "_backup",
+
+File::index( File::Indexes::MediaId, 37 ),
+File::index( File::Indexes::FolderId, 37 ),
+File::index( File::Indexes::PlaylistId, 37 ),
+
+Media::trigger( Media::Triggers::CascadeFileDeletion, 37 ),
+Media::trigger( Media::Triggers::CascadeFileUpdate, 37 ),
+
+Playlist::trigger( Playlist::Triggers::CascadeFileDeletion, 37 ),
