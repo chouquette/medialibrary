@@ -35,6 +35,7 @@
 #include "Folder.h"
 #include "Playlist.h"
 #include "Media.h"
+#include "Subscription.h"
 #include "parser/Task.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
@@ -135,6 +136,27 @@ Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
     , m_type( Type::Restore )
     , m_mrl( std::move( mrl ) )
     , m_fileType( fileType )
+{
+}
+
+Task::Task(MediaLibraryPtr ml, std::string mrl, Service service )
+    : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxTaskAttempts )
+    , m_type( Type::Creation )
+    , m_mrl( std::move( mrl ) )
+    , m_fileType( IFile::Type::Subscription )
+    , m_linkToId( static_cast<std::underlying_type_t<Service>>( service ) )
+{
+}
+
+Task::Task( MediaLibraryPtr ml, std::shared_ptr<File> file )
+    : m_ml( ml )
+    , m_attemptsRemaining( Settings::MaxTaskAttempts )
+    , m_type( Type::Refresh )
+    , m_mrl( file->mrl() )
+    , m_fileType( IFile::Type::Subscription )
+    , m_fileId( file->id() )
+    , m_file( std::move( file ) )
 {
 }
 
@@ -438,6 +460,9 @@ void Task::createTriggers( sqlite::Connection* dbConnection )
     sqlite::Tools::executeRequest( dbConnection,
                                    trigger( Triggers::DeletePlaylistLinkingTask,
                                             Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   trigger( Triggers::DeleteSubscriptionLinkingTask,
+                                            Settings::DbModelVersion ) );
 }
 
 void Task::createIndex( sqlite::Connection* dbConnection )
@@ -594,29 +619,50 @@ std::string Task::schema( const std::string& tableName, uint32_t dbModel )
 
 std::string Task::trigger(Task::Triggers trigger, uint32_t dbModel )
 {
-    assert( trigger == Triggers::DeletePlaylistLinkingTask );
     assert( dbModel >= 18 );
-    return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
-           " AFTER DELETE ON " + Playlist::Table::Name +
-           " BEGIN "
-               "DELETE FROM " + Table::Name + " "
-                   "WHERE link_to_type = " +
-                           utils::enum_to_string( IItem::LinkType::Playlist ) + " "
-                       "AND link_to_id = old.id_playlist "
-                       "AND type = " +
-                           utils::enum_to_string( Type::Link ) + ";"
-           "END";
-
+    switch ( trigger )
+    {
+    case Triggers::DeletePlaylistLinkingTask:
+        return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+               " AFTER DELETE ON " + Playlist::Table::Name +
+               " BEGIN "
+                   "DELETE FROM " + Table::Name + " "
+                       "WHERE link_to_type = " +
+                               utils::enum_to_string( IItem::LinkType::Playlist ) + " "
+                           "AND link_to_id = old.id_playlist "
+                           "AND type = " +
+                               utils::enum_to_string( Type::Link ) + ";"
+               "END";
+    case Triggers::DeleteSubscriptionLinkingTask:
+        assert( dbModel >= 37 );
+        return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+               " AFTER DELETE ON " + Subscription::Table::Name +
+               " BEGIN "
+                   "DELETE FROM " + Table::Name + " "
+                       "WHERE link_to_type = " +
+                               utils::enum_to_string( IItem::LinkType::Subscription ) + " "
+                           "AND link_to_id = old.id_subscription "
+                           "AND type = " +
+                               utils::enum_to_string( Type::Link ) + ";"
+               "END";
+    }
+    return "<invalid trigger>";
 }
 
 std::string Task::triggerName( Triggers trigger, uint32_t dbModel )
 {
-    UNUSED_IN_RELEASE( trigger );
     UNUSED_IN_RELEASE( dbModel );
 
-    assert( trigger == Triggers::DeletePlaylistLinkingTask );
     assert( dbModel >= 18 );
-    return "delete_playlist_linking_tasks";
+    switch ( trigger )
+    {
+    case Triggers::DeletePlaylistLinkingTask:
+        return "delete_playlist_linking_tasks";
+    case Triggers::DeleteSubscriptionLinkingTask:
+        assert( dbModel >= 37 );
+        return "task_delete_subscription_linking_tasks";
+    }
+    return "<invalid trigger>";
 }
 
 std::string Task::index( Task::Indexes index, uint32_t dbModel )
@@ -661,6 +707,9 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
            sqlite::Tools::checkTriggerStatement(
                 trigger( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ),
                 triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) ) &&
+           sqlite::Tools::checkTriggerStatement(
+                trigger( Triggers::DeleteSubscriptionLinkingTask, Settings::DbModelVersion ),
+                triggerName( Triggers::DeleteSubscriptionLinkingTask, Settings::DbModelVersion ) ) &&
            sqlite::Tools::checkIndexStatement(
                 index( Indexes::ParentFolderId, Settings::DbModelVersion ),
                 indexName( Indexes::ParentFolderId, Settings::DbModelVersion ) ) &&
@@ -715,10 +764,11 @@ std::vector<std::shared_ptr<Task>> Task::fetchUncompleted( MediaLibraryPtr ml )
         " LEFT JOIN " + Folder::Table::Name + " fol ON t.parent_folder_id = fol.id_folder"
         " LEFT JOIN " + Device::Table::Name + " d ON d.id_device = fol.device_id"
         " WHERE step & ? != ? AND attempts_left > 0 AND "
-            "(d.is_present != 0 OR (t.parent_folder_id IS NULL AND t.type = ?))"
+            "((d.is_present != 0 OR (t.parent_folder_id IS NULL AND t.type = ?))"
+                " OR t.file_type = ?)"
         " ORDER BY parent_folder_id";
     return Task::fetchAll<Task>( ml, req, Step::Completed,
-                                 Step::Completed, Type::Link );
+                                 Step::Completed, Type::Link, IFile::Type::Subscription );
 }
 
 std::shared_ptr<Task>
@@ -738,6 +788,20 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
             "VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
     if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Creation,
                  self->mrl(), fileType, parentFolderId ) == false )
+        return nullptr;
+    return self;
+}
+
+std::shared_ptr<Task> Task::create( MediaLibraryPtr ml, std::string mrl,
+                                    Service service )
+{
+    std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), service );
+    const std::string req = "INSERT INTO " + Table::Name +
+        "(attempts_left, type, mrl, file_type, link_to_id, link_to_type, "
+            "link_extra, link_to_mrl)"
+            "VALUES(?, ?, ?, ?, ?, 0, 0, '')";
+    if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Creation,
+                 self->mrl(), IFile::Type::Subscription, service ) == false )
         return nullptr;
     return self;
 }
@@ -797,6 +861,20 @@ Task::createMediaRefreshTask( MediaLibraryPtr ml, const Media& media )
     assert( fileFs != nullptr );
     return createRefreshTask( ml, std::move( mainFile ), std::move( fileFs ),
                               std::move( folder ), std::move( folderFs ) );
+}
+
+std::shared_ptr<Task> Task::createRefreshTask( MediaLibraryPtr ml,
+                                               std::shared_ptr<File> file )
+{
+    assert( file->type() == IFile::Type::Subscription );
+    auto self = std::make_shared<Task>( ml, std::move( file ) );
+    const std::string req = "INSERT INTO " + Table::Name +
+            "(attempts_left, type, mrl, file_type, file_id, link_to_id, "
+            "link_to_type, link_extra, link_to_mrl) VALUES(?, ?, ?, ?, ?, 0, 0, 0, '')";
+    if ( insert( ml, self, req, Settings::MaxTaskAttempts, Type::Refresh,
+                 self->mrl(), IFile::Type::Subscription, self->file()->id() ) == false )
+        return nullptr;
+    return self;
 }
 
 std::shared_ptr<Task> Task::createLinkTask( MediaLibraryPtr ml, std::string mrl,
@@ -863,6 +941,14 @@ bool Task::removePlaylistContentTasks( MediaLibraryPtr ml )
                                          LinkType::Playlist );
 }
 
+bool Task::removeSubscriptionContentTasks( MediaLibraryPtr ml, int64_t subscriptionId )
+{
+    const std::string req = "DELETE FROM " + Table::Name + " "
+            "WHERE type = ? AND link_to_type = ? AND link_to_id = ?";
+    return sqlite::Tools::executeDelete( ml->getConn(), req, Task::Type::Link,
+                                         LinkType::Subscription, subscriptionId );
+}
+
 std::string Task::meta( Task::Metadata type ) const
 {
     return m_metadata[static_cast<std::underlying_type_t<Task::Metadata>>(type)];
@@ -907,6 +993,9 @@ IItem& Task::createLinkedItem( std::string mrl, IFile::Type itemType,
             break;
         case IFile::Type::Playlist:
             linkType = LinkType::Playlist;
+            break;
+        case IFile::Type::Subscription:
+            linkType = LinkType::Subscription;
             break;
         default:
             throw std::runtime_error{ "Can't create a linked item for this item"
@@ -1027,6 +1116,8 @@ bool Task::needEntityRestoration() const
 {
     if ( isLinkTask() == true || isRestore() == true )
         return false;
+    if ( m_fileType == IFile::Type::Subscription )
+        return m_fileId != 0 && m_file == nullptr;
     return m_parentFolderFs == nullptr ||
            m_fileFs == nullptr ||
            m_parentFolder == nullptr ||

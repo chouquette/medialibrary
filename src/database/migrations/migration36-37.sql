@@ -59,6 +59,8 @@ Subscription::index( Subscription::Indexes::ServiceId, 37 ),
 Subscription::index( Subscription::Indexes::RelationMediaId, 37 ),
 Subscription::index( Subscription::Indexes::RelationSubscriptionId, 37 ),
 
+parser::Task::trigger( parser::Task::Triggers::DeleteSubscriptionLinkingTask, 37 ),
+
 "CREATE TEMPORARY TABLE " + Media::Table::Name + "_backup"
 "("
     "id_media INTEGER PRIMARY KEY AUTOINCREMENT,"

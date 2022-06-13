@@ -55,6 +55,7 @@ public:
         NoLink,
         Playlist,
         Media,
+        Subscription,
     };
 
     enum class Metadata : uint8_t

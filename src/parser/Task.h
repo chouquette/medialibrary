@@ -67,6 +67,7 @@ public:
     enum class Triggers : uint8_t
     {
         DeletePlaylistLinkingTask,
+        DeleteSubscriptionLinkingTask,
     };
     enum class Indexes : uint8_t
     {
@@ -144,6 +145,15 @@ public:
      */
     Task( MediaLibraryPtr ml, std::string mrl, IFile::Type fileType );
 
+    /**
+     * @brief Task Constructor for a collection creation task
+     * @param ml A medialibrary instance pointer
+     * @param mrl The MRL to the collection file or resource
+     */
+    Task( MediaLibraryPtr ml, std::string mrl, Service serviceId );
+
+    Task( MediaLibraryPtr ml, std::shared_ptr<File> file );
+
     /*
      * We need to decouple the current parser state and the saved one.
      * For instance, metadata extraction won't save anything in DB, so while
@@ -195,6 +205,7 @@ public:
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          IFile::Type fileType );
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, Service serviceId );
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
                                                     std::shared_ptr<File> file,
                                                     std::shared_ptr<fs::IFile> fsFile,
@@ -208,6 +219,9 @@ public:
      */
     static std::shared_ptr<Task> createMediaRefreshTask( MediaLibraryPtr ml,
                                                          const Media& media );
+
+    static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
+                                                    std::shared_ptr<File> file );
     /**
      * @brief createLinkTask Create a link task with a known entity
      * @param ml A media library instance
@@ -259,6 +273,8 @@ public:
      * @param playlistId
      */
     static bool removePlaylistContentTasks( MediaLibraryPtr ml );
+
+    static bool removeSubscriptionContentTasks( MediaLibraryPtr ml, int64_t subscriptionId );
 
     /***************************************************************************
      * IItem interface implementation
