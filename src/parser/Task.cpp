@@ -663,7 +663,10 @@ bool Task::checkDbModel( MediaLibraryPtr ml )
                 triggerName( Triggers::DeletePlaylistLinkingTask, Settings::DbModelVersion ) ) &&
            sqlite::Tools::checkIndexStatement(
                 index( Indexes::ParentFolderId, Settings::DbModelVersion ),
-                indexName( Indexes::ParentFolderId, Settings::DbModelVersion ) );
+                indexName( Indexes::ParentFolderId, Settings::DbModelVersion ) ) &&
+           sqlite::Tools::checkIndexStatement(
+                index( Indexes::FileId, Settings::DbModelVersion ),
+                indexName( Indexes::FileId, Settings::DbModelVersion ) );
 }
 
 bool Task::resetRetryCount( MediaLibraryPtr ml )
