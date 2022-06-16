@@ -60,6 +60,9 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onFoldersAdded( std::vector<FolderPtr> ) override {};
     virtual void onFoldersModified( std::set<int64_t> ) override {};
     virtual void onFoldersDeleted( std::set<int64_t> ) override {};
+    virtual void onSubscriptionsAdded( std::vector<SubscriptionPtr> ) override {};
+    virtual void onSubscriptionsModified( std::set<int64_t> ) override {};
+    virtual void onSubscriptionsDeleted( std::set<int64_t> ) override {};
     virtual void onEntryPointAdded( const std::string&, bool ) override {}
     virtual void onEntryPointRemoved( const std::string&, bool ) override {}
     virtual void onEntryPointBanned( const std::string&, bool ) override {}
@@ -68,6 +71,7 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onMediaThumbnailReady( MediaPtr, ThumbnailSizeType, bool ) override {}
     virtual void onHistoryChanged( HistoryType ) override {}
     virtual void onRescanStarted() override {}
+    virtual void onSubscriptionNewMedia( std::set<int64_t> ) override {}
 };
 
 }

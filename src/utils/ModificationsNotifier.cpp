@@ -188,6 +188,21 @@ void ModificationNotifier::notifyFolderRemoval( int64_t folderId )
     notifyRemoval( folderId, m_folders );
 }
 
+void ModificationNotifier::notifySubscriptionCreation( SubscriptionPtr subscription )
+{
+    notifyCreation( std::move( subscription ), m_subscriptions );
+}
+
+void ModificationNotifier::notifySubscriptionModification( int64_t subscriptionId )
+{
+    notifyModification( subscriptionId, m_subscriptions );
+}
+
+void ModificationNotifier::notifySubscriptionRemoval( int64_t subscriptionId )
+{
+    notifyRemoval( subscriptionId, m_subscriptions );
+}
+
 void ModificationNotifier::notifyThumbnailCleanupInserted( int64_t requestId )
 {
     /*
@@ -198,6 +213,11 @@ void ModificationNotifier::notifyThumbnailCleanupInserted( int64_t requestId )
      * spamming the thumbnailer from a sqlite hook
      */
     notifyRemoval( requestId, m_thumbnailsCleanupRequests );
+}
+
+void ModificationNotifier::notifySubscriptionNewMedia( int64_t subscriptionId )
+{
+    notifyRemoval( subscriptionId, m_subscriptionsMedia );
 }
 
 void ModificationNotifier::flush()
@@ -223,7 +243,9 @@ void ModificationNotifier::run()
     Queue<IMediaGroup> mediaGroups;
     Queue<IBookmark> bookmarks;
     Queue<IFolder> folders;
+    Queue<ISubscription> subscriptions;
     Queue<void> thumbnailsCleanup;
+    Queue<void> subscriptionsMedia;
 
     TimeoutChrono timeout = ZeroTimeout;
 
@@ -280,6 +302,7 @@ void ModificationNotifier::run()
             checkQueue( m_mediaGroups, mediaGroups, nextTimeout, now, flushing );
             checkQueue( m_thumbnailsCleanupRequests, thumbnailsCleanup, nextTimeout, now, flushing );
             checkQueue( m_bookmarks, bookmarks, nextTimeout, now, flushing );
+            checkQueue( m_subscriptions, subscriptions, nextTimeout, now, flushing );
             checkQueue( m_folders, folders, nextTimeout, now, flushing );
             timeout = nextTimeout;
 
@@ -299,6 +322,9 @@ void ModificationNotifier::run()
                     &IMediaLibraryCb::onBookmarksModified, &IMediaLibraryCb::onBookmarksDeleted );
             notify( std::move( folders ), &IMediaLibraryCb::onFoldersAdded,
                     &IMediaLibraryCb::onFoldersModified, &IMediaLibraryCb::onFoldersDeleted );
+            notify( std::move( subscriptions ), &IMediaLibraryCb::onSubscriptionsAdded,
+                    &IMediaLibraryCb::onSubscriptionsModified, &IMediaLibraryCb::onSubscriptionsDeleted );
+            notify( std::move( subscriptionsMedia ), &IMediaLibraryCb::onSubscriptionNewMedia );
 
             if ( thumbnailsCleanup.removed.empty() == false )
             {

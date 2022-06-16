@@ -31,6 +31,7 @@
 #include "Media.h"
 #include "File.h"
 #include "Subscription.h"
+#include "utils/ModificationsNotifier.h"
 
 namespace medialibrary
 {
@@ -229,6 +230,9 @@ Status LinkService::linkToSubscription(IItem& item)
          */
         return Status::Completed;
     }
+    auto notifier = m_ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifySubscriptionNewMedia( item.linkToId() );
     return Status::Completed;
 }
 

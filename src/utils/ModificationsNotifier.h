@@ -80,7 +80,13 @@ public:
     void notifyFolderModification( int64_t folderId );
     void notifyFolderRemoval( int64_t folderId );
 
+    void notifySubscriptionCreation( SubscriptionPtr subscription );
+    void notifySubscriptionModification( int64_t subscriptionId );
+    void notifySubscriptionRemoval( int64_t subscriptionId );
+
     void notifyThumbnailCleanupInserted( int64_t requestId );
+
+    void notifySubscriptionNewMedia( int64_t collectionId );
 
     /**
      * @brief flush Flushes the notifications queues
@@ -228,8 +234,9 @@ private:
     Queue<IMediaGroup> m_mediaGroups;
     Queue<IBookmark> m_bookmarks;
     Queue<IFolder> m_folders;
+    Queue<ISubscription> m_subscriptions;
     Queue<void> m_thumbnailsCleanupRequests;
-
+    Queue<void> m_subscriptionsMedia;
 
     // Notifier thread
     compat::Mutex m_lock;

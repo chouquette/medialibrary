@@ -599,6 +599,13 @@ void MediaLibrary::registerEntityHooks()
         else if ( reason == sqlite::Connection::HookReason::Delete )
             m_modificationNotifier->notifyFolderRemoval( rowId );
     });
+    m_dbConnection->registerUpdateHook( Subscription::Table::Name,
+                                        [this]( sqlite::Connection::HookReason reason, int64_t rowId ) {
+        if ( reason == sqlite::Connection::HookReason::Update )
+            m_modificationNotifier->notifySubscriptionModification( rowId );
+        else if ( reason == sqlite::Connection::HookReason::Delete )
+            m_modificationNotifier->notifySubscriptionRemoval( rowId );
+    });
 }
 
 void MediaLibrary::removeThumbnails()

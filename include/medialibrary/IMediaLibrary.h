@@ -277,6 +277,10 @@ public:
     virtual void onFoldersModified( std::set<int64_t> folderIds ) = 0;
     virtual void onFoldersDeleted( std::set<int64_t> folderIds ) = 0;
 
+    virtual void onSubscriptionsAdded( std::vector<SubscriptionPtr> subscriptions ) = 0;
+    virtual void onSubscriptionsModified( std::set<int64_t> subscriptionIds ) = 0;
+    virtual void onSubscriptionsDeleted( std::set<int64_t> subscriptionsIds ) = 0;
+
     /**
      * @brief onDiscoveryStarted This callback will be invoked when the discoverer
      * starts to crawl an entrypoint that was scheduled for discovery or reload.
@@ -409,6 +413,12 @@ public:
      * to a migration.
      */
     virtual void onRescanStarted() = 0;
+    /**
+     * @brief onSubscriptionNewMedia will be invoked when some media are added to
+     *                             one or more subscription(s)
+     * @param subscriptionId The subscription ID(s)
+     */
+    virtual void onSubscriptionNewMedia( std::set<int64_t> subscriptionId ) = 0;
 };
 
 class IMediaLibrary

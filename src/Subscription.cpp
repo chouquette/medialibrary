@@ -28,6 +28,7 @@
 #include "Media.h"
 #include "File.h"
 #include "parser/Task.h"
+#include "utils/ModificationsNotifier.h"
 
 #include "database/SqliteTools.h"
 #include "database/SqliteQuery.h"
@@ -252,7 +253,9 @@ std::shared_ptr<Subscription> Subscription::create(MediaLibraryPtr ml, Service s
     if ( insert( ml, self, req, service, self->m_name,
                  sqlite::ForeignKey{ parentId } ) == false )
         return nullptr;
-    //fixme callbacks
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr )
+        notifier->notifySubscriptionCreation( self );
     return self;
 }
 
