@@ -30,6 +30,8 @@
 #include "utils/Filename.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
+#include "logging/Logger.h"
+#include "logging/IostreamLogger.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -83,6 +85,7 @@ int main( int argc, char** argv )
     auto mlDir = getTempPath( "fast_teardown_test" );
     auto dbPath = mlDir + "test.db";
 
+    Log::SetLogger( std::make_shared<IostreamLogger>() );
     for ( auto i = 0; i < 1000; ++i )
     {
         auto testCb = std::make_unique<FastTearDownCb>();
