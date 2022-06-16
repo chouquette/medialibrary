@@ -29,6 +29,8 @@
 
 #include "common/Tests.h"
 #include "common/util.h"
+#include "logging/Logger.h"
+#include "logging/IostreamLogger.h"
 #include "medialibrary/IAlbum.h"
 #include "medialibrary/IArtist.h"
 #include "medialibrary/IMedia.h"
@@ -96,6 +98,12 @@ private:
 
 struct Tests
 {
+    Tests()
+    {
+        Log::SetLogger( std::make_shared<IostreamLogger>() );
+        Log::setLogLevel( LogLevel::Debug );
+    }
+
     virtual ~Tests() = default;
     virtual void SetUp(const std::string& testSuite, const std::string& testName );
     virtual void TearDown();

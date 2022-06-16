@@ -31,6 +31,8 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
+#include "logging/Logger.h"
+#include "logging/IostreamLogger.h"
 
 #include <iostream>
 #include <condition_variable>
@@ -94,8 +96,10 @@ int main( int argc, char** argv )
     auto dbPath = mlDir + "test.db";
 
     auto testCb = std::make_unique<FastDiscoverCancelCb>();
+
+    Log::SetLogger( std::make_shared<IostreamLogger>() );
     auto ml = std::make_unique<medialibrary::MediaLibrary>( dbPath, mlDir, nullptr );
-//    ml->setVerbosity( LogLevel::Debug );
+
     unlink( dbPath.c_str() );
     ml->initialize( testCb.get() );
 

@@ -31,6 +31,8 @@
 #include "medialibrary/filesystem/IDirectory.h"
 #include "utils/Directory.h"
 #include "filesystem/libvlc/FileSystemFactory.h"
+#include "logging/Logger.h"
+#include "logging/IostreamLogger.h"
 
 #include "common/util.h"
 #include "mocks/FileSystem.h"
@@ -45,7 +47,12 @@ struct UnitTests
     std::shared_ptr<mock::FileSystemFactory> fsMock;
     std::shared_ptr<mock::MockDeviceLister> mockDeviceLister;
 
-    UnitTests() = default;
+    UnitTests()
+    {
+        Log::SetLogger( std::make_shared<IostreamLogger>() );
+        Log::setLogLevel( LogLevel::Debug );
+    }
+
     virtual ~UnitTests() = default;
 
     void InitTestFolder( const std::string& testSuite, const std::string& testName )
@@ -69,7 +76,6 @@ struct UnitTests
         cbMock.reset( new CB );
 
         ml->setFsFactory( fsMock );
-        ml->setVerbosity( LogLevel::Debug );
         Initialize();
         TestSpecificSetup();
     }

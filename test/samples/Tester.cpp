@@ -222,7 +222,6 @@ void Tests::SetUp( const std::string& testSuite, const std::string& testName )
     m_testDir = getTempPath( testSuite + "." + testName );
     auto dbPath = m_testDir + "/test.db";
     InitializeMediaLibrary( dbPath, m_testDir );
-    m_ml->setVerbosity( LogLevel::Debug );
 
     auto res = m_ml->initialize( m_cb.get() );
     ASSERT_EQ( InitializeResult::Success, res );
