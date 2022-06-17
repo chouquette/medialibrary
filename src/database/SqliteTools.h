@@ -48,8 +48,15 @@ namespace sqlite
 class Row
 {
 public:
+    /**
+     * @brief Row Construct a row from an executed statement
+     * @param stmt A valide sqlite statement opaque object
+     */
     explicit Row( sqlite3_stmt* stmt );
 
+    /**
+     * @brief Row default constructs an empty row that will compare equal to nullptr
+     */
     constexpr Row()
         : m_stmt( nullptr )
         , m_idx( 0 )
@@ -85,6 +92,9 @@ public:
         return *this;
     }
 
+    /**
+     * @return The number of columns in this row
+     */
     unsigned int nbColumns() const;
 
     /**
@@ -98,6 +108,11 @@ public:
         return sqlite::Traits<T>::Load( m_stmt, idx );
     }
 
+    /**
+     * @brief operator== Compares this row with the special value nullptr
+     * @return true if this row is considered null. Meaning that it was either
+     * default constructed or that the statement has no more row to return.
+     */
     bool operator==(std::nullptr_t) const;
 
     bool operator!=(std::nullptr_t) const;
@@ -120,21 +135,62 @@ private:
 class Statement
 {
 public:
+    /**
+     * @brief Statement Constructs a statement with an acquired connection handle
+     * @param dbConnection A database connection handle
+     * @param req The request to execute
+     *
+     * This constructor is to be used when the caller has already acquired a
+     * database connection handle and whishes to use it directly to avoid an
+     * extra lookup from the other Statement constructor
+     */
     Statement( Connection::Handle dbConnection, const std::string& req );
 
+    /**
+     * @brief Statement Constructs a statement and automatically acquires the
+     *                  handle associated to an open context
+     * @param req The request to execute
+     *
+     * This will *not* automatically acquire a context, but merely fetch the
+     * existing one and use it to acquire a connection handle.
+     * The caller is still responsible for opening a read or write context.
+     */
     Statement( const std::string& req );
 
+    /**
+     * @brief execute Executes the request and binds the parameters if any
+     * @tparam A parameter pack representing the values to bind with the placeholders
+     * @param args The values to bind
+     */
     template <typename... Args>
     void execute(Args&&... args)
     {
         m_bindIdx = 1;
+        /*
+         * Using an initializer_list guarantees us that the parameters will be
+         * used in the provided order, instead of an arbitrary one.
+         */
         (void)std::initializer_list<bool>{ _bind( std::forward<Args>( args ) )... };
     }
 
+    /**
+     * @brief row Returns the next row for this statement
+     *
+     * If there is no more result, a row comparing equal to nullptr will be returned
+     */
     Row row();
 
+    /**
+     * @brief FlushStatementCache Flush all connections statement cache
+     *
+     * In other words, this will flush all the cache for all the threads that
+     * acquired a connection.
+     * Flushing the statement cache is mandatory when reopening a connection.
+     */
     static void FlushStatementCache();
-
+    /**
+     * @brief FlushConnectionStatementCache Flushes a given connection's statement cache
+     */
     static void FlushConnectionStatementCache( Connection::Handle h );
 
 private:
@@ -167,6 +223,11 @@ private:
     static std::unordered_map<Connection::Handle, StatementsCacheMap> StatementsCache;
 };
 
+/**
+ * @brief The QueryTimer struct provides a RAII-type helper to time a query
+ *
+ * The results are displayed as a verbose log including the query and its duration
+ */
 struct QueryTimer
 {
     QueryTimer( const std::string& req );
