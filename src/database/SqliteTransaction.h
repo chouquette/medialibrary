@@ -34,11 +34,26 @@ namespace medialibrary
 namespace sqlite
 {
 
+/**
+ * @brief The Transaction class represents an abstract transaction.
+ *
+ * When no transaction is opened, the associated factory (Connection::newTransaction)
+ * will instantiate an ActualTransaction, which executes begin/commit
+ * Later instantiation while a transaction is already opened will result in a
+ * NoopTransaction which does nothing but simplifies the code path for the caller.
+ */
 class Transaction
 {
 public:
     Transaction() = default;
+    /**
+     * If a transaction is in progress and hasn't been commited, the destructor
+     * will issue a ROLLBACK
+     */
     virtual ~Transaction() = default;
+    /**
+     * @brief commit Commits all pending changes to the database
+     */
     virtual void commit() = 0;
     /**
      * @brief commitNoUnlock This will commit the current transaction but will
@@ -46,6 +61,9 @@ public:
      */
     virtual void commitNoUnlock() = 0;
 
+    /**
+     * @brief isInProgress Returns true if a transaction is opened by the current thread
+     */
     static bool isInProgress();
 
     Transaction( const Transaction& ) = delete;
