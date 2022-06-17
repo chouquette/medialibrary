@@ -250,28 +250,6 @@ struct Traits<T, typename std::enable_if<
     }
 };
 
-template <typename T>
-struct Traits<T, typename std::enable_if<
-        is_instanciation_of<typename std::decay<T>::type, std::atomic>::value>::type
-    >
-{
-    // std::atomic::value_type is C++17 only
-    using value_type = decltype( std::declval<T>().load() );
-
-    static int Bind( sqlite3_stmt* stmt, int pos, const T& value )
-    {
-        return Traits<value_type>::Bind( stmt, pos, value.load() );
-    }
-
-    static value_type Load( sqlite3_stmt* stmt, int pos )
-    {
-        return Traits<value_type>::Load( stmt, pos );
-    }
-};
-
-static_assert( is_instanciation_of<std::atomic_uint, std::atomic>::value == true,
-               "std::atomic_uint should be an instanciation of std::atomic" );
-
 } // namespace sqlite
 
 }
