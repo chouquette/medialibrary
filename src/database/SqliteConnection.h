@@ -47,6 +47,13 @@
         name = dbConn->acquireReadContext(); \
     }
 
+/*
+ * Conditionally open a write context if no context is currently opened.
+ * The first macro parameter is the context instance name, the 2nd a pointer to
+ * a sqlite::Connection instance.
+ * The resulting object must not be used as it may be default constructed if
+ * a context was already opened.
+ */
 #define OPEN_WRITE_CONTEXT( name, dbConn ) \
     sqlite::Connection::WriteContext name; \
     if ( sqlite::Connection::Context::isOpened( \
@@ -67,6 +74,12 @@ class Connection : public std::enable_shared_from_this<Connection>
 public:
     using Handle = sqlite3*;
 
+    /**
+     * @brief Represents a generic acquired context, which can be read or write
+     *
+     * This base class allows the caller to acquire a connection handle, which is
+     * otherwise inaccessible.
+     */
     class Context
     {
     public:
@@ -80,7 +93,17 @@ public:
         Context() noexcept = default;
         ~Context();
 
+        /**
+         * @brief handle Returns a connection handle for the calling thread
+         *
+         * It is invalid to call this function if no context is opened
+         */
         static Handle handle();
+        /**
+         * @brief isOpened Returns true if the calling thread has acquired a context
+         * @param t The type of context to check for.
+         * @return true if a context is opened, false otherwise
+         */
         static bool isOpened( Type t );
 
     protected:
@@ -98,6 +121,11 @@ public:
         bool m_owning = false;
     };
 
+    /**
+     * @brief The ReadContext class represents a read context to the database
+     *
+     * Performing writes to the database with such a context is undefined
+     */
     class ReadContext final : public Context
     {
     public:
@@ -111,6 +139,11 @@ public:
         std::unique_lock<utils::ReadLocker> m_lock;
     };
 
+    /**
+     * @brief The WriteContext class represents an opened write context
+     *
+     * Performing writes or read to the database with such a context is valid
+     */
     class WriteContext final : public Context
     {
     public:
@@ -128,6 +161,14 @@ public:
         std::unique_lock<utils::WriteLocker> m_lock;
     };
 
+    /**
+     * @brief The PriorityContext class represents a priority context
+     *
+     * After acquiring such a context, the calling thread has priority over the
+     * others if it tries to acquire a read or write context.
+     * This is *not* a read/write context in itself, and doesn't expose a handle
+     * to the database
+     */
     class PriorityContext final : public Context
     {
     public:
@@ -158,6 +199,13 @@ public:
         Connection* m_conn;
     };
 
+    /**
+     * @brief The WeakDbContext struct exposes a context with foreign key &
+     * recursive triggers disabled.
+     *
+     * This is usefull for some migrations which will delete & recreate some
+     * entities but for which we don't want those deletions to propagate
+     */
     struct WeakDbContext
     {
         explicit WeakDbContext( Connection* conn );
@@ -173,15 +221,54 @@ public:
 
     using UpdateHookCb = std::function<void(HookReason, int64_t)>;
 
+    /**
+     * @brief newTransaction Creates a transaction and acquires a write context
+     * @return A transaction object
+     *
+     * This is safe to call recursively, only the first returned transaction
+     * object will actually perform operations, the later will be noops, but will
+     * not deadlock trying to acquire a second write context.
+     */
     std::unique_ptr<sqlite::Transaction> newTransaction();
+    /**
+     * @brief acquireReadContext Acquires a read context
+     * @return A ReadContext object
+     *
+     * This is not safe to be called recursively.
+     * If the caller might already hold a read context, OPEN_READ_CONTEXT can be used
+     */
     ReadContext acquireReadContext();
+    /**
+     * @brief acquireWriteContext Acquires a write context
+     * @return A WriteContext object
+     *
+     * This is not safe to be called recursively.
+     * If the caller might already hold a read context, OPEN_WRITE_CONTEXT can be used
+     */
     WriteContext acquireWriteContext();
+    /**
+     * @brief acquirePriorityContext Acquires a priority context
+     * @return A priority context object
+     */
     PriorityContext acquirePriorityContext();
 
+    /**
+     * @brief registerUpdateHook Register a hook on the provided table
+     * @param table The table on which to hook
+     * @param cb The callback to invoke when an event occurs on the given table
+     *
+     * This must be called after initializing the Connection object and before
+     * other threads have connected to the database.
+     * Once registered, hooks will be invoked for all connection, regardless of
+     * the thread that executed the request.
+     */
     void registerUpdateHook( const std::string& table, UpdateHookCb cb );
     bool checkSchemaIntegrity();
     bool checkForeignKeysIntegrity();
     const std::string& dbPath() const;
+    /**
+     * @brief flushAll Closes all connections for all threads
+     */
     void flushAll();
 
     static std::shared_ptr<Connection> connect( const std::string& dbPath );
