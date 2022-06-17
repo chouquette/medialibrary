@@ -226,13 +226,6 @@ unsigned int Row::nbColumns() const
     return m_nbColumns;
 }
 
-void Row::advanceToColumn(unsigned int idx)
-{
-    if ( idx >= m_nbColumns )
-        throw errors::ColumnOutOfRange( idx, m_nbColumns );
-    m_idx = idx;
-}
-
 bool Row::operator==(std::nullptr_t) const
 {
     return m_stmt == nullptr;

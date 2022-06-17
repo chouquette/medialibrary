@@ -87,8 +87,6 @@ public:
 
     unsigned int nbColumns() const;
 
-    void advanceToColumn( unsigned int idx );
-
     /**
      * @brief Returns the value in column idx, but doesn't advance to the next column
      */
