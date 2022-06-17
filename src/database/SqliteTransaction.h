@@ -53,6 +53,7 @@ public:
     Transaction& operator=( const Transaction& ) = delete;
     Transaction& operator=( Transaction&& ) = delete;
 
+protected:
     static thread_local Transaction* CurrentTransaction;
 };
 
