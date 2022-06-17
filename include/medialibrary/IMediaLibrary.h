@@ -430,11 +430,45 @@ public:
      */
     virtual InitializeResult initialize( IMediaLibraryCb* mlCallback ) = 0;
 
+    /**
+     * @brief setVerbosity Sets the log level
+     * @param v The required log level
+     *
+     * This defaults to Error.
+     */
     virtual void setVerbosity( LogLevel v ) = 0;
 
+    /**
+     * @brief createLabel Create a label that can be assigned to various entities
+     * @param label The label name
+     * @return A label instance
+     *
+     * Creating 2 labels with the same name is considered an error and will
+     * throw a ConstraintUnique exception
+     */
     virtual LabelPtr createLabel( const std::string& label ) = 0;
+    /**
+     * @brief deleteLabel Delete a label from the database
+     * @param label An instance of the label to be deleted
+     * @return true if the label was deleted, false otherwise
+     */
     virtual bool deleteLabel( LabelPtr label ) = 0;
+    /**
+     * @brief media Fetch a media by its ID
+     * @param mediaId The ID of the media to fetch
+     * @return A media instance, or nullptr in case of error or if no media matched
+     */
     virtual MediaPtr media( int64_t mediaId ) const = 0;
+    /**
+     * @brief media Attempts to fetch a media by its MRL
+     * @param mrl The MRL of the media to fetch
+     * @return A media instance or nullptr in case of error or if no media matched
+     *
+     * This will attempt to fetch an external media with the given MRL first, and
+     * will then attempt to fetch an analyzed media.
+     * Even if the media is removable, the MRL must represent the absolute path
+     * to the media
+     */
     virtual MediaPtr media( const std::string& mrl ) const = 0;
     /**
      * @brief addExternalMedia Adds an external media to the list of known media
@@ -946,10 +980,34 @@ public:
      */
     virtual bool isSubtitleExtensionSupported( const char* ext ) const = 0;
 
+    /**
+     * @brief requestThumbnail Request an asynchronous thumbnail generation
+     * @param mediaId The media for which to generate a thumbnail
+     * @param sizeType A value representing the type of thumbnail size
+     * @param desiredWidth The desired width
+     * @param desiredHeight The desired height
+     * @param position A position in the range [0;1]
+     * @return true if the request has been scheduled
+     *
+     * When the thumbnail is generated, IMediaLibraryCb::onMediaThumbnailReady
+     * will be invoked from the thumbnailer thread.
+     * If this is invoked multiple time before the original request is processed,
+     * the later requests will be ignored, and no callback will be invoked before
+     * the first one has completed.
+     * The desired width or height might be 0 to automatically infer one from the
+     * other by respecting the source aspect ratio.
+     * If both sizes are provided, the resulting thumbnail will be cropped to
+     * abide by the source aspect ratio.
+     */
     virtual bool requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,
                                    uint32_t desiredWidth, uint32_t desiredHeight,
                                    float position ) = 0;
 
+    /**
+     * @brief bookmark Returns the bookmark with the given ID
+     * @param bookmarkId The bookmark ID
+     * @return A bookmark instance, or nullptr if no bookmark has this ID
+     */
     virtual BookmarkPtr bookmark( int64_t bookmarkId ) const = 0;
 
     /**
@@ -964,6 +1022,12 @@ public:
      */
     virtual bool setExternalLibvlcInstance( libvlc_instance_t* inst ) = 0;
 
+    /**
+     * @brief acquirePriorityAccess Acquires a priority context for the calling thread
+     * @return A PriorityAccess wrapper object.
+     *
+     * The returned object will release its priority context when it gets destroyed.
+     */
     virtual PriorityAccess acquirePriorityAccess() = 0;
 
     /**
