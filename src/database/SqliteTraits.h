@@ -35,6 +35,9 @@ namespace medialibrary
 namespace sqlite
 {
 
+/**
+ * @brief The ForeignKey struct wraps a primary key in order to convert 0 to NULL
+ */
 struct ForeignKey
 {
     constexpr explicit ForeignKey(int64_t v) : value(v) {}
@@ -47,6 +50,9 @@ using IsSameDecay = std::is_same<typename std::decay<ToCheck>::type, T>;
 template <typename T, typename Enable = void>
 struct Traits;
 
+/*
+ * Traits class that handles integer types that are *NOT* int64_t
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<
         std::is_integral<typename std::decay<T>::type>::value
@@ -60,6 +66,12 @@ struct Traits<T, typename std::enable_if<
     int (*Load)(sqlite3_stmt *, int) = &sqlite3_column_int;
 };
 
+/**
+ * Traits that handles ForeignKey wrappers.
+ *
+ * For a valid primary key (ie. != 0) this will just bind its value
+ * For an invalid primary key (ie. == 0) this will bind NULL.
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::type>
 {
@@ -71,6 +83,9 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::typ
     }
 };
 
+/**
+ * Traits that handles raw string litteral without an intermediate std::string
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<std::is_same<T, const char*>::value>::type>
 {
@@ -88,6 +103,9 @@ struct Traits<T, typename std::enable_if<std::is_same<T, const char*>::value>::t
     }
 };
 
+/**
+ * Traits that handles std::string
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::type>
 {
@@ -110,6 +128,9 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, std::string>::value>::ty
     }
 };
 
+/**
+ * Traits handling floating point value
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<std::is_floating_point<
         typename std::decay<T>::type
@@ -122,6 +143,13 @@ struct Traits<T, typename std::enable_if<std::is_floating_point<
         (*Load)(sqlite3_stmt *, int) = &sqlite3_column_double;
 };
 
+/**
+ * Traits handling nullptr
+ *
+ * There is no load for this type as we can't pass nullptr as an lvalue.
+ * Regardless, other traits will correctly handle NULL for their respective
+ * destination types
+ */
 template <>
 struct Traits<std::nullptr_t>
 {
@@ -131,6 +159,9 @@ struct Traits<std::nullptr_t>
     }
 };
 
+/**
+ * Traits that handles enum by converting them to their underlying type beforehand
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<std::is_enum<
         typename std::decay<T>::type
@@ -148,7 +179,12 @@ struct Traits<T, typename std::enable_if<std::is_enum<
     }
 };
 
-
+/**
+ * Traits that handles int64_t
+ *
+ * int64 has special bind/load functions which causes it to be a dedicated
+ * implementation and not the regular integer one.
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<IsSameDecay<T, int64_t>::value>::type>
 {
@@ -191,6 +227,20 @@ struct MakeIndexSequence<0>
     using type = IndexSequence<>;
 };
 
+/**
+ * Traits that handles tuple of parameters
+ *
+ * The tuple will be extended and each parameters bound at their respective index.
+ * For instance:
+ * auto t = std::make_tuple<bool, int, std::string>( ... );
+ * `Traits<decltype(t)>::Bind(t)`
+ * will be equivalent to:
+ * ```
+ * Traits<bool>::Bind( std::get<0>( t ) );
+ * Traits<int>::Bind( std::get<1>( t ) );
+ * Traits<std::string>( std::get<2>( t ) );
+ * ```
+ */
 template <typename T>
 struct Traits<T, typename std::enable_if<
         is_instanciation_of<typename std::decay<T>::type, std::tuple>::value &&
