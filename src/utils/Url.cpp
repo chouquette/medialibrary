@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
+#include <iterator>
 
 namespace
 {
