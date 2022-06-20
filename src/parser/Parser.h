@@ -49,13 +49,6 @@ public:
     virtual void parse( std::shared_ptr<Task> task ) = 0;
     virtual void done( std::shared_ptr<Task> task, Status status ) = 0;
     virtual void onIdleChanged( bool isIdle ) const = 0;
-    /**
-     * @brief refreshTaskList Will be invoked when the task list should be refreshed
-     *
-     * This is likely to happen when the discoverer is instructed to remove/ban
-     * some folders, in which case we need to stop
-     */
-    virtual void refreshTaskList() = 0;
 };
 
 class Parser : public IParserCb, public IFsHolderCb
@@ -79,7 +72,7 @@ public:
     ///
     void rescan();
 
-    virtual void refreshTaskList() override;
+    void refreshTaskList();
 
     void flush();
     bool isRunning() const;
