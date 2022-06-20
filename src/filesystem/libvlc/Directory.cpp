@@ -71,8 +71,13 @@ const std::string& Directory::mrl() const
 
 void Directory::read() const
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    VLC::Media media( m_mrl, VLC::Media::FromLocation );
+    assert( media.parsedStatus( VLCInstance::get() ) != VLC::Media::ParsedStatus::Done );
+#else
     VLC::Media media( VLCInstance::get(), m_mrl, VLC::Media::FromLocation );
     assert( media.parsedStatus() != VLC::Media::ParsedStatus::Done );
+#endif
 
     compat::Mutex mutex;
     compat::ConditionVariable cond;
@@ -92,8 +97,13 @@ void Directory::read() const
     bool success;
     {
         std::unique_lock<compat::Mutex> lock( mutex );
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        media.parseRequest( VLCInstance::get(), VLC::Media::ParseFlags::Network |
+                            VLC::Media::ParseFlags::Local, -1 );
+#else
         media.parseWithOptions( VLC::Media::ParseFlags::Network |
                                 VLC::Media::ParseFlags::Local, -1 );
+#endif
         success = cond.wait_for( lock, std::chrono::seconds{ 5 }, [&res]() {
             return res != VLC::Media::ParsedStatus::Skipped;
         });
