@@ -46,7 +46,7 @@ bool CoreThumbnailer::generate( const IMedia&, const std::string& mrl,
     auto done = false;
     VLC::Picture thumbnail;
     {
-        m_vlcMedia = VLC::Media{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
+        m_vlcMedia = VLC::Media{ mrl, VLC::Media::FromType::FromLocation };
         auto em = m_vlcMedia.eventManager();
 
         em.onThumbnailGenerated([this, &cond, &thumbnail, &done]( const VLC::Picture* p ) {
@@ -58,7 +58,7 @@ bool CoreThumbnailer::generate( const IMedia&, const std::string& mrl,
             }
             cond.notify_all();
         });
-        m_request = m_vlcMedia.thumbnailRequestByPos( position, VLC::Media::ThumbnailSeekSpeed::Fast,
+        m_request = m_vlcMedia.thumbnailRequestByPos( VLCInstance::get(), position, VLC::Media::ThumbnailSeekSpeed::Fast,
                                                       desiredWidth, desiredHeight,
                                                       desiredWidth != 0 && desiredHeight != 0,
                                                       VLC::Picture::Type::Jpg, 3000 );
