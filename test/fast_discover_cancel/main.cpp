@@ -98,7 +98,10 @@ int main( int argc, char** argv )
     auto testCb = std::make_unique<FastDiscoverCancelCb>();
 
     Log::SetLogger( std::make_shared<IostreamLogger>() );
-    auto ml = std::make_unique<medialibrary::MediaLibrary>( dbPath, mlDir, nullptr );
+    auto ml = std::unique_ptr<medialibrary::MediaLibrary>{
+                static_cast<MediaLibrary*>(
+                    NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false,
+                                     nullptr ) ) };
 
     unlink( dbPath.c_str() );
     ml->initialize( testCb.get() );
