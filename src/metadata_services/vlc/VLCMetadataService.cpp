@@ -237,6 +237,8 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
                   media.meta( libvlc_meta_DiscNumber ) );
     item.setMeta( IItem::Metadata::DiscTotal,
                   media.meta( libvlc_meta_DiscTotal ) );
+    item.setMeta( IItem::Metadata::Description,
+                  media.meta( libvlc_meta_Description ) );
     item.setDuration( media.duration() );
 
 #if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)

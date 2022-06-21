@@ -72,6 +72,7 @@ public:
         TrackNumber,
         DiscNumber,
         DiscTotal,
+        Description,
 
         /* for convenience, please keep this last */
         NbValues,
