@@ -653,6 +653,7 @@ media_tests = [
   'ExternalMrlDifferentPorts',
   'MarkAsPlayed',
   'NbSubscriptions',
+  'Description',
 ]
 
 foreach t : media_tests

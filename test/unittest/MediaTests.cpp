@@ -1532,6 +1532,21 @@ static void NbSubscriptions( Tests* T )
     ASSERT_EQ( 0u, m->nbSubscriptions() );
 }
 
+static void Description( Tests* T )
+{
+    auto m = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file:///path/to/movie.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m );
+
+    ASSERT_EQ( m->description(), "" );
+    auto res = m->setDescription( "desc" );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( "desc", m->description() );
+
+    m = T->ml->media( m->id() );
+    ASSERT_EQ( "desc", m->description() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1595,6 +1610,7 @@ int main( int ac, char** av )
     ADD_TEST( ExternalMrlDifferentPorts );
     ADD_TEST( MarkAsPlayed );
     ADD_TEST( NbSubscriptions );
+    ADD_TEST( Description );
 
     END_TESTS
 }

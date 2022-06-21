@@ -100,7 +100,7 @@ Media::schema( Media::Table::Name, 37 ),
 "IIF(release_date < 3000, STRFTIME( '%s', CAST(release_date as TEXT) || '-01-01' ), release_date), "
 "title, filename, is_favorite, is_present, device_id, nb_playlists, folder_id, "
 "import_type, group_id, forced_title, artist_id, genre_id, track_number, album_id, "
-"disc_number, lyrics, FALSE, 0 FROM "
+"disc_number, lyrics, FALSE, 0, '' FROM "
     + Media::Table::Name + "_backup",
 
 "DROP TABLE " + Media::Table::Name + "_backup",

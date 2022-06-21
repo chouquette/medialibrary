@@ -489,6 +489,12 @@ public:
 
     virtual bool isPublic() const = 0;
     virtual uint32_t nbSubscriptions() const = 0;
+
+    /**
+     * @brief description Returns this media description, if available.
+     * @return A description or a reference to an empty string when none is available.
+     */
+    virtual const std::string& description() const = 0;
 };
 
 }

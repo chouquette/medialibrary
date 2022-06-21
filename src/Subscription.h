@@ -91,6 +91,7 @@ private:
     Service m_service;
     std::string m_name;
     int64_t m_parentId;
+    std::string m_description;
 };
 
 }

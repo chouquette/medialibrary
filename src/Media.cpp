@@ -99,6 +99,7 @@ Media::Media( MediaLibraryPtr ml, sqlite::Row& row )
     , m_lyrics( row.extract<decltype(m_lyrics)>() )
     , m_isPublic( row.extract<decltype(m_isPublic)>() )
     , m_nbSubscriptions( row.extract<decltype(m_nbSubscriptions)>() )
+    , m_description( row.extract<decltype(m_description)>() )
 
     // End of DB fields extraction
     , m_metadata( m_ml, IMetadata::EntityType::Media )
@@ -1171,6 +1172,23 @@ uint32_t Media::nbSubscriptions() const
     return m_nbSubscriptions;
 }
 
+const std::string& Media::description() const
+{
+    return m_description;
+}
+
+bool Media::setDescription(std::string desc)
+{
+    if ( m_description == desc )
+        return true;
+    const std::string req = "UPDATE " + Table::Name +
+            " SET description = ? WHERE id_media = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, desc, m_id ) == false )
+        return false;
+    m_description = std::move( desc );
+    return true;
+}
+
 std::string Media::addRequestJoin( const QueryParameters* params )
 {
     bool artist = false;
@@ -1878,6 +1896,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "lyrics TEXT,"
         "is_public BOOLEAN NOT NULL DEFAULT FALSE,"
         "nb_subscriptions UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+        "description TEXT,"
         "FOREIGN KEY(group_id) REFERENCES " + MediaGroup::Table::Name +
             "(id_group) ON DELETE RESTRICT,"
         "FOREIGN KEY(folder_id) REFERENCES " + Folder::Table::Name

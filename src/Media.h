@@ -301,6 +301,8 @@ class Media : public IMedia,
         bool setLyrics( std::string lyrics );
         virtual bool isPublic() const override;
         virtual uint32_t nbSubscriptions() const override;
+        virtual const std::string& description() const override;
+        bool setDescription( std::string desc );
 
         static Query<IMedia> listAll( MediaLibraryPtr ml, Type type,
                                      const QueryParameters* params,
@@ -442,6 +444,7 @@ private:
         std::string m_lyrics;
         bool m_isPublic;
         uint32_t m_nbSubscriptions;
+        std::string m_description;
 
         bool m_publicOnlyListing;
 
