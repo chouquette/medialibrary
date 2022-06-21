@@ -33,6 +33,7 @@
 #include "utils/Defer.h"
 #include "utils/Xml.h"
 #include "utils/XxHasher.h"
+#include "utils/Date.h"
 
 #include "parser/Task.h"
 
@@ -187,6 +188,40 @@ static void ClearDatabase( Tests* T )
     ASSERT_TRUE( res );
 }
 
+static void DateFromStr( Tests* )
+{
+    struct
+    {
+        const char* str;
+        time_t exp;
+        bool res;
+    } cases[] = {
+        { "Wed, 06 Jul 2022 13:58:", 0, false },
+        { "Wed, 06 Jul 2022 13:58:45 +", 0, false },
+        { "Wed, 06 Jul 2022 13:58:45 +-+", 0, false },
+        { "Wed, 06 Jul 2022 13:58:45 +123", 0, false },
+        { "Wed, 06 Jul 2022 13:58:45 MEOW", 0, false },
+        { "Fri, 08 Jul 2022 13:12:00 GMT",   1657285920, true },
+        { "Fri, 08 Jul 2022 13:12:00 +0200", 1657278720, true },
+        { "Wed, 02 Oct 2002 08:00:00 EST", 1033563600, true },
+    };
+    for ( const auto& c : cases )
+    {
+        struct tm t;
+        auto res = utils::date::fromStr( c.str, &t );
+        if ( c.res == true )
+        {
+            ASSERT_TRUE( res );
+            auto ts = utils::date::mktime( &t );
+            ASSERT_EQ( ts, c.exp );
+        }
+        else
+        {
+            ASSERT_FALSE( res );
+        }
+    }
+}
+
 int test_without_ml_init( int ac, char** av )
 {
     INIT_TESTS_C( MiscTests );
@@ -202,6 +237,7 @@ int test_without_ml_init( int ac, char** av )
     ADD_TEST( Defer );
     ADD_TEST( XxHashBuffer );
     ADD_TEST( XxHashFile );
+    ADD_TEST( DateFromStr );
 
     END_TESTS
 }

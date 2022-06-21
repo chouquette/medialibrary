@@ -166,6 +166,7 @@ misc_tests = [
   'CheckTaskDbModel',
   'ClearDatabaseKeepPlaylist',
   'ClearDatabase',
+  'DateFromStr',
 ]
 
 foreach t : misc_tests

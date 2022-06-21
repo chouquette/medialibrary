@@ -23,6 +23,7 @@
 #pragma once
 
 #include <ctime>
+#include <string>
 
 namespace medialibrary
 {
@@ -36,6 +37,15 @@ namespace date
      * @return A date as a Unix timestamp expressed in UTC
      */
     time_t mktime( struct tm* t );
+    /**
+     * @brief fromStr Attempts to convert a string to a timestamp
+     * @param str The date expressed as a string
+     * @param t A pointer to a struct tm, which will contain the result in case of success
+     * @return true if the conversion was successful, false otherwise
+     *
+     * If the conversion fails, the given struct tm's content it undefined.
+     */
+    bool fromStr( const std::string& str, struct tm *t );
 }
 }
 }
