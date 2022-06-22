@@ -57,6 +57,7 @@ medialib_src = [
   'utils/StringKey.cpp',
   'Deprecated.cpp',
   'Subscription.cpp',
+  'CacheWorker.cpp',
 ]
 
 use_xxhash_dispatch = host_machine.cpu_family() == 'x86' or host_machine.cpu_family() == 'x86_64'
