@@ -36,6 +36,7 @@
 #include "filesystem/FsHolder.h"
 #include "discoverer/DiscovererWorker.h"
 #include "parser/Parser.h"
+#include "CacheWorker.h"
 
 #include <atomic>
 
@@ -219,6 +220,7 @@ public:
     std::shared_ptr<ModificationNotifier> getNotifier() const;
     virtual parser::Parser* getParser() const;
     ThumbnailerWorker* thumbnailer() const;
+    CacheWorker& cacheWorker();
 
     virtual DeviceListerPtr deviceLister( const std::string& scheme ) const override;
 
@@ -367,6 +369,7 @@ protected:
     std::shared_ptr<ModificationNotifier> m_modificationNotifier;
     mutable compat::Mutex m_thumbnailerWorkerMutex;
     mutable std::unique_ptr<ThumbnailerWorker> m_thumbnailerWorker;
+    CacheWorker m_cacheWorker;
 };
 
 }

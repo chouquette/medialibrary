@@ -327,6 +327,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_fsHolder( this )
     , m_parser( this, &m_fsHolder )
     , m_discovererWorker( this, &m_fsHolder )
+    , m_cacheWorker( this )
 {
     if ( cfg != nullptr )
     {
@@ -1254,6 +1255,7 @@ void MediaLibrary::onDbConnectionReady( sqlite::Connection* )
 
 void MediaLibrary::stopBackgroundJobs()
 {
+    m_cacheWorker.stop();
     {
         std::lock_guard<compat::Mutex> lock{ m_thumbnailerWorkerMutex };
         m_thumbnailerWorker.reset();
@@ -2219,6 +2221,7 @@ void MediaLibrary::pauseBackgroundOperations()
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->pause();
+    m_cacheWorker.pause();
 }
 
 void MediaLibrary::resumeBackgroundOperations()
@@ -2228,6 +2231,7 @@ void MediaLibrary::resumeBackgroundOperations()
     std::lock_guard<compat::Mutex> thumbLock{ m_thumbnailerWorkerMutex };
     if ( m_thumbnailerWorker != nullptr )
         m_thumbnailerWorker->resume();
+    m_cacheWorker.resume();
 }
 
 void MediaLibrary::onBackgroundTasksIdleChanged( bool idle )
@@ -2299,6 +2303,11 @@ ThumbnailerWorker* MediaLibrary::thumbnailer() const
     if ( m_thumbnailerWorker == nullptr )
         startThumbnailer();
     return m_thumbnailerWorker.get();
+}
+
+CacheWorker& MediaLibrary::cacheWorker()
+{
+    return m_cacheWorker;
 }
 
 DeviceListerPtr MediaLibrary::deviceLister( const std::string& scheme ) const
