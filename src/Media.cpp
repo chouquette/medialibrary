@@ -1086,7 +1086,7 @@ FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
     FilePtr res;
     try
     {
-        res = File::createFromExternalMedia( m_ml, m_id, type, mrl );
+        res = File::createFromExternalMedia( m_ml, m_id, type, mrl, 0 );
     }
     catch ( const sqlite::errors::Exception& ex )
     {

@@ -50,7 +50,8 @@ public:
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
           const fs::IFile& file, int64_t folderId, bool isRemovable );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
-          int64_t subscriptionId, Type type, const std::string& mrl );
+          int64_t subscriptionId, Type type, const std::string& mrl,
+          int64_t fileSize );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     /**
@@ -98,7 +99,8 @@ public:
                                                   const fs::IFile& file, int64_t folderId, bool isRemovable );
     static std::shared_ptr<File> createFromExternalMedia( MediaLibraryPtr ml,
                                                           int64_t mediaId, Type type,
-                                                          const std::string& mrl );
+                                                          const std::string& mrl,
+                                                          int64_t fileSize );
 
     static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
                                                      int64_t folderId, bool isRemovable );
