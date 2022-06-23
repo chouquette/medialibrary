@@ -576,6 +576,8 @@ void Album::createIndexes( sqlite::Connection* dbConnection )
                                    index( Indexes::ArtistId, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConnection,
                                    index( Indexes::NbTracks, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConnection,
+                                   index( Indexes::Title, Settings::DbModelVersion ) );
 }
 
 std::string Album::schema( const std::string& tableName, uint32_t dbModel )
@@ -827,6 +829,10 @@ std::string Album::index( Indexes index, uint32_t dbModel )
             assert( dbModel >= 34 );
             return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
                     Table::Name + "(nb_tracks, is_present)";
+        case Indexes::Title:
+            assert( dbModel >= 37 );
+            return "CREATE INDEX " + indexName( index, dbModel ) + " ON " +
+                    Table::Name + "(title)";
     }
     return "<invalid request>";
 }
@@ -843,6 +849,9 @@ std::string Album::indexName( Album::Indexes index, uint32_t dbModel )
         case Indexes::NbTracks:
             assert( dbModel >= 34 );
             return "album_nb_tracks_idx";
+        case Indexes::Title:
+            assert( dbModel >= 37 );
+            return "album_title_idx";
     }
     return "<invalid request>";
 }

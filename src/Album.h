@@ -65,6 +65,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         {
             ArtistId,
             NbTracks,
+            Title,
         };
 
         Album( MediaLibraryPtr ml, sqlite::Row& row );
