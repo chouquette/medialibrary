@@ -196,3 +196,5 @@ Media::trigger( Media::Triggers::CascadeFileDeletion, 37 ),
 Media::trigger( Media::Triggers::CascadeFileUpdate, 37 ),
 
 Playlist::trigger( Playlist::Triggers::CascadeFileDeletion, 37 ),
+
+"DROP TABLE Settings",

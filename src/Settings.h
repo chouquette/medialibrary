@@ -47,17 +47,25 @@ public:
      */
     uint32_t dbModelVersion() const;
     bool setDbModelVersion( uint32_t dbModelVersion );
+    uint32_t nbCachedMediaPerSubscription() const;
+    bool setNbCachedMediaPerSubscription( uint32_t nbCachedMedia );
+    uint64_t maxSubscriptionCacheSize() const;
+    bool setMaxSubscriptionCacheSize( uint64_t maxCacheSize );
 
     static void createTable( sqlite::Connection* dbConn );
 
     static const uint32_t DbModelVersion;
     static const uint32_t MaxTaskAttempts;
     static const uint32_t MaxLinkTaskAttempts;
+    static const uint32_t DefaultNbCachedMediaPerSubscription;
+    static const uint64_t DefaultMaxSubscriptionCacheSize;
 
 private:
     MediaLibrary* m_ml;
 
     uint32_t m_dbModelVersion;
+    uint32_t m_nbCachedMediaPerSubscription;
+    uint64_t m_maxSubscriptionCacheSize;
 };
 
 }

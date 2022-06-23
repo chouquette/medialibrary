@@ -2104,6 +2104,9 @@ void MediaLibrary::migrateModel36to37()
     for ( const auto& req : reqs )
         sqlite::Tools::executeRequest( dbConn, req );
 
+    Settings::createTable( dbConn );
+    m_settings.load();
+
     m_settings.setDbModelVersion( 37 );
     t->commit();
 }

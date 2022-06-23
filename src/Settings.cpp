@@ -35,10 +35,14 @@ namespace medialibrary
 const uint32_t Settings::DbModelVersion = 37u;
 const uint32_t Settings::MaxTaskAttempts = 2u;
 const uint32_t Settings::MaxLinkTaskAttempts = 6u;
+const uint32_t Settings::DefaultNbCachedMediaPerSubscription = 2u;
+const uint64_t Settings::DefaultMaxSubscriptionCacheSize = 1024 * 1024 * 1024;
 
 Settings::Settings( MediaLibrary* ml )
     : m_ml( ml )
     , m_dbModelVersion( 0 )
+    , m_nbCachedMediaPerSubscription( 0 )
+    , m_maxSubscriptionCacheSize( 0 )
 {
 }
 
@@ -50,16 +54,24 @@ bool Settings::load()
     if ( row == nullptr )
     {
         if ( sqlite::Tools::executeInsert( m_ml->getConn(),
-                "INSERT INTO Settings VALUES(?, ?, ?)",
-                DbModelVersion, MaxTaskAttempts, MaxLinkTaskAttempts ) == false )
+                "INSERT INTO Settings VALUES(?, ?, ?, ?, ?)",
+                DbModelVersion, MaxTaskAttempts, MaxLinkTaskAttempts,
+                DefaultNbCachedMediaPerSubscription, DefaultMaxSubscriptionCacheSize ) == false )
         {
             return false;
         }
         m_dbModelVersion = 0;
+        m_nbCachedMediaPerSubscription = DefaultNbCachedMediaPerSubscription;
+        m_maxSubscriptionCacheSize = DefaultMaxSubscriptionCacheSize;
     }
     else
     {
         row >> m_dbModelVersion;
+        if ( m_dbModelVersion >= 37 )
+        {
+            m_nbCachedMediaPerSubscription = row.load<decltype(m_nbCachedMediaPerSubscription)>( 3 );
+            m_maxSubscriptionCacheSize = row.load<decltype(m_maxSubscriptionCacheSize)>( 4 );
+        }
         // safety check: there sould only be one row
         assert( s.row() == nullptr );
     }
@@ -81,12 +93,46 @@ bool Settings::setDbModelVersion( uint32_t dbModelVersion )
     return true;
 }
 
+uint32_t Settings::nbCachedMediaPerSubscription() const
+{
+    return m_nbCachedMediaPerSubscription;
+}
+
+bool Settings::setNbCachedMediaPerSubscription( uint32_t nbCachedMedia )
+{
+    if ( m_nbCachedMediaPerSubscription == nbCachedMedia )
+        return true;
+    const std::string req = "UPDATE Settings SET nb_cached_media_per_subscription = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, nbCachedMedia ) == false )
+        return false;
+    m_nbCachedMediaPerSubscription = nbCachedMedia;
+    return true;
+}
+
+uint64_t Settings::maxSubscriptionCacheSize() const
+{
+    return m_maxSubscriptionCacheSize;
+}
+
+bool Settings::setMaxSubscriptionCacheSize( uint64_t maxCacheSize )
+{
+    if ( m_maxSubscriptionCacheSize == maxCacheSize )
+        return true;
+    const std::string req = "UPDATE Settings SET max_subscription_cache_size = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, maxCacheSize ) == false )
+        return false;
+    m_maxSubscriptionCacheSize = maxCacheSize;
+    return true;
+}
+
 void Settings::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
                 "db_model_version UNSIGNED INTEGER NOT NULL,"
                 "max_task_attempts UNSIGNED INTEGER NOT NULL,"
-                "max_link_task_attempts UNSIGNED INTEGER NOT NULL"
+                "max_link_task_attempts UNSIGNED INTEGER NOT NULL,"
+                "nb_cached_media_per_subscription UNSIGNED INTEGER NOT NULL,"
+                "max_subscription_cache_size UNSIGNED INTEGER NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConn, req );
 }
