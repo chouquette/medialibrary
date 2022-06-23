@@ -859,10 +859,11 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
                                        FtsTable::Name ) == false )
         return false;
 
-    if ( sqlite::Tools::checkIndexStatement(
-            index( Indexes::ArtistId, Settings::DbModelVersion ),
-            indexName( Indexes::ArtistId, Settings::DbModelVersion ) ) == false )
-        return false;
+    auto checkIndex = []( Indexes i ) {
+        return sqlite::Tools::checkIndexStatement(
+                    index( i, Settings::DbModelVersion ),
+                    indexName( i, Settings::DbModelVersion ) );
+    };
 
     auto check = []( Triggers t ) {
         return sqlite::Tools::checkTriggerStatement(
@@ -874,7 +875,9 @@ bool Album::checkDbModel( MediaLibraryPtr ml )
             check( Triggers::InsertFts ) &&
             check( Triggers::DeleteFts ) &&
             check( Triggers::DeleteEmpty ) &&
-            check( Triggers::UpdateOnMediaAlbumIdChange );
+            check( Triggers::UpdateOnMediaAlbumIdChange ) &&
+            checkIndex( Indexes::ArtistId ) &&
+            checkIndex( Indexes::NbTracks );
 }
 
 std::shared_ptr<Album> Album::create( MediaLibraryPtr ml, std::string title )
