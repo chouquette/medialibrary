@@ -53,6 +53,20 @@ static void ListAllPublicAlbums( benchmark::State& state )
     }
 }
 
+static void SearchAlbumByName( benchmark::State& state )
+{
+    auto bml = commonInit();
+    const std::string req = "SELECT * FROM " + Album::Table::Name +
+            " WHERE title = 'album_5'";
+    for ( auto _ : state )
+    {
+        auto albums = Album::fetchAll<Album>(
+                    static_cast<MediaLibrary*>( bml.ml.get() ),
+                    req );
+        benchmark::DoNotOptimize( albums );
+    }
+}
+
 BENCHMARK( ListAllAlbums )
     ->Arg( toInt( SortingCriteria::Artist ) )
     ->Arg( toInt( SortingCriteria::ReleaseDate ) )
@@ -63,3 +77,5 @@ BENCHMARK( ListAllAlbums )
     ->Arg( toInt( SortingCriteria::Default ) );
 
 BENCHMARK( ListAllPublicAlbums );
+
+BENCHMARK( SearchAlbumByName );
