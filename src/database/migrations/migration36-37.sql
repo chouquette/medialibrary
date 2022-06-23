@@ -198,3 +198,8 @@ Media::trigger( Media::Triggers::CascadeFileUpdate, 37 ),
 Playlist::trigger( Playlist::Triggers::CascadeFileDeletion, 37 ),
 
 "DROP TABLE Settings",
+
+Subscription::trigger( Subscription::Triggers::PropagateTaskDeletion, 37 ),
+Subscription::trigger( Subscription::Triggers::IncrementCachedSize, 37 ),
+Subscription::trigger( Subscription::Triggers::DecrementCachedSize, 37 ),
+Subscription::trigger( Subscription::Triggers::DecrementCachedSizeOnRemoval, 37 ),

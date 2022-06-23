@@ -502,6 +502,7 @@ void MediaLibrary::createAllTriggers()
     parser::Task::createIndex( dbConn );
     Bookmark::createIndexes( dbConn );
     Chapter::createIndexes( dbConn );
+    Subscription::createTriggers( dbConn );
     Subscription::createIndexes( dbConn );
 }
 

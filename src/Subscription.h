@@ -43,6 +43,14 @@ public:
         static const std::string Name;
     };
 
+    enum class Triggers : uint8_t
+    {
+        PropagateTaskDeletion,
+        IncrementCachedSize,
+        DecrementCachedSize,
+        DecrementCachedSizeOnRemoval,
+    };
+
     enum class Indexes : uint8_t
     {
         ServiceId,
@@ -59,18 +67,60 @@ public:
     virtual Query<ISubscription> childSubscriptions(const QueryParameters* params) override;
     virtual SubscriptionPtr parent() override;
     virtual Query<IMedia> media( const QueryParameters* params ) override;
+    virtual int64_t cachedSize() const override;
+    virtual int32_t maxCachedMedia() const override;
+    virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) override;
+    virtual int64_t maxCachedSize() const override;
+    virtual bool setMaxCachedSize( int64_t maxCachedSize ) override;
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );
     bool refresh() override;
     std::shared_ptr<File> file() const;
+    /**
+     * @brief cachedMedia Returns all the cached media for this collection
+     * @param evictableOnly If true, this function will only return media that are
+     *                      considered safe to be evited
+     * @return A query to access cached media
+     *
+     * The returned media will already be sorted by descending play_count and
+     * ascending release_date, which is the order in which we should evict the
+     * media from the cache: when removing something from cache we prioritize
+     * media that were played the most and that were released as far as possible
+     * in the past.
+     * A media is considered safe for eviction if it was cached manually AND has
+     * been played, or if it was automatically cached.
+     */
+    Query<Media> cachedMedia(bool evictableOnly) const;
+    /**
+     * @brief uncachedMedia Returns the uncached media in this collection
+     * @param autoOnly If true, only the media not already handled by automatic
+     *                 caching will be returned
+     *
+     * The returned media will be sorted by descending release date (from the most
+     * recent to the oldest one, in term of release date as provided by the
+     * subscription manifest)
+     */
+    std::vector<std::shared_ptr<Media>> uncachedMedia(bool autoOnly) const;
+    /**
+     * @brief markCacheAsHandled Will mark all the media belonging to a subscription
+     * as handed by the automatic cache pass.
+     * @return true in case of success, false otherwise
+     *
+     * Once a media has been marked as handled by the automatic caching, it won't
+     * be considered for automatic caching anymore.
+     */
+    bool markCacheAsHandled();
 
     std::shared_ptr<Subscription> addChildSubscription( std::string name );
 
     bool clearContent();
 
     static void createTable( sqlite::Connection* connection );
+    static void createTriggers( sqlite::Connection* connection );
     static void createIndexes( sqlite::Connection* connection );
     static std::string schema( const std::string& name, uint32_t dbModel );
+    static std::string trigger( Triggers trigger, uint32_t dbModel );
+    static std::string triggerName( Triggers trigger, uint32_t dbModel );
     static std::string index( Indexes index, uint32_t dbModel );
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
@@ -92,7 +142,9 @@ private:
     Service m_service;
     std::string m_name;
     int64_t m_parentId;
-    std::string m_description;
+    int64_t m_cachedSize;
+    int32_t m_maxCachedMedia;
+    int64_t m_maxCachedSize;
 };
 
 }

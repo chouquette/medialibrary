@@ -919,6 +919,10 @@ subscription_tests = [
   'ChildSubscriptions',
   'ListMedia',
   'CheckDbModel',
+  'CachedSize',
+  'FetchUncached',
+  'MaxCachedMedia',
+  'MaxCachedSize',
 ]
 
 foreach t : subscription_tests
