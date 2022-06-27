@@ -401,8 +401,8 @@ Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
     m_lastPlayedDate = lastPlayedDate;
     m_lastPosition = curatedPosition;
     m_lastTime = curatedTime;
-    m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Media :
-                                                  HistoryType::Network );
+    m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Network :
+                                                  HistoryType::Media );
     switch ( positionType )
     {
     case PositionTypes::Begin:
