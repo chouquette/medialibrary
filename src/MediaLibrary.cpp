@@ -321,6 +321,7 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
     , m_mlFolderPath( utils::file::toFolderPath( mlFolderPath ) )
     , m_thumbnailPath( m_mlFolderPath + "thumbnails/" )
     , m_playlistPath( m_mlFolderPath + "playlists/" )
+    , m_cachePath( m_mlFolderPath + "cache/" )
     , m_lockFile( std::move( lockFile ) )
     , m_callback( nullptr )
     , m_fsHolder( this )
@@ -655,6 +656,12 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
     if ( utils::fs::mkdir( m_playlistPath ) == false )
     {
         LOG_ERROR( "Failed to create playlist export directory (", m_playlistPath,
+                    ": ", strerror( errno ) );
+        return InitializeResult::Failed;
+    }
+    if ( utils::fs::mkdir( m_cachePath ) == false )
+    {
+        LOG_ERROR( "Failed to create cache directory (", m_cachePath,
                     ": ", strerror( errno ) );
         return InitializeResult::Failed;
     }
@@ -2386,6 +2393,11 @@ const std::string& MediaLibrary::thumbnailPath() const
 const std::string& MediaLibrary::playlistPath() const
 {
     return m_playlistPath;
+}
+
+const std::string& MediaLibrary::cachePath()
+{
+    return m_cachePath;
 }
 
 void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const

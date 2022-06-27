@@ -198,6 +198,11 @@ public:
 
     const std::string& thumbnailPath() const;
     const std::string& playlistPath() const;
+    /**
+     * @brief cachePath Returns the path to the medialib cache folder
+     */
+    const std::string& cachePath();
+
     //Temporarily public, move back to private as soon as we start monitoring the FS
     virtual void reload() override;
     virtual void reload( const std::string& entryPoint ) override;
@@ -341,6 +346,7 @@ protected:
     const std::string m_mlFolderPath;
     const std::string m_thumbnailPath;
     const std::string m_playlistPath;
+    const std::string m_cachePath;
 
     std::unique_ptr<LockFile> m_lockFile;
 
