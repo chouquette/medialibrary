@@ -486,8 +486,7 @@ bool Media::removeFromHistory()
     m_lastTime = -1;
     m_lastPlayedDate = 0;
     m_playCount = 0;
-    auto historyType = ( m_type == Type::Video || m_type == Type::Audio ) ?
-                       HistoryType::Media : HistoryType::Network;
+    auto historyType = isStream() ? HistoryType::Network: HistoryType::Media;
     m_ml->getCb()->onHistoryChanged( historyType );
     return true;
 }
