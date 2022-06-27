@@ -452,6 +452,8 @@ bool Media::markAsPlayed()
         return false;
     m_lastPlayedDate = lastPlayedDate;
     ++m_playCount;
+    m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Network :
+                                                  HistoryType::Media );
     return true;
 }
 
