@@ -1061,6 +1061,23 @@ public:
     virtual Query<ISubscription> subscriptions( Service s,
                                             const QueryParameters* params = nullptr ) = 0;
     virtual bool removeSubscription( int64_t subscriptionId ) = 0;
+
+    /**
+     * @brief fitsInSubscriptionCache Checks if the provided media will fit in
+     *                                the subscription cache
+     * @param m The media to probe
+     * @return true if the media fits *or if its size is unknown* false otherwise
+     *
+     * This will use the associated files to figure out the size on disk. If the
+     * size is unknown, true will be returned, and the size will be updated in
+     * database when caching is attempted.
+     * The media will fit in cache if:
+     * - The global maximum cache size allows for it to fit
+     * - Its associated subscription maximum cache size allows it to fit as well
+     * The maximum number of media, be it global or for the associated
+     * subscription, it *not* taken into account for this.
+     */
+    virtual bool fitsInSubscriptionCache( const IMedia& m ) const = 0;
 };
 
 }

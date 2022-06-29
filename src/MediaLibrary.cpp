@@ -2566,4 +2566,29 @@ bool MediaLibrary::removeSubscription( int64_t subscriptionId )
     return Subscription::destroy( this, subscriptionId );
 }
 
+bool MediaLibrary::fitsInSubscriptionCache( const IMedia& m ) const
+{
+    auto f = m.mainFile();
+    if ( f == nullptr )
+        return false;
+    assert( f->type() != IFile::Type::Cache );
+    auto size = f->size();
+    if ( size <= 0 )
+    {
+        LOG_DEBUG( "Unknown file size for file ", f->mrl() );
+        return true;
+    }
+
+    auto currentCacheSize = m_cacheWorker.cacheSize();
+    auto maxCacheSize = m_settings.maxSubscriptionCacheSize();
+    if ( currentCacheSize > maxCacheSize )
+    {
+        LOG_WARN( "Cache is already overfilled: ", currentCacheSize, " / ",
+                  maxCacheSize );
+        return false;
+    }
+    auto remainingCacheSize = maxCacheSize - currentCacheSize;
+    return static_cast<uint64_t>(size) <= remainingCacheSize;
+}
+
 }

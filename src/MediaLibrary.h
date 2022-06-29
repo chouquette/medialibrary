@@ -268,6 +268,8 @@ public:
                                             const QueryParameters* params ) override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;
 
+    virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;
+
 private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;
