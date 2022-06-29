@@ -79,7 +79,7 @@ time_t File::lastModificationDate() const
     return m_lastModification;
 }
 
-int64_t File::size() const
+uint64_t File::size() const
 {
     return 0;
 }

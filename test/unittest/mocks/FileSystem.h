@@ -296,7 +296,7 @@ class NoopFile : public fs::IFile
     std::string m_extension;
     std::string m_linkedWith;
     time_t m_lastModifDate;
-    int64_t m_size;
+    uint64_t m_size;
 
 public:
     NoopFile( const std::string& file )
@@ -345,7 +345,7 @@ public:
         return false;
     }
 
-    virtual int64_t size() const
+    virtual uint64_t size() const
     {
         return m_size;
     }
@@ -365,7 +365,7 @@ public:
         m_lastModifDate = date;
     }
 
-    void setSize( unsigned int size )
+    void setSize( uint64_t size )
     {
         m_size = size;
     }

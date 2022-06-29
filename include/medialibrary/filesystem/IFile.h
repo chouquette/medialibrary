@@ -48,7 +48,7 @@ namespace fs
         virtual const std::string& mrl() const = 0;
         virtual const std::string& extension() const = 0;
         virtual time_t lastModificationDate() const = 0;
-        virtual int64_t size() const = 0;
+        virtual uint64_t size() const = 0;
         virtual bool isNetwork() const = 0;
         /**
          * @brief type Returns the file type, or None if not linked with another file

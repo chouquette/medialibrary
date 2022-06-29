@@ -41,7 +41,7 @@ namespace libvlc
 {
 
 File::File( std::string mrl, fs::IFileSystemFactory& fsFactory,
-            time_t lastModificationDate, int64_t size )
+            time_t lastModificationDate, uint64_t size )
     : CommonFile( std::move( mrl ) )
     , m_lastModificationDate( lastModificationDate )
     , m_size( size )
@@ -51,7 +51,7 @@ File::File( std::string mrl, fs::IFileSystemFactory& fsFactory,
 }
 
 File::File( std::string mrl, IFileSystemFactory& fsFactory,
-            time_t lastModificationDate, int64_t size,
+            time_t lastModificationDate, uint64_t size,
             IFile::LinkedFileType linkedType, std::string linkedFile )
     : CommonFile( std::move( mrl ), linkedType, std::move( linkedFile ) )
     , m_lastModificationDate( lastModificationDate )
@@ -65,7 +65,7 @@ time_t File::lastModificationDate() const
     return m_lastModificationDate;
 }
 
-int64_t File::size() const
+uint64_t File::size() const
 {
     return m_size;
 }

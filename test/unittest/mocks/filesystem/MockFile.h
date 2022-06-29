@@ -40,7 +40,7 @@ public:
     virtual const std::string& name() const override;
     virtual const std::string& extension() const override;
     virtual time_t lastModificationDate() const override;
-    virtual int64_t size() const override;
+    virtual uint64_t size() const override;
     void markAsModified();
     virtual const std::string& mrl() const override;
     virtual bool isNetwork() const override;
