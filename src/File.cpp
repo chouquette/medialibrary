@@ -152,7 +152,7 @@ time_t File::lastModificationDate() const
     return m_lastModificationDate;
 }
 
-int64_t File::size() const
+uint64_t File::size() const
 {
     return m_size;
 }
@@ -162,7 +162,7 @@ bool File::isExternal() const
     return m_isExternal;
 }
 
-bool File::updateFsInfo( time_t newLastModificationDate, int64_t newSize )
+bool File::updateFsInfo( time_t newLastModificationDate, uint64_t newSize )
 {
     if ( m_lastModificationDate == newLastModificationDate && m_size == newSize )
         return true;
