@@ -2393,6 +2393,11 @@ void MediaLibrary::startFsFactory( fs::IFileSystemFactory &fsFactory ) const
     m_fsHolder.startFsFactory( fsFactory );
 }
 
+const Settings& MediaLibrary::settings() const
+{
+    return m_settings;
+}
+
 bool MediaLibrary::forceRescan()
 {
     if ( m_parser.isRunning() == true )

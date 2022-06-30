@@ -221,6 +221,8 @@ public:
 
     void startFsFactory( fs::IFileSystemFactory& fsFactory ) const;
 
+    const Settings& settings() const;
+
     virtual bool forceRescan() override;
 
     virtual void enableFailedThumbnailRegeneration() override;
