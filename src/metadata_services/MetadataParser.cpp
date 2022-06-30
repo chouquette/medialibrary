@@ -344,7 +344,7 @@ Status MetadataAnalyzer::parsePlaylist( IItem& item ) const
                 {
                     file = File::createFromPlaylist( m_ml, playlistPtr->id(),
                                 *item.fileFs(), item.parentFolder()->id(),
-                                deviceFs->isRemovable() );
+                                deviceFs->isRemovable(), playlistPtr->creationDate() );
                     if ( file == nullptr )
                         return Status::Fatal;
                 }

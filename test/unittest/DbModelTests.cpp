@@ -757,6 +757,9 @@ static void Upgrade36to37( DbModel* T )
      */
     auto media = T->ml->media( 1 );
     ASSERT_TRUE( media->releaseDate() > 3000 );
+    auto mainFile = media->mainFile();
+    ASSERT_NON_NULL( mainFile );
+    ASSERT_EQ( media->insertionDate(), mainFile->insertionDate() );
 }
 
 int main( int ac, char** av )

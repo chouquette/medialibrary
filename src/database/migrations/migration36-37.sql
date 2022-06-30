@@ -181,7 +181,9 @@ Album::index( Album::Indexes::Title, 37 ),
 File::schema( File::Table::Name, 37 ),
 
 "INSERT INTO " + File::Table::Name +
-    " SELECT *, NULL FROM " + File::Table::Name + "_backup",
+    " SELECT *, NULL,"
+    " (SELECT insertion_date FROM " + Media::Table::Name + " WHERE id_media = media_id)"
+    " FROM " + File::Table::Name + "_backup",
 
 "DROP TABLE " + File::Table::Name + "_backup",
 

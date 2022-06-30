@@ -44,14 +44,16 @@ public:
         MediaId,
         FolderId,
         PlaylistId,
+        InsertionDate,
     };
 
     File( MediaLibraryPtr ml, sqlite::Row& row );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
-          const fs::IFile& file, int64_t folderId, bool isRemovable );
+          const fs::IFile& file, int64_t folderId, bool isRemovable,
+          time_t insertionDate );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
           int64_t subscriptionId, Type type, const std::string& mrl,
-          int64_t fileSize );
+          int64_t fileSize, time_t insertionDate );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     /**
@@ -71,6 +73,7 @@ public:
     virtual bool isRemovable() const override;
     virtual bool isNetwork() const override;
     virtual bool isMain() const override;
+    virtual time_t insertionDate() const override;
 
     std::shared_ptr<Media> media() const;
     int64_t mediaId() const;
@@ -96,14 +99,16 @@ public:
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
     static std::shared_ptr<File> createFromMedia( MediaLibraryPtr ml, int64_t mediaId, Type type,
-                                                  const fs::IFile& file, int64_t folderId, bool isRemovable );
+                                                  const fs::IFile& file, int64_t folderId,
+                                                  bool isRemovable, time_t insertionDate );
     static std::shared_ptr<File> createFromExternalMedia( MediaLibraryPtr ml,
                                                           int64_t mediaId, Type type,
                                                           const std::string& mrl,
-                                                          int64_t fileSize );
+                                                          int64_t fileSize,
+                                                          time_t insertionDate );
 
     static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
-                                                     int64_t folderId, bool isRemovable );
+                                                     int64_t folderId, bool isRemovable, time_t insertionDate );
     static std::shared_ptr<File> createFromSubscription( MediaLibraryPtr ml, std::string mrl, int64_t subscriptionId );
 
     static bool exists( MediaLibraryPtr ml, const std::string& mrl );
@@ -159,6 +164,7 @@ private:
     bool m_isExternal;
     bool m_isNetwork;
     int64_t m_subscriptionId;
+    time_t m_insertionDate;
 
     // Contains the full path as a MRL
     mutable std::string m_fullPath;

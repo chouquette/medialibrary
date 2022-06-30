@@ -1048,7 +1048,8 @@ bool Media::setThumbnail( const std::string& thumbnailMrl, ThumbnailSizeType siz
 std::shared_ptr<File> Media::addFile( const fs::IFile& fileFs, int64_t parentFolderId,
                                       bool isFolderFsRemovable, IFile::Type type )
 {
-    return File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId, isFolderFsRemovable);
+    return File::createFromMedia( m_ml, m_id, type, fileFs, parentFolderId,
+                                  isFolderFsRemovable, time( nullptr ) );
 }
 
 FilePtr Media::addFile( const std::string& mrl, IFile::Type fileType )
@@ -1086,7 +1087,7 @@ FilePtr Media::addExternalMrl( const std::string& mrl, IFile::Type type )
     FilePtr res;
     try
     {
-        res = File::createFromExternalMedia( m_ml, m_id, type, mrl, 0 );
+        res = File::createFromExternalMedia( m_ml, m_id, type, mrl, 0, time( nullptr ) );
     }
     catch ( const sqlite::errors::Exception& ex )
     {

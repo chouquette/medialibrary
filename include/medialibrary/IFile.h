@@ -91,6 +91,8 @@ public:
      * This can be used to have a Disc file considered as the main file
      */
     virtual bool isMain() const = 0;
+
+    virtual time_t insertionDate() const = 0;
 };
 
 }
