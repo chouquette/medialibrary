@@ -40,10 +40,9 @@ struct TestFailedDisplayer
 template <typename T>
 struct TestFailedDisplayer<T, std::enable_if_t<std::is_enum<std::decay_t<T>>::value>>
 {
-    using Enum = std::decay_t<T>;
-    static std::underlying_type_t<Enum> display( T t )
+    static int display( T t )
     {
-        return static_cast<std::underlying_type_t<Enum>>( t );
+        return static_cast<int>( t );
     }
 };
 
