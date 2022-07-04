@@ -1063,6 +1063,11 @@ public:
     virtual bool removeSubscription( int64_t subscriptionId ) = 0;
 
     /**
+     * @brief cacheNewSubscriptionMedia Asynchronously starts a caching of new subscription media
+     */
+    virtual void cacheNewSubscriptionMedia() = 0;
+
+    /**
      * @brief fitsInSubscriptionCache Checks if the provided media will fit in
      *                                the subscription cache
      * @param m The media to probe

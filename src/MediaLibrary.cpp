@@ -2591,4 +2591,9 @@ bool MediaLibrary::fitsInSubscriptionCache( const IMedia& m ) const
     return static_cast<uint64_t>(size) <= remainingCacheSize;
 }
 
+void MediaLibrary::cacheNewSubscriptionMedia()
+{
+    m_cacheWorker.cacheSubscriptions();
+}
+
 }

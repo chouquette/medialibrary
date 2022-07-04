@@ -270,6 +270,8 @@ public:
 
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;
 
+    virtual void cacheNewSubscriptionMedia() override;
+
 private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;
