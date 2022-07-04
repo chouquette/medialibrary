@@ -50,6 +50,7 @@ static void Create( FileTests* T )
     ASSERT_NE( 0u, T->f->lastModificationDate() );
     ASSERT_NE( 0u, T->f->size() );
     ASSERT_EQ( File::Type::Main, T->f->type() );
+    ASSERT_EQ( File::CacheType::Uncached, T->f->cacheType() );
 }
 
 static void Remove( FileTests* T )

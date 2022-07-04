@@ -182,7 +182,8 @@ File::schema( File::Table::Name, 37 ),
 
 "INSERT INTO " + File::Table::Name +
     " SELECT *, NULL,"
-    " (SELECT insertion_date FROM " + Media::Table::Name + " WHERE id_media = media_id)"
+    " (SELECT insertion_date FROM " + Media::Table::Name + " WHERE id_media = media_id), "
+    + utils::enum_to_string( IFile::CacheType::Uncached ) +
     " FROM " + File::Table::Name + "_backup",
 
 "DROP TABLE " + File::Table::Name + "_backup",

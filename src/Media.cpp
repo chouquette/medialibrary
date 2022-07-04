@@ -549,14 +549,14 @@ FilePtr Media::mainFile() const
     return nullptr;
 }
 
-bool Media::cache( const std::string& mrl )
+bool Media::cache( const std::string& mrl, File::CacheType cacheType )
 {
     auto f = std::static_pointer_cast<File>( mainFile() );
     if ( f == nullptr )
         return false;
     if ( f->type() == IFile::Type::Cache )
         return true;
-    auto c = f->cache( mrl );
+    auto c = f->cache( mrl, cacheType );
     if ( c == nullptr )
         return false;
     m_files.push_back( std::move( c ) );

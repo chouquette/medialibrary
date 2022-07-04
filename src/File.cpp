@@ -32,6 +32,7 @@
 #include "Subscription.h"
 #include "utils/Filename.h"
 #include "utils/Url.h"
+#include "utils/Enums.h"
 #include "medialibrary/filesystem/IFile.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
@@ -58,6 +59,7 @@ File::File( MediaLibraryPtr ml, sqlite::Row& row )
     , m_isNetwork( row.extract<decltype(m_isNetwork)>() )
     , m_subscriptionId( row.hasRemainingColumns() ? row.extract<decltype(m_subscriptionId)>() : 0 )
     , m_insertionDate( row.hasRemainingColumns() ? row.extract<decltype(m_insertionDate)>() : 0 )
+    , m_cacheType( row.hasRemainingColumns() ? row.extract<decltype(m_cacheType)>() : CacheType::Uncached )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -83,13 +85,14 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId, Type type,
     , m_isNetwork( file.isNetwork() )
     , m_subscriptionId( 0 )
     , m_insertionDate( insertionDate )
+    , m_cacheType( CacheType::Uncached )
 {
     assert( ( mediaId == 0 && playlistId != 0 ) || ( mediaId != 0 && playlistId == 0 ) );
 }
 
 File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
             int64_t subscriptionId, IFile::Type type, const std::string& mrl,
-            int64_t fileSize, time_t insertionDate )
+            int64_t fileSize, time_t insertionDate, CacheType cacheType )
     : m_ml( ml )
     , m_id( 0 )
     , m_mediaId( mediaId )
@@ -104,6 +107,7 @@ File::File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
     , m_isNetwork( utils::url::schemeIs( "file://", mrl ) == false )
     , m_subscriptionId( subscriptionId )
     , m_insertionDate( insertionDate )
+    , m_cacheType( cacheType )
     , m_fullPath( mrl )
 {
     assert( ( mediaId == 0 && playlistId != 0 && subscriptionId == 0 ) ||
@@ -214,6 +218,11 @@ time_t File::insertionDate() const
     return m_insertionDate;
 }
 
+IFile::CacheType File::cacheType() const
+{
+    return m_cacheType;
+}
+
 std::shared_ptr<Media> File::media() const
 {
     if ( m_mediaId == 0 )
@@ -295,13 +304,13 @@ bool File::convertToExternal()
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl(), m_id );
 }
 
-FilePtr File::cache( const std::string& mrl )
+FilePtr File::cache( const std::string& mrl, CacheType cacheType )
 {
     if ( utils::url::schemeIs( "file://", mrl ) == false )
         return nullptr;
     LOG_DEBUG( "Marking ", mrl, " as a cached MRL for file #", m_id );
-    return File::createFromExternalMedia( m_ml, m_mediaId, Type::Cache, mrl,
-                                          m_size, time(nullptr) );
+    return File::createForCache( m_ml, m_mediaId, mrl,
+                                 m_size, time(nullptr), cacheType );
 }
 
 void File::createTable( sqlite::Connection* dbConnection )
@@ -368,6 +377,8 @@ std::string File::schema( const std::string& tableName, uint32_t dbModel )
         "is_network BOOLEAN NOT NULL,"
         "subscription_id UNSIGNED INTEGER UNIQUE,"
         "insertion_date UNSIGNED INTEGER,"
+        "cache_type UNSIGNED INTEGER NOT NULL DEFAULT " +
+            utils::enum_to_string( CacheType::Uncached ) + ","
 
         "FOREIGN KEY(media_id) REFERENCES " + Media::Table::Name
         + "(id_media) ON DELETE CASCADE,"
@@ -483,7 +494,7 @@ std::shared_ptr<File> File::createFromExternalMedia( MediaLibraryPtr ml, int64_t
         return nullptr;
 
     auto self = std::make_shared<File>( ml, mediaId, 0, 0, type, mrl, fileSize,
-                                        insertionDate );
+                                        insertionDate, CacheType::Uncached );
     static const std::string req = "INSERT INTO " + File::Table::Name +
             "(media_id, mrl, type, size, folder_id, is_removable, is_external,"
             "is_network, subscription_id, insertion_date) "
@@ -491,6 +502,24 @@ std::shared_ptr<File> File::createFromExternalMedia( MediaLibraryPtr ml, int64_t
 
     if ( insert( ml, self, req, mediaId, mrl, type, fileSize,
                  self->m_isNetwork, nullptr, insertionDate ) == false )
+        return nullptr;
+    return self;
+}
+
+std::shared_ptr<File> File::createForCache( MediaLibraryPtr ml, int64_t mediaId,
+                                            const std::string& mrl, int64_t fileSize,
+                                            time_t insertionDate, CacheType cacheType )
+{
+    assert( mediaId > 0 );
+    auto self = std::make_shared<File>( ml, mediaId, 0, 0, Type::Cache, mrl,
+                                        fileSize, insertionDate, cacheType );
+    static const std::string req = "INSERT INTO " + File::Table::Name +
+            "(media_id, mrl, type, size, folder_id, is_removable, is_external,"
+            "is_network, insertion_date, cache_type) "
+            "VALUES(?, ?, ?, ?, NULL, 0, 1, 0, ?, ?)";
+
+    if ( insert( ml, self, req, mediaId, mrl, self->m_type, fileSize,
+                 insertionDate, cacheType ) == false )
         return nullptr;
     return self;
 }
@@ -524,7 +553,7 @@ std::shared_ptr<File> File::createFromSubscription( MediaLibraryPtr ml,
     assert( subscriptionId > 0 );
     auto self = std::make_shared<File>( ml, 0, 0, subscriptionId,
                                         IFile::Type::Subscription, mrl, 0,
-                                        time(nullptr) );
+                                        time(nullptr), CacheType::Uncached );
     const std::string req = "INSERT INTO " + Table::Name +
             "(mrl, type, is_removable, is_external, is_network, subscription_id) "
             "VALUES(?, ?, ?, ?, ?, ?)";
@@ -620,17 +649,17 @@ std::vector<std::shared_ptr<File>> File::fromParentFolder( MediaLibraryPtr ml,
     return File::fetchAll<File>( ml, req, parentFolderId );
 }
 
-std::vector<std::shared_ptr<File> > File::cachedFiles( MediaLibraryPtr ml )
+std::vector<std::shared_ptr<File>> File::cachedFiles( MediaLibraryPtr ml )
 {
     const std::string req = "SELECT * FROM " + Table::Name +
-            " WHERE type = ?";
+            " WHERE type = ? ORDER BY insertion_date ASC";
     return fetchAll<File>( ml, req, Type::Cache );
 }
 
-std::string File::cachedFileName( const File& f )
+std::string File::cachedFileName() const
 {
-    return std::to_string( f.id() ) + "_" +
-            utils::url::decode( utils::file::fileName( f.rawMrl() ) );
+    return std::to_string( m_id ) + "_" +
+            utils::url::decode( utils::file::fileName( m_mrl ) );
 }
 
 

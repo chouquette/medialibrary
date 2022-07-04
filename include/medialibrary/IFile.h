@@ -58,6 +58,13 @@ public:
         Cache,
     };
 
+    enum class CacheType : uint8_t
+    {
+        Uncached,
+        Manual,
+        Automatic,
+    };
+
     virtual ~IFile() = default;
     virtual int64_t id() const = 0;
     /**
@@ -93,6 +100,13 @@ public:
     virtual bool isMain() const = 0;
 
     virtual time_t insertionDate() const = 0;
+
+    /**
+     * @brief cacheType Returns the cache type, if the file is a cached representation.
+     *
+     * If this is not a cache file, CacheType::Uncached will be returned.
+     */
+    virtual CacheType cacheType() const = 0;
 };
 
 }

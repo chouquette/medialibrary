@@ -24,6 +24,7 @@
 
 #include "medialibrary/IMedia.h"
 #include "Thumbnail.h"
+#include "File.h"
 #include "database/DatabaseHelpers.h"
 #include "Metadata.h"
 #include "medialibrary/IGenre.h"
@@ -200,7 +201,7 @@ class Media : public IMedia,
         virtual bool setFavorite( bool favorite ) override;
         virtual const std::vector<FilePtr>& files() const override;
         virtual FilePtr mainFile() const override;
-        bool cache( const std::string& mrl );
+        bool cache( const std::string& mrl, File::CacheType cacheType );
         bool removeCached();
         virtual const std::string& fileName() const override;
         virtual MoviePtr movie() const override;

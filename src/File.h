@@ -53,7 +53,7 @@ public:
           time_t insertionDate );
     File( MediaLibraryPtr ml, int64_t mediaId, int64_t playlistId,
           int64_t subscriptionId, Type type, const std::string& mrl,
-          int64_t fileSize, time_t insertionDate );
+          int64_t fileSize, time_t insertionDate, CacheType cacheType );
     virtual int64_t id() const override;
     virtual const std::string& mrl() const override;
     /**
@@ -74,6 +74,7 @@ public:
     virtual bool isNetwork() const override;
     virtual bool isMain() const override;
     virtual time_t insertionDate() const override;
+    virtual CacheType cacheType() const override;
 
     std::shared_ptr<Media> media() const;
     int64_t mediaId() const;
@@ -90,7 +91,9 @@ public:
     bool update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable );
     bool convertToExternal();
 
-    FilePtr cache( const std::string& mrl );
+    FilePtr cache(const std::string& mrl , CacheType cacheType);
+    std::string cachedFileName() const;
+
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createIndexes( sqlite::Connection* dbConnection );
@@ -110,6 +113,9 @@ public:
     static std::shared_ptr<File> createFromPlaylist( MediaLibraryPtr ml, int64_t playlistId, const fs::IFile& file,
                                                      int64_t folderId, bool isRemovable, time_t insertionDate );
     static std::shared_ptr<File> createFromSubscription( MediaLibraryPtr ml, std::string mrl, int64_t subscriptionId );
+    std::shared_ptr<File> createForCache( MediaLibraryPtr ml, int64_t mediaId,
+                                          const std::string& mrl, int64_t fileSize,
+                                          time_t insertionDate, CacheType cacheType );
 
     static bool exists( MediaLibraryPtr ml, const std::string& mrl );
     /**
@@ -145,7 +151,6 @@ public:
                                                                 int64_t parentFolderId );
 
     static std::vector<std::shared_ptr<File>> cachedFiles( MediaLibraryPtr ml );
-    static std::string cachedFileName( const File& f );
 
 private:
     MediaLibraryPtr m_ml;
@@ -165,6 +170,7 @@ private:
     bool m_isNetwork;
     int64_t m_subscriptionId;
     time_t m_insertionDate;
+    CacheType m_cacheType;
 
     // Contains the full path as a MRL
     mutable std::string m_fullPath;

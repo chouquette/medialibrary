@@ -1553,10 +1553,10 @@ static void AddCachedMrl( Tests* T )
                 T->ml->addMedia( "file:///path/to/media.mkv", IMedia::Type::Video ) );
     ASSERT_NON_NULL( m );
 
-    auto res = m->cache( "smb://not/a/valid/cache/file.mkv" );
+    auto res = m->cache( "smb://not/a/valid/cache/file.mkv", IFile::CacheType::Manual );
     ASSERT_FALSE( res );
 
-    res = m->cache( "file:///cache/media.mkv" );
+    res = m->cache( "file:///cache/media.mkv", IFile::CacheType::Manual );
     ASSERT_TRUE( res );
 
     auto files = m->files();
@@ -1565,6 +1565,7 @@ static void AddCachedMrl( Tests* T )
     auto f = m->mainFile();
     ASSERT_NON_NULL( f );
     ASSERT_EQ( IFile::Type::Cache, f->type() );
+    ASSERT_EQ( IFile::CacheType::Manual, f->cacheType() );
 
     m = T->ml->media( m->id() );
     f = m->mainFile();
