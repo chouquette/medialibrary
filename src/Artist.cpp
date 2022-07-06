@@ -52,6 +52,7 @@ Artist::Artist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_mbId( row.extract<decltype(m_mbId)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
 {
     if ( row.hasRemainingColumns() == true )
         m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
@@ -68,6 +69,7 @@ Artist::Artist( MediaLibraryPtr ml, std::string name )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
     , m_publicOnlyListing( false )
+    , m_isFavorite( false )
 {
 }
 
@@ -317,6 +319,22 @@ unsigned int Artist::nbPresentTracks() const
     return m_nbPresentTracks;
 }
 
+bool Artist::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool Artist::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_artist = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
+    return true;
+}
+
 void Artist::createTable( sqlite::Connection* dbConnection )
 {
     const std::string reqs[] = {
@@ -406,6 +424,20 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
             + "(id_thumbnail)"
         ")";
     }
+    if ( dbModelVersion < 37 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+            "shortbio TEXT,"
+            "nb_albums UNSIGNED INT DEFAULT 0,"
+            "nb_tracks UNSIGNED INT DEFAULT 0,"
+            "mb_id TEXT,"
+            "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
+                "CHECK(is_present <= nb_tracks)"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_artist INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -424,8 +456,9 @@ std::string Artist::schema( const std::string& tableName, uint32_t dbModelVersio
         // not present, even if one of its album contains a present
         // track from another artist (the album will be present, however)
         "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
-            "CHECK(is_present <= nb_tracks)"
-        ")";
+            "CHECK(is_present <= nb_tracks), "
+        "is_favorite BOOLEAN NOT NULL DEFAULT FALSE"
+    ")";
 }
 
 std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )

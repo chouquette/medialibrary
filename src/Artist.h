@@ -111,6 +111,8 @@ public:
     virtual unsigned int nbAlbums() const override;
     virtual unsigned int nbTracks() const override;
     virtual unsigned int nbPresentTracks() const override;
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool ) override;
 
     static void createTable( sqlite::Connection* dbConnection );
     static void createTriggers( sqlite::Connection* dbConnection );
@@ -168,6 +170,7 @@ private:
     std::string m_mbId;
     unsigned int m_nbPresentTracks;
     bool m_publicOnlyListing;
+    bool m_isFavorite;
 
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 

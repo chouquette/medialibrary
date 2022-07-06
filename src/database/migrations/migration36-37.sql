@@ -143,3 +143,4 @@ Label::trigger( Label::Triggers::DeleteMediaLabel, 37 ),
 Album::index( Album::Indexes::Title, 37 ),
 
 "ALTER TABLE " + Album::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
+"ALTER TABLE " + Artist::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",

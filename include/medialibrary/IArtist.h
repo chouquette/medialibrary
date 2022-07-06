@@ -76,6 +76,15 @@ public:
     virtual unsigned int nbAlbums() const = 0;
     virtual unsigned int nbTracks() const = 0;
     virtual unsigned int nbPresentTracks() const = 0;
+
+    /**
+     * @brief isFavorite returns true if the artist is marked as favorite.
+     */
+    virtual bool isFavorite() const = 0;
+    /**
+     * @brief setFavorite mark or unmark an artist as favorite.
+     */
+    virtual bool setFavorite( bool ) = 0;
 };
 
 }
