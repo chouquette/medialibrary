@@ -5,7 +5,7 @@ variables:
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20220620085314
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20220127084320
   MEDIALIBRARY_ALPINE_IMG: registry.videolan.org/medialibrary-alpine:20220706115155
-  MEDIALIBRARY_ARCH_IMG: registry.videolan.org/medialibrary-archlinux:20220124130611
+  MEDIALIBRARY_ARCH_IMG: registry.videolan.org/medialibrary-archlinux:20220706120650
   MEDIALIB_TEST_FOLDER: $CI_PROJECT_DIR/medialib_tests/
 
 stages:
