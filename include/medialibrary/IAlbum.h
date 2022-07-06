@@ -90,6 +90,14 @@ public:
      * @brief isUnknownAlbum returns true is this is an unknown album
      */
     virtual bool isUnknownAlbum() const = 0;
+    /**
+     * @brief isFavorite returns true if the album is marked as favorite.
+     */
+    virtual bool isFavorite() const = 0;
+    /**
+     * @brief setFavorite mark or unmark an album as favorite.
+     */
+    virtual bool setFavorite( bool ) = 0;
 
     virtual Query<IMedia> searchTracks( const std::string& pattern,
                                         const QueryParameters* params = nullptr ) const = 0;

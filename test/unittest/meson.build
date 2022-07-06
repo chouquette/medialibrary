@@ -60,6 +60,7 @@ album_tests = [
   'SortByInsertionDate',
   'ConvertToExternal',
   'Public',
+  'Favorite',
 ]
 foreach t : album_tests
   test('Album.' + t, album_test_exe, args: t, suite: ['unittest', 'Album'])

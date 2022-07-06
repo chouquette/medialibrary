@@ -140,5 +140,6 @@ Album::trigger( Album::Triggers::UpdateOnMediaAlbumIdChange, 37 ),
 Show::trigger( Show::Triggers::UpdateIsPresent, 37 ),
 Artist::trigger( Artist::Triggers::HasTrackPresent, 37 ),
 Label::trigger( Label::Triggers::DeleteMediaLabel, 37 ),
-
 Album::index( Album::Indexes::Title, 37 ),
+
+"ALTER TABLE " + Album::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",

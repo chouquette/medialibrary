@@ -57,6 +57,7 @@ Album::Album(MediaLibraryPtr ml, sqlite::Row& row)
     , m_duration( row.extract<decltype(m_duration)>() )
     , m_nbDiscs( row.extract<decltype(m_nbDiscs)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
 {
     if ( row.hasRemainingColumns() == true )
         m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
@@ -76,6 +77,7 @@ Album::Album( MediaLibraryPtr ml, std::string title )
     , m_nbDiscs( 1 )
     , m_nbPresentTracks( 0 )
     , m_publicOnlyListing( false )
+    , m_isFavorite( false )
 {
 }
 
@@ -89,6 +91,7 @@ Album::Album( MediaLibraryPtr ml, const Artist* artist )
     , m_nbDiscs( 1 )
     , m_nbPresentTracks( 0 )
     , m_publicOnlyListing( false )
+    , m_isFavorite( false )
 {
 }
 
@@ -495,6 +498,22 @@ bool Album::isUnknownAlbum() const
     return m_title.empty();
 }
 
+bool Album::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool Album::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_album = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
+    return true;
+}
+
 ArtistPtr Album::albumArtist() const
 {
     if ( m_artistId == 0 )
@@ -605,7 +624,25 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_thumbnail)"
             ")";
         }
-        return "CREATE TABLE " + Album::Table::Name +
+        if ( dbModel < 37 )
+        {
+            return "CREATE TABLE " + Table::Name +
+            "("
+                "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "title TEXT COLLATE NOCASE,"
+                "artist_id UNSIGNED INTEGER,"
+                "release_year UNSIGNED INTEGER,"
+                "short_summary TEXT,"
+                "nb_tracks UNSIGNED INTEGER DEFAULT 0,"
+                "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                "nb_discs UNSIGNED INTEGER NOT NULL DEFAULT 1,"
+                "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
+                    "CHECK(is_present <= nb_tracks),"
+                "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name
+                + "(id_artist) ON DELETE CASCADE"
+            ")";
+        }
+        return "CREATE TABLE " + Table::Name +
         "("
             "id_album INTEGER PRIMARY KEY AUTOINCREMENT,"
             "title TEXT COLLATE NOCASE,"
@@ -620,7 +657,8 @@ std::string Album::schema( const std::string& tableName, uint32_t dbModel )
             // The album presence state, which is the number of present tracks
             // in this album
             "is_present UNSIGNED INTEGER NOT NULL DEFAULT 0 "
-                "CHECK(is_present <= nb_tracks),"
+                "CHECK(is_present <= nb_tracks), "
+            "is_favorite BOOLEAN NOT NULL DEFAULT FALSE,"
             "FOREIGN KEY(artist_id) REFERENCES " + Artist::Table::Name
             + "(id_artist) ON DELETE CASCADE"
         ")";

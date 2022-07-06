@@ -117,6 +117,9 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         virtual int64_t duration() const override;
         virtual bool isUnknownAlbum() const override;
 
+        virtual bool isFavorite() const override;
+        virtual bool setFavorite( bool ) override;
+
         virtual ArtistPtr albumArtist() const override;
         bool setAlbumArtist( std::shared_ptr<Artist> artist );
         virtual Query<IArtist> artists( const QueryParameters* params ) const override;
@@ -178,6 +181,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
         uint32_t m_nbDiscs;
         uint32_t m_nbPresentTracks;
         bool m_publicOnlyListing;
+        bool m_isFavorite;
 
         mutable std::vector<MediaPtr> m_tracks;
         mutable std::shared_ptr<Artist> m_albumArtist;

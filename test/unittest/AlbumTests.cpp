@@ -1005,6 +1005,21 @@ static void Public( Tests* T )
     ASSERT_TRUE( tracks[0]->isPublic() );
 }
 
+static void Favorite( Tests* T )
+{
+    auto a = T->ml->createAlbum( "Album" );
+
+    ASSERT_FALSE( a->isFavorite() );
+
+    a->setFavorite( true );
+    ASSERT_TRUE( a->isFavorite() );
+    ASSERT_TRUE( T->ml->album( a->id() )->isFavorite() );
+
+    a->setFavorite( false );
+    ASSERT_FALSE( a->isFavorite() );
+    ASSERT_FALSE( T->ml->album( a->id() )->isFavorite() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Album )
@@ -1042,6 +1057,7 @@ int main( int ac, char** av )
     ADD_TEST( SortByInsertionDate );
     ADD_TEST( ConvertToExternal );
     ADD_TEST( Public );
+    ADD_TEST( Favorite );
 
     END_TESTS
 }
