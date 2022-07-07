@@ -81,6 +81,7 @@ protected:
     std::tuple<bool, bool> refreshFile( IItem& item ) const;
     std::tuple<bool, bool> refreshMedia( IItem& item ) const;
     std::tuple<bool, bool> refreshPlaylist( IItem& item ) const;
+    std::tuple<bool, bool> refreshSubscription( IItem& item ) const;
     std::pair<std::shared_ptr<Artist>, std::shared_ptr<Artist>> findOrCreateArtist( IItem& item ) const;
     std::shared_ptr<Media> handleTrack(Album& album, IItem& item,
                                              int64_t artistId, Genre* genre ) const;
@@ -101,6 +102,9 @@ protected:
     std::shared_ptr<Thumbnail> findAlbumArtwork( IItem& item );
     std::shared_ptr<Show> findShow( const std::string& showName ) const;
     bool assignMediaToGroup( IItem& item ) const;
+    Status parseSubscription( IItem& item ) const;
+    void addSubscriptionElement( const IItem& item, int64_t subscriptionId,
+                                 std::string mrl, std::string title ) const;
 
 private:
     static int toInt( IItem& item, IItem::Metadata meta );

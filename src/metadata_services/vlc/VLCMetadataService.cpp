@@ -154,10 +154,14 @@ Status VLCMetadataService::run( IItem& item )
     }
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
         return Status::Fatal;
-    if ( item.fileType() == IFile::Type::Playlist &&
+    if ( ( item.fileType() == IFile::Type::Playlist ||
+           item.fileType() == IFile::Type::Subscription ) &&
          vlcMedia.subitems()->count() == 0 )
     {
-        LOG_DEBUG( "Discarding playlist file with no subitem: ", mrl );
+        LOG_DEBUG( "Discarding ",
+                   ( item.fileType() == IFile::Type::Playlist ? "playlist file"
+                                                              : "subscription" ),
+                   " with no subitem: ", mrl );
         return Status::Fatal;
     }
 #if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0) && !defined(FORCE_ATTACHMENTS_API)

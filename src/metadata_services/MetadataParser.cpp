@@ -46,6 +46,7 @@
 #include "utils/Date.h"
 #include "utils/ModificationsNotifier.h"
 #include "utils/TitleAnalyzer.h"
+#include "utils/Date.h"
 #include "discoverer/FsDiscoverer.h"
 #include "Device.h"
 #include "VideoTrack.h"
@@ -54,6 +55,7 @@
 #include "parser/Task.h"
 #include "parser/Parser.h"
 #include "MediaGroup.h"
+#include "Subscription.h"
 
 #include <cstdlib>
 #include <algorithm>
@@ -131,8 +133,21 @@ Status MetadataAnalyzer::run( IItem& item )
         auto file = static_cast<File*>( item.file().get() );
         // Now that the refresh request was processed, we can update the last
         // modification date in database
-        file->updateFsInfo( item.fileFs()->lastModificationDate(),
-                            item.fileFs()->size() );
+        if ( item.fileFs() != nullptr )
+        {
+            file->updateFsInfo( item.fileFs()->lastModificationDate(),
+                                item.fileFs()->size() );
+        }
+        else
+        {
+            /*
+             * A subscription might not be represented by a file on disk, for
+             * instance if its a podcast, it's likely to just be an external
+             * file pointing to the RSS feed for it.
+             * In any other case so far, it is an invalid state.
+             */
+            assert( item.fileType() == IFile::Type::Subscription );
+        }
         if ( needRescan == false )
             return Status::Success;
     }
@@ -144,6 +159,15 @@ Status MetadataAnalyzer::run( IItem& item )
             return res;
 
         assert( item.file() != nullptr || item.isRestore() == true );
+        return Status::Completed;
+    }
+    if ( item.fileType() == IFile::Type::Subscription )
+    {
+        assert( item.nbLinkedItems() > 0 );
+        auto res = parseSubscription( item );
+        if ( res != Status::Success ) // playlist addition may fail due to constraint violation
+            return res;
+
         return Status::Completed;
     }
 
@@ -486,6 +510,111 @@ void MetadataAnalyzer::addFolderToPlaylist( IItem& item,
     }
 }
 
+/* Subscriptions */
+
+Status MetadataAnalyzer::parseSubscription( IItem& item ) const
+{
+    const auto& mrl = item.mrl();
+    LOG_DEBUG( "Importing ", mrl, " as a subscription" );
+    std::shared_ptr<Subscription> subscription;
+    if ( item.file() != nullptr )
+    {
+        /*
+         * If the file exists in DB, we already inserted this subscription and are
+         * most likely refreshing it
+         */
+        subscription = Subscription::fromFile( m_ml, item.file()->id() );
+        if ( subscription == nullptr )
+        {
+            assert( false );
+            return Status::Fatal;
+        }
+    }
+    else
+    {
+        auto name = item.meta( IItem::Metadata::Title );
+        if ( name.empty() == true )
+            name = utils::file::fileName( mrl );
+        auto t = m_ml->getConn()->newTransaction();
+        subscription = Subscription::create( m_ml, static_cast<Service>( item.linkToId() ),
+                                         std::move( name ), 0 );
+        if ( subscription == nullptr )
+            return Status::Fatal;
+        auto file = File::createFromSubscription( m_ml, mrl, subscription->id() );
+        if ( file == nullptr )
+            return Status::Fatal;
+        if ( item.setFile( file ) == false )
+            return Status::Fatal;
+        t->commit();
+    }
+    for ( auto i = 0u; i < item.nbLinkedItems(); ++i )
+    {
+        if ( m_stopped.load() == true )
+            break;
+        const auto& subItem = item.linkedItem( i );
+        addSubscriptionElement( subItem, subscription->id(), subItem.mrl(),
+                              subItem.meta( IItem::Metadata::Title ) );
+    }
+    return Status::Success;
+}
+
+void MetadataAnalyzer::addSubscriptionElement( const IItem& item, int64_t subscriptionId,
+                                               std::string mrl, std::string title ) const
+{
+    auto t = m_ml->getConn()->newTransaction();
+    auto file = File::fromExternalMrl( m_ml, mrl );
+    if ( file == nullptr )
+    {
+        auto media = Media::createExternal( m_ml, mrl, item.duration() );
+        if ( media == nullptr )
+            return;
+        if ( title.empty() == false )
+            media->setTitle( std::move( title ), false );
+        auto desc = item.meta( IItem::Metadata::Description );
+        if ( desc.empty() == false )
+            media->setDescription( std::move( desc ) );
+        auto date = item.meta( IItem::Metadata::Date );
+        if ( date.empty() == false )
+        {
+            struct tm tm;
+            if ( utils::date::fromStr( date, &tm ) == true )
+            {
+                auto ts = utils::date::mktime( &tm );
+                if ( ts != static_cast<time_t>( -1 ) )
+                    media->setReleaseDate( ts );
+            }
+        }
+        auto files = media->files();
+        auto mainFileIt = std::find_if( cbegin( files ), cend( files ),
+                                      []( const std::shared_ptr<IFile>& f ) {
+            return f->isMain();
+        });
+        if ( mainFileIt == cend( files ) )
+        {
+            assert( !"A main file was expected but not found" );
+            return;
+        }
+        file = std::static_pointer_cast<File>( *mainFileIt );
+        if ( file == nullptr )
+            return;
+    }
+    try
+    {
+        auto task = Task::createLinkTask( m_ml, std::move( mrl ), subscriptionId,
+                                          parser::IItem::LinkType::Subscription, 0 );
+        auto parser = m_ml->getParser();
+        t->commit();
+        if ( parser == nullptr )
+            return;
+        parser->parse( std::move( task ) );
+    }
+    catch ( const sqlite::errors::ConstraintUnique& ex )
+    {
+        LOG_DEBUG( "Failed to insert link task: ", ex.what() );
+        return;
+    }
+}
+
 /* Video files */
 
 bool MetadataAnalyzer::parseVideoFile( IItem& item ) const
@@ -746,12 +875,13 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshFile( IItem& item ) const
             return refreshMedia( item );
         case IFile::Type::Playlist:
             return refreshPlaylist( item );
+        case IFile::Type::Subscription:
+            return refreshSubscription( item );
         case IFile::Type::Part:
         case IFile::Type::Soundtrack:
         case IFile::Type::Subtitles:
         case IFile::Type::Disc:
         case IFile::Type::Unknown:
-        case IFile::Type::Subscription:
             break;
     }
     LOG_WARN( "Refreshing of file type ",
@@ -916,6 +1046,22 @@ std::tuple<bool, bool> MetadataAnalyzer::refreshPlaylist(IItem& item) const
     auto t = m_ml->getConn()->newTransaction();
     if ( parser::Task::removePlaylistContentTasks( m_ml, playlist->id() ) == false ||
          playlist->clearContent() == false )
+        return std::make_tuple( false, false );
+    t->commit();
+    return std::make_tuple( true, true );
+}
+
+std::tuple<bool, bool> MetadataAnalyzer::refreshSubscription( IItem& item ) const
+{
+    auto subscription = Subscription::fromFile( m_ml, item.file()->id() );
+    if ( subscription == nullptr )
+    {
+        LOG_WARN( "Failed to find a subscription associated to MRL ", item.mrl() );
+        return std::make_tuple( false, false );
+    }
+    auto t = m_ml->getConn()->newTransaction();
+    if ( parser::Task::removeSubscriptionContentTasks( m_ml, subscription->id() ) == false ||
+         subscription->clearContent() == false )
         return std::make_tuple( false, false );
     t->commit();
     return std::make_tuple( true, true );

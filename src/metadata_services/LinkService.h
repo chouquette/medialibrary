@@ -44,6 +44,7 @@ public:
 private:
     Status linkToPlaylist( IItem& item );
     Status linkToMedia( IItem& item );
+    Status linkToSubscription( IItem& item );
 
 private:
     MediaLibraryPtr m_ml;

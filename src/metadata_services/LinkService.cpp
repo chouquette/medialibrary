@@ -30,6 +30,7 @@
 #include "Playlist.h"
 #include "Media.h"
 #include "File.h"
+#include "Subscription.h"
 
 namespace medialibrary
 {
@@ -48,6 +49,8 @@ Status LinkService::run( IItem& item )
             return linkToMedia( item );
         case IItem::LinkType::Playlist:
             return linkToPlaylist( item );
+        case IItem::LinkType::Subscription:
+            return linkToSubscription( item );
     }
     assert( false );
     return Status::Fatal;
@@ -203,6 +206,28 @@ Status LinkService::linkToMedia( IItem &item )
                                   tr.language, tr.description, item.fileId() );
         }
         t->commit();
+    }
+    return Status::Completed;
+}
+
+Status LinkService::linkToSubscription(IItem& item)
+{
+    auto media = std::static_pointer_cast<Media>( m_ml->media( item.mrl() ) );
+    if ( media == nullptr )
+        return Status::Requeue;
+
+    try
+    {
+        if ( Subscription::addMedia( m_ml, item.linkToId(), media->id() ) == false )
+            return Status::Fatal;
+    }
+    catch ( const sqlite::errors::ConstraintUnique& )
+    {
+        /*
+         * We're trying to reinsert the same media to the same subscription, just
+         * ignore it and do not notify the application of a new media
+         */
+        return Status::Completed;
     }
     return Status::Completed;
 }
