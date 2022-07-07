@@ -89,6 +89,21 @@ Query<IMedia> Subscription::media( const QueryParameters* params )
     return Media::fromSubscription( m_ml, m_id, params );
 }
 
+bool Subscription::refresh()
+{
+    auto f = file();
+    if ( f == nullptr )
+        return false;
+    auto t = parser::Task::createRefreshTask( m_ml, std::move( f ) );
+    if ( t == nullptr )
+        return false;
+    auto parser = m_ml->getParser();
+    if ( parser == nullptr )
+        return false;
+    parser->parse( std::move( t ) );
+    return true;
+}
+
 std::shared_ptr<File> Subscription::file() const
 {
     const std::string req = "SELECT * FROM " + File::Table::Name +

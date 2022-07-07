@@ -40,6 +40,7 @@ public:
     virtual Query<ISubscription> childSubscriptions( const QueryParameters* params ) = 0;
     virtual SubscriptionPtr parent() = 0;
     virtual Query<IMedia> media( const QueryParameters* params ) = 0;
+    virtual bool refresh() = 0;
 };
 
 }

@@ -61,6 +61,7 @@ public:
     virtual Query<IMedia> media( const QueryParameters* params ) override;
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );
+    bool refresh() override;
     std::shared_ptr<File> file() const;
 
     std::shared_ptr<Subscription> addChildSubscription( std::string name );
