@@ -2506,6 +2506,18 @@ bool MediaLibrary::isServiceSupported( Service s ) const
     return false;
 }
 
+bool MediaLibrary::addSubscription( Service s, std::string mrl )
+{
+    auto t = parser::Task::create( this, std::move( mrl ), s );
+    if ( t == nullptr )
+        return false;
+    auto parser = getParser();
+    if ( parser == nullptr )
+        return false;
+    parser->parse( std::move( t ) );
+    return true;
+}
+
 Query<ISubscription> MediaLibrary::subscriptions( Service s,
                                               const QueryParameters* params )
 {

@@ -254,6 +254,7 @@ public:
 
     virtual bool flushUserProvidedThumbnails() override;
     virtual bool isServiceSupported( Service s ) const override;
+    virtual bool addSubscription( Service s, std::string mrl ) override;
     virtual Query<ISubscription> subscriptions( Service s,
                                             const QueryParameters* params ) override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;

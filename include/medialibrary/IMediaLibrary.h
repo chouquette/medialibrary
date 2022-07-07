@@ -1047,6 +1047,7 @@ public:
     virtual bool flushUserProvidedThumbnails() = 0;
 
     virtual bool isServiceSupported( Service s ) const = 0;
+    virtual bool addSubscription( Service s, std::string mrl ) = 0;
     virtual Query<ISubscription> subscriptions( Service s,
                                             const QueryParameters* params = nullptr ) = 0;
     virtual bool removeSubscription( int64_t subscriptionId ) = 0;
