@@ -61,10 +61,13 @@ public:
     void waitForPlaylistReload();
     void prepareForDiscovery( uint32_t nbEntryPointsExpected );
     void prepareForRemoval( uint32_t nbEntryPointsRemovalExpected );
-
+    /*
+     * May be invoked directly by tests which don't discover anything, such
+     * as collection tests which only discover external MRLs
+     */
+    virtual void onDiscoveryCompleted() override;
 protected:
     virtual void onDiscoveryStarted() override;
-    virtual void onDiscoveryCompleted() override;
     virtual void onParsingStatsUpdated( uint32_t done, uint32_t scheduled ) override;
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
@@ -112,13 +115,15 @@ struct Tests
 
     rapidjson::Document doc;
     rapidjson::GenericValue<rapidjson::UTF8<>> input;
+    rapidjson::GenericValue<rapidjson::UTF8<>> subscriptions;
 
     static const std::string Directory;
 
     virtual void InitializeCallback();
     virtual void InitializeMediaLibrary( const std::string& dbPath,
                                          const std::string& mlFolderDir );
-
+    /* Helper to manipulate the subscription MRL to convert it to an absolute path */
+    void addSubscription( Service s, std::string mrl );
     void runChecks();
 
     void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );
@@ -134,6 +139,8 @@ struct Tests
     void checkMediaGroups( const rapidjson::Value& expectedMediaGroups,
                            std::vector<MediaGroupPtr> mediaGroups );
     void checkMediaFiles( const IMedia* media, const rapidjson::Value &expectedFiles );
+    void checkSubscriptions( const rapidjson::Value& expectedSubscriptions,
+                             std::vector<SubscriptionPtr> subscriptions );
 
 protected:
     virtual void InitTestCase( const std::string& testName );

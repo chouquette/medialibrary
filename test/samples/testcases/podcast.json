@@ -1,0 +1,12 @@
+{
+    "subscriptions": [{
+        "service": 0,
+        "mrl": "file/podcast://@SAMPLES_DIR@/podcasts/franceinter.xml"
+    }],
+    "expected": {
+        "subscriptions": [{
+            "name": "Les Pieds sur terre",
+            "nbItems": 4
+        }]
+    }
+}

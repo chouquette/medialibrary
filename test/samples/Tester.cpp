@@ -39,6 +39,7 @@
 #include "medialibrary/IShow.h"
 #include "medialibrary/IShowEpisode.h"
 #include "medialibrary/IMediaGroup.h"
+#include "medialibrary/ISubscription.h"
 #include "utils/Directory.h"
 #include "filesystem/libvlc/FileSystemFactory.h"
 
@@ -191,6 +192,13 @@ void Tests::InitTestCase( const std::string& testName )
     buff[ret] = 0;
     doc.Parse( buff );
 
+    /*
+     * We don't support subscriptions + regular input for now, and since
+     * subscriptions don't have an associated discovery phase, we have to cheat
+     * a little and force the discovery to be considered as completed.
+     */
+    ASSERT_TRUE( doc.HasMember( "input" ) != doc.HasMember( "subscriptions" ) );
+
     if ( doc.HasMember( "banned" ) == true )
     {
         const auto& banned = doc["banned"];
@@ -203,16 +211,32 @@ void Tests::InitTestCase( const std::string& testName )
         }
     }
 
-    ASSERT_TRUE( doc.HasMember( "input" ) );
-    input = doc["input"];
-    for ( auto i = 0u; i < input.Size(); ++i )
+    ASSERT_TRUE( doc.HasMember( "input" ) || doc.HasMember( "subscriptions" ) );
+    if ( doc.HasMember( "input" ) )
     {
-        // Quick and dirty check to ensure we're discovering something that exists
-        auto samplesDir = Directory + "samples/" + input[i].GetString();
-        ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
-        samplesDir = utils::fs::toAbsolute( samplesDir );
+        input = doc["input"];
+        for ( auto i = 0u; i < input.Size(); ++i )
+        {
+            // Quick and dirty check to ensure we're discovering something that exists
+            auto samplesDir = Directory + "samples/" + input[i].GetString();
+            ASSERT_TRUE( utils::fs::isDirectory( samplesDir ) );
+            samplesDir = utils::fs::toAbsolute( samplesDir );
 
-        m_ml->discover( utils::file::toMrl( samplesDir ) );
+            m_ml->discover( utils::file::toMrl( samplesDir ) );
+        }
+    }
+
+    if ( doc.HasMember( "subscriptions" ) )
+    {
+        subscriptions = doc["subscriptions"];
+        for ( auto i = 0u; i < subscriptions.Size(); ++i )
+        {
+            auto& sub = subscriptions[i];
+            ASSERT_TRUE( sub.HasMember( "service" ) && sub.HasMember( "mrl" ) );
+            addSubscription( static_cast<Service>( sub["service"].GetUint() ),
+                    sub["mrl"].GetString() );
+        }
+        m_cb->onDiscoveryCompleted();
     }
 }
 
@@ -266,6 +290,34 @@ void Tests::InitializeMediaLibrary( const std::string& dbPath,
 
 {
     m_ml.reset( new MediaLibraryTester{ dbPath, mlFolderDir } );
+}
+
+void Tests::addSubscription( Service s, std::string mrl )
+{
+    /*
+     * We need an absolute path, and we definitely can't compute it from the json
+     * test case, so replace a placeholder from here.
+     * The code is sprinkled with some WIN32 specific hacks because we can't use
+     * the regular utils::file::toUrl which handles the backward to forward slash
+     * conversions and the leading '/' that's expected by VLC from here, as the
+     * util function will just overwrite the scheme, and we need the scheme to
+     * force the podcast demux (ie. be 'file/podcast:///Z:/path/to/podcast.xml)
+     */
+    const std::string pattern = "@SAMPLES_DIR@";
+    auto pos = mrl.find( pattern );
+    if ( pos != std::string::npos )
+    {
+        auto replacement = utils::fs::toAbsolute( Directory + "/samples/" );
+#ifdef _WIN32
+        replacement = "/" + replacement;
+#endif
+        mrl.replace( pos, pattern.size(), replacement );
+    }
+    mrl = utils::url::encode( mrl );
+#ifdef _WIN32
+    std::replace( begin( mrl ), end( mrl ), '\\', '/' );
+#endif
+    m_ml->addSubscription( s, mrl );
 }
 
 void Tests::runChecks()
@@ -328,6 +380,13 @@ void Tests::runChecks()
     {
         checkMediaGroups( expected["mediaGroups"],
                 m_ml->mediaGroups( IMedia::Type::Unknown, nullptr )->all() );
+    }
+    if ( expected.HasMember( "subscriptions" ) == true )
+    {
+        //FIXME: Should we expose the services with their ID and the subscriptions
+        // as a member?
+        checkSubscriptions( expected["subscriptions"],
+                m_ml->subscriptions( Service::Podcast, nullptr )->all() );
     }
 }
 
@@ -436,6 +495,28 @@ void Tests::checkMediaFiles( const IMedia *media, const rapidjson::Value& expect
         }
         files.erase( it );
 }
+}
+
+void Tests::checkSubscriptions( const rapidjson::Value& expectedSubscriptions,
+                                std::vector<SubscriptionPtr> subscriptions )
+{
+    ASSERT_TRUE( expectedSubscriptions.IsArray() );
+    for ( auto i = 0u; i < expectedSubscriptions.Size(); ++i )
+    {
+        const auto& expectedSubscription = expectedSubscriptions[i];
+        ASSERT_TRUE( expectedSubscription.HasMember( "name" ) );
+        auto it = std::find_if( begin( subscriptions ), end( subscriptions ),
+                                [&expectedSubscription]( SubscriptionPtr s ) {
+            return s->name() == expectedSubscription["name"].GetString();
+        });
+        ASSERT_TRUE( it != end( subscriptions ) );
+        if ( expectedSubscription.HasMember( "nbItems" ) )
+        {
+            ASSERT_EQ( expectedSubscription["nbItems"].GetUint64(),
+                       (*it)->media( nullptr )->count() );
+        }
+        subscriptions.erase( it );
+    }
 }
 
 void Tests::checkMedias(const rapidjson::Value& expectedMedias)
@@ -919,6 +1000,9 @@ void RefreshTests::forceRefresh()
         assert( fileFsIt != cend( filesFs ) );
         ml->onUpdatedFile( std::move( f ), *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
+    auto subscriptions = m_ml->subscriptions( Service::Podcast, nullptr )->all();
+    for ( auto& s : subscriptions )
+        s->refresh();
 }
 
 void RefreshTests::InitializeCallback()

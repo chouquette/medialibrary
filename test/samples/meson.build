@@ -47,6 +47,7 @@ if libvlc_dep.version().version_compare('>=4.0')
   test_list += [
     'thumbnail_sharing',
     'thumbnail_embedded_sharing',
+    'podcast',
   ]
 endif
 

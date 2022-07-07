@@ -32,6 +32,7 @@
 #include "Playlist.h"
 #include "Media.h"
 #include "File.h"
+#include "Subscription.h"
 
 #include <vlcpp/vlc.hpp>
 
@@ -48,22 +49,40 @@ static void ParseTwice( Tests* T )
 
     T->runChecks();
 
-    T->m_cb->prepareForRemoval( T->input.Size() );
-    for ( auto i = 0u; i < T->input.Size(); ++i )
+    if ( T->input.IsArray() )
     {
-        auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-        T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
+        T->m_cb->prepareForRemoval( T->input.Size() );
+        for ( auto i = 0u; i < T->input.Size(); ++i )
+        {
+            auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
+            samplesDir = utils::fs::toAbsolute( samplesDir );
+            T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
+        }
+        ASSERT_TRUE( T->m_cb->waitForRemovalComplete() );
+        T->m_cb->reinit();
+        for ( auto i = 0u; i < T->input.Size(); ++i )
+        {
+            auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
+            samplesDir = utils::fs::toAbsolute( samplesDir );
+            T->m_ml->discover( utils::file::toMrl( samplesDir ) );
+        }
     }
+    else
 
-    ASSERT_TRUE( T->m_cb->waitForRemovalComplete() );
-    T->m_cb->reinit();
-
-    for ( auto i = 0u; i < T->input.Size(); ++i )
+    if ( T->subscriptions.IsArray() )
     {
-        auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
-        samplesDir = utils::fs::toAbsolute( samplesDir );
-        T->m_ml->discover( utils::file::toMrl( samplesDir ) );
+        auto subscriptions = T->m_ml->subscriptions( Service::Podcast, nullptr )->all();
+        for ( const auto& c : subscriptions )
+            T->m_ml->removeSubscription( c->id() );
+        /* Ensure we don't wait for a discovery that will not come */
+        T->m_cb->onDiscoveryCompleted();
+        for ( auto i = 0u; i < T->subscriptions.Size(); ++i )
+        {
+            auto& sub = T->subscriptions[i];
+            ASSERT_TRUE( sub.HasMember( "service" ) && sub.HasMember( "mrl" ) );
+            T->addSubscription( static_cast<Service>( sub["service"].GetUint() ),
+                    sub["mrl"].GetString() );
+        }
     }
 
     T->m_cb->waitForParsingComplete();
