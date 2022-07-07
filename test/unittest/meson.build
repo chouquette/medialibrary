@@ -484,6 +484,7 @@ genre_tests = [
   'GetThumbnails',
   'ConvertToExternal',
   'Public',
+  'Favorite',
 ]
 
 foreach t : genre_tests

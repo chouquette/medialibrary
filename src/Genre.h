@@ -60,6 +60,8 @@ public:
     virtual const std::string& name() const override;
     virtual uint32_t nbTracks() const override;
     virtual uint32_t nbPresentTracks() const override;
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool ) override;
     bool updateNbTracks(int increment );
     virtual Query<IArtist> artists( const QueryParameters* params ) const override;
     virtual Query<IArtist> searchArtists( const std::string& pattern,
@@ -100,6 +102,7 @@ private:
     uint32_t m_nbTracks;
     uint32_t m_nbPresentTracks;
     bool m_publicOnlyListing;
+    bool m_isFavorite;
     mutable std::shared_ptr<Thumbnail> m_thumbnails[Thumbnail::SizeToInt( ThumbnailSizeType::Count )];
 
     friend Genre::Table;

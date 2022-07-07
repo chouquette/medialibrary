@@ -566,6 +566,19 @@ static void Public( GenreTests* T )
 
 }
 
+static void Favorite( GenreTests* T )
+{
+    ASSERT_FALSE( T->g->isFavorite() );
+
+    T->g->setFavorite( true );
+    ASSERT_TRUE( T->g->isFavorite() );
+    ASSERT_TRUE( T->ml->genre( T->g->id() )->isFavorite() );
+
+    T->g->setFavorite( false );
+    ASSERT_FALSE( T->g->isFavorite() );
+    ASSERT_FALSE( T->ml->genre( T->g->id() )->isFavorite() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( GenreTests );
@@ -589,6 +602,7 @@ int main( int ac, char** av )
     ADD_TEST( GetThumbnails );
     ADD_TEST( ConvertToExternal );
     ADD_TEST( Public );
+    ADD_TEST( Favorite );
 
     END_TESTS
 }

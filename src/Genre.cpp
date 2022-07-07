@@ -48,6 +48,7 @@ Genre::Genre( MediaLibraryPtr ml, sqlite::Row& row )
     , m_name( row.extract<decltype(m_name)>() )
     , m_nbTracks( row.extract<decltype(m_nbTracks)>() )
     , m_nbPresentTracks( row.extract<decltype(m_nbPresentTracks)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
 {
     if ( row.hasRemainingColumns() == true )
         m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
@@ -63,6 +64,7 @@ Genre::Genre( MediaLibraryPtr ml, std::string name )
     , m_nbTracks( 0 )
     , m_nbPresentTracks( 0 )
     , m_publicOnlyListing( false )
+    , m_isFavorite( false )
 {
 }
 
@@ -94,6 +96,22 @@ bool Genre::updateNbTracks( int increment )
 {
     m_nbTracks += increment;
     m_nbPresentTracks += increment;
+    return true;
+}
+
+bool Genre::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool Genre::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_genre = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
     return true;
 }
 
@@ -248,13 +266,25 @@ std::string Genre::schema( const std::string& tableName, uint32_t dbModel )
             "nb_tracks INTEGER NOT NULL DEFAULT 0"
         ")";
     }
+    if (dbModel < 37 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
+            "nb_tracks INTEGER NOT NULL DEFAULT 0,"
+            "is_present INTEGER NOT NULL DEFAULT 0 "
+                "CHECK(is_present <= nb_tracks)"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_genre INTEGER PRIMARY KEY AUTOINCREMENT,"
         "name TEXT COLLATE NOCASE UNIQUE ON CONFLICT FAIL,"
         "nb_tracks INTEGER NOT NULL DEFAULT 0,"
         "is_present INTEGER NOT NULL DEFAULT 0 "
-            "CHECK(is_present <= nb_tracks)"
+            "CHECK(is_present <= nb_tracks), "
+        "is_favorite BOOLEAN NOT NULL DEFAULT FALSE"
     ")";
 }
 

@@ -91,6 +91,15 @@ public:
      */
     virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
                                bool takeOwnership ) = 0;
+
+    /**
+     * @brief isFavorite returns true if the genre is marked as favorite.
+     */
+    virtual bool isFavorite() const = 0;
+    /**
+     * @brief setFavorite mark or unmark a genre as favorite.
+     */
+    virtual bool setFavorite( bool ) = 0;
 };
 
 }
