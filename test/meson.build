@@ -10,4 +10,5 @@ else
   subdir('sqlite_load')
   subdir('fast_teardown')
   subdir('fast_discover_cancel')
+  subdir('subscriptions_importer')
 endif
