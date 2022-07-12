@@ -106,6 +106,7 @@ if libvlc_dep.found()
     'filesystem/libvlc/File.cpp',
     'filesystem/libvlc/Device.cpp',
     'filesystem/libvlc/DeviceLister.cpp',
+    'LibvlcCacher.cpp',
   ]
 endif
 
