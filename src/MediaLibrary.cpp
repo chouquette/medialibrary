@@ -92,6 +92,7 @@
 #include "filesystem/libvlc/FileSystemFactory.h"
 #include "filesystem/libvlc/DeviceLister.h"
 #include "utils/VLCInstance.h"
+#include "LibvlcCacher.h"
 
 #include <vlcpp/vlc.hpp>
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
@@ -356,6 +357,12 @@ MediaLibrary::MediaLibrary( const std::string& dbPath,
 #endif
     m_parser.addService( std::make_shared<parser::MetadataAnalyzer>() );
     m_parser.addService( std::make_shared<parser::LinkService>() );
+    if ( cfg != nullptr && cfg->cacher != nullptr )
+        m_cacheWorker.setCacher( std::move( cfg->cacher ) );
+#ifdef HAVE_LIBVLC
+    else
+        m_cacheWorker.setCacher( std::make_shared<LibvlcCacher>() );
+#endif
 }
 
 MediaLibrary::~MediaLibrary()

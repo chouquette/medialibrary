@@ -227,6 +227,8 @@ struct SetupConfig
      * If nullptr is provided, the default IOstream logger will be used.
      */
     std::shared_ptr<ILogger> logger;
+
+    std::shared_ptr<ICacher> cacher;
 };
 
 class IMediaLibraryCb
