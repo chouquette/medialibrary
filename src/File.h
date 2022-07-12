@@ -91,7 +91,7 @@ public:
     bool update( const fs::IFile& fileFs, int64_t folderId, bool isRemovable );
     bool convertToExternal();
 
-    FilePtr cache(const std::string& mrl , CacheType cacheType);
+    FilePtr cache( const std::string& mrl, CacheType cacheType, uint64_t fileSize );
     std::string cachedFileName() const;
 
 

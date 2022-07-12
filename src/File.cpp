@@ -304,13 +304,14 @@ bool File::convertToExternal()
     return sqlite::Tools::executeUpdate( m_ml->getConn(), req, mrl(), m_id );
 }
 
-FilePtr File::cache( const std::string& mrl, CacheType cacheType )
+FilePtr File::cache( const std::string& mrl, CacheType cacheType, uint64_t fileSize )
 {
     if ( utils::url::schemeIs( "file://", mrl ) == false )
         return nullptr;
     LOG_DEBUG( "Marking ", mrl, " as a cached MRL for file #", m_id );
     return File::createForCache( m_ml, m_mediaId, mrl,
-                                 m_size, time(nullptr), cacheType );
+                                 fileSize > 0 ? fileSize : m_size,
+                                 time(nullptr), cacheType );
 }
 
 void File::createTable( sqlite::Connection* dbConnection )
@@ -510,6 +511,9 @@ std::shared_ptr<File> File::createForCache( MediaLibraryPtr ml, int64_t mediaId,
                                             const std::string& mrl, int64_t fileSize,
                                             time_t insertionDate, CacheType cacheType )
 {
+    /* We *need* a file size to maintain a cache that abides by the user's settings */
+    if ( fileSize == 0 )
+        return nullptr;
     assert( mediaId > 0 );
     auto self = std::make_shared<File>( ml, mediaId, 0, 0, Type::Cache, mrl,
                                         fileSize, insertionDate, cacheType );
