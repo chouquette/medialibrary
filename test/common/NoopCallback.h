@@ -72,6 +72,9 @@ class NoopCallback : public IMediaLibraryCb
     virtual void onHistoryChanged( HistoryType ) override {}
     virtual void onRescanStarted() override {}
     virtual void onSubscriptionNewMedia( std::set<int64_t> ) override {}
+    virtual void onCacheIdleChanged( bool ) override {}
+    virtual void onSubscriptionCacheUpdated( int64_t ) override {}
+
 };
 
 }

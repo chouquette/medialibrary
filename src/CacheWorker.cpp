@@ -147,6 +147,8 @@ uint64_t CacheWorker::availableCacheSize() const
 
 void CacheWorker::run()
 {
+    auto cb = m_ml->getCb();
+
     LOG_DEBUG( "Starting cache worker" );
     checkCache();
     while ( true )
@@ -158,6 +160,8 @@ void CacheWorker::run()
                 break;
             if ( m_paused == true || m_tasks.empty() == true )
             {
+                if ( cb != nullptr )
+                    cb->onCacheIdleChanged( true );
                 m_cond.wait( lock, [this]() {
                     return m_run == false ||
                            ( m_paused == false && m_tasks.empty() == false );
@@ -165,6 +169,8 @@ void CacheWorker::run()
                 if ( m_run == false )
                     break;
                 assert( m_paused == false );
+                if ( cb != nullptr )
+                    cb->onCacheIdleChanged( false );
             }
 
             t = std::move( m_tasks.front() );
@@ -234,14 +240,20 @@ void CacheWorker::doUncache( std::shared_ptr<Media> m )
 
 void CacheWorker::doSubscriptionCache()
 {
+    auto cb = m_ml->getCb();
     auto subscriptions = Subscription::fetchAll( m_ml );
     for ( auto& s : subscriptions )
     {
         auto uncachedMedia = s->uncachedMedia( true );
 
-        for ( auto& m : uncachedMedia )
+        if ( uncachedMedia.empty() == false )
         {
-            doCache( m, s.get(), File::CacheType::Automatic );
+            for ( auto& m : uncachedMedia )
+            {
+                doCache( m, s.get(), File::CacheType::Automatic );
+            }
+            if ( cb != nullptr )
+                cb->onSubscriptionCacheUpdated( s->id() );
         }
         s->markCacheAsHandled();
     }

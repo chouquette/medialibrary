@@ -421,6 +421,24 @@ public:
      * @param subscriptionId The subscription ID(s)
      */
     virtual void onSubscriptionNewMedia( std::set<int64_t> subscriptionId ) = 0;
+
+    /**
+     * @brief onSubscriptionCacheUpdated Invoked after at least a media changed cached status
+     *                                   for a subscription.
+     * @param subscriptionId The subscription for which the cache was updated
+     *
+     * If the subscription by the cache worker but didn't change, this will not
+     * be invoked.
+     */
+    virtual void onSubscriptionCacheUpdated( int64_t subscriptionId ) = 0;
+
+    /**
+     * @brief onCacheIdleChanged Will be invoked when the background cache worker
+     *                           changes its idle state
+     * @param idle true if the worker went back to idle, false if it resumed, meaning
+     *             some media and/or subscriptions are being cached.
+     */
+    virtual void onCacheIdleChanged( bool idle ) = 0;
 };
 
 class IMediaLibrary
