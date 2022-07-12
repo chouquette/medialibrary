@@ -24,6 +24,7 @@ medialib_headers = [
 	'IThumbnailer.h',
 	'IMediaGroup.h',
     'ISubscription.h',
+    'ICacher.h',
 ]
 
 subdir('filesystem')

@@ -51,6 +51,7 @@ class ISubtitleTrack;
 class IThumbnailer;
 class IMediaGroup;
 class ISubscription;
+class ICacher;
 
 namespace parser
 {
