@@ -67,13 +67,12 @@ public:
         m_doneQueuing = true;
     }
 
-    void waitForDiscoveryCompleted()
+    bool waitForDiscoveryCompleted()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
-        auto res = m_cond.wait_for( lock, std::chrono::minutes{ 10 }, [this](){
+        return m_cond.wait_for( lock, std::chrono::minutes{ 10 }, [this](){
             return m_doneQueuing == true && m_discovereryCompleted == true;
         });
-        assert( res == true );
     }
 
 private:
@@ -132,6 +131,5 @@ int main( int argc, char** argv )
     ml->reload( entrypoint );
 
     testCb->markDoneQueuing();
-    testCb->waitForDiscoveryCompleted();
-    return 0;
+    return testCb->waitForDiscoveryCompleted() == true ? 0 : 1;
 }
