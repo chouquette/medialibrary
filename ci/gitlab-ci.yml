@@ -167,12 +167,13 @@ asan-ubsan:
     - cd $CI_PROJECT_DIR
     - meson.py -Db_sanitize=address,undefined -Dlong_running_tests=true build
     - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
-    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples
+    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:
     when: on_failure
     paths:
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+      - $CI_PROJECT_DIR/build/meson-logs/longtests.txt
     expire_in: 1 week
 
 .base-sanitizer:
@@ -194,12 +195,13 @@ asan-ubsan:
       -Dlong_running_tests=true
       build
     - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
-    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples
+    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:
     when: on_failure
     paths:
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+      - $CI_PROJECT_DIR/build/meson-logs/longtests.txt
     expire_in: 1 week
 
 test:tsan:
