@@ -164,10 +164,9 @@ asan-ubsan:
     - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
     - export PATH=/tmp/meson:$PATH
     - cd $CI_PROJECT_DIR
-    - meson.py -Db_sanitize=address,undefined build
-    - cd build && meson.py test --no-stdsplit
-    - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
-    - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+    - meson.py -Db_sanitize=address,undefined -Dlong_running_tests=true build
+    - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
+    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples
   artifacts:
     when: on_failure
     paths:
@@ -191,10 +190,10 @@ asan-ubsan:
       -Dpkg_config_path=$PKG_CONFIG_PATH:$CI_PROJECT_DIR/vlc/prefix/lib/pkgconfig
       -Db_sanitize=$SANITIZERS
       -Db_lundef=false
+      -Dlong_running_tests=true
       build
-    - cd build && meson.py test --no-stdsplit
-    - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
-    - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
+    - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
+    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples
   artifacts:
     when: on_failure
     paths:
