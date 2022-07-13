@@ -7,5 +7,5 @@ fast_disc_exec = executable('fast_discover_cancel', 'main.cpp',
 
 if get_option('long_running_tests')
   test('fast_discoverer_cancel', fast_disc_exec, suite: 'long_running_tests',
-    priority: -1, timeout: 300)
+    priority: -1, timeout: 630)
 endif
