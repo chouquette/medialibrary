@@ -80,6 +80,7 @@ Status VLCMetadataService::run( IItem& item )
 #else
     VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
 #endif
+    vlcMedia.addOption( ":no-lua" );
 
     VLC::Media::ParsedStatus status;
     bool done = false;

@@ -86,6 +86,7 @@ void Directory::read() const
     media.addOption( ":show-hiddenfiles=true" );
     media.addOption( ":ignore-filetypes=''" );
     media.addOption( ":sub-autodetect-fuzzy=2" );
+    media.addOption( ":no-lua" );
 
     auto eventHandler = media.eventManager().onParsedChanged(
         [&mutex, &cond, &res]( VLC::Media::ParsedStatus status) {
