@@ -78,10 +78,7 @@ VLC::Instance VLCInstance::get()
     std::lock_guard<compat::Mutex> lock{ s_lock };
     if ( s_instance.isValid() == false )
     {
-        const char* args[] = {
-            "--no-lua",
-        };
-        s_instance = VLC::Instance{ sizeof(args) / sizeof(args[0]), args };
+        s_instance = VLC::Instance{ 0, nullptr };
     }
     return s_instance;
 }
