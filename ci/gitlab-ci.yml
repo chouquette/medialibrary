@@ -73,6 +73,7 @@ test:debian:
       --xml cobertura.xml --html=html/medialibrary.html --html-details
       -s
       -j 4
+  coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     reports:
       coverage_report: 
