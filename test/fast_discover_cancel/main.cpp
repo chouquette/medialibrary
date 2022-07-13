@@ -109,6 +109,7 @@ int main( int argc, char** argv )
 
     for ( auto i = 0; i < 500; ++i )
     {
+        LOG_DEBUG( "Iteration ", i, "/", 500 );
         auto fsFactory = ml->fsFactoryForMrl( entrypoint );
         auto fsDir = fsFactory->createDirectory( entrypoint );
         auto j = 0u;
