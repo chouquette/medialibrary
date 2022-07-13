@@ -166,7 +166,6 @@ asan-ubsan:
     - cd $CI_PROJECT_DIR
     - meson.py -Db_sanitize=address,undefined build
     - cd build && meson.py test --no-stdsplit
-    - meson.py compile fast_discover_cancel fast_teardown
     - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
     - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
   artifacts:
@@ -194,7 +193,6 @@ asan-ubsan:
       -Db_lundef=false
       build
     - cd build && meson.py test --no-stdsplit
-    - meson.py compile fast_discover_cancel fast_teardown
     - ./test/fast_teardown/fast_teardown $CI_PROJECT_DIR/test/samples/samples
     - ./test/fast_discover_cancel/fast_discover_cancel $CI_PROJECT_DIR/test/samples/samples
   artifacts:
