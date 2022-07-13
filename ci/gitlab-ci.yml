@@ -60,31 +60,14 @@ test:debian:
     - meson.py -Db_coverage=true build
     - cd build
     - meson.py test --no-stdsplit
-    - mkdir html/
-    - >
-      gcovr -r "$CI_PROJECT_DIR/"
-      -e "$CI_PROJECT_DIR/libvlcpp"
-      -e "$CI_PROJECT_DIR/test"
-      -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
-      -e "$CI_PROJECT_DIR/src/database/SqliteErrors.cpp"
-      -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
-      -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
-      -e "$CI_PROJECT_DIR/src/utils/xxhash/"
-      --xml cobertura.xml --html=html/medialibrary.html --html-details
-      -s
-      -j 4
-  coverage: /^\s*lines:\s*\d+.\d+\%/
+    - gcovr -r "$CI_PROJECT_DIR/" --json $CI_PROJECT_DIR/coverage.vlc3.json -j 4
   artifacts:
     reports:
-      coverage_report: 
-        coverage_format: cobertura
-        path: build/cobertura.xml
       junit: build/meson-logs/testlog.junit.xml
-    name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
     paths:
-      - build/html/
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
+      - $CI_PROJECT_DIR/coverage.vlc3.json
     when: always
 
 test:win32:
@@ -243,3 +226,36 @@ gen-test-db:
     paths:
       - "$CI_PROJECT_DIR/test_db.sql"
       - "$CI_PROJECT_DIR/test.db"
+
+# Combine multiple coverage output into a single coverage artifact
+gen-coverage:
+  image: $MEDIALIBRARY_IMG
+  stage: generate
+  needs: ["test:debian"]
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
+  script:
+    - mkdir html
+    - >
+      gcovr --add-tracefile coverage.vlc3.json
+      -e "$CI_PROJECT_DIR/libvlcpp"
+      -e "$CI_PROJECT_DIR/test"
+      -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
+      -e "$CI_PROJECT_DIR/src/database/SqliteErrors.cpp"
+      -e "$CI_PROJECT_DIR/include/medialibrary/filesystem/Errors.h"
+      -e "$CI_PROJECT_DIR/include/medialibrary/IMediaLibrary.h"
+      -e "$CI_PROJECT_DIR/src/utils/xxhash/"
+      --xml cobertura.xml --html=html/medialibrary.html --html-details
+      -s
+      -j 4
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
+    paths:
+      - html/
+    name: "coverage-medialibrary-$CI_COMMIT_SHORT_SHA"
