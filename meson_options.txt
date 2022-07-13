@@ -6,3 +6,6 @@ option('fuzz', type: 'boolean', value: false)
 option('libtool_workaround', type: 'boolean', value: false,
   description: 'Force explicit mention of some libraries in the .pc ' +
   'file that would be overwritten by libtool\'s use of -nostdlib')
+option('long_running_tests', type: 'boolean', value: false,
+  description: 'Enable the long running tests. The binaries will be built ' +
+  'regardless and can still be run manually. This is intended for CI invocations')
