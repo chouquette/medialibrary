@@ -1,6 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
-  MEDIALIBRARY_IMG: registry.videolan.org/medialibrary:20220630074125
+  MEDIALIBRARY_30_IMAGE: registry.videolan.org/medialibrary-3.0:20220713114658
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20220620092626
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20220620085314
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20220127084320
@@ -20,7 +20,7 @@ default:
   interruptible: true
 
 build:novlc:
-  image: $MEDIALIBRARY_IMG
+  image: $MEDIALIBRARY_30_IMAGE
   stage: build
   rules:
     - if: $CI_MERGE_REQUEST_IID
@@ -47,7 +47,7 @@ build:arch:
     - cd build && ninja
 
 test:debian:
-  image: $MEDIALIBRARY_IMG
+  image: $MEDIALIBRARY_30_IMAGE
   rules:
     - if: $CI_MERGE_REQUEST_IID
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -160,7 +160,7 @@ asan-ubsan:
     expire_in: 1 week
 
 .base-sanitizer:
-  image: $MEDIALIBRARY_IMG
+  image: $MEDIALIBRARY_30_IMAGE
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
@@ -200,7 +200,7 @@ test:asan-ubsan:
     SANITIZERS: address,undefined
 
 gen-test-db:
-  image: $MEDIALIBRARY_IMG
+  image: $MEDIALIBRARY_30_IMAGE
   stage: generate
   dependencies: []
   rules:
@@ -229,7 +229,7 @@ gen-test-db:
 
 # Combine multiple coverage output into a single coverage artifact
 gen-coverage:
-  image: $MEDIALIBRARY_IMG
+  image: $MEDIALIBRARY_30_IMAGE
   stage: generate
   needs: ["test:debian"]
   rules:
