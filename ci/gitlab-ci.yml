@@ -1,6 +1,7 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
   MEDIALIBRARY_30_IMAGE: registry.videolan.org/medialibrary-3.0:20220713114658
+  MEDIALIBRARY_40_IMAGE: registry.videolan.org/medialibrary-4.0:20220713115346
   MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20220620092626
   MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20220620085314
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20220127084320
@@ -73,6 +74,10 @@ build:arch:
 test:debian-3.0:
   extends: .test:debian.base
   image: $MEDIALIBRARY_30_IMAGE
+
+test:debian-4.0:
+  extends: .test:debian.base
+  image: $MEDIALIBRARY_40_IMAGE
 
 test:win32:
   image: $MEDIALIBRARY_WIN32_IMG
@@ -235,7 +240,7 @@ gen-test-db:
 gen-coverage:
   image: $MEDIALIBRARY_30_IMAGE
   stage: generate
-  needs: ["test:debian-3.0"]
+  needs: ["test:debian-3.0", "test:debian-4.0"]
   rules:
     - if: $CI_MERGE_REQUEST_IID
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -243,7 +248,7 @@ gen-coverage:
   script:
     - mkdir html
     - >
-      gcovr --add-tracefile coverage.vlc3.json
+      gcovr --add-tracefile '*.cov.json'
       -e "$CI_PROJECT_DIR/libvlcpp"
       -e "$CI_PROJECT_DIR/test"
       -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
