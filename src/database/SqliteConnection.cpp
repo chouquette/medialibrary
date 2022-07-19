@@ -385,6 +385,8 @@ Connection::Handle Connection::Context::handle()
 
 bool Connection::Context::isOpened( Type t )
 {
+    UNUSED_IN_RELEASE( t );
+
     if ( m_handle == nullptr )
         return false;
     switch ( m_type )
