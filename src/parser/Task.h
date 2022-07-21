@@ -150,7 +150,7 @@ public:
      * @param ml A medialibrary instance pointer
      * @param mrl The MRL to the collection file or resource
      */
-    Task( MediaLibraryPtr ml, std::string mrl, Service serviceId );
+    Task( MediaLibraryPtr ml, std::string mrl, IService::Type serviceId );
 
     Task( MediaLibraryPtr ml, std::shared_ptr<File> file );
 
@@ -205,7 +205,7 @@ public:
                                          std::shared_ptr<Folder> parentFolder,
                                          std::shared_ptr<fs::IDirectory> parentFolderFs,
                                          IFile::Type fileType );
-    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, Service serviceId );
+    static std::shared_ptr<Task> create( MediaLibraryPtr ml, std::string mrl, IService::Type t );
     static std::shared_ptr<Task> createRefreshTask( MediaLibraryPtr ml,
                                                     std::shared_ptr<File> file,
                                                     std::shared_ptr<fs::IFile> fsFile,

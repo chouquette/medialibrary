@@ -262,15 +262,17 @@ public:
     virtual PriorityAccess acquirePriorityAccess() override;
 
     virtual bool flushUserProvidedThumbnails() override;
-    virtual bool isServiceSupported( Service s ) const override;
-    virtual bool addSubscription( Service s, std::string mrl ) override;
-    virtual Query<ISubscription> subscriptions( Service s,
+    virtual bool isServiceSupported( IService::Type t ) const override;
+    virtual bool addSubscription( IService::Type t, std::string mrl ) override;
+    virtual Query<ISubscription> subscriptions( IService::Type t,
                                             const QueryParameters* params ) override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;
 
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;
 
     virtual void cacheNewSubscriptionMedia() override;
+
+    virtual ServicePtr service( IService::Type type ) const override;
 
 private:
     static const std::vector<const char*> SupportedMediaExtensions;

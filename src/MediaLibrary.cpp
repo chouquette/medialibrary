@@ -72,6 +72,7 @@
 #include "utils/Enums.h"
 #include "Deprecated.h"
 #include "Subscription.h"
+#include "Service.h"
 
 // Discoverers:
 #include "discoverer/FsDiscoverer.h"
@@ -411,6 +412,7 @@ bool MediaLibrary::createAllTables()
     Bookmark::createTable( dbConn );
     MediaGroup::createTable( dbConn );
     Subscription::createTable( dbConn );
+    Service::createTable( dbConn );
     return true;
 }
 
@@ -2540,19 +2542,19 @@ bool MediaLibrary::flushUserProvidedThumbnails()
     return Thumbnail::flushUserProvided( this );
 }
 
-bool MediaLibrary::isServiceSupported( Service s ) const
+bool MediaLibrary::isServiceSupported( IService::Type t ) const
 {
-    switch ( s )
+    switch ( t )
     {
-    case Service::Podcast:
+    case IService::Type::Podcast:
         return true;
     }
     return false;
 }
 
-bool MediaLibrary::addSubscription( Service s, std::string mrl )
+bool MediaLibrary::addSubscription( IService::Type type, std::string mrl )
 {
-    auto t = parser::Task::create( this, std::move( mrl ), s );
+    auto t = parser::Task::create( this, std::move( mrl ), type );
     if ( t == nullptr )
         return false;
     auto parser = getParser();
@@ -2562,10 +2564,10 @@ bool MediaLibrary::addSubscription( Service s, std::string mrl )
     return true;
 }
 
-Query<ISubscription> MediaLibrary::subscriptions( Service s,
-                                              const QueryParameters* params )
+Query<ISubscription> MediaLibrary::subscriptions( IService::Type t,
+                                                  const QueryParameters* params )
 {
-    return Subscription::fromService( this, s, params );
+    return Subscription::fromService( this, t, params );
 }
 
 bool MediaLibrary::removeSubscription( int64_t subscriptionId )
@@ -2601,6 +2603,13 @@ bool MediaLibrary::fitsInSubscriptionCache( const IMedia& m ) const
 void MediaLibrary::cacheNewSubscriptionMedia()
 {
     m_cacheWorker.cacheSubscriptions();
+}
+
+ServicePtr MediaLibrary::service( IService::Type type ) const
+{
+    if ( isServiceSupported( type ) == false )
+        return nullptr;
+    return Service::fetch( this, type );
 }
 
 }

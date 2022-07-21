@@ -1,6 +1,6 @@
 {
     "subscriptions": [{
-        "service": 0,
+        "service": 1,
         "mrl": "file/podcast://@SAMPLES_DIR@/podcasts/franceinter.xml"
     }],
     "expected": {

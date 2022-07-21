@@ -32,24 +32,24 @@
 
 static void Create( Tests* T )
 {
-    auto c = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( c );
     ASSERT_EQ( c->name(), "collection" );
 }
 
 static void ListFromService( Tests* T )
 {
-    auto collectionQuery = T->ml->subscriptions( Service::Podcast, nullptr );
+    auto collectionQuery = T->ml->subscriptions( IService::Type::Podcast, nullptr );
     ASSERT_EQ( 0u, collectionQuery->count() );
     auto collections = collectionQuery->all();
     ASSERT_TRUE( collections.empty() );
 
-    auto c = Subscription::create( T->ml.get(), Service::Podcast, "Z collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection", 0 );
     ASSERT_NON_NULL( c );
-    auto c2 = Subscription::create( T->ml.get(), Service::Podcast, "A collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", 0 );
     ASSERT_NON_NULL( c2 );
 
-    collectionQuery = T->ml->subscriptions( Service::Podcast, nullptr );
+    collectionQuery = T->ml->subscriptions( IService::Type::Podcast, nullptr );
     ASSERT_EQ( 2u, collectionQuery->count() );
     collections = collectionQuery->all();
     ASSERT_EQ( 2u, collections.size() );
@@ -60,7 +60,7 @@ static void ListFromService( Tests* T )
     QueryParameters params{};
     params.desc = true;
 
-    collectionQuery = T->ml->subscriptions( Service::Podcast, &params );
+    collectionQuery = T->ml->subscriptions( IService::Type::Podcast, &params );
     ASSERT_EQ( 2u, collectionQuery->count() );
     collections = collectionQuery->all();
     ASSERT_EQ( 2u, collections.size() );
@@ -71,7 +71,7 @@ static void ListFromService( Tests* T )
 
 static void ChildSubscriptions( Tests* T )
 {
-    auto c = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( c );
     auto scQuery = c->childSubscriptions( nullptr );
     ASSERT_EQ( 0u, scQuery->count() );
@@ -97,7 +97,7 @@ static void ChildSubscriptions( Tests* T )
     ASSERT_EQ( parent->id(), c->id() );
 
     /* Ensure sub collections aren't listed as 1st level collections */
-    auto collections = T->ml->subscriptions( Service::Podcast, nullptr )->all();
+    auto collections = T->ml->subscriptions( IService::Type::Podcast, nullptr )->all();
     ASSERT_EQ( 1u, collections.size() );
     ASSERT_EQ( c->id(), collections[0]->id() );
 
@@ -115,7 +115,7 @@ static void ChildSubscriptions( Tests* T )
 
 static void ListMedia( Tests* T )
 {
-    auto c1 = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto c1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( c1 );
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addExternalMedia( "http://youtu.be/media1", -1 ) );
@@ -126,7 +126,7 @@ static void ListMedia( Tests* T )
     c1->addMedia( *m1 );
     c1->addMedia( *m2 );
 
-    auto c2 = Subscription::create( T->ml.get(), Service::Podcast, "another collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection", 0 );
     ASSERT_NON_NULL( c2 );
     auto m3 = T->ml->addExternalMedia( "http://podcast.io/something.mp3", -1 );
     ASSERT_NON_NULL( m3 );
@@ -145,7 +145,7 @@ static void CheckDbModel( Tests* T )
 
 static void CachedSize( Tests* T )
 {
-    auto s1 = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_EQ( s1->cachedSize(), 0u );
 
     ASSERT_NON_NULL( s1 );
@@ -224,7 +224,7 @@ static void CachedSize( Tests* T )
 
 static void FetchUncached( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( s );
 
     auto m1 = std::static_pointer_cast<Media>(
@@ -263,7 +263,7 @@ static void FetchUncached( Tests* T )
 
 static void MaxCachedMedia( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( s );
 
     ASSERT_EQ( -1, s->maxCachedMedia() );
@@ -286,7 +286,7 @@ static void MaxCachedMedia( Tests* T )
 
 static void MaxCachedSize( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
     ASSERT_NON_NULL( s );
 
     ASSERT_EQ( -1, s->maxCachedSize() );

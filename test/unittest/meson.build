@@ -928,3 +928,23 @@ subscription_tests = [
 foreach t : subscription_tests
   test('Subscription.' + t, subscription_test_exe, args: t, suite: ['unittest', 'Subscription'])
 endforeach
+
+service_test_exe = executable('service_tests', 'ServiceTests.cpp',
+  objects: common_test_objs,
+  link_with: [medialib],
+  include_directories: [includes, test_include_dir],
+  dependencies: [sqlite_dep],
+  build_by_default: false,
+)
+
+service_tests = [
+  'FetchCreate',
+  'CheckDbModel',
+  'AutoDownload',
+  'NewMediaNotification',
+  'MaxCachedSize',
+]
+
+foreach t : service_tests
+  test('Service.' + t, service_test_exe, args: t, suite: ['unittest', 'Service'])
+endforeach

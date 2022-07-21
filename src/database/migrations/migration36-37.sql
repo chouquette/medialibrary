@@ -203,3 +203,5 @@ Subscription::trigger( Subscription::Triggers::PropagateTaskDeletion, 37 ),
 Subscription::trigger( Subscription::Triggers::IncrementCachedSize, 37 ),
 Subscription::trigger( Subscription::Triggers::DecrementCachedSize, 37 ),
 Subscription::trigger( Subscription::Triggers::DecrementCachedSizeOnRemoval, 37 ),
+
+Service::schema( Service::Table::Name, 37 ),

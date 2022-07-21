@@ -25,6 +25,7 @@
 #include <string>
 #include "medialibrary/ISubscription.h"
 #include "database/DatabaseHelpers.h"
+#include "Service.h"
 
 namespace medialibrary
 {
@@ -60,7 +61,8 @@ public:
 
 public:
     Subscription( MediaLibraryPtr ml, sqlite::Row& row );
-    Subscription( MediaLibraryPtr ml, Service service, std::string name, int64_t parentId );
+    Subscription( MediaLibraryPtr ml, IService::Type service, std::string name,
+                  int64_t parentId );
 
     virtual int64_t id() const override;
     virtual const std::string& name() const override;
@@ -126,10 +128,10 @@ public:
     static bool checkDbModel( MediaLibraryPtr ml );
     static bool addMedia( MediaLibraryPtr ml, int64_t collectionId, int64_t mediaId );
 
-    static std::shared_ptr<Subscription> create(MediaLibraryPtr ml, Service service,
-                                               std::string name, int64_t parentId);
-    static Query<ISubscription> fromService( MediaLibraryPtr ml, Service service,
-                                           const QueryParameters* params );
+    static std::shared_ptr<Subscription> create( MediaLibraryPtr ml, IService::Type service,
+                                                 std::string name, int64_t parentId );
+    static Query<ISubscription> fromService( MediaLibraryPtr ml, IService::Type service,
+                                             const QueryParameters* params );
 
     static std::shared_ptr<Subscription> fromFile( MediaLibraryPtr ml, int64_t fileId );
 
@@ -139,7 +141,7 @@ private:
 private:
     MediaLibraryPtr m_ml;
     int64_t m_id;
-    Service m_service;
+    IService::Type m_service;
     std::string m_name;
     int64_t m_parentId;
     uint64_t m_cachedSize;

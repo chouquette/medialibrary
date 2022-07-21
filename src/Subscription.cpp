@@ -55,8 +55,8 @@ Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
     assert( row.hasRemainingColumns() == false );
 }
 
-Subscription::Subscription( MediaLibraryPtr ml, Service service, std::string name,
-                        int64_t parentId )
+Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
+                            std::string name, int64_t parentId )
     : m_ml( ml )
     , m_id( 0 )
     , m_service( service )
@@ -442,8 +442,8 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
            checkIndex( Indexes::RelationSubscriptionId );
 }
 
-std::shared_ptr<Subscription> Subscription::create(MediaLibraryPtr ml, Service service,
-                                                std::string name, int64_t parentId )
+std::shared_ptr<Subscription> Subscription::create( MediaLibraryPtr ml, IService::Type service,
+                                                    std::string name, int64_t parentId )
 {
     auto self = std::make_shared<Subscription>( ml, service, std::move( name ), parentId );
     const std::string req = "INSERT INTO " + Table::Name +
@@ -457,7 +457,7 @@ std::shared_ptr<Subscription> Subscription::create(MediaLibraryPtr ml, Service s
     return self;
 }
 
-Query<ISubscription> Subscription::fromService( MediaLibraryPtr ml, Service service,
+Query<ISubscription> Subscription::fromService( MediaLibraryPtr ml, IService::Type service,
                                             const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name +

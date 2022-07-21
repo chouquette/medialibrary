@@ -30,6 +30,7 @@
 #include "Types.h"
 #include "IQuery.h"
 #include "IMedia.h"
+#include "IService.h"
 
 struct libvlc_instance_t;
 
@@ -186,11 +187,6 @@ enum class PlaylistType : uint8_t
     AudioOnly,
     /// Only include video playlist
     VideoOnly,
-};
-
-enum class Service : uint8_t
-{
-    Podcast,
 };
 
 struct SetupConfig
@@ -1076,9 +1072,9 @@ public:
      */
     virtual bool flushUserProvidedThumbnails() = 0;
 
-    virtual bool isServiceSupported( Service s ) const = 0;
-    virtual bool addSubscription( Service s, std::string mrl ) = 0;
-    virtual Query<ISubscription> subscriptions( Service s,
+    virtual bool isServiceSupported( IService::Type t ) const = 0;
+    virtual bool addSubscription( IService::Type t, std::string mrl ) = 0;
+    virtual Query<ISubscription> subscriptions( IService::Type t,
                                             const QueryParameters* params = nullptr ) = 0;
     virtual bool removeSubscription( int64_t subscriptionId ) = 0;
 
@@ -1103,6 +1099,13 @@ public:
      * subscription, it *not* taken into account for this.
      */
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const = 0;
+
+    /**
+     * @brief service Returns an object representing a service
+     * @param type The service type
+     * @return A service instance, or nullptr if the service isn't available
+     */
+    virtual ServicePtr service( IService::Type type ) const = 0;
 };
 
 }

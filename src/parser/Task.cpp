@@ -139,13 +139,13 @@ Task::Task( MediaLibraryPtr ml, std::string mrl , IFile::Type fileType )
 {
 }
 
-Task::Task(MediaLibraryPtr ml, std::string mrl, Service service )
+Task::Task(MediaLibraryPtr ml, std::string mrl, IService::Type service )
     : m_ml( ml )
     , m_attemptsRemaining( Settings::MaxTaskAttempts )
     , m_type( Type::Creation )
     , m_mrl( std::move( mrl ) )
     , m_fileType( IFile::Type::Subscription )
-    , m_linkToId( static_cast<std::underlying_type_t<Service>>( service ) )
+    , m_linkToId( static_cast<std::underlying_type_t<IService::Type>>( service ) )
 {
 }
 
@@ -793,7 +793,7 @@ Task::create( MediaLibraryPtr ml, std::shared_ptr<fs::IFile> fileFs,
 }
 
 std::shared_ptr<Task> Task::create( MediaLibraryPtr ml, std::string mrl,
-                                    Service service )
+                                    IService::Type service )
 {
     std::shared_ptr<Task> self = std::make_shared<Task>( ml, std::move( mrl ), service );
     const std::string req = "INSERT INTO " + Table::Name +

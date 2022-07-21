@@ -233,7 +233,7 @@ void Tests::InitTestCase( const std::string& testName )
         {
             auto& sub = subscriptions[i];
             ASSERT_TRUE( sub.HasMember( "service" ) && sub.HasMember( "mrl" ) );
-            addSubscription( static_cast<Service>( sub["service"].GetUint() ),
+            addSubscription( static_cast<IService::Type>( sub["service"].GetUint() ),
                     sub["mrl"].GetString() );
         }
         m_cb->onDiscoveryCompleted();
@@ -292,7 +292,7 @@ void Tests::InitializeMediaLibrary( const std::string& dbPath,
     m_ml.reset( new MediaLibraryTester{ dbPath, mlFolderDir } );
 }
 
-void Tests::addSubscription( Service s, std::string mrl )
+void Tests::addSubscription( IService::Type s, std::string mrl )
 {
     /*
      * We need an absolute path, and we definitely can't compute it from the json
@@ -386,7 +386,7 @@ void Tests::runChecks()
         //FIXME: Should we expose the services with their ID and the subscriptions
         // as a member?
         checkSubscriptions( expected["subscriptions"],
-                m_ml->subscriptions( Service::Podcast, nullptr )->all() );
+                m_ml->subscriptions( IService::Type::Podcast, nullptr )->all() );
     }
 }
 
@@ -1000,7 +1000,7 @@ void RefreshTests::forceRefresh()
         assert( fileFsIt != cend( filesFs ) );
         ml->onUpdatedFile( std::move( f ), *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
-    auto subscriptions = m_ml->subscriptions( Service::Podcast, nullptr )->all();
+    auto subscriptions = m_ml->subscriptions( IService::Type::Podcast, nullptr )->all();
     for ( auto& s : subscriptions )
         s->refresh();
 }

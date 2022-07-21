@@ -186,6 +186,7 @@ namespace
         "Playlist",
         "PlaylistFts",
         "PlaylistMediaRelation",
+        "Service",
         "Settings",
         "Show",
         "ShowEpisode",

@@ -71,7 +71,7 @@ static void ParseTwice( Tests* T )
 
     if ( T->subscriptions.IsArray() )
     {
-        auto subscriptions = T->m_ml->subscriptions( Service::Podcast, nullptr )->all();
+        auto subscriptions = T->m_ml->subscriptions( IService::Type::Podcast, nullptr )->all();
         for ( const auto& c : subscriptions )
             T->m_ml->removeSubscription( c->id() );
         /* Ensure we don't wait for a discovery that will not come */
@@ -80,7 +80,7 @@ static void ParseTwice( Tests* T )
         {
             auto& sub = T->subscriptions[i];
             ASSERT_TRUE( sub.HasMember( "service" ) && sub.HasMember( "mrl" ) );
-            T->addSubscription( static_cast<Service>( sub["service"].GetUint() ),
+            T->addSubscription( static_cast<IService::Type>( sub["service"].GetUint() ),
                     sub["mrl"].GetString() );
         }
     }

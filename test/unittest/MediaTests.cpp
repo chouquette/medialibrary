@@ -1500,7 +1500,7 @@ static void NbSubscriptions( Tests* T )
     auto m = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media.mkv", -1 ) );
     ASSERT_EQ( 0u, m->nbSubscriptions() );
 
-    auto subscription = Subscription::create( T->ml.get(), Service::Podcast, "subscription", 0 );
+    auto subscription = Subscription::create( T->ml.get(), IService::Type::Podcast, "subscription", 0 );
     ASSERT_NON_NULL( subscription );
 
     auto res = subscription->addMedia( *m );

@@ -123,7 +123,7 @@ struct Tests
     virtual void InitializeMediaLibrary( const std::string& dbPath,
                                          const std::string& mlFolderDir );
     /* Helper to manipulate the subscription MRL to convert it to an absolute path */
-    void addSubscription( Service s, std::string mrl );
+    void addSubscription( IService::Type s, std::string mrl );
     void runChecks();
 
     void checkVideoTracks( const rapidjson::Value& expectedTracks, const std::vector<VideoTrackPtr>& tracks );

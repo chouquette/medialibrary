@@ -52,6 +52,7 @@ class IThumbnailer;
 class IMediaGroup;
 class ISubscription;
 class ICacher;
+class IService;
 
 namespace parser
 {
@@ -82,6 +83,7 @@ using FolderPtr = std::shared_ptr<IFolder>;
 using SubtitleTrackPtr = std::shared_ptr<ISubtitleTrack>;
 using MediaGroupPtr = std::shared_ptr<IMediaGroup>;
 using SubscriptionPtr = std::shared_ptr<ISubscription>;
+using ServicePtr = std::shared_ptr<IService>;
 
 }
 

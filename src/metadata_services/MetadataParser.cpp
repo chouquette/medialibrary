@@ -536,7 +536,7 @@ Status MetadataAnalyzer::parseSubscription( IItem& item ) const
         if ( name.empty() == true )
             name = utils::file::fileName( mrl );
         auto t = m_ml->getConn()->newTransaction();
-        subscription = Subscription::create( m_ml, static_cast<Service>( item.linkToId() ),
+        subscription = Subscription::create( m_ml, static_cast<IService::Type>( item.linkToId() ),
                                          std::move( name ), 0 );
         if ( subscription == nullptr )
             return Status::Fatal;
