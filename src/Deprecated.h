@@ -27,6 +27,7 @@
  * or old migration code
  */
 
+#include <cstdint>
 #include <string>
 
 namespace medialibrary
