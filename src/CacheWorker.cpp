@@ -186,7 +186,7 @@ void CacheWorker::run()
     LOG_DEBUG( "Terminating cache worker" );
 }
 
-uint64_t CacheWorker::doCache( std::shared_ptr<Media> m, Subscription* c,
+uint64_t CacheWorker::doCache( std::shared_ptr<Media> m, Subscription* s,
                                IFile::CacheType cacheType )
 {
     auto f = std::static_pointer_cast<File>( m->mainFile() );
@@ -202,7 +202,7 @@ uint64_t CacheWorker::doCache( std::shared_ptr<Media> m, Subscription* c,
     }
     LOG_DEBUG( "Attempting to ", ( cacheType == IFile::CacheType::Automatic ?
                  "automatically" : "manually" ), " cache file at ", f->mrl() );
-    if ( evictIfNeeded( *f, c, cacheType ) == false )
+    if ( evictIfNeeded( *f, s, cacheType ) == false )
     {
         LOG_DEBUG( "Failed to evict media from cache, can't cache ", f->mrl() );
         return 0;
@@ -259,7 +259,7 @@ void CacheWorker::doSubscriptionCache()
     }
 }
 
-bool CacheWorker::evictIfNeeded( const File& file, Subscription* c,
+bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
                                  IFile::CacheType cacheType )
 {
     if ( cacheType == File::CacheType::Automatic )
@@ -268,18 +268,18 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* c,
          * We only want to check the number of cached media for a subscription
          * when doing automatic caching.
          */
-        auto maxMedia = c->maxCachedMedia();
+        auto maxMedia = s->maxCachedMedia();
         if ( maxMedia < 0 )
         {
             LOG_DEBUG( "No subscription settings, falling back to global settings" );
             maxMedia = m_ml->settings().nbCachedMediaPerSubscription();
         }
-        auto nbCachedMediaInSub = c->cachedMedia( false )->count();
-        LOG_DEBUG( "Subscription #", c->id(), " has ", nbCachedMediaInSub,
+        auto nbCachedMediaInSub = s->cachedMedia( false )->count();
+        LOG_DEBUG( "Subscription #", s->id(), " has ", nbCachedMediaInSub,
                    "/", maxMedia, " cached media" );
         if ( nbCachedMediaInSub >= static_cast<uint32_t>( maxMedia ) )
         {
-            auto toEvict = c->cachedMedia( true )->items( 1, 0 );
+            auto toEvict = s->cachedMedia( true )->items( 1, 0 );
             if ( toEvict.size() != 1 )
                 return false;
             auto f = toEvict[0]->mainFile();

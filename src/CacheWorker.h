@@ -66,13 +66,13 @@ public:
 
 private:
     void run();
-    uint64_t doCache( std::shared_ptr<Media> m, Subscription* c,
+    uint64_t doCache( std::shared_ptr<Media> m, Subscription* s,
                       IFile::CacheType cacheType );
     void doUncache( std::shared_ptr<Media> m );
     void doSubscriptionCache();
     void checkCache();
     bool removeFromCache( const std::string& mrl );
-    bool evictIfNeeded( const File& file, Subscription* c, IFile::CacheType cacheType );
+    bool evictIfNeeded( const File& file, Subscription* s, IFile::CacheType cacheType );
     void queueTask( std::shared_ptr<Media> m, bool cache );
     uint64_t availableSubscriptionCacheSize() const;
 
