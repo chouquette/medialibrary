@@ -309,6 +309,35 @@ static void MaxCachedSize( Tests* T )
     ASSERT_EQ( -1, s->maxCachedSize() );
 }
 
+static void NewMediaNotify( Tests* T )
+{
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    ASSERT_NON_NULL( s );
+
+    ASSERT_EQ( -1, s->newMediaNotification() );
+
+    auto res = s->setNewMediaNotification( 124 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1, s->newMediaNotification() );
+
+    s = Subscription::fetch( T->ml.get(), s->id() );
+    ASSERT_EQ( 1, s->newMediaNotification() );
+
+    res = s->setNewMediaNotification( 0 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 0, s->newMediaNotification() );
+
+    s = Subscription::fetch( T->ml.get(), s->id() );
+    ASSERT_EQ( 0, s->newMediaNotification() );
+
+    res = s->setNewMediaNotification( -123 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( -1, s->newMediaNotification() );
+
+    s = Subscription::fetch( T->ml.get(), s->id() );
+    ASSERT_EQ( -1, s->newMediaNotification() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Subscription )
@@ -322,6 +351,7 @@ int main( int ac, char** av )
     ADD_TEST( FetchUncached );
     ADD_TEST( MaxCachedMedia );
     ADD_TEST( MaxCachedSize );
+    ADD_TEST( NewMediaNotify );
 
     END_TESTS
 }

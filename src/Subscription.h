@@ -75,6 +75,9 @@ public:
     virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) override;
     virtual int64_t maxCachedSize() const override;
     virtual bool setMaxCachedSize( int64_t maxCachedSize ) override;
+    virtual int8_t newMediaNotification() const override;
+    virtual bool setNewMediaNotification( int8_t value ) override;
+
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );
     bool refresh() override;
@@ -148,6 +151,7 @@ private:
     uint64_t m_cachedSize;
     int32_t m_maxCachedMedia;
     int64_t m_maxCachedSize;
+    int8_t m_newMediaNotification;
 };
 
 }

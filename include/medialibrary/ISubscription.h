@@ -85,6 +85,20 @@ public:
      * If passing the current value, this will return true.
      */
     virtual bool setMaxCachedSize( int64_t maxCachedSize ) = 0;
+    /**
+     * @brief newMediaNotification Returns the new media notification setting
+     * @return A positive value if explicitly enabled, 0 if explicitly disabled, -1 is unset
+     *
+     * If this value is unset, the parent service setting will be used.
+     */
+    virtual int8_t newMediaNotification() const = 0;
+    /**
+     * @brief setNewMediaNotification Sets the new media notification setting
+     * @param value A negative value to default to the parent service setting, 0
+     *              to disable, and a positive value to enable.
+     * @return true if the change was successful, false otherwise.
+     */
+    virtual bool setNewMediaNotification( int8_t value ) = 0;
 };
 
 }

@@ -51,6 +51,7 @@ Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
     , m_cachedSize( row.extract<decltype(m_cachedSize)>() )
     , m_maxCachedMedia( row.extract<decltype(m_maxCachedMedia)>() )
     , m_maxCachedSize( row.extract<decltype(m_maxCachedSize)>() )
+    , m_newMediaNotification( row.extract<decltype(m_newMediaNotification)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -65,6 +66,7 @@ Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
     , m_cachedSize( 0 )
     , m_maxCachedMedia( -1 )
     , m_maxCachedSize( -1 )
+    , m_newMediaNotification( -1 )
 {
 }
 
@@ -144,6 +146,28 @@ bool Subscription::setMaxCachedSize( int64_t maxCachedSize )
                                        maxCachedSize, m_id ) == false )
         return false;
     m_maxCachedSize = maxCachedSize;
+    return true;
+}
+
+int8_t Subscription::newMediaNotification() const
+{
+    return m_newMediaNotification;
+}
+
+bool Subscription::setNewMediaNotification( int8_t value )
+{
+    if ( m_newMediaNotification == value )
+        return true;
+    if ( value < 0 )
+        value = -1;
+    else if ( value > 0 )
+        value = 1;
+    const std::string req = "UPDATE " + Table::Name +
+            " SET new_media_notify = ?1 WHERE id_subscription = ?2";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
+                                       value, m_id ) == false )
+        return false;
+    m_newMediaNotification = value;
     return true;
 }
 
@@ -310,6 +334,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                "cached_size UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "max_cached_media INTEGER NOT NULL DEFAULT -1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
+               "new_media_notify INTEGER NOT NULL DEFAULT -1,"
                "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
                    "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
            ")";

@@ -923,6 +923,7 @@ subscription_tests = [
   'FetchUncached',
   'MaxCachedMedia',
   'MaxCachedSize',
+  'NewMediaNotify',
 ]
 
 foreach t : subscription_tests
