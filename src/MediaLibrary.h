@@ -271,6 +271,10 @@ public:
 
     virtual ServicePtr service( IService::Type type ) const override;
 
+    virtual bool setSubscriptionMaxCachedMedia( uint32_t nbCachedMedia ) override;
+    virtual bool setSubscriptionMaxCacheSize( uint64_t maxCacheSize ) override;
+    virtual bool setMaxCacheSize( uint64_t maxCacheSize ) override;
+
 private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;

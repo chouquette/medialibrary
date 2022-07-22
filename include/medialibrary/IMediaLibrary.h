@@ -1103,6 +1103,32 @@ public:
      * @return A service instance, or nullptr if the service isn't available
      */
     virtual ServicePtr service( IService::Type type ) const = 0;
+
+    /**
+     * @brief setSubscriptionMaxCachedMedia Sets the maximum number of cached media
+     *                                      for each subscription
+     * @param nbCachedMedia The number of media to automatically cache
+     * @return true if the change was successful, false otherwise
+     *
+     * This setting will be used when a subscription is set to inherit the global
+     * setting, but each subscription can individually override this setting.
+     */
+    virtual bool setSubscriptionMaxCachedMedia( uint32_t nbCachedMedia ) = 0;
+    /**
+     * @brief setSubscriptionMaxCacheSize Sets the maximum cache size for each subscriptions
+     * @param maxCacheSize The size of each subscription cache in bytes
+     * @return true if the change was successful, false otherwise
+     *
+     * This setting will be used when a subscription is set to inherit the global
+     * setting, but each subscription can individually override this setting.
+     */
+    virtual bool setSubscriptionMaxCacheSize( uint64_t maxCacheSize ) = 0;
+    /**
+     * @brief setMaxCacheSize Sets the maximum overall cache size
+     * @param nbCacheMedia The size the global cache in bytes
+     * @return true if the change was successful, false otherwise
+     */
+    virtual bool setMaxCacheSize( uint64_t maxCacheSize ) = 0;
 };
 
 }
