@@ -217,9 +217,12 @@ Status LinkService::linkToSubscription(IItem& item)
     if ( media == nullptr )
         return Status::Requeue;
 
+    auto sub = Subscription::fetch( m_ml, item.linkToId() );
+    if ( sub == nullptr )
+        return Status::Fatal;
     try
     {
-        if ( Subscription::addMedia( m_ml, item.linkToId(), media->id() ) == false )
+        if ( sub->addMedia( *media ) == false )
             return Status::Fatal;
     }
     catch ( const sqlite::errors::ConstraintUnique& )
@@ -230,6 +233,16 @@ Status LinkService::linkToSubscription(IItem& item)
          */
         return Status::Completed;
     }
+    auto notifySub = sub->newMediaNotification();
+    if ( notifySub == 0 )
+        return Status::Completed;
+    if ( notifySub < 0 )
+    {
+        auto service = m_ml->service( sub->service() );
+        if ( service == nullptr || service->isNewMediaNotificationEnabled() == false )
+            return Status::Completed;
+    }
+
     auto notifier = m_ml->getNotifier();
     if ( notifier != nullptr )
         notifier->notifySubscriptionNewMedia( item.linkToId() );
