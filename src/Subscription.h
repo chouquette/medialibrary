@@ -65,6 +65,7 @@ public:
                   int64_t parentId );
 
     virtual int64_t id() const override;
+    virtual IService::Type service() const override;
     virtual const std::string& name() const override;
     virtual Query<ISubscription> childSubscriptions(const QueryParameters* params) override;
     virtual SubscriptionPtr parent() override;

@@ -73,6 +73,11 @@ int64_t Subscription::id() const
     return m_id;
 }
 
+IService::Type Subscription::service() const
+{
+    return m_service;
+}
+
 const std::string& Subscription::name() const
 {
     return m_name;

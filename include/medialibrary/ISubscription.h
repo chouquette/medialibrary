@@ -25,6 +25,7 @@
 #include <string>
 #include "medialibrary/Types.h"
 #include "medialibrary/IQuery.h"
+#include "medialibrary/IService.h"
 
 namespace medialibrary
 {
@@ -36,6 +37,7 @@ class ISubscription
 public:
     virtual ~ISubscription() = default;
     virtual int64_t id() const = 0;
+    virtual IService::Type service() const = 0;
     virtual const std::string& name() const = 0;
     virtual Query<ISubscription> childSubscriptions( const QueryParameters* params ) = 0;
     virtual SubscriptionPtr parent() = 0;
