@@ -288,10 +288,14 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
             LOG_DEBUG( "No subscription settings, falling back to global settings" );
             maxMedia = m_ml->settings().nbCachedMediaPerSubscription();
         }
+        auto subCacheSize = s->cachedSize();
+        auto maxSubCacheSize = s->maxCachedSize();
         auto nbCachedMediaInSub = s->cachedMedia( false )->count();
         LOG_DEBUG( "Subscription #", s->id(), " has ", nbCachedMediaInSub,
                    "/", maxMedia, " cached media" );
-        if ( nbCachedMediaInSub >= static_cast<uint32_t>( maxMedia ) )
+        while ( nbCachedMediaInSub >= static_cast<uint32_t>( maxMedia ) ||
+                ( maxSubCacheSize > 0 &&
+                  static_cast<uint64_t>( maxSubCacheSize ) >= subCacheSize ) )
         {
             auto toEvict = s->cachedMedia( true )->items( 1, 0 );
             if ( toEvict.size() != 1 )
@@ -307,10 +311,11 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
             if ( toEvict[0]->removeCached() == false )
                 return false;
             m_cacheSize.fetch_sub( f->size(), std::memory_order_acq_rel );
+            subCacheSize -= f->size();
         }
     }
     auto fileSize = file.size();
-    auto evictionNeeded = fileSize > availableSubscriptionCacheSize();
+    auto evictionNeeded = fileSize > availableCacheSize();
     if ( evictionNeeded == false )
         return true;
 
@@ -328,7 +333,7 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
             return false;
         m_cacheSize.fetch_sub( cachedFiles[cachedFilesIdx]->size(),
                                std::memory_order_acq_rel );
-        evictionNeeded = fileSize > availableSubscriptionCacheSize();
+        evictionNeeded = fileSize > availableCacheSize();
     }
     return true;
 }
