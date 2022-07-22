@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 namespace medialibrary
 {
