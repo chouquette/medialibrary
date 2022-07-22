@@ -146,7 +146,7 @@ static void CheckDbModel( Tests* T )
 static void CachedSize( Tests* T )
 {
     auto s1 = Subscription::create( T->ml.get(), Service::Podcast, "collection", 0 );
-    ASSERT_EQ( s1->cachedSize(), 0 );
+    ASSERT_EQ( s1->cachedSize(), 0u );
 
     ASSERT_NON_NULL( s1 );
     auto m1 = std::static_pointer_cast<Media>(
@@ -173,7 +173,7 @@ static void CachedSize( Tests* T )
     ASSERT_TRUE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 0 );
+    ASSERT_EQ( s1->cachedSize(), 0u );
 
     /* Since media1 is external, it doesn't have a size, let's fix this */
     res = f1->updateFsInfo( 0, 123 );
@@ -183,7 +183,7 @@ static void CachedSize( Tests* T )
     ASSERT_TRUE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 123 );
+    ASSERT_EQ( s1->cachedSize(), 123u );
 
     /* Ensure we reject caching a file without a size */
     res = f2->updateFsInfo( 0, 0 );
@@ -193,7 +193,7 @@ static void CachedSize( Tests* T )
     ASSERT_FALSE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 123 );
+    ASSERT_EQ( s1->cachedSize(), 123u );
 
     res = f2->updateFsInfo( 0, 987 );
     ASSERT_TRUE( res );
@@ -202,24 +202,24 @@ static void CachedSize( Tests* T )
     ASSERT_TRUE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 123 + 987 );
+    ASSERT_EQ( s1->cachedSize(), 123u + 987u );
 
     res = s1->removeMedia( m1->id() );
     ASSERT_TRUE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 987 );
+    ASSERT_EQ( s1->cachedSize(), 987u );
 
     T->ml->deleteMedia( m2->id() );
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 0 );
+    ASSERT_EQ( s1->cachedSize(), 0u );
 
     /* Ensure everything works fine when removing an uncached media */
     res = s1->removeMedia( m3->id() );
     ASSERT_TRUE( res );
 
     s1 = Subscription::fetch( T->ml.get(), s1->id() );
-    ASSERT_EQ( s1->cachedSize(), 0 );
+    ASSERT_EQ( s1->cachedSize(), 0u );
 }
 
 static void FetchUncached( Tests* T )

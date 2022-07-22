@@ -44,7 +44,7 @@ public:
     /**
      * @brief cachedSize Returns the sum of all cached files for this collection
      */
-    virtual int64_t cachedSize() const = 0;
+    virtual uint64_t cachedSize() const = 0;
     /**
      * @brief maxCachedMedia Returns the maximum number of cached media for this
      *                       collection, or -1 is unset

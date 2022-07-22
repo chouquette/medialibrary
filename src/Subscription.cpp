@@ -97,7 +97,7 @@ Query<IMedia> Subscription::media( const QueryParameters* params )
     return Media::fromSubscription( m_ml, m_id, params );
 }
 
-int64_t Subscription::cachedSize() const
+uint64_t Subscription::cachedSize() const
 {
     return m_cachedSize;
 }
