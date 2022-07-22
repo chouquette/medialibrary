@@ -27,8 +27,8 @@
 #include "Strings.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cassert>
+#include <cctype>
 
 namespace medialibrary
 {
