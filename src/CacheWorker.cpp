@@ -133,13 +133,13 @@ uint64_t CacheWorker::cacheSize() const
     return m_cacheSize.load( std::memory_order_acquire );
 }
 
-uint64_t CacheWorker::availableCacheSize() const
+uint64_t CacheWorker::availableSubscriptionCacheSize() const
 {
     auto usedSize = cacheSize();
     auto totalSize = m_ml->settings().maxSubscriptionCacheSize();
     if ( usedSize > totalSize )
     {
-        LOG_WARN( "Cache is overused: ", usedSize, " / ", totalSize );
+        LOG_WARN( "Subscription cache is overused: ", usedSize, " / ", totalSize );
         return 0;
     }
     return totalSize - usedSize;
@@ -296,7 +296,7 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* c,
         }
     }
     auto fileSize = file.size();
-    auto evictionNeeded = fileSize > availableCacheSize();
+    auto evictionNeeded = fileSize > availableSubscriptionCacheSize();
     if ( evictionNeeded == false )
         return true;
 
@@ -314,7 +314,7 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* c,
             return false;
         m_cacheSize.fetch_sub( cachedFiles[cachedFilesIdx]->size(),
                                std::memory_order_acq_rel );
-        evictionNeeded = fileSize > availableCacheSize();
+        evictionNeeded = fileSize > availableSubscriptionCacheSize();
     }
     return true;
 }
