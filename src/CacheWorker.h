@@ -63,7 +63,6 @@ public:
     void resume();
     void stop();
     uint64_t cacheSize() const;
-    uint64_t availableCacheSize() const;
 
 private:
     void run();
@@ -75,6 +74,7 @@ private:
     bool removeFromCache( const std::string& mrl );
     bool evictIfNeeded( const File& file, Subscription* c, IFile::CacheType cacheType );
     void queueTask( std::shared_ptr<Media> m, bool cache );
+    uint64_t availableCacheSize() const;
 
 private:
     MediaLibrary* m_ml;
