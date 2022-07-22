@@ -41,6 +41,7 @@ Service::Service( MediaLibraryPtr ml, sqlite::Row& row )
     , m_autoDownload( row.extract<decltype(m_autoDownload)>() )
     , m_newMediaNotif( row.extract<decltype(m_newMediaNotif)>() )
     , m_maxCacheSize( row.extract<decltype(m_maxCacheSize)>() )
+    , m_nbSubscriptions( row.extract<decltype(m_nbSubscriptions)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -51,6 +52,7 @@ Service::Service( MediaLibraryPtr ml, Type type )
     , m_autoDownload( true )
     , m_newMediaNotif( true )
     , m_maxCacheSize( -1 )
+    , m_nbSubscriptions( 0 )
 {
 }
 
@@ -64,6 +66,7 @@ bool Service::addSubscription( std::string mrl )
     auto t = parser::Task::create( m_ml, std::move( mrl ), type() );
     if ( t == nullptr )
         return false;
+    ++m_nbSubscriptions;
     auto parser = m_ml->getParser();
     if ( parser == nullptr )
         return false;
@@ -129,6 +132,11 @@ bool Service::setMaxCachedSize( int64_t maxSize )
     return true;
 }
 
+uint32_t Service::nbSubscriptions() const
+{
+    return m_nbSubscriptions;
+}
+
 std::string Service::schema( const std::string& name, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( name );
@@ -141,7 +149,8 @@ std::string Service::schema( const std::string& name, uint32_t dbModel )
                + Table::PrimaryKeyColumn + " UNSIGNED INTEGER PRIMARY KEY,"
                "auto_download BOOLEAN NOT NULL DEFAULT 1,"
                "notify BOOLEAN NOT NULL DEFAULT 1,"
-               "max_cached_size INTEGER NOT NULL DEFAULT -1"
+               "max_cached_size INTEGER NOT NULL DEFAULT -1,"
+               "nb_subscriptions INTEGER NOT NULL DEFAULT 0"
            ")";
 }
 
@@ -151,12 +160,69 @@ void Service::createTable( sqlite::Connection* dbConn )
                                    schema( Table::Name, Settings::DbModelVersion ) );
 }
 
+void Service::createTriggers( sqlite::Connection* dbConn )
+{
+    sqlite::Tools::executeRequest( dbConn,
+            trigger( Triggers::IncrementNbSubscriptions, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+            trigger( Triggers::DecrementNbSubscriptions, Settings::DbModelVersion ) );
+}
+
 bool Service::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
     return sqlite::Tools::checkTableSchema(
                 schema( Table::Name, Settings::DbModelVersion ), Table::Name );
+}
+
+std::string Service::trigger( Triggers t, uint32_t dbModel )
+{
+    UNUSED_IN_RELEASE( dbModel );
+    assert( dbModel >= 37 );
+
+    switch ( t )
+    {
+    case Triggers::IncrementNbSubscriptions:
+        return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+               " AFTER INSERT ON " + Subscription::Table::Name +
+               " BEGIN"
+               " UPDATE " + Table::Name +
+                   " SET nb_subscriptions = nb_subscriptions + 1"
+                       " WHERE " + Table::PrimaryKeyColumn + " = new.service_id;"
+               " END";
+    case Triggers::DecrementNbSubscriptions:
+        return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+               " AFTER DELETE ON " + Subscription::Table::Name +
+               " BEGIN"
+               " UPDATE " + Table::Name +
+                   " SET nb_subscriptions = nb_subscriptions - 1"
+                       " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
+               " END";
+    default:
+        assert( !"Invalid trigger provided" );
+    }
+
+    return "<invalid trigger>";
+
+}
+
+std::string Service::triggerName( Triggers t, uint32_t dbModel )
+{
+    UNUSED_IN_RELEASE( dbModel );
+    assert( dbModel >= 37 );
+
+    switch ( t )
+    {
+    case Triggers::IncrementNbSubscriptions:
+        return "service_increment_nb_subs";
+    case Triggers::DecrementNbSubscriptions:
+        return "service_decrement_nb_subs";
+    default:
+        assert( !"Invalid trigger provided" );
+    }
+
+    return "<invalid trigger>";
 }
 
 std::shared_ptr<Service> Service::create( MediaLibraryPtr ml, Type type )

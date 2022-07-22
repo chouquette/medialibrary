@@ -205,3 +205,5 @@ Subscription::trigger( Subscription::Triggers::DecrementCachedSize, 37 ),
 Subscription::trigger( Subscription::Triggers::DecrementCachedSizeOnRemoval, 37 ),
 
 Service::schema( Service::Table::Name, 37 ),
+Service::trigger( Service::Triggers::IncrementNbSubscriptions, 37 ),
+Service::trigger( Service::Triggers::DecrementNbSubscriptions, 37 ),

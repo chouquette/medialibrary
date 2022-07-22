@@ -944,6 +944,7 @@ service_tests = [
   'AutoDownload',
   'NewMediaNotification',
   'MaxCachedSize',
+  'NbSubscriptions',
 ]
 
 foreach t : service_tests

@@ -514,6 +514,7 @@ void MediaLibrary::createAllTriggers()
     Chapter::createIndexes( dbConn );
     Subscription::createTriggers( dbConn );
     Subscription::createIndexes( dbConn );
+    Service::createTriggers( dbConn );
 }
 
 bool MediaLibrary::checkDatabaseIntegrity()

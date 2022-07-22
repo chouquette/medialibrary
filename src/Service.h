@@ -37,6 +37,11 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Service::*const PrimaryKey;
     };
+    enum class Triggers : uint8_t
+    {
+        IncrementNbSubscriptions,
+        DecrementNbSubscriptions,
+    };
 
     Service( MediaLibraryPtr ml, sqlite::Row& row );
     Service( MediaLibraryPtr ml, Type type );
@@ -50,10 +55,15 @@ public:
     virtual bool setNewMediaNotificationEnabled(bool enabled) override;
     virtual int64_t maxCachedSize() const override;
     virtual bool setMaxCachedSize(int64_t maxSize) override;
+    virtual uint32_t nbSubscriptions() const override;
 
     static std::string schema( const std::string& name, uint32_t dbModel );
+    static std::string trigger( Triggers t, uint32_t dbModel );
+    static std::string triggerName( Triggers t, uint32_t dbModel );
     static void createTable(sqlite::Connection* dbConn );
+    static void createTriggers( sqlite::Connection* dbConn );
     static bool checkDbModel( MediaLibraryPtr ml );
+
 
     static std::shared_ptr<Service> fetch( MediaLibraryPtr ml, Type type );
 
@@ -66,6 +76,7 @@ private:
     bool m_autoDownload;
     bool m_newMediaNotif;
     int64_t m_maxCacheSize;
+    uint32_t m_nbSubscriptions;
 };
 
 }

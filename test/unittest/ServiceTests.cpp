@@ -27,6 +27,7 @@
 #include "UnitTests.h"
 
 #include "Service.h"
+#include "Subscription.h"
 
 static void FetchCreate( Tests* T )
 {
@@ -107,6 +108,35 @@ static void MaxCachedSize( Tests* T )
     ASSERT_EQ( -1, s->maxCachedSize() );
 }
 
+static void NbSubscriptions( Tests* T )
+{
+    auto s = T->ml->service( IService::Type::Podcast );
+    ASSERT_NON_NULL( s );
+    ASSERT_EQ( 0u, s->nbSubscriptions() );
+
+    /*
+     * We can't use Service::addSubscription since it relies on the parser
+     * which isn't started for unit tests
+    */
+    auto sub = Subscription::create( T->ml.get(), s->type(), "test", 0 );
+    ASSERT_NON_NULL( sub );
+
+    s = T->ml->service( IService::Type::Podcast );
+    ASSERT_EQ( 1u, s->nbSubscriptions() );
+
+    auto subs = s->subscriptions( nullptr )->all();
+    ASSERT_EQ( subs.size(), s->nbSubscriptions() );
+
+    s = T->ml->service( IService::Type::Podcast );
+    ASSERT_EQ( 1u, s->nbSubscriptions() );
+
+    auto res = T->ml->removeSubscription( subs[0]->id() );
+    ASSERT_TRUE( res );
+
+    s = T->ml->service( IService::Type::Podcast );
+    ASSERT_EQ( 0u, s->nbSubscriptions() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Service )
@@ -116,5 +146,6 @@ int main( int ac, char** av )
     ADD_TEST( AutoDownload );
     ADD_TEST( NewMediaNotification );
     ADD_TEST( MaxCachedSize );
+    ADD_TEST( NbSubscriptions );
     END_TESTS
 }
