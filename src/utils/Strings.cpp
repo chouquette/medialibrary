@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cstdint>
 
 namespace medialibrary
 {
