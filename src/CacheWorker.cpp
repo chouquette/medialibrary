@@ -145,6 +145,18 @@ uint64_t CacheWorker::availableSubscriptionCacheSize() const
     return totalSize - usedSize;
 }
 
+uint64_t CacheWorker::availableCacheSize() const
+{
+    auto usedSize = cacheSize();
+    auto totalSize = m_ml->settings().maxCacheSize();
+    if ( usedSize > totalSize )
+    {
+        LOG_WARN( "Cache is overused: ", usedSize, " / ", totalSize );
+        return 0;
+    }
+    return totalSize - usedSize;
+}
+
 void CacheWorker::run()
 {
     auto cb = m_ml->getCb();
