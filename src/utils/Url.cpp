@@ -29,6 +29,7 @@
 #include "medialibrary/filesystem/Errors.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
