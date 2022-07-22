@@ -37,6 +37,7 @@ const uint32_t Settings::MaxTaskAttempts = 2u;
 const uint32_t Settings::MaxLinkTaskAttempts = 6u;
 const uint32_t Settings::DefaultNbCachedMediaPerSubscription = 2u;
 const uint64_t Settings::DefaultMaxSubscriptionCacheSize = 1024 * 1024 * 1024;
+const uint64_t Settings::DefaultCacheSize = DefaultMaxSubscriptionCacheSize * 3;
 
 Settings::Settings( MediaLibrary* ml )
     : m_ml( ml )
@@ -54,9 +55,10 @@ bool Settings::load()
     if ( row == nullptr )
     {
         if ( sqlite::Tools::executeInsert( m_ml->getConn(),
-                "INSERT INTO Settings VALUES(?, ?, ?, ?, ?)",
+                "INSERT INTO Settings VALUES(?, ?, ?, ?, ?, ?)",
                 DbModelVersion, MaxTaskAttempts, MaxLinkTaskAttempts,
-                DefaultNbCachedMediaPerSubscription, DefaultMaxSubscriptionCacheSize ) == false )
+                DefaultNbCachedMediaPerSubscription,
+                DefaultMaxSubscriptionCacheSize, DefaultCacheSize ) == false )
         {
             return false;
         }
@@ -125,6 +127,22 @@ bool Settings::setMaxSubscriptionCacheSize( uint64_t maxCacheSize )
     return true;
 }
 
+uint64_t Settings::maxCacheSize() const
+{
+    return m_maxCacheSize;
+}
+
+bool Settings::setMaxCacheSize( uint64_t maxCacheSize )
+{
+    if ( m_maxCacheSize == maxCacheSize )
+        return true;
+    const std::string req = "UPDATE Settings SET max_cache_size = ?";
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, maxCacheSize ) == false )
+        return false;
+    m_maxCacheSize = maxCacheSize;
+    return true;
+}
+
 void Settings::createTable( sqlite::Connection* dbConn )
 {
     const std::string req = "CREATE TABLE IF NOT EXISTS Settings("
@@ -132,7 +150,8 @@ void Settings::createTable( sqlite::Connection* dbConn )
                 "max_task_attempts UNSIGNED INTEGER NOT NULL,"
                 "max_link_task_attempts UNSIGNED INTEGER NOT NULL,"
                 "nb_cached_media_per_subscription UNSIGNED INTEGER NOT NULL,"
-                "max_subscription_cache_size UNSIGNED INTEGER NOT NULL"
+                "max_subscription_cache_size UNSIGNED INTEGER NOT NULL,"
+                "max_cache_size UNSIGNED INTEGER NOT NULL"
             ")";
     sqlite::Tools::executeRequest( dbConn, req );
 }

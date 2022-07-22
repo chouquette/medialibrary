@@ -51,6 +51,8 @@ public:
     bool setNbCachedMediaPerSubscription( uint32_t nbCachedMedia );
     uint64_t maxSubscriptionCacheSize() const;
     bool setMaxSubscriptionCacheSize( uint64_t maxCacheSize );
+    uint64_t maxCacheSize() const;
+    bool setMaxCacheSize( uint64_t maxCacheSize );
 
     static void createTable( sqlite::Connection* dbConn );
 
@@ -59,6 +61,7 @@ public:
     static const uint32_t MaxLinkTaskAttempts;
     static const uint32_t DefaultNbCachedMediaPerSubscription;
     static const uint64_t DefaultMaxSubscriptionCacheSize;
+    static const uint64_t DefaultCacheSize;
 
 private:
     MediaLibrary* m_ml;
@@ -66,6 +69,7 @@ private:
     uint32_t m_dbModelVersion;
     uint32_t m_nbCachedMediaPerSubscription;
     uint64_t m_maxSubscriptionCacheSize;
+    uint64_t m_maxCacheSize;
 };
 
 }
