@@ -28,10 +28,10 @@
 #include "Filename.h"
 #include "medialibrary/filesystem/Errors.h"
 
-#include <stdexcept>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 #include <iterator>
+#include <stdexcept>
 
 namespace
 {
