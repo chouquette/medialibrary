@@ -264,6 +264,8 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
 {
     if ( cacheType == File::CacheType::Automatic )
     {
+        /* Automatic caching is only requested for subscription */
+        assert( s != nullptr );
         /*
          * We only want to check the number of cached media for a subscription
          * when doing automatic caching.
