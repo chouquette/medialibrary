@@ -2552,24 +2552,6 @@ bool MediaLibrary::isServiceSupported( IService::Type t ) const
     return false;
 }
 
-bool MediaLibrary::addSubscription( IService::Type type, std::string mrl )
-{
-    auto t = parser::Task::create( this, std::move( mrl ), type );
-    if ( t == nullptr )
-        return false;
-    auto parser = getParser();
-    if ( parser == nullptr )
-        return false;
-    parser->parse( std::move( t ) );
-    return true;
-}
-
-Query<ISubscription> MediaLibrary::subscriptions( IService::Type t,
-                                                  const QueryParameters* params )
-{
-    return Subscription::fromService( this, t, params );
-}
-
 bool MediaLibrary::removeSubscription( int64_t subscriptionId )
 {
     return Subscription::destroy( this, subscriptionId );

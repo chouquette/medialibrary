@@ -263,9 +263,6 @@ public:
 
     virtual bool flushUserProvidedThumbnails() override;
     virtual bool isServiceSupported( IService::Type t ) const override;
-    virtual bool addSubscription( IService::Type t, std::string mrl ) override;
-    virtual Query<ISubscription> subscriptions( IService::Type t,
-                                            const QueryParameters* params ) override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;
 
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;

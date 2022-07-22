@@ -42,6 +42,7 @@ public:
     Service( MediaLibraryPtr ml, Type type );
 
     virtual Type type() const override;
+    virtual bool addSubscription( std::string mrl ) override;
     virtual Query<ISubscription> subscriptions( const QueryParameters* params ) override;
     virtual bool isAutoDownloadEnabled() const override;
     virtual bool setAutoDownloadEnabled(bool enabled) override;

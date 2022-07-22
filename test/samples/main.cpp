@@ -71,7 +71,8 @@ static void ParseTwice( Tests* T )
 
     if ( T->subscriptions.IsArray() )
     {
-        auto subscriptions = T->m_ml->subscriptions( IService::Type::Podcast, nullptr )->all();
+        auto service = T->m_ml->service( IService::Type::Podcast );
+        auto subscriptions = service->subscriptions( nullptr )->all();
         for ( const auto& c : subscriptions )
             T->m_ml->removeSubscription( c->id() );
         /* Ensure we don't wait for a discovery that will not come */

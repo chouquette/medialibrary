@@ -73,6 +73,7 @@ public:
      * @return true if the change was successful, false otherwise.
      */
     virtual bool setMaxCachedSize( int64_t maxSize ) = 0;
+    virtual bool addSubscription( std::string mrl ) = 0;
     virtual Query<ISubscription> subscriptions( const QueryParameters* params ) = 0;
 };
 }

@@ -26,6 +26,7 @@
 
 #include "Service.h"
 #include "Subscription.h"
+#include "parser/Task.h"
 
 namespace medialibrary
 {
@@ -56,6 +57,18 @@ Service::Service( MediaLibraryPtr ml, Type type )
 Service::Type Service::type() const
 {
     return static_cast<Type>( m_id );
+}
+
+bool Service::addSubscription( std::string mrl )
+{
+    auto t = parser::Task::create( m_ml, std::move( mrl ), type() );
+    if ( t == nullptr )
+        return false;
+    auto parser = m_ml->getParser();
+    if ( parser == nullptr )
+        return false;
+    parser->parse( std::move( t ) );
+    return true;
 }
 
 Query<ISubscription> Service::subscriptions( const QueryParameters* params )

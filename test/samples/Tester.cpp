@@ -317,7 +317,8 @@ void Tests::addSubscription( IService::Type s, std::string mrl )
 #ifdef _WIN32
     std::replace( begin( mrl ), end( mrl ), '\\', '/' );
 #endif
-    m_ml->addSubscription( s, mrl );
+    auto service = m_ml->service( s );
+    service->addSubscription( std::move( mrl ) );
 }
 
 void Tests::runChecks()
@@ -383,10 +384,9 @@ void Tests::runChecks()
     }
     if ( expected.HasMember( "subscriptions" ) == true )
     {
-        //FIXME: Should we expose the services with their ID and the subscriptions
-        // as a member?
+        auto service = m_ml->service( IService::Type::Podcast );
         checkSubscriptions( expected["subscriptions"],
-                m_ml->subscriptions( IService::Type::Podcast, nullptr )->all() );
+                service->subscriptions( nullptr )->all() );
     }
 }
 
@@ -1000,7 +1000,8 @@ void RefreshTests::forceRefresh()
         assert( fileFsIt != cend( filesFs ) );
         ml->onUpdatedFile( std::move( f ), *fileFsIt, std::move( folder ), std::move( folderFs ) );
     }
-    auto subscriptions = m_ml->subscriptions( IService::Type::Podcast, nullptr )->all();
+    auto service = m_ml->service( IService::Type::Podcast );
+    auto subscriptions = service->subscriptions( nullptr )->all();
     for ( auto& s : subscriptions )
         s->refresh();
 }

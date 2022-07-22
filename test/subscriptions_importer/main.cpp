@@ -156,7 +156,8 @@ int main( int argc, char** argv )
     assert( initRes == InitializeResult::Success );
     ml->setDiscoverNetworkEnabled( true );
 
-    ml->addSubscription( IService::Type::Podcast, subMrl );
+    auto service = ml->service( IService::Type::Podcast );
+    service->addSubscription( std::move( subMrl ) );
 
     testCb->waitForCompletion();
     if ( cache == true )

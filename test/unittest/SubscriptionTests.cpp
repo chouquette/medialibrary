@@ -39,7 +39,8 @@ static void Create( Tests* T )
 
 static void ListFromService( Tests* T )
 {
-    auto collectionQuery = T->ml->subscriptions( IService::Type::Podcast, nullptr );
+    auto service = T->ml->service( IService::Type::Podcast );
+    auto collectionQuery = service->subscriptions( nullptr );
     ASSERT_EQ( 0u, collectionQuery->count() );
     auto collections = collectionQuery->all();
     ASSERT_TRUE( collections.empty() );
@@ -49,7 +50,7 @@ static void ListFromService( Tests* T )
     auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", 0 );
     ASSERT_NON_NULL( c2 );
 
-    collectionQuery = T->ml->subscriptions( IService::Type::Podcast, nullptr );
+    collectionQuery = service->subscriptions( nullptr );
     ASSERT_EQ( 2u, collectionQuery->count() );
     collections = collectionQuery->all();
     ASSERT_EQ( 2u, collections.size() );
@@ -60,7 +61,7 @@ static void ListFromService( Tests* T )
     QueryParameters params{};
     params.desc = true;
 
-    collectionQuery = T->ml->subscriptions( IService::Type::Podcast, &params );
+    collectionQuery = service->subscriptions( &params );
     ASSERT_EQ( 2u, collectionQuery->count() );
     collections = collectionQuery->all();
     ASSERT_EQ( 2u, collections.size() );
@@ -97,7 +98,8 @@ static void ChildSubscriptions( Tests* T )
     ASSERT_EQ( parent->id(), c->id() );
 
     /* Ensure sub collections aren't listed as 1st level collections */
-    auto collections = T->ml->subscriptions( IService::Type::Podcast, nullptr )->all();
+    auto service = T->ml->service( IService::Type::Podcast );
+    auto collections = service->subscriptions( nullptr )->all();
     ASSERT_EQ( 1u, collections.size() );
     ASSERT_EQ( c->id(), collections[0]->id() );
 
