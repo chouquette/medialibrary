@@ -99,6 +99,11 @@ public:
      * @return true if the change was successful, false otherwise.
      */
     virtual bool setNewMediaNotification( int8_t value ) = 0;
+    /**
+     * @brief nbUnplayedMedia Returns the number of media that belong to this
+     *                        subscription and haven't been played
+     */
+    virtual uint32_t nbUnplayedMedia() const = 0;
 };
 
 }

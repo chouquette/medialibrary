@@ -924,6 +924,7 @@ subscription_tests = [
   'MaxCachedMedia',
   'MaxCachedSize',
   'NewMediaNotify',
+  'NbUnplayedMedia',
 ]
 
 foreach t : subscription_tests

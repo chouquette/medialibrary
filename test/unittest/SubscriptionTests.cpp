@@ -338,6 +338,74 @@ static void NewMediaNotify( Tests* T )
     ASSERT_EQ( -1, s->newMediaNotification() );
 }
 
+static void NbUnplayedMedia( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "http://pod.ca/st/episode1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "http://pod.ca/st/episode2.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m1 );
+    ASSERT_NON_NULL( m2 );
+
+    auto sub = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub", 0 );
+    ASSERT_NON_NULL( sub );
+    ASSERT_EQ( 0u, sub->nbUnplayedMedia() );
+
+    // Add a simple unplayed media
+    auto res = sub->addMedia( *m1 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+
+    // Add an already played media and remove it
+    res = m2->markAsPlayed();
+    ASSERT_TRUE( res );
+    res = sub->addMedia( *m2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+
+    res = sub->removeMedia( m2->id() );
+    ASSERT_TRUE( res );
+
+    res = m2->removeFromHistory();
+    ASSERT_TRUE( res );
+
+    // Now insert it as unplayed
+    res = sub->addMedia( *m2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+
+    // Check that updating the media play_count update the subscription
+    res = m1->markAsPlayed();
+    ASSERT_TRUE( res );
+
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+
+    res = m1->removeFromHistory();
+    ASSERT_TRUE( res );
+
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+
+    res = Media::destroy( T->ml.get(), m1->id() );
+    ASSERT_TRUE( res );
+
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+
+    res = sub->removeMedia( m2->id() );
+    ASSERT_TRUE( res );
+
+    sub = Subscription::fetch( T->ml.get(), sub->id() );
+    ASSERT_EQ( 0u, sub->nbUnplayedMedia() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Subscription )
@@ -352,6 +420,7 @@ int main( int ac, char** av )
     ADD_TEST( MaxCachedMedia );
     ADD_TEST( MaxCachedSize );
     ADD_TEST( NewMediaNotify );
+    ADD_TEST( NbUnplayedMedia );
 
     END_TESTS
 }

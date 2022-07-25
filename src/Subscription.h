@@ -50,6 +50,21 @@ public:
         IncrementCachedSize,
         DecrementCachedSize,
         DecrementCachedSizeOnRemoval,
+        /*
+         * Increment/decrement unplayed media when inserting/removing from the
+         * subscription table
+         */
+        IncrementUnplayedMedia,
+        DecrementUnplayedMedia,
+        /*
+         * This trigger handles the media removal. We can't implement this as part
+         * of the regular DecrementUnplayedMedia trigger since when the media
+         * gets removed from the relation table following a delete, we can't know
+         * its play count.
+         */
+        DecrementUnplayedMediaOnDestroy,
+        /* Handle play_count changes in the media table */
+        UpdateUnplayedMedia,
     };
 
     enum class Indexes : uint8_t
@@ -77,6 +92,7 @@ public:
     virtual bool setMaxCachedSize( int64_t maxCachedSize ) override;
     virtual int8_t newMediaNotification() const override;
     virtual bool setNewMediaNotification( int8_t value ) override;
+    virtual uint32_t nbUnplayedMedia() const override;
 
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );
@@ -152,6 +168,7 @@ private:
     int32_t m_maxCachedMedia;
     int64_t m_maxCachedSize;
     int8_t m_newMediaNotification;
+    uint32_t m_nbUnplayedMedia;
 };
 
 }
