@@ -172,8 +172,16 @@ bool Service::checkDbModel( MediaLibraryPtr ml )
 {
     OPEN_READ_CONTEXT( ctx, ml->getConn() );
 
+    auto checkTrigger = []( Triggers t ) {
+        return sqlite::Tools::checkTriggerStatement(
+                    trigger( t, Settings::DbModelVersion ),
+                    triggerName( t, Settings::DbModelVersion ) );
+    };
+
     return sqlite::Tools::checkTableSchema(
-                schema( Table::Name, Settings::DbModelVersion ), Table::Name );
+                schema( Table::Name, Settings::DbModelVersion ), Table::Name ) &&
+           checkTrigger( Triggers::IncrementNbSubscriptions ) &&
+           checkTrigger( Triggers::DecrementNbSubscriptions );
 }
 
 std::string Service::trigger( Triggers t, uint32_t dbModel )
