@@ -42,6 +42,7 @@ Service::Service( MediaLibraryPtr ml, sqlite::Row& row )
     , m_newMediaNotif( row.extract<decltype(m_newMediaNotif)>() )
     , m_maxCacheSize( row.extract<decltype(m_maxCacheSize)>() )
     , m_nbSubscriptions( row.extract<decltype(m_nbSubscriptions)>() )
+    , m_nbUnplayedMedia( row.extract<decltype(m_nbUnplayedMedia)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -53,6 +54,7 @@ Service::Service( MediaLibraryPtr ml, Type type )
     , m_newMediaNotif( true )
     , m_maxCacheSize( -1 )
     , m_nbSubscriptions( 0 )
+    , m_nbUnplayedMedia( 0 )
 {
 }
 
@@ -137,6 +139,11 @@ uint32_t Service::nbSubscriptions() const
     return m_nbSubscriptions;
 }
 
+uint32_t Service::nbUnplayedMedia() const
+{
+    return m_nbUnplayedMedia;
+}
+
 std::string Service::schema( const std::string& name, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( name );
@@ -150,7 +157,8 @@ std::string Service::schema( const std::string& name, uint32_t dbModel )
                "auto_download BOOLEAN NOT NULL DEFAULT 1,"
                "notify BOOLEAN NOT NULL DEFAULT 1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
-               "nb_subscriptions INTEGER NOT NULL DEFAULT 0"
+               "nb_subscriptions INTEGER NOT NULL DEFAULT 0,"
+               "unplayed_media INTEGER NOT NULL DEFAULT 0"
            ")";
 }
 
@@ -166,6 +174,10 @@ void Service::createTriggers( sqlite::Connection* dbConn )
             trigger( Triggers::IncrementNbSubscriptions, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
             trigger( Triggers::DecrementNbSubscriptions, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+            trigger( Triggers::UpdateUnplayedMedia, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( dbConn,
+            trigger( Triggers::DecrementUnplayedMediaOnSubRemoval, Settings::DbModelVersion ) );
 }
 
 bool Service::checkDbModel( MediaLibraryPtr ml )
@@ -181,7 +193,9 @@ bool Service::checkDbModel( MediaLibraryPtr ml )
     return sqlite::Tools::checkTableSchema(
                 schema( Table::Name, Settings::DbModelVersion ), Table::Name ) &&
            checkTrigger( Triggers::IncrementNbSubscriptions ) &&
-           checkTrigger( Triggers::DecrementNbSubscriptions );
+           checkTrigger( Triggers::DecrementNbSubscriptions ) &&
+           checkTrigger( Triggers::UpdateUnplayedMedia ) &&
+           checkTrigger( Triggers::DecrementUnplayedMediaOnSubRemoval );
 }
 
 std::string Service::trigger( Triggers t, uint32_t dbModel )
@@ -207,6 +221,25 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
                    " SET nb_subscriptions = nb_subscriptions - 1"
                        " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
                " END";
+    case Triggers::UpdateUnplayedMedia:
+        return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+               " AFTER UPDATE OF unplayed_media ON " + Subscription::Table::Name +
+               " WHEN old.unplayed_media != new.unplayed_media"
+               " BEGIN"
+                   " UPDATE " + Table::Name +
+                   " SET unplayed_media = unplayed_media + "
+                       "(new.unplayed_media - old.unplayed_media)"
+                   " WHERE " + Table::PrimaryKeyColumn + " = new.service_id;"
+               " END";
+    case Triggers::DecrementUnplayedMediaOnSubRemoval:
+        return "CREATE TRIGGER " + triggerName( t, dbModel ) +
+               " AFTER DELETE ON " + Subscription::Table::Name +
+               " WHEN old.unplayed_media > 0"
+               " BEGIN"
+                   " UPDATE " + Table::Name +
+                   " SET unplayed_media = unplayed_media - old.unplayed_media"
+                   " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
+               " END";
     default:
         assert( !"Invalid trigger provided" );
     }
@@ -226,6 +259,10 @@ std::string Service::triggerName( Triggers t, uint32_t dbModel )
         return "service_increment_nb_subs";
     case Triggers::DecrementNbSubscriptions:
         return "service_decrement_nb_subs";
+    case Triggers::UpdateUnplayedMedia:
+        return "service_update_unplayed_media";
+    case Triggers::DecrementUnplayedMediaOnSubRemoval:
+        return "service_decrement_unplayed_media_sub_removal";
     default:
         assert( !"Invalid trigger provided" );
     }

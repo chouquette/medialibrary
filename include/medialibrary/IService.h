@@ -82,5 +82,6 @@ public:
      * this version will not issue a request and will return an already computed counter.
      */
     virtual uint32_t nbSubscriptions() const = 0;
+    virtual uint32_t nbUnplayedMedia() const = 0;
 };
 }

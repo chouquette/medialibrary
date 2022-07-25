@@ -41,6 +41,8 @@ public:
     {
         IncrementNbSubscriptions,
         DecrementNbSubscriptions,
+        UpdateUnplayedMedia,
+        DecrementUnplayedMediaOnSubRemoval,
     };
 
     Service( MediaLibraryPtr ml, sqlite::Row& row );
@@ -56,6 +58,7 @@ public:
     virtual int64_t maxCachedSize() const override;
     virtual bool setMaxCachedSize(int64_t maxSize) override;
     virtual uint32_t nbSubscriptions() const override;
+    virtual uint32_t nbUnplayedMedia() const override;
 
     static std::string schema( const std::string& name, uint32_t dbModel );
     static std::string trigger( Triggers t, uint32_t dbModel );
@@ -77,6 +80,7 @@ private:
     bool m_newMediaNotif;
     int64_t m_maxCacheSize;
     uint32_t m_nbSubscriptions;
+    uint32_t m_nbUnplayedMedia;
 };
 
 }
