@@ -316,8 +316,9 @@ class Media : public IMedia,
 
         static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
                                      const QueryParameters* params );
-        static Query<IMedia> search(MediaLibraryPtr ml, const std::string& title,
-                                    Media::Type subType, const QueryParameters* params );
+        static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
+                                     Media::Type type, const QueryParameters* params,
+                                     Media::SubType subType );
         static Query<IMedia> searchAlbumTracks( MediaLibraryPtr ml, const std::string& pattern,
                                                 int64_t albumId, const QueryParameters* params,
                                                 bool forcePublic );

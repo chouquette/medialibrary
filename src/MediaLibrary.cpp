@@ -1181,12 +1181,12 @@ Query<IMedia> MediaLibrary::searchMedia( const std::string& title,
 
 Query<IMedia> MediaLibrary::searchAudio( const std::string& pattern, const QueryParameters* params ) const
 {
-    return Media::search( this, pattern, IMedia::Type::Audio, params );
+    return Media::search( this, pattern, IMedia::Type::Audio, params, IMedia::SubType::Unknown );
 }
 
 Query<IMedia> MediaLibrary::searchVideo( const std::string& pattern, const QueryParameters* params ) const
 {
-    return Media::search( this, pattern, IMedia::Type::Video, params );
+    return Media::search( this, pattern, IMedia::Type::Video, params, IMedia::SubType::Unknown );
 }
 
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,

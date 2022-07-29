@@ -2405,7 +2405,8 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
 }
 
 Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
-                             Media::Type type, const QueryParameters* params )
+                             Media::Type type, const QueryParameters* params,
+                             IMedia::SubType subType )
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
@@ -2419,6 +2420,15 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
         req += " AND m.is_present != 0";
     if ( params != nullptr && params->publicOnly == true )
         req += " AND m.is_public != 0";
+    if ( subType != IMedia::SubType::Unknown )
+    {
+        req += " AND m.subtype = ?";
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                          sortRequest( params ),
+                                          sqlite::Tools::sanitizePattern( title ),
+                                          type, ImportType::Internal, subType ).build();
+    }
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
