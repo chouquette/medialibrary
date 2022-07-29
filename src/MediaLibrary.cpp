@@ -1189,6 +1189,11 @@ Query<IMedia> MediaLibrary::searchVideo( const std::string& pattern, const Query
     return Media::search( this, pattern, IMedia::Type::Video, params, IMedia::SubType::Unknown );
 }
 
+Query<IMedia> MediaLibrary::searchMovie( const std::string& pattern, const QueryParameters* params ) const
+{
+    return Media::search( this, pattern, IMedia::Type::Video, params, IMedia::SubType::Movie );
+}
+
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
                                                 const QueryParameters* params ) const
 {

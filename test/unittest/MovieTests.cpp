@@ -67,6 +67,25 @@ static void FetchAll( Tests* T )
     ASSERT_EQ( m2->id(), movies[1]->id() );
 }
 
+static void Search( Tests* T )
+{
+    auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
+    media->setTitle( "test", false );
+    auto m = T->ml->createMovie( *media );
+
+    auto media2 = std::static_pointer_cast<Media>( T->ml->addMedia( "movie2.mkv", IMedia::Type::Video ) );
+    media2->setTitle( "perk", false );
+    auto m2 = T->ml->createMovie( *media2 );
+
+    auto media3 = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
+    media3->setTitle( "test audio", false );
+
+    auto movies = T->ml->searchMovie( "test", nullptr )->all();
+
+    ASSERT_EQ( 1u, movies.size() );
+    ASSERT_EQ( m->id(), movies[0]->id() );
+}
+
 static void SortByAlpha( Tests* T )
 {
     auto media = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", Media::Type::Video ) );
@@ -167,6 +186,7 @@ int main( int ac, char** av )
     ADD_TEST( Create );
     ADD_TEST( Fetch );
     ADD_TEST( FetchAll );
+    ADD_TEST( Search );
     ADD_TEST( SortByAlpha );
     ADD_TEST( SetShortSummary );
     ADD_TEST( SetImdbId );

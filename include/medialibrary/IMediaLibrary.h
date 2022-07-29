@@ -715,7 +715,7 @@ public:
      */
 
     /**
-     * @brief searchMedia, searchAudio, and searchVideo search for some media, based on a pattern.
+     * @brief searchMedia, searchAudio, searchMovie, and searchVideo search for some media, based on a pattern.
      * @param pattern A 3 character or more pattern that will be matched against the media's title
      *                or filename if no title was set for this media.
      * @param params Some query parameters.
@@ -731,6 +731,8 @@ public:
     virtual Query<IMedia> searchAudio( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IMedia> searchVideo( const std::string& pattern,
+                                       const QueryParameters* params = nullptr ) const = 0;
+    virtual Query<IMedia> searchMovie( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const = 0;
 
     virtual Query<IPlaylist> searchPlaylists( const std::string& name,

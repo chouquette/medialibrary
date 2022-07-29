@@ -675,6 +675,7 @@ movie_tests = [
   'Fetch',
   'FetchAll',
   'SortByAlpha',
+  'Search',
   'SetShortSummary',
   'SetImdbId',
   'AssignToFile',
