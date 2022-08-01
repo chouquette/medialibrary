@@ -264,7 +264,6 @@ public:
     virtual PriorityAccess acquirePriorityAccess() override;
 
     virtual bool flushUserProvidedThumbnails() override;
-    virtual bool isServiceSupported( IService::Type t ) const override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;
 
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;

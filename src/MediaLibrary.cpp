@@ -2548,16 +2548,6 @@ bool MediaLibrary::flushUserProvidedThumbnails()
     return Thumbnail::flushUserProvided( this );
 }
 
-bool MediaLibrary::isServiceSupported( IService::Type t ) const
-{
-    switch ( t )
-    {
-    case IService::Type::Podcast:
-        return true;
-    }
-    return false;
-}
-
 bool MediaLibrary::removeSubscription( int64_t subscriptionId )
 {
     return Subscription::destroy( this, subscriptionId );
@@ -2595,8 +2585,6 @@ void MediaLibrary::cacheNewSubscriptionMedia()
 
 ServicePtr MediaLibrary::service( IService::Type type ) const
 {
-    if ( isServiceSupported( type ) == false )
-        return nullptr;
     return Service::fetch( this, type );
 }
 
