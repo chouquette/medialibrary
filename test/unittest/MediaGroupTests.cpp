@@ -185,10 +185,7 @@ static void SearchMedia( Tests* T )
     mg->add( *v2 );
     mg->add( *v3 );
 
-    auto query = mg->searchMedia( "12", IMedia::Type::Unknown, nullptr );
-    ASSERT_EQ( nullptr, query );
-
-    query = mg->searchMedia( "otters", IMedia::Type::Audio );
+    auto query = mg->searchMedia( "otters", IMedia::Type::Audio );
     ASSERT_EQ( 1u, query->count() );
     auto media = query->all();
     ASSERT_EQ( 1u, media.size() );
