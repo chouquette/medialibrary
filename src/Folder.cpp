@@ -1075,8 +1075,6 @@ Query<IMedia> Folder::media( IMedia::Type type, const QueryParameters* params ) 
 Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type,
                                    const QueryParameters* params ) const
 {
-    if ( pattern.size() < 3 )
-        return {};
     return Media::searchFromFolderId( m_ml, pattern, type, m_id, params,
                                       m_publicOnlyListing );
 }
