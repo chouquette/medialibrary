@@ -2677,8 +2677,6 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
                                            const std::string& pattern,
                                            const QueryParameters* params )
 {
-    if ( pattern.size() < 3 )
-        return nullptr;
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params );
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
