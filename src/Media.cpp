@@ -1923,7 +1923,7 @@ std::string Media::schema( const std::string& tableName, uint32_t dbModel )
         "insertion_date UNSIGNED INTEGER,"
         "release_date UNSIGNED INTEGER,"
         "title TEXT COLLATE NOCASE,"
-        "filename TEXT COLLATE NOCASE,"
+        "filename TEXT COLLATE FILENAME,"
         "is_favorite BOOLEAN NOT NULL DEFAULT 0,"
         "is_present BOOLEAN NOT NULL DEFAULT 1,"
         "device_id INTEGER,"

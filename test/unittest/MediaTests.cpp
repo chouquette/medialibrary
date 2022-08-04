@@ -1583,6 +1583,31 @@ static void AddCachedMrl( Tests* T )
     ASSERT_EQ( IFile::Type::Main, f->type() );
 }
 
+static void FilenameNumericalOrder( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "9 song.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "1 song.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "10 song.mp3", IMedia::Type::Audio ) );
+
+    QueryParameters params { SortingCriteria::Filename, false };
+    auto media = T->ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m2->id(), media[0]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[2]->id() );
+
+    params.desc = true;
+    media = T->ml->audioFiles( &params )->all();
+    ASSERT_EQ( 3u, media.size() );
+    ASSERT_EQ( m2->id(), media[2]->id() );
+    ASSERT_EQ( m1->id(), media[1]->id() );
+    ASSERT_EQ( m3->id(), media[0]->id() );
+}
+
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Media );
@@ -1648,6 +1673,7 @@ int main( int ac, char** av )
     ADD_TEST( NbSubscriptions );
     ADD_TEST( Description );
     ADD_TEST( AddCachedMrl );
+    ADD_TEST( FilenameNumericalOrder );
 
     END_TESTS
 }

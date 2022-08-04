@@ -657,6 +657,7 @@ media_tests = [
   'NbSubscriptions',
   'Description',
   'AddCachedMrl',
+  'FilenameNumericalOrder',
 ]
 
 foreach t : media_tests
