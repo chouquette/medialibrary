@@ -167,6 +167,7 @@ misc_tests = [
   'ClearDatabaseKeepPlaylist',
   'ClearDatabase',
   'DateFromStr',
+  'FilenameCollate',
 ]
 
 foreach t : misc_tests
@@ -655,7 +656,7 @@ media_tests = [
   'MarkAsPlayed',
   'NbSubscriptions',
   'Description',
-  'AddCachedMrl'
+  'AddCachedMrl',
 ]
 
 foreach t : media_tests

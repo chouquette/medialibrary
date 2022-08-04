@@ -135,6 +135,8 @@ Connection::Handle Connection::handle()
 #endif
     m_conns.emplace( compat::this_thread::get_id(), std::move( dbConn ) );
     sqlite3_update_hook( dbConnection, &updateHook, this );
+    sqlite3_create_collation_v2( dbConnection, "FILENAME", SQLITE_UTF8, this,
+                                 &collateFilename, nullptr );
 #if !defined(_WIN32) || defined(__clang__)
     /*
      * Thread local object with destructors don't behave properly when built
@@ -302,6 +304,37 @@ void Connection::updateHook( void* data, int reason, const char*,
         it->second( HookReason::Delete, rowId );
         break;
     }
+}
+
+int Connection::collateFilename( void*, int lhsSize, const void* lhs,
+                                 int rhsSize, const void* rhs )
+{
+    /* The strings are NOT null terminated */
+    auto str1 = static_cast<const char*>( lhs );
+    auto str2 = static_cast<const char*>( rhs );
+    auto size = std::min( lhsSize, rhsSize );
+    if ( size == 0 )
+        return lhsSize - rhsSize;
+    if ( lhsSize == 0 || isdigit( *str1 ) == false ||
+         rhsSize == 0 || isdigit( *str2 ) == false )
+        return sqlite3_strnicmp( str1, str2, size );
+    auto strtolAdvance = []( const char*& str, int& size ) {
+        auto res = 0;
+        while ( size > 0 && std::isdigit( *str ) )
+        {
+            res *= 10;
+            res += (*str - '0');
+            --size;
+            ++str;
+        }
+        return res;
+    };
+    auto num1 = strtolAdvance( str1, lhsSize );
+    auto num2 = strtolAdvance( str2, rhsSize );
+    if ( num1 != num2 )
+        return num1 - num2;
+    size = std::min( lhsSize, rhsSize );
+    return sqlite3_strnicmp( str1, str2, size );
 }
 
 #if DEBUG_SQLITE_TRIGGERS

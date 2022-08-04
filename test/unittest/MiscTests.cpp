@@ -48,6 +48,15 @@ namespace
         }
         return true;
     }
+    class TestSqliteConnection : public sqlite::Connection
+    {
+    public:
+        static int testCollate( const char* str1, const char* str2 )
+        {
+            return sqlite::Connection::collateFilename( nullptr,
+                        strlen( str1 ), str1, strlen( str2 ), str2 );
+        }
+    };
 }
 
 struct MiscTests : public Tests
@@ -169,6 +178,16 @@ static void XxHashFile( MiscTests* )
     ASSERT_EQ( "5AF0124E1F8A891", utils::hash::toString( hash ) );
 }
 
+static void FilenameCollate( MiscTests* )
+{
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "000001 A", "1 B" ) < 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "", "" ) == 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "A", "" ) > 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "normal string", "another string" ) > 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "123", "321" ) < 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "000123 test", "123 test" ) == 0 );
+    ASSERT_TRUE( TestSqliteConnection::testCollate( "02 something.mp3", "3 something else.mp3" ) < 0 );
+}
 
 static void CheckTaskDbModel( Tests* T )
 {
@@ -238,6 +257,7 @@ int test_without_ml_init( int ac, char** av )
     ADD_TEST( XxHashBuffer );
     ADD_TEST( XxHashFile );
     ADD_TEST( DateFromStr );
+    ADD_TEST( FilenameCollate );
 
     END_TESTS
 }

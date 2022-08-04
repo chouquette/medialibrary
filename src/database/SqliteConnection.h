@@ -307,6 +307,11 @@ private:
 
     static void updateHook( void* data, int reason, const char* database,
                             const char* table, sqlite_int64 rowId );
+
+protected:
+    /* This is protected in order to be accessible from test code */
+    static int collateFilename( void* data, int lhsSize, const void* lhs,
+                                int rhsSize, const void* rhs );
 private:
     struct ThreadSpecificConnection
     {
