@@ -682,6 +682,7 @@ static void AssignToGroups( Tests* T )
     m4 = T->ml->addMedia( "otters are so fluffy.mkv", IMedia::Type::Video );
     mg = T->ml->createMediaGroup( std::vector<int64_t>{ m4->id() } );
     res = mg->remove( *m4 );
+    ASSERT_TRUE( res );
 
     /* Now try again with the other ordering */
     res = MediaGroup::assignToGroup( T->ml.get(), *m3 );
