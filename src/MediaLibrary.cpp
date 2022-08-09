@@ -939,7 +939,6 @@ void MediaLibrary::onDiscoveredFile( std::shared_ptr<fs::IFile> fileFs,
                                      IFile::Type fileType )
 {
     auto mrl = fileFs->mrl();
-    std::unique_ptr<sqlite::Transaction> t;
     auto parser = getParser();
     try
     {
