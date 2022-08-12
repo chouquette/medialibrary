@@ -104,6 +104,7 @@ private:
     compat::Mutex m_mutex;
     compat::ConditionVariable m_cond;
     VLC::Media m_currentMedia;
+    VLC::Instance m_currentInstance;
 };
 
 }

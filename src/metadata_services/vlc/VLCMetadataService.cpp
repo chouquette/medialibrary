@@ -75,10 +75,11 @@ Status VLCMetadataService::run( IItem& item )
 
     // Having a valid media means we're re-executing this parser after the thumbnailer,
     // which isn't expected, as we always mark this task as completed.
+    auto instance = VLCInstance::get();
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
     VLC::Media vlcMedia{ mrl, VLC::Media::FromType::FromLocation };
 #else
-    VLC::Media vlcMedia{ VLCInstance::get(), mrl, VLC::Media::FromType::FromLocation };
+    VLC::Media vlcMedia{ instance, mrl, VLC::Media::FromType::FromLocation };
 #endif
     vlcMedia.addOption( ":no-lua" );
 
@@ -131,10 +132,11 @@ Status VLCMetadataService::run( IItem& item )
             // mutexes.
             std::unique_lock<compat::Mutex> lock( m_mutex );
             m_currentMedia = vlcMedia;
+            m_currentInstance = std::move( instance );
         }
 
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-        if ( vlcMedia.parseRequest( VLCInstance::get(),
+        if ( vlcMedia.parseRequest( m_currentInstance,
                                     VLC::Media::ParseFlags::Local |
                                     VLC::Media::ParseFlags::Network, 5000 ) == false )
 #else
@@ -143,6 +145,7 @@ Status VLCMetadataService::run( IItem& item )
 #endif
         {
             std::unique_lock<compat::Mutex> lock( m_mutex );
+            m_currentInstance = VLC::Instance{};
             m_currentMedia = VLC::Media{};
             return Status::Fatal;
         }
@@ -150,6 +153,7 @@ Status VLCMetadataService::run( IItem& item )
         m_cond.wait( lock, [&done]() {
             return done == true;
         });
+        m_currentInstance = VLC::Instance{};
         m_currentMedia = VLC::Media{};
     }
     if ( status == VLC::Media::ParsedStatus::Failed || status == VLC::Media::ParsedStatus::Timeout )
@@ -208,7 +212,7 @@ void VLCMetadataService::stop()
     if ( m_currentMedia.isValid() )
     {
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-        m_currentMedia.parseStop( VLCInstance::get() );
+        m_currentMedia.parseStop( m_currentInstance );
 #else
         m_currentMedia.parseStop();
 #endif
