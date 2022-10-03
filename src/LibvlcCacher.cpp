@@ -43,7 +43,7 @@ LibvlcCacher::LibvlcCacher()
 bool LibvlcCacher::cache( const std::string& inputMrl,
                           const std::string& outputPath )
 {
-    LOG_ERROR( "Caching ", inputMrl, " to ", outputPath );
+    LOG_INFO( "Caching ", inputMrl, " to ", outputPath );
 
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
     VLC::Media m{ inputMrl, VLC::Media::FromLocation };
