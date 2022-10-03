@@ -59,12 +59,17 @@ public:
         m_cacheWorkerIdle = false;
     }
 
-    void waitForCacheUpdated()
+    void waitForCacheIdle()
     {
         std::unique_lock<compat::Mutex> lock{ m_mutex };
         m_cond.wait( lock, [this]() {
-            return m_cacheWorkerIdle == true && m_cacheUpdated == true;
+            return m_cacheWorkerIdle == true;
         });
+    }
+
+    bool wasCacheUpdated() const
+    {
+        return m_cacheUpdated;
     }
 
 private:
@@ -164,6 +169,13 @@ int main( int argc, char** argv )
     {
         testCb->prepareWaitForCache();
         ml->cacheNewSubscriptionMedia();
-        testCb->waitForCacheUpdated();
+        testCb->waitForCacheIdle();
+
+        if (!testCb->wasCacheUpdated())
+        {
+            std::cerr << "No cache update event received."
+                         " Subscription might be empty." << std::endl;
+            exit(2);
+        }
     }
 }
