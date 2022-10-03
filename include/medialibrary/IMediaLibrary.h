@@ -423,7 +423,7 @@ public:
      *                                   for a subscription.
      * @param subscriptionId The subscription for which the cache was updated
      *
-     * If the subscription by the cache worker but didn't change, this will not
+     * If the subscription by the cache worker didn't change, this will not
      * be invoked.
      */
     virtual void onSubscriptionCacheUpdated( int64_t subscriptionId ) = 0;
