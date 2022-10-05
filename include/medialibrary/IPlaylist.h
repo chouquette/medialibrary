@@ -96,11 +96,7 @@ public:
     /// \param params A QueryParameters object or nullptr for the default params
     /// \return A query object representing the media in this playlist
     ///
-    /// The media will always be sorted by their ascending position in the
-    /// playlist, meaning QueryParameters::sort & QueryParameters::desc will be
-    /// ignored.
-    /// QueryParameters::includeMissing will be used however, so the called can
-    /// get the missing media for the playlist
+    /// \note The media will be sorted by their ascending position in the playlist by default.
     ///
     virtual Query<IMedia> media( const QueryParameters* params ) const = 0;
     ///
