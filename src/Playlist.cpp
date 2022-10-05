@@ -207,18 +207,7 @@ uint32_t Playlist::nbDurationUnknown() const
 
 Query<IMedia> Playlist::media( const QueryParameters* params ) const
 {
-    std::string base = "FROM " + Media::Table::Name + " m "
-        "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr ON pmr.media_id = m.id_media "
-        "WHERE pmr.playlist_id = ?";
-    if ( params == nullptr || params->includeMissing == false )
-         base += " AND m.is_present != 0";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
-                        m_publicOnlyListing == true;
-    if ( publicOnly == true )
-        base += " AND m.is_public != 0";
-    const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
-    const std::string countReq = "SELECT COUNT(*) " + base;
-    return make_query_with_count<Media, IMedia>( m_ml, countReq, req, m_id );
+    return Media::fromPlaylist( m_ml, m_id, params, m_publicOnlyListing );
 }
 
 Query<IMedia> Playlist::searchMedia( const std::string& pattern,

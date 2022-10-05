@@ -829,6 +829,23 @@ Query<IMedia> Media::fromSubscription( MediaLibraryPtr ml, int64_t subscriptionI
                                       subscriptionId ).build();
 }
 
+Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
+                                   const QueryParameters* params, bool publicOnly )
+{
+    std::string base = "FROM " + Media::Table::Name + " m "
+        "LEFT JOIN " + Playlist::MediaRelationTable::Name + " pmr ON pmr.media_id = m.id_media "
+        "WHERE pmr.playlist_id = ?";
+    if ( params == nullptr || params->includeMissing == false )
+        base += " AND m.is_present != 0";
+    auto isPublicOnly = ( params != nullptr && params->publicOnly == true ) ||
+        publicOnly == true;
+    if ( isPublicOnly == true )
+        base += " AND m.is_public != 0";
+    const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
+    const std::string countReq = "SELECT COUNT(*) " + base;
+    return make_query_with_count<Media, IMedia>( ml, countReq, req, playlistId );
+}
+
 bool Media::addToGroup( IMediaGroup& group )
 {
     if ( group.id() == m_groupId )
