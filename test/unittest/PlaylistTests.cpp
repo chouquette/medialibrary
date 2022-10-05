@@ -27,6 +27,7 @@
 #include "UnitTests.h"
 
 #include "File.h"
+#include "Album.h"
 #include "Playlist.h"
 #include "Media.h"
 #include "parser/Task.h"
@@ -1121,6 +1122,71 @@ static void Public( PlaylistTests* T )
     ASSERT_EQ( 1u, tracks.size() );
 }
 
+static void SortMediaRequest( PlaylistTests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "a.mkv", IMedia::Type::Video ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "b.mp3", IMedia::Type::Audio ) );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "z.aac", IMedia::Type::Video ) );
+
+    bool res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m2 );
+    ASSERT_TRUE( res );
+    res = T->pl->append( *m3 );
+    ASSERT_TRUE( res );
+
+    /* Check that the default sort is by order in the playlist. */
+    auto tracks = T->pl->media( nullptr )->all();
+    ASSERT_EQ( tracks.size(), 3u );
+    ASSERT_EQ( tracks[0]->fileName(), m1->fileName() );
+    ASSERT_EQ( tracks[1]->fileName(), m2->fileName() );
+    ASSERT_EQ( tracks[2]->fileName(), m3->fileName() );
+
+    /* Change playlist order. */
+    T->pl->move( 1, 0 );
+    tracks = T->pl->media( nullptr )->all();
+    ASSERT_EQ( tracks.size(), 3u );
+    ASSERT_EQ( tracks[0]->fileName(), m2->fileName() );
+    ASSERT_EQ( tracks[1]->fileName(), m1->fileName() );
+    ASSERT_EQ( tracks[2]->fileName(), m3->fileName() );
+
+    /* Test sorting by filename. */
+    QueryParameters params{};
+    params.sort = SortingCriteria::Filename;
+    tracks = T->pl->media( &params )->all();
+    ASSERT_EQ( tracks.size(), 3u );
+    ASSERT_EQ( tracks[0]->fileName(), m1->fileName() );
+    ASSERT_EQ( tracks[1]->fileName(), m2->fileName() );
+    ASSERT_EQ( tracks[2]->fileName(), m3->fileName() );
+
+    /* Test sorting by duration. */
+    int64_t duration = 0;
+    for ( auto m : { m3, m2, m1 } )
+        m->setDuration( ++duration );
+
+    params.sort = SortingCriteria::Duration;
+    tracks = T->pl->media( &params )->all();
+    ASSERT_EQ( tracks.size(), 3u );
+    ASSERT_EQ( tracks[0]->fileName(), m3->fileName() );
+    ASSERT_EQ( tracks[1]->fileName(), m2->fileName() );
+    ASSERT_EQ( tracks[2]->fileName(), m1->fileName() );
+
+    /* Test sorting by Album tracks. */
+    auto album1 = T->ml->createAlbum( "A" );
+    album1->addTrack( m2, 1, 0, 0, nullptr );
+
+    auto album2 = T->ml->createAlbum( "B" );
+    album2->addTrack( m3, 1, 0, 0, nullptr );
+    album2->addTrack( m1, 2, 0, 0, nullptr );
+
+    params.sort = SortingCriteria::Album;
+    tracks = T->pl->media( &params )->all();
+    ASSERT_EQ( tracks.size(), 3u );
+    ASSERT_EQ( tracks[0]->fileName(), m2->fileName() );
+    ASSERT_EQ( tracks[1]->fileName(), m3->fileName() );
+    ASSERT_EQ( tracks[2]->fileName(), m1->fileName() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -1159,6 +1225,7 @@ int main( int ac, char** av )
     ADD_TEST( UpdateNbMediaOnMediaTypeChange );
     ADD_TEST( FilterByMediaType );
     ADD_TEST( Public );
+    ADD_TEST( SortMediaRequest );
 
     END_TESTS
 }

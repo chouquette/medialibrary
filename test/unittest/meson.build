@@ -732,6 +732,7 @@ playlist_tests = [
   'UpdateNbMediaOnMediaTypeChange',
   'FilterByMediaType',
   'Public',
+  'SortMediaRequest',
 ]
 
 foreach t : playlist_tests
