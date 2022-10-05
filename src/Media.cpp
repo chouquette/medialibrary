@@ -834,7 +834,8 @@ Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
 {
     std::string base = "FROM " + Media::Table::Name + " m ";
 
-    base += "LEFT JOIN " + Playlist::MediaRelationTable::Name +
+    base += addRequestJoin( params );
+    base += " LEFT JOIN " + Playlist::MediaRelationTable::Name +
             " pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ?";
 
@@ -846,7 +847,13 @@ Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
     if ( isPublicOnly == true )
         base += " AND m.is_public != 0";
 
-    const std::string req = "SELECT m.* " + base + " ORDER BY pmr.position";
+    std::string sortRequest;
+    if ( params != nullptr && params->sort != SortingCriteria::Default )
+        sortRequest = Media::sortRequest( params );
+    else
+        sortRequest = "ORDER BY pmr.position";
+
+    const std::string req = "SELECT m.* " + base + " " + sortRequest;
     const std::string countReq = "SELECT COUNT(*) " + base;
     return make_query_with_count<Media, IMedia>( ml, countReq, req, playlistId );
 }
