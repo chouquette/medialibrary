@@ -2587,6 +2587,11 @@ ServicePtr MediaLibrary::service( IService::Type type ) const
     return Service::fetch( this, type );
 }
 
+SubscriptionPtr MediaLibrary::subscription( uint64_t id ) const
+{
+    return Subscription::fetch( this, id );
+}
+
 bool MediaLibrary::setSubscriptionMaxCachedMedia( uint32_t nbCachedMedia )
 {
     return m_settings.setNbCachedMediaPerSubscription( nbCachedMedia );

@@ -271,6 +271,7 @@ public:
     virtual void cacheNewSubscriptionMedia() override;
 
     virtual ServicePtr service( IService::Type type ) const override;
+    virtual SubscriptionPtr subscription(uint64_t id) const override;
 
     virtual bool setSubscriptionMaxCachedMedia( uint32_t nbCachedMedia ) override;
     virtual bool setSubscriptionMaxCacheSize( uint64_t maxCacheSize ) override;

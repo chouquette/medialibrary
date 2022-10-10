@@ -1104,6 +1104,16 @@ public:
      * @return A service instance, or nullptr if the service isn't available
      */
     virtual ServicePtr service( IService::Type type ) const = 0;
+    /**
+     * @brief subscription Returns an object representing a subscription
+     * @param id The subscription's id
+     * @return A Subscription instance, or a nullptr if the id matches no
+     *                                     subscription
+     * Subscriptions usually should be instantiated through their service, but
+     * this becomes useful in a JNI context where we can only instantiate
+     * through an ID.
+     */
+    virtual SubscriptionPtr subscription( uint64_t id ) const = 0;
 
     /**
      * @brief setSubscriptionMaxCachedMedia Sets the maximum number of cached media
