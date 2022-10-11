@@ -2607,4 +2607,19 @@ bool MediaLibrary::setMaxCacheSize( uint64_t maxCacheSize )
     return m_settings.setMaxCacheSize( maxCacheSize );
 }
 
+uint32_t MediaLibrary::getSubscriptionMaxCachedMedia() const
+{
+    return m_settings.nbCachedMediaPerSubscription();
+}
+
+uint64_t MediaLibrary::getSubscriptionMaxCacheSize() const
+{
+    return m_settings.maxSubscriptionCacheSize();
+}
+
+uint64_t MediaLibrary::getMaxCacheSize() const
+{
+    return m_settings.maxCacheSize();
+}
+
 }

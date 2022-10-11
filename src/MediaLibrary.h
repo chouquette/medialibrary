@@ -277,6 +277,10 @@ public:
     virtual bool setSubscriptionMaxCacheSize( uint64_t maxCacheSize ) override;
     virtual bool setMaxCacheSize( uint64_t maxCacheSize ) override;
 
+    virtual uint32_t getSubscriptionMaxCachedMedia() const override;
+    virtual uint64_t getSubscriptionMaxCacheSize() const override;
+    virtual uint64_t getMaxCacheSize() const override;
+
 private:
     static const std::vector<const char*> SupportedMediaExtensions;
     static const std::vector<const char*> SupportedPlaylistExtensions;

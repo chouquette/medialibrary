@@ -1140,6 +1140,28 @@ public:
      * @return true if the change was successful, false otherwise
      */
     virtual bool setMaxCacheSize( uint64_t maxCacheSize ) = 0;
+    /**
+     * @brief getSubscriptionMaxCachedMedia Gets the maximum number of cached media
+     *                                      for each subscription
+     * @return maximum number of cached media for each subscription
+     *
+     * This setting will be used when a subscription is set to inherit the global
+     * setting, but each subscription can individually override this setting.
+     */
+    virtual uint32_t getSubscriptionMaxCachedMedia() const = 0;
+    /**
+     * @brief getSubscriptionMaxCacheSize Gets the maximum cache size for each subscriptions
+     * @return maximum cache size for each subscriptions
+     *
+     * This setting will be used when a subscription is set to inherit the global
+     * setting, but each subscription can individually override this setting.
+     */
+    virtual uint64_t getSubscriptionMaxCacheSize() const = 0;
+    /**
+     * @brief getMaxCacheSize Gets the maximum overall cache size
+     * @return maximum overall cache size
+     */
+    virtual uint64_t getMaxCacheSize() const = 0;
 };
 
 }
