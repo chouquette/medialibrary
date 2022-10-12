@@ -1216,11 +1216,40 @@ bool Playlist::checkDbModel(MediaLibraryPtr ml)
             checkIndex( Indexes::PlaylistRelMediaId );
 }
 
+std::string Playlist::playlistRequest( const QueryParameters* params, PlaylistType type )
+{
+    const bool includeMissing = params != nullptr && params->includeMissing == true;
+
+    std::string req;
+    switch ( type )
+    {
+    case PlaylistType::VideoOnly:
+        if ( includeMissing == true )
+            req += " (nb_video > 0 OR nb_unknown > 0) AND nb_audio = 0";
+        else
+            req += " (nb_present_video > 0 OR nb_present_unknown > 0)"
+                   " AND nb_present_audio = 0";
+        break;
+    case PlaylistType::AudioOnly:
+        if ( includeMissing == true )
+            req += " nb_video = 0 AND nb_unknown = 0 AND nb_audio > 0";
+        else
+            req += " nb_present_video = 0 AND nb_present_unknown = 0"
+                   " AND nb_present_audio > 0";
+        break;
+    case PlaylistType::All:
+    default:
+        break;
+    }
+    return req;
+}
+
 Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
                                    const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
+
     if ( params == nullptr || params->includeMissing == false )
         req += " AND (nb_present_video > 0 OR nb_present_audio > 0"
                " OR nb_present_unknown > 0)";
@@ -1233,34 +1262,15 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
                                     const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name;
-    auto includeMissing = params != nullptr && params->includeMissing == true;
-    auto whereInserted = false;
-    switch ( type )
-    {
-    case PlaylistType::VideoOnly:
-        if ( includeMissing == true )
-            req += " WHERE (nb_video > 0 OR nb_unknown > 0) AND nb_audio = 0";
-        else
-            req += " WHERE (nb_present_video > 0 OR nb_present_unknown > 0)"
-                   " AND nb_present_audio = 0";
-        whereInserted = true;
-        break;
-    case PlaylistType::AudioOnly:
-        if ( includeMissing == true )
-            req += " WHERE nb_video = 0 AND nb_unknown = 0 AND nb_audio > 0";
-        else
-            req += " WHERE nb_present_video = 0 AND nb_present_unknown = 0"
-                   " AND nb_present_audio > 0";
-        whereInserted = true;
-        break;
-    case PlaylistType::All:
-    default:
-        break;
-    }
+
+    const auto playlistRq = playlistRequest( params, type );
+    if ( playlistRq.empty() == false )
+        req += " WHERE" + playlistRequest( params, type );
+
     auto publicOnly = params != nullptr && params->publicOnly == true;
     if ( publicOnly )
     {
-        if ( whereInserted == true )
+        if ( playlistRq.empty() == false )
             req += " AND";
         else
             req += " WHERE";

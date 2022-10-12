@@ -150,6 +150,8 @@ public:
                                         const QueryParameters* params, bool forcePublic );
 private:
     static std::string sortRequest( const QueryParameters* params );
+    static std::string playlistRequest( const QueryParameters* params, PlaylistType type );
+
     static bool writeBackup( const std::string& name,
                              const std::vector<std::string>& mrls,
                              const std::string& destFile );
