@@ -1193,10 +1193,10 @@ Query<IMedia> MediaLibrary::searchMovie( const std::string& pattern, const Query
     return Media::search( this, pattern, IMedia::Type::Video, params, IMedia::SubType::Movie );
 }
 
-Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name,
+Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name, PlaylistType type,
                                                 const QueryParameters* params ) const
 {
-    return Playlist::search( this, name, params );
+    return Playlist::search( this, name, type, params );
 }
 
 Query<IAlbum> MediaLibrary::searchAlbums( const std::string& pattern,
@@ -1232,7 +1232,7 @@ SearchAggregate MediaLibrary::search( const std::string& pattern,
     res.artists = searchArtists( pattern, ArtistIncluded::All, params );
     res.genres = searchGenre( pattern, params );
     res.media = searchMedia( pattern, params );
-    res.playlists = searchPlaylists( pattern, params );
+    res.playlists = searchPlaylists( pattern, PlaylistType::All, params );
     res.shows = searchShows( pattern, params );
     return res;
 }

@@ -123,7 +123,7 @@ public:
     static std::string index( Indexes index, uint32_t dbModel );
     static std::string indexName( Indexes index, uint32_t dbModel );
     static bool checkDbModel( MediaLibraryPtr ml );
-    static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name,
+    static Query<IPlaylist> search( MediaLibraryPtr ml, const std::string& name, PlaylistType type,
                                     const QueryParameters* params );
     static Query<IPlaylist> listAll( MediaLibraryPtr ml, PlaylistType type,
                                      const QueryParameters* params );

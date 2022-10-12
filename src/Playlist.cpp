@@ -1244,15 +1244,21 @@ std::string Playlist::playlistRequest( const QueryParameters* params, PlaylistTy
     return req;
 }
 
-Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name,
+Query<IPlaylist> Playlist::search( MediaLibraryPtr ml, const std::string& name, PlaylistType type,
                                    const QueryParameters* params )
 {
     std::string req = "FROM " + Playlist::Table::Name + " WHERE id_playlist IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
 
-    if ( params == nullptr || params->includeMissing == false )
+    const auto playlistRq = playlistRequest( params, type );
+    if ( playlistRq.empty() == false )
+        req += " AND" + playlistRq;
+    if ( type == PlaylistType::All && ( params == nullptr || params->includeMissing == false ) )
+    {
         req += " AND (nb_present_video > 0 OR nb_present_audio > 0"
                " OR nb_present_unknown > 0)";
+    }
+
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ),
                                             sqlite::Tools::sanitizePattern( name ) ).build();

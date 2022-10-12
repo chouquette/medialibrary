@@ -168,7 +168,7 @@ public:
                                        const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> searchMovie( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const override;
-    virtual Query<IPlaylist> searchPlaylists( const std::string& name,
+    virtual Query<IPlaylist> searchPlaylists( const std::string& name, PlaylistType type,
                                               const QueryParameters* params ) const override;
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
                                         const QueryParameters* params ) const override;

@@ -338,11 +338,11 @@ static void Search( PlaylistTests* T )
     QueryParameters params{};
     params.includeMissing = true;
 
-    auto playlists = T->ml->searchPlaylists( "play", &params )->all();
+    auto playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
 
     params.includeMissing = false;
-    playlists = T->ml->searchPlaylists( "play", &params )->all();
+    playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 0u, playlists.size() );
 }
 
@@ -352,19 +352,19 @@ static void SearchAndSort( PlaylistTests* T )
 
     QueryParameters params{};
     params.includeMissing = true;
-    auto playlists = T->ml->searchPlaylists( "play", &params )->all();
+    auto playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( pl2->id(), playlists[0]->id() );
     ASSERT_EQ( T->pl->id(), playlists[1]->id() );
 
     params.includeMissing = false;
-    playlists = T->ml->searchPlaylists( "play", &params )->all();
+    playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 0u, playlists.size() );
 
     params.sort = SortingCriteria::Default;
     params.desc = true;
     params.includeMissing = true;
-    playlists = T->ml->searchPlaylists( "play", &params )->all();
+    playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
     ASSERT_EQ( pl2->id(), playlists[1]->id() );
@@ -375,12 +375,12 @@ static void SearchAfterDelete( PlaylistTests* T )
     QueryParameters params{};
     params.includeMissing = true;
     auto pl = T->ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = T->ml->searchPlaylists( "sea otters", &params )->all();
+    auto pls = T->ml->searchPlaylists( "sea otters", PlaylistType::All, &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     T->ml->deletePlaylist( pl->id() );
 
-    pls = T->ml->searchPlaylists( "sea otters", &params )->all();
+    pls = T->ml->searchPlaylists( "sea otters", PlaylistType::All, &params )->all();
     ASSERT_EQ( 0u, pls.size() );
 }
 
@@ -389,15 +389,15 @@ static void SearchAfterUpdate( PlaylistTests* T )
     QueryParameters params{};
     params.includeMissing = true;
     auto pl = T->ml->createPlaylist( "sea otters greatest hits" );
-    auto pls = T->ml->searchPlaylists( "sea otters", &params )->all();
+    auto pls = T->ml->searchPlaylists( "sea otters", PlaylistType::All, &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 
     pl->setName( "pangolins are cool too" );
 
-    pls = T->ml->searchPlaylists( "sea otters", &params )->all();
+    pls = T->ml->searchPlaylists( "sea otters", PlaylistType::All, &params )->all();
     ASSERT_EQ( 0u, pls.size() );
 
-    pls = T->ml->searchPlaylists( "pangolins", &params )->all();
+    pls = T->ml->searchPlaylists( "pangolins", PlaylistType::All, &params )->all();
     ASSERT_EQ( 1u, pls.size() );
 }
 
