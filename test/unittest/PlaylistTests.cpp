@@ -344,6 +344,20 @@ static void Search( PlaylistTests* T )
     params.includeMissing = false;
     playlists = T->ml->searchPlaylists( "play", PlaylistType::All, &params )->all();
     ASSERT_EQ( 0u, playlists.size() );
+
+    auto vOnly = T->ml->createPlaylist( "play_video" );
+    auto video = T->ml->addMedia( "video", IMedia::Type::Video );
+    vOnly->append( *video );
+
+    auto aOnly = T->ml->createPlaylist( "play_audio" );
+    auto audio = T->ml->addMedia( "audio", IMedia::Type::Audio );
+    aOnly->append( *audio );
+
+    playlists = T->ml->searchPlaylists( "play", PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+
+    playlists = T->ml->searchPlaylists( "play", PlaylistType::AudioOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
 }
 
 static void SearchAndSort( PlaylistTests* T )
