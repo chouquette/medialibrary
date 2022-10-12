@@ -1241,6 +1241,19 @@ std::string Playlist::playlistRequest( const QueryParameters* params, PlaylistTy
     default:
         break;
     }
+
+    const bool publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+    {
+        if ( req.empty() == false )
+            req += " AND";
+
+        req += " EXISTS(SELECT id_media FROM " + Media::Table::Name + " m"
+               " LEFT JOIN " + MediaRelationTable::Name + " mrt"
+               " ON mrt.media_id = m.id_media"
+               " WHERE mrt.playlist_id = id_playlist AND m.is_public != 0)";
+    }
+
     return req;
 }
 
@@ -1274,17 +1287,6 @@ Query<IPlaylist> Playlist::listAll( MediaLibraryPtr ml, PlaylistType type,
         req += " WHERE" + playlistRequest( params, type );
 
     auto publicOnly = params != nullptr && params->publicOnly == true;
-    if ( publicOnly )
-    {
-        if ( playlistRq.empty() == false )
-            req += " AND";
-        else
-            req += " WHERE";
-        req += " EXISTS(SELECT id_media FROM " + Media::Table::Name + " m"
-               " LEFT JOIN " + MediaRelationTable::Name + " mrt"
-               " ON mrt.media_id = m.id_media"
-               " WHERE mrt.playlist_id = id_playlist AND m.is_public != 0)";
-    }
 
     return make_query<Playlist, IPlaylist>( ml, "*", std::move( req ),
                                             sortRequest( params ) )
