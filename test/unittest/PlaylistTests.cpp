@@ -1111,10 +1111,20 @@ static void Public( PlaylistTests* T )
     auto playlists = playlistQuery->all();
     ASSERT_EQ( 2u, playlists.size() );
 
+    playlistQuery = T->ml->searchPlaylists( "pl", PlaylistType::All, nullptr );
+    ASSERT_EQ( 2u, playlistQuery->count() );
+    playlists = playlistQuery->all();
+    ASSERT_EQ( 2u, playlists.size() );
+
     QueryParameters params{};
     params.publicOnly = true;
 
     playlistQuery = T->ml->playlists( PlaylistType::All, &params );
+    ASSERT_EQ( 0u, playlistQuery->count() );
+    playlists = playlistQuery->all();
+    ASSERT_EQ( 0u, playlists.size() );
+
+    playlistQuery = T->ml->searchPlaylists( "pl", PlaylistType::All, &params );
     ASSERT_EQ( 0u, playlistQuery->count() );
     playlists = playlistQuery->all();
     ASSERT_EQ( 0u, playlists.size() );
@@ -1134,6 +1144,14 @@ static void Public( PlaylistTests* T )
     ASSERT_EQ( 1u, tracksQuery->count() );
     auto tracks = tracksQuery->all();
     ASSERT_EQ( 1u, tracks.size() );
+
+    playlistQuery = T->ml->searchPlaylists( "pl", PlaylistType::All, &params );
+    ASSERT_EQ( 1u, playlistQuery->count() );
+    playlists = playlistQuery->all();
+    ASSERT_EQ( 1u, playlists.size() );
+
+    pl = playlists[0];
+    ASSERT_EQ( pl->id(), pl2->id() );
 }
 
 static void SortMediaRequest( PlaylistTests* T )
