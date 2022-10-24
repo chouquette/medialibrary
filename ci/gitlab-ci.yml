@@ -2,8 +2,8 @@ variables:
   GIT_SUBMODULE_STRATEGY: normal
   MEDIALIBRARY_30_IMAGE: registry.videolan.org/medialibrary-3.0:20220713114658
   MEDIALIBRARY_40_IMAGE: registry.videolan.org/medialibrary-4.0:20220727133212
-  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20220728090852
-  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20220728080707
+  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20221023212324
+  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20221023210716
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20220127084320
   MEDIALIBRARY_ALPINE_IMG: registry.videolan.org/medialibrary-alpine:20220706115155
   MEDIALIBRARY_ARCH_IMG: registry.videolan.org/medialibrary-archlinux:20220706120650
@@ -105,7 +105,7 @@ test:win32:
     when: always
     reports:
       junit: build/meson-logs/testlog.junit.xml
-    paths: 
+    paths:
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
     expire_in: 1 week
@@ -136,7 +136,7 @@ test:win64:
     when: always
     reports:
       junit: build/meson-logs/testlog.junit.xml
-    paths: 
+    paths:
       - $MEDIALIB_TEST_FOLDER/**/test.db
       - $CI_PROJECT_DIR/build/meson-logs/testlog.txt
     expire_in: 1 week
@@ -202,7 +202,7 @@ test:tsan:
   variables:
     TSAN_OPTIONS: 'suppressions=$CI_PROJECT_DIR/ci/tsan_suppress_file'
     SANITIZERS: thread
-        
+
 test:asan-ubsan:
   extends: .base-sanitizer
   variables:
@@ -221,11 +221,11 @@ gen-test-db:
     - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples -n 10
     - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
     - echo "BEGIN;" > $CI_PROJECT_DIR/test_db.sql
-    - > 
-      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.schema --nosys' 
+    - >
+      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.schema --nosys'
       | grep -vF '/*' >> $CI_PROJECT_DIR/test_db.sql
     - >
-      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.dump --data-only --nosys' 
+      sqlite3 $MEDIALIB_TEST_FOLDER/medialib/discoverer_test/test.db '.dump --data-only --nosys'
       | grep -v '^INSERT INTO [[:alpha:]]*Fts'
       >> $CI_PROJECT_DIR/test_db.sql
     - echo "COMMIT;" >> $CI_PROJECT_DIR/test_db.sql
