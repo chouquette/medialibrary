@@ -360,7 +360,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                "max_cached_media INTEGER NOT NULL DEFAULT -1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
                "new_media_notify INTEGER NOT NULL DEFAULT -1,"
-               "unplayed_media INTEGER NOT NULL DEFAULT 0,"
+               "unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
                    "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
            ")";
