@@ -53,6 +53,7 @@ Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
     , m_maxCachedSize( row.extract<decltype(m_maxCachedSize)>() )
     , m_newMediaNotification( row.extract<decltype(m_newMediaNotification)>() )
     , m_nbUnplayedMedia( row.extract<decltype(m_nbUnplayedMedia)>() )
+    , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -69,6 +70,7 @@ Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
     , m_maxCachedSize( -1 )
     , m_newMediaNotification( -1 )
     , m_nbUnplayedMedia( 0 )
+    , m_nbMedia( 0 )
 {
 }
 
@@ -178,6 +180,11 @@ uint32_t Subscription::nbUnplayedMedia() const
     return m_nbUnplayedMedia;
 }
 
+uint32_t Subscription::nbMedia() const
+{
+    return m_nbMedia;
+}
+
 bool Subscription::refresh()
 {
     auto f = file();
@@ -259,6 +266,7 @@ bool Subscription::addMedia( Media& m )
         return false;
     if ( m.playCount() == 0 )
         ++m_nbUnplayedMedia;
+    ++m_nbMedia;
     return true;
 }
 
@@ -282,6 +290,7 @@ bool Subscription::removeMedia( int64_t mediaId )
 
     if ( media->playCount() == 0 )
         --m_nbUnplayedMedia;
+    --m_nbMedia;
     return true;
 }
 
@@ -370,6 +379,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
                "new_media_notify INTEGER NOT NULL DEFAULT -1,"
                "unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+               "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
                    "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
            ")";
@@ -424,8 +434,9 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER INSERT ON " + MediaRelationTable::Name +
                " BEGIN"
-               " UPDATE " + Table::Name +
-                   " SET unplayed_media = unplayed_media + IIF("
+               " UPDATE " + Table::Name + " SET"
+                   " nb_media = nb_media + 1,"
+                   " unplayed_media = unplayed_media + IIF("
                        "(SELECT play_count FROM " + Media::Table::Name +
                        " WHERE id_media = new.media_id) = 0, 1, 0)"
                    " WHERE id_subscription = new.subscription_id;"
@@ -441,8 +452,9 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER DELETE ON " + MediaRelationTable::Name +
                " BEGIN"
-               " UPDATE " + Table::Name +
-                   " SET unplayed_media = unplayed_media - "
+               " UPDATE " + Table::Name + " SET"
+                   " nb_media = nb_media - 1,"
+                   " unplayed_media = unplayed_media - "
                        "EXISTS(SELECT id_media FROM " + Media::Table::Name +
                        " WHERE play_count = 0 AND"
                        " id_media = old.media_id)"
@@ -451,10 +463,11 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
     case Triggers::DecrementUnplayedMediaOnDestroy:
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER DELETE ON " + Media::Table::Name +
-               " WHEN old.nb_subscriptions > 0 AND old.play_count = 0"
+               " WHEN old.nb_subscriptions > 0"
                " BEGIN"
                " UPDATE " + Table::Name +
-                   " SET unplayed_media = unplayed_media - items.cnt"
+                   " SET unplayed_media = unplayed_media -"
+                   " IIF(old.play_count = 0, items.cnt, 0)"
                " FROM (SELECT COUNT(media_id) AS cnt, subscription_id"
                    " FROM " + MediaRelationTable::Name +
                    " WHERE media_id = old.id_media"

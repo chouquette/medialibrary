@@ -104,6 +104,11 @@ public:
      *                        subscription and haven't been played
      */
     virtual uint32_t nbUnplayedMedia() const = 0;
+    /**
+     * @brief nbMedia Returns the number of media that belong to this
+     *                subscription.
+     */
+    virtual uint32_t nbMedia() const = 0;
 };
 
 }
