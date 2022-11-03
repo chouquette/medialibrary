@@ -93,6 +93,7 @@ public:
     virtual int8_t newMediaNotification() const override;
     virtual bool setNewMediaNotification( int8_t value ) override;
     virtual uint32_t nbUnplayedMedia() const override;
+    virtual uint32_t nbMedia() const override;
 
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );
@@ -169,6 +170,7 @@ private:
     int64_t m_maxCachedSize;
     int8_t m_newMediaNotification;
     uint32_t m_nbUnplayedMedia;
+    uint32_t m_nbMedia;
 };
 
 }
