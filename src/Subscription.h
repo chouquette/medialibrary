@@ -54,15 +54,15 @@ public:
          * Increment/decrement unplayed media when inserting/removing from the
          * subscription table
          */
-        IncrementUnplayedMedia,
-        DecrementUnplayedMedia,
+        IncrementMediaCounters,
+        DecrementMediaCounters,
         /*
          * This trigger handles the media removal. We can't implement this as part
-         * of the regular DecrementUnplayedMedia trigger since when the media
+         * of the regular DecrementMediaCounters trigger since when the media
          * gets removed from the relation table following a delete, we can't know
          * its play count.
          */
-        DecrementUnplayedMediaOnDestroy,
+        DecrementMediaCountersOnDestroy,
         /* Handle play_count changes in the media table */
         UpdateUnplayedMedia,
     };

@@ -325,11 +325,11 @@ void Subscription::createTriggers( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
             trigger( Triggers::DecrementCachedSizeOnRemoval, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-            trigger( Triggers::IncrementUnplayedMedia, Settings::DbModelVersion ) );
+            trigger( Triggers::IncrementMediaCounters, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-            trigger( Triggers::DecrementUnplayedMedia, Settings::DbModelVersion ) );
+            trigger( Triggers::DecrementMediaCounters, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
-            trigger( Triggers::DecrementUnplayedMediaOnDestroy, Settings::DbModelVersion ) );
+            trigger( Triggers::DecrementMediaCountersOnDestroy, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
             trigger( Triggers::UpdateUnplayedMedia, Settings::DbModelVersion ) );
 }
@@ -430,7 +430,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                             " AND media_id = old.media_id), 0)"
                     " WHERE id_subscription = old.subscription_id;"
                " END";
-    case Triggers::IncrementUnplayedMedia:
+    case Triggers::IncrementMediaCounters:
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER INSERT ON " + MediaRelationTable::Name +
                " BEGIN"
@@ -441,7 +441,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                        " WHERE id_media = new.media_id) = 0, 1, 0)"
                    " WHERE id_subscription = new.subscription_id;"
                " END";
-    case Triggers::DecrementUnplayedMedia:
+    case Triggers::DecrementMediaCounters:
         /*
          * We need to ensure the media still exists in the Media table in this trigger
          * as it will also be invoked recursively when a media gets deleted.
@@ -460,7 +460,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                        " id_media = old.media_id)"
                        " WHERE id_subscription = old.subscription_id;"
                " END";
-    case Triggers::DecrementUnplayedMediaOnDestroy:
+    case Triggers::DecrementMediaCountersOnDestroy:
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER DELETE ON " + Media::Table::Name +
                " WHEN old.nb_subscriptions > 0"
@@ -512,12 +512,12 @@ std::string Subscription::triggerName( Triggers trigger, uint32_t dbModel )
         return "subscription_decrement_cached_size";
     case Triggers::DecrementCachedSizeOnRemoval:
         return "subscription_decrement_cached_size_on_removal";
-    case Triggers::IncrementUnplayedMedia:
-        return "subscription_increment_unplayed_media_on_insert";
-    case Triggers::DecrementUnplayedMedia:
-        return "subscription_decrement_unplayed_media_on_removal";
-    case Triggers::DecrementUnplayedMediaOnDestroy:
-        return "subscription_decrement_unplayed_media_on_media_destroy";
+    case Triggers::IncrementMediaCounters:
+        return "subscription_increment_media_counters_on_insert";
+    case Triggers::DecrementMediaCounters:
+        return "subscription_decrement_media_counters_on_removal";
+    case Triggers::DecrementMediaCountersOnDestroy:
+        return "subscription_decrement_media_counters_on_media_destroy";
     case Triggers::UpdateUnplayedMedia:
         return "subscription_update_unplayed_media";
     }
@@ -583,9 +583,9 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
            checkTrigger( Triggers::IncrementCachedSize ) &&
            checkTrigger( Triggers::DecrementCachedSize ) &&
            checkTrigger( Triggers::DecrementCachedSizeOnRemoval ) &&
-           checkTrigger( Triggers::IncrementUnplayedMedia ) &&
-           checkTrigger( Triggers::DecrementUnplayedMedia ) &&
-           checkTrigger( Triggers::DecrementUnplayedMediaOnDestroy ) &&
+           checkTrigger( Triggers::IncrementMediaCounters ) &&
+           checkTrigger( Triggers::DecrementMediaCounters ) &&
+           checkTrigger( Triggers::DecrementMediaCountersOnDestroy ) &&
            checkTrigger( Triggers::UpdateUnplayedMedia ) &&
            checkIndex( Indexes::ServiceId ) &&
            checkIndex( Indexes::RelationMediaId ) &&
