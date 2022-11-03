@@ -338,7 +338,7 @@ static void NewMediaNotify( Tests* T )
     ASSERT_EQ( -1, s->newMediaNotification() );
 }
 
-static void NbUnplayedMedia( Tests* T )
+static void NbMedia( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "http://pod.ca/st/episode1.mp3", IMedia::Type::Audio ) );
@@ -350,13 +350,16 @@ static void NbUnplayedMedia( Tests* T )
     auto sub = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub", 0 );
     ASSERT_NON_NULL( sub );
     ASSERT_EQ( 0u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 0u, sub->nbMedia() );
 
     // Add a simple unplayed media
     auto res = sub->addMedia( *m1 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, sub->nbMedia() );
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, sub->nbMedia() );
 
     // Add an already played media and remove it
     res = m2->markAsPlayed();
@@ -364,11 +367,14 @@ static void NbUnplayedMedia( Tests* T )
     res = sub->addMedia( *m2 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
 
     res = sub->removeMedia( m2->id() );
     ASSERT_TRUE( res );
+    ASSERT_EQ( 1u, sub->nbMedia() );
 
     res = m2->removeFromHistory();
     ASSERT_TRUE( res );
@@ -377,8 +383,10 @@ static void NbUnplayedMedia( Tests* T )
     res = sub->addMedia( *m2 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
 
     // Check that updating the media play_count update the subscription
     res = m1->markAsPlayed();
@@ -386,24 +394,28 @@ static void NbUnplayedMedia( Tests* T )
 
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
 
     res = m1->removeFromHistory();
     ASSERT_TRUE( res );
 
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 2u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, sub->nbMedia() );
 
     res = Media::destroy( T->ml.get(), m1->id() );
     ASSERT_TRUE( res );
 
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 1u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, sub->nbMedia() );
 
     res = sub->removeMedia( m2->id() );
     ASSERT_TRUE( res );
 
     sub = Subscription::fetch( T->ml.get(), sub->id() );
     ASSERT_EQ( 0u, sub->nbUnplayedMedia() );
+    ASSERT_EQ( 0u, sub->nbMedia() );
 }
 
 int main( int ac, char** av )
@@ -420,7 +432,7 @@ int main( int ac, char** av )
     ADD_TEST( MaxCachedMedia );
     ADD_TEST( MaxCachedSize );
     ADD_TEST( NewMediaNotify );
-    ADD_TEST( NbUnplayedMedia );
+    ADD_TEST( NbMedia );
 
     END_TESTS
 }
