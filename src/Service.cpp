@@ -158,7 +158,7 @@ std::string Service::schema( const std::string& name, uint32_t dbModel )
                "notify BOOLEAN NOT NULL DEFAULT 1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
                "nb_subscriptions UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-               "unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0"
+               "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0"
            ")";
 }
 
@@ -223,21 +223,21 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
                " END";
     case Triggers::UpdateUnplayedMedia:
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
-               " AFTER UPDATE OF unplayed_media ON " + Subscription::Table::Name +
-               " WHEN old.unplayed_media != new.unplayed_media"
+               " AFTER UPDATE OF nb_unplayed_media ON " + Subscription::Table::Name +
+               " WHEN old.nb_unplayed_media != new.nb_unplayed_media"
                " BEGIN"
                    " UPDATE " + Table::Name +
-                   " SET unplayed_media = unplayed_media + "
-                       "(new.unplayed_media - old.unplayed_media)"
+                   " SET nb_unplayed_media = nb_unplayed_media + "
+                       "(new.nb_unplayed_media - old.nb_unplayed_media)"
                    " WHERE " + Table::PrimaryKeyColumn + " = new.service_id;"
                " END";
     case Triggers::DecrementUnplayedMediaOnSubRemoval:
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                " AFTER DELETE ON " + Subscription::Table::Name +
-               " WHEN old.unplayed_media > 0"
+               " WHEN old.nb_unplayed_media > 0"
                " BEGIN"
                    " UPDATE " + Table::Name +
-                   " SET unplayed_media = unplayed_media - old.unplayed_media"
+                   " SET nb_unplayed_media = nb_unplayed_media - old.nb_unplayed_media"
                    " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
                " END";
     default:
