@@ -271,9 +271,18 @@ bool Subscription::addMedia( MediaLibraryPtr ml, int64_t subscriptionId, int64_t
 
 bool Subscription::removeMedia( int64_t mediaId )
 {
+    auto media = m_ml->media( mediaId );
+    if ( media == nullptr )
+        return false;
+
     const std::string req = "DELETE FROM " + MediaRelationTable::Name +
             " WHERE media_id = ? AND subscription_id = ?";
-    return sqlite::Tools::executeDelete( m_ml->getConn(), req, mediaId, m_id );
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, mediaId, m_id ) == false )
+        return false;
+
+    if ( media->playCount() == 0 )
+        --m_nbUnplayedMedia;
+    return true;
 }
 
 std::shared_ptr<Subscription> Subscription::addChildSubscription( std::string name )
