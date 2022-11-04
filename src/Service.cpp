@@ -43,6 +43,7 @@ Service::Service( MediaLibraryPtr ml, sqlite::Row& row )
     , m_maxCacheSize( row.extract<decltype(m_maxCacheSize)>() )
     , m_nbSubscriptions( row.extract<decltype(m_nbSubscriptions)>() )
     , m_nbUnplayedMedia( row.extract<decltype(m_nbUnplayedMedia)>() )
+    , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -55,6 +56,7 @@ Service::Service( MediaLibraryPtr ml, Type type )
     , m_maxCacheSize( -1 )
     , m_nbSubscriptions( 0 )
     , m_nbUnplayedMedia( 0 )
+    , m_nbMedia( 0 )
 {
 }
 
@@ -144,6 +146,11 @@ uint32_t Service::nbUnplayedMedia() const
     return m_nbUnplayedMedia;
 }
 
+uint32_t Service::nbMedia() const
+{
+    return m_nbMedia;
+}
+
 std::string Service::schema( const std::string& name, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( name );
@@ -158,7 +165,8 @@ std::string Service::schema( const std::string& name, uint32_t dbModel )
                "notify BOOLEAN NOT NULL DEFAULT 1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
                "nb_subscriptions UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-               "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0"
+               "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+               "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0"
            ")";
 }
 
@@ -223,11 +231,14 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
                " END";
     case Triggers::UpdateUnplayedMedia:
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
-               " AFTER UPDATE OF nb_unplayed_media ON " + Subscription::Table::Name +
+               " AFTER UPDATE OF nb_media, nb_unplayed_media ON " + Subscription::Table::Name +
                " WHEN old.nb_unplayed_media != new.nb_unplayed_media"
+               " OR old.nb_media != new.nb_unplayed_media"
                " BEGIN"
-                   " UPDATE " + Table::Name +
-                   " SET nb_unplayed_media = nb_unplayed_media + "
+                   " UPDATE " + Table::Name + " SET"
+                   " nb_media = nb_media + "
+                       "(new.nb_media - old.nb_media),"
+                   " nb_unplayed_media = nb_unplayed_media + "
                        "(new.nb_unplayed_media - old.nb_unplayed_media)"
                    " WHERE " + Table::PrimaryKeyColumn + " = new.service_id;"
                " END";
@@ -235,9 +246,11 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                " AFTER DELETE ON " + Subscription::Table::Name +
                " WHEN old.nb_unplayed_media > 0"
+               " OR old.nb_media > 0"
                " BEGIN"
-                   " UPDATE " + Table::Name +
-                   " SET nb_unplayed_media = nb_unplayed_media - old.nb_unplayed_media"
+                   " UPDATE " + Table::Name + " SET"
+                   " nb_media = nb_media - old.nb_media,"
+                   " nb_unplayed_media = nb_unplayed_media - old.nb_unplayed_media"
                    " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
                " END";
     default:
