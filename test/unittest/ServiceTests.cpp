@@ -143,6 +143,7 @@ static void NbUnplayedMedia( Tests* T )
     auto s = T->ml->service( IService::Type::Podcast );
     ASSERT_NON_NULL( s );
     ASSERT_EQ( 0u, s->nbUnplayedMedia() );
+    ASSERT_EQ( 0u, s->nbMedia() );
 
     auto sub = Subscription::create( T->ml.get(), s->type(), "test", 0 );
     ASSERT_NON_NULL( sub );
@@ -161,17 +162,27 @@ static void NbUnplayedMedia( Tests* T )
 
     s = T->ml->service( s->type() );
     ASSERT_EQ( 1u, s->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, s->nbMedia() );
 
     res = sub2->addMedia( *m2 );
     ASSERT_TRUE( res );
 
     s = T->ml->service( s->type() );
     ASSERT_EQ( 2u, s->nbUnplayedMedia() );
+    ASSERT_EQ( 2u, s->nbMedia() );
 
     Subscription::destroy( T->ml.get(), sub2->id() );
 
     s = T->ml->service( s->type() );
     ASSERT_EQ( 1u, s->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, s->nbMedia() );
+
+    m1->markAsPlayed();
+
+    s = T->ml->service( s->type() );
+    ASSERT_EQ( 0u, s->nbUnplayedMedia() );
+    ASSERT_EQ( 1u, s->nbMedia() );
+
 }
 
 int main( int ac, char** av )
