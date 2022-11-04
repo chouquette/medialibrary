@@ -83,5 +83,6 @@ public:
      */
     virtual uint32_t nbSubscriptions() const = 0;
     virtual uint32_t nbUnplayedMedia() const = 0;
+    virtual uint32_t nbMedia() const = 0;
 };
 }
