@@ -951,6 +951,7 @@ service_tests = [
   'MaxCachedSize',
   'NbSubscriptions',
   'NbUnplayedMedia',
+  'ListMedia',
 ]
 
 foreach t : service_tests

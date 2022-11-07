@@ -185,6 +185,44 @@ static void NbUnplayedMedia( Tests* T )
 
 }
 
+static void ListMedia( Tests* T )
+{
+    auto s = T->ml->service( IService::Type::Podcast );
+
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection", 0 );
+    ASSERT_NON_NULL( c1 );
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addExternalMedia( "http://youtu.be/media1", -1 ) );
+    ASSERT_NON_NULL( m1 );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "file:///path/to/movie.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m2 );
+    c1->addMedia( *m1 );
+    c1->addMedia( *m2 );
+
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "another collection", 0 );
+    ASSERT_NON_NULL( c2 );
+    auto m3 = std::static_pointer_cast<Media>(T->ml->addExternalMedia( "http://podcast.io/something.mp3", -1 ));
+    ASSERT_NON_NULL( m3 );
+
+    auto mediaQuery = s->media( nullptr );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    auto media = mediaQuery->all();
+    ASSERT_EQ( 2u, media.size() );
+
+    c2->addMedia( *m3 );
+    mediaQuery = s->media( nullptr );
+    ASSERT_EQ( 3u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 3u, media.size() );
+
+    c1->removeMedia( m2->id() );
+    mediaQuery = s->media( nullptr );
+    ASSERT_EQ( 2u, mediaQuery->count() );
+    media = mediaQuery->all();
+    ASSERT_EQ( 2u, media.size() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Service )
@@ -196,6 +234,7 @@ int main( int ac, char** av )
     ADD_TEST( MaxCachedSize );
     ADD_TEST( NbSubscriptions );
     ADD_TEST( NbUnplayedMedia );
+    ADD_TEST( ListMedia );
 
     END_TESTS
 }
