@@ -189,9 +189,9 @@ void Service::createTriggers( sqlite::Connection* dbConn )
     sqlite::Tools::executeRequest( dbConn,
             trigger( Triggers::DecrementNbSubscriptions, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
-            trigger( Triggers::UpdateUnplayedMedia, Settings::DbModelVersion ) );
+            trigger( Triggers::UpdateMediaCounters, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( dbConn,
-            trigger( Triggers::DecrementUnplayedMediaOnSubRemoval, Settings::DbModelVersion ) );
+            trigger( Triggers::DecrementMediaCountersOnSubRemoval, Settings::DbModelVersion ) );
 }
 
 bool Service::checkDbModel( MediaLibraryPtr ml )
@@ -208,8 +208,8 @@ bool Service::checkDbModel( MediaLibraryPtr ml )
                 schema( Table::Name, Settings::DbModelVersion ), Table::Name ) &&
            checkTrigger( Triggers::IncrementNbSubscriptions ) &&
            checkTrigger( Triggers::DecrementNbSubscriptions ) &&
-           checkTrigger( Triggers::UpdateUnplayedMedia ) &&
-           checkTrigger( Triggers::DecrementUnplayedMediaOnSubRemoval );
+           checkTrigger( Triggers::UpdateMediaCounters ) &&
+           checkTrigger( Triggers::DecrementMediaCountersOnSubRemoval );
 }
 
 std::string Service::trigger( Triggers t, uint32_t dbModel )
@@ -235,7 +235,7 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
                    " SET nb_subscriptions = nb_subscriptions - 1"
                        " WHERE " + Table::PrimaryKeyColumn + " = old.service_id;"
                " END";
-    case Triggers::UpdateUnplayedMedia:
+    case Triggers::UpdateMediaCounters:
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                " AFTER UPDATE OF nb_media, nb_unplayed_media ON " + Subscription::Table::Name +
                " WHEN old.nb_unplayed_media != new.nb_unplayed_media"
@@ -248,7 +248,7 @@ std::string Service::trigger( Triggers t, uint32_t dbModel )
                        "(new.nb_unplayed_media - old.nb_unplayed_media)"
                    " WHERE " + Table::PrimaryKeyColumn + " = new.service_id;"
                " END";
-    case Triggers::DecrementUnplayedMediaOnSubRemoval:
+    case Triggers::DecrementMediaCountersOnSubRemoval:
         return "CREATE TRIGGER " + triggerName( t, dbModel ) +
                " AFTER DELETE ON " + Subscription::Table::Name +
                " WHEN old.nb_unplayed_media > 0"
@@ -278,10 +278,10 @@ std::string Service::triggerName( Triggers t, uint32_t dbModel )
         return "service_increment_nb_subs";
     case Triggers::DecrementNbSubscriptions:
         return "service_decrement_nb_subs";
-    case Triggers::UpdateUnplayedMedia:
-        return "service_update_unplayed_media";
-    case Triggers::DecrementUnplayedMediaOnSubRemoval:
-        return "service_decrement_unplayed_media_sub_removal";
+    case Triggers::UpdateMediaCounters:
+        return "service_update_media_counters";
+    case Triggers::DecrementMediaCountersOnSubRemoval:
+        return "service_decrement_media_counters_sub_removal";
     default:
         assert( !"Invalid trigger provided" );
     }
