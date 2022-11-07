@@ -76,7 +76,7 @@ bool Service::addSubscription( std::string mrl )
     return true;
 }
 
-Query<ISubscription> Service::subscriptions( const QueryParameters* params )
+Query<ISubscription> Service::subscriptions( const QueryParameters* params ) const
 {
     return Subscription::fromService( m_ml, type(), params );
 }

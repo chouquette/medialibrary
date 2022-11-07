@@ -50,7 +50,7 @@ public:
 
     virtual Type type() const override;
     virtual bool addSubscription( std::string mrl ) override;
-    virtual Query<ISubscription> subscriptions( const QueryParameters* params ) override;
+    virtual Query<ISubscription> subscriptions( const QueryParameters* params ) const override;
     virtual bool isAutoDownloadEnabled() const override;
     virtual bool setAutoDownloadEnabled(bool enabled) override;
     virtual bool isNewMediaNotificationEnabled() const override;

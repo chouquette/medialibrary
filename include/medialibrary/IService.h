@@ -74,7 +74,7 @@ public:
      */
     virtual bool setMaxCachedSize( int64_t maxSize ) = 0;
     virtual bool addSubscription( std::string mrl ) = 0;
-    virtual Query<ISubscription> subscriptions( const QueryParameters* params ) = 0;
+    virtual Query<ISubscription> subscriptions( const QueryParameters* params ) const = 0;
     /**
      * @brief nbSubscriptions Returns the number of subscriptions associated with this service
      *
