@@ -87,7 +87,7 @@ const std::string& Subscription::name() const
     return m_name;
 }
 
-Query<ISubscription> Subscription::childSubscriptions( const QueryParameters* params )
+Query<ISubscription> Subscription::childSubscriptions( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Table::Name + " c WHERE parent_id = ?";
     return make_query<Subscription, ISubscription>( m_ml, "c.*", req,
@@ -101,7 +101,7 @@ SubscriptionPtr Subscription::parent()
     return fetch( m_ml, m_parentId );
 }
 
-Query<IMedia> Subscription::media( const QueryParameters* params )
+Query<IMedia> Subscription::media( const QueryParameters* params ) const
 {
     return Media::fromSubscription( m_ml, m_id, params );
 }

@@ -82,9 +82,9 @@ public:
     virtual int64_t id() const override;
     virtual IService::Type service() const override;
     virtual const std::string& name() const override;
-    virtual Query<ISubscription> childSubscriptions(const QueryParameters* params) override;
+    virtual Query<ISubscription> childSubscriptions( const QueryParameters* params ) const override;
     virtual SubscriptionPtr parent() override;
-    virtual Query<IMedia> media( const QueryParameters* params ) override;
+    virtual Query<IMedia> media( const QueryParameters* params ) const override;
     virtual uint64_t cachedSize() const override;
     virtual int32_t maxCachedMedia() const override;
     virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) override;
