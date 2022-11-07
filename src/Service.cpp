@@ -157,7 +157,7 @@ std::string Service::schema( const std::string& name, uint32_t dbModel )
                "auto_download BOOLEAN NOT NULL DEFAULT 1,"
                "notify BOOLEAN NOT NULL DEFAULT 1,"
                "max_cached_size INTEGER NOT NULL DEFAULT -1,"
-               "nb_subscriptions INTEGER NOT NULL DEFAULT 0,"
+               "nb_subscriptions UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0"
            ")";
 }
