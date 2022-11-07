@@ -100,7 +100,7 @@ test:win32:
     - cp /prefix/dll/libvlccore.dll .
     - ln -s /prefix/lib/vlc/plugins/ .
     - wineserver -p && wine wineboot
-    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
+    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit --timeout-multiplier=2
   artifacts:
     when: always
     reports:
@@ -131,7 +131,7 @@ test:win64:
     - cp /prefix/dll/libvlc.dll .
     - cp /prefix/dll/libvlccore.dll .
     - ln -s /prefix/lib/vlc/plugins/ .
-    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit
+    - MEDIALIB_TEST_FOLDER=`winepath -w $MEDIALIB_TEST_FOLDER` meson test --no-stdsplit --timeout-multiplier=2
   artifacts:
     when: always
     reports:
