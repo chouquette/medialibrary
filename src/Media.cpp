@@ -829,6 +829,18 @@ Query<IMedia> Media::fromSubscription( MediaLibraryPtr ml, int64_t subscriptionI
                                       subscriptionId ).build();
 }
 
+Query<IMedia> Media::fromService( MediaLibraryPtr ml, IService::Type service,
+                                  const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m "
+        "INNER JOIN " + Subscription::MediaRelationTable::Name + " "
+            "cmr ON cmr.media_id = m.id_media "
+        "WHERE (SELECT service_id FROM " + Subscription::Table::Name + " "
+        "WHERE subscription_id = cmr.subscription_id) = ?";
+    req += addRequestJoin( params );
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ), service ).build();
+}
+
 Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
                                    const QueryParameters* params, bool publicOnly )
 {

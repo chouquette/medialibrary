@@ -26,6 +26,7 @@
 
 #include "Service.h"
 #include "Subscription.h"
+#include "Media.h"
 #include "parser/Task.h"
 
 namespace medialibrary
@@ -81,6 +82,11 @@ bool Service::addSubscription( std::string mrl )
 Query<ISubscription> Service::subscriptions( const QueryParameters* params ) const
 {
     return Subscription::fromService( m_ml, type(), params );
+}
+
+Query<IMedia> Service::media( const QueryParameters* params ) const
+{
+    return Media::fromService( m_ml, type(), params );
 }
 
 bool Service::isAutoDownloadEnabled() const
