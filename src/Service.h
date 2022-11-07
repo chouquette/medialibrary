@@ -41,8 +41,8 @@ public:
     {
         IncrementNbSubscriptions,
         DecrementNbSubscriptions,
-        UpdateUnplayedMedia,
-        DecrementUnplayedMediaOnSubRemoval,
+        UpdateMediaCounters,
+        DecrementMediaCountersOnSubRemoval,
     };
 
     Service( MediaLibraryPtr ml, sqlite::Row& row );
