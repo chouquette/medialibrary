@@ -29,6 +29,8 @@
 #include "Media.h"
 #include "parser/Task.h"
 
+#include "database/SqliteErrors.h"
+
 namespace medialibrary
 {
 
@@ -68,7 +70,19 @@ Service::Type Service::type() const
 
 bool Service::addSubscription( std::string mrl )
 {
-    auto t = parser::Task::create( m_ml, std::move( mrl ), type() );
+    std::shared_ptr<parser::Task> t;
+    try
+    {
+        LOG_INFO( "Trying to insert ", mrl );
+        t = parser::Task::create( m_ml, std::move( mrl ), type() );
+    }
+    catch ( const sqlite::errors::ConstraintUnique& ex )
+    {
+        LOG_WARN( "Failed to insert: ", ex.what(),
+                  ". Assuming the subscription is already scheduled for discovery." );
+        return false;
+    }
+
     if ( t == nullptr )
         return false;
     ++m_nbSubscriptions;
