@@ -112,6 +112,9 @@ struct QueryParameters
      * public entities only.
      */
     bool publicOnly = false;
+
+    /* If true, only favourite entities will be returned */
+    bool favouriteOnly = false;
 };
 
 enum class InitializeResult
