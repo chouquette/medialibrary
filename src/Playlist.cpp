@@ -1223,6 +1223,18 @@ std::string Playlist::playlistRequest( const QueryParameters* params, PlaylistTy
     std::string req;
     switch ( type )
     {
+    case PlaylistType::Video:
+        if ( includeMissing == true)
+            req += " (nb_video > 0 OR nb_unknown > 0)";
+        else
+            req += " (nb_present_video > 0 OR nb_present_unknown > 0)";
+        break;
+    case PlaylistType::Audio:
+        if ( includeMissing == true)
+            req += " (nb_audio > 0)";
+        else
+            req += " (nb_present_audio > 0)";
+        break;
     case PlaylistType::VideoOnly:
         if ( includeMissing == true )
             req += " (nb_video > 0 OR nb_unknown > 0) AND nb_audio = 0";
