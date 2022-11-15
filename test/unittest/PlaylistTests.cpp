@@ -1078,10 +1078,18 @@ static void FilterByMediaType( PlaylistTests* T )
     ASSERT_EQ( 1u, playlists.size() );
     ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
 
+    playlists = T->ml->playlists( PlaylistType::Video, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
+
     /* Insert a video to the playlist and check that it's still returned */
     res = videoOnly->append( *m1 );
     ASSERT_TRUE( res );
     playlists = T->ml->playlists( PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
+
+    playlists = T->ml->playlists( PlaylistType::Video, nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
     ASSERT_EQ( videoOnly->id(), playlists[0]->id() );
 
@@ -1090,6 +1098,27 @@ static void FilterByMediaType( PlaylistTests* T )
     ASSERT_TRUE( res );
     playlists = T->ml->playlists( PlaylistType::AudioOnly, nullptr )->all();
     ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( T->pl->id(), playlists[0]->id() );
+
+    playlists = T->ml->playlists( PlaylistType::Audio, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( T->pl->id(), playlists[0]->id() );
+
+    /* Mixed audio/video playlist */
+    res = T->pl->append( *m1 );
+    ASSERT_TRUE( res );
+    playlists = T->ml->playlists( PlaylistType::AudioOnly, nullptr )->all();
+    ASSERT_TRUE( playlists.empty() );
+
+    playlists = T->ml->playlists( PlaylistType::VideoOnly, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+
+    playlists = T->ml->playlists( PlaylistType::Audio, nullptr )->all();
+    ASSERT_EQ( 1u, playlists.size() );
+    ASSERT_EQ( T->pl->id(), playlists[0]->id() );
+
+    playlists = T->ml->playlists( PlaylistType::Video, nullptr )->all();
+    ASSERT_EQ( 2u, playlists.size() );
     ASSERT_EQ( T->pl->id(), playlists[0]->id() );
 }
 
