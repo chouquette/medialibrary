@@ -280,6 +280,7 @@ public:
     virtual uint32_t getSubscriptionMaxCachedMedia() const override;
     virtual uint64_t getSubscriptionMaxCacheSize() const override;
     virtual uint64_t getMaxCacheSize() const override;
+    virtual bool refreshAllSubscriptions() override;
 
 private:
     static const std::vector<const char*> SupportedMediaExtensions;

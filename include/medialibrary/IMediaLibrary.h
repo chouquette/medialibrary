@@ -1166,6 +1166,12 @@ public:
      * @return maximum overall cache size
      */
     virtual uint64_t getMaxCacheSize() const = 0;
+
+    /**
+     * @brief refreshAllSubscriptions Queue refresh tasks for each subscriptions.
+     * @return true if all the subscriptions were refreshed successfully.
+     */
+    virtual bool refreshAllSubscriptions() = 0;
 };
 
 }
