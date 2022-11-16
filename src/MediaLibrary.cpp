@@ -2622,4 +2622,19 @@ uint64_t MediaLibrary::getMaxCacheSize() const
     return m_settings.maxCacheSize();
 }
 
+bool MediaLibrary::refreshAllSubscriptions()
+{
+    auto subscriptions = Subscription::fetchAll( this );
+    bool status = true;
+    for ( auto& subscription : subscriptions )
+    {
+        if ( subscription->refresh() == false )
+        {
+            LOG_WARN( "Subscription '", subscription->name(), "' failed to refresh." );
+            status = false;
+        }
+    }
+    return status;
+}
+
 }
