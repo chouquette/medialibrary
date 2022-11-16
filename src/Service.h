@@ -61,6 +61,7 @@ public:
     virtual uint32_t nbSubscriptions() const override;
     virtual uint32_t nbUnplayedMedia() const override;
     virtual uint32_t nbMedia() const override;
+    virtual bool refresh() override;
 
     static std::string schema( const std::string& name, uint32_t dbModel );
     static std::string trigger( Triggers t, uint32_t dbModel );

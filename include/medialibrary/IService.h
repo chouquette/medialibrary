@@ -86,5 +86,11 @@ public:
     virtual uint32_t nbSubscriptions() const = 0;
     virtual uint32_t nbUnplayedMedia() const = 0;
     virtual uint32_t nbMedia() const = 0;
+
+    /**
+     * @brief refresh Queue refresh tasks for each subscriptions of this service.
+     * @return true if all the subscriptions were refreshed successfully.
+     */
+    virtual bool refresh() = 0;
 };
 }
