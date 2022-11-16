@@ -171,6 +171,21 @@ uint32_t Service::nbMedia() const
     return m_nbMedia;
 }
 
+bool Service::refresh()
+{
+    auto subscriptions = Subscription::fromService( m_ml, type(), nullptr )->all();
+    bool status = true;
+    for ( auto& subscription : subscriptions )
+    {
+        if ( subscription->refresh() == false )
+        {
+            LOG_WARN( "Subscription '", subscription->name(), "' failed to refresh." );
+            status = false;
+        }
+    }
+    return status;
+}
+
 std::string Service::schema( const std::string& name, uint32_t dbModel )
 {
     UNUSED_IN_RELEASE( name );
