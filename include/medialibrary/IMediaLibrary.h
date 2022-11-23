@@ -538,7 +538,7 @@ public:
      * @param params Some query parameters.
      * @return A query representing the results set
      *
-     * All media accessors throughout the media library suppor the same sorting
+     * All media accessors throughout the media library supports the same sorting
      * criteria, which are:
      *   - Duration
      *   - InsertionDate
@@ -564,7 +564,7 @@ public:
      * @param params Some query parameters.
      * @return A query representing the results set
      *
-     * \see{IMediaLibrary::videoFiles} for the supported sorting criteria
+     * \see{IMediaLibrary::audioFiles} for the supported sorting criteria
      */
     virtual Query<IMedia> movies( const QueryParameters* params = nullptr ) const = 0;
 
