@@ -1326,6 +1326,58 @@ static void FetchInProgress( Tests* T )
     ASSERT_EQ( 1u, m1->playCount() );
 }
 
+static void FetchFromSubscriptions( Tests* T )
+{
+    auto r = T->ml->subscriptionMedia( nullptr )->all();
+    ASSERT_TRUE( r.empty() );
+
+    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "1", 0 );
+    ASSERT_NON_NULL( s1 );
+
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "1.mkv", IMedia::Type::Video ) );
+
+    auto res = s1->addMedia( *m1 );
+    ASSERT_TRUE( res );
+
+    r = T->ml->subscriptionMedia( nullptr )->all();
+    ASSERT_EQ( 1u, r.size() );
+
+    auto s2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "2", 0 );
+    ASSERT_NON_NULL( s1 );
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "2.mkv", IMedia::Type::Video ) );
+
+    res = s2->addMedia( *m2 );
+    ASSERT_TRUE( res );
+
+    r = T->ml->subscriptionMedia( nullptr )->all();
+    ASSERT_EQ( 2u, r.size() );
+    ASSERT_EQ(r[0]->fileName(), "1.mkv");
+    ASSERT_EQ(r[1]->fileName(), "2.mkv");
+
+    /* Test Sorting */
+    res = m1->setReleaseDate(5);
+    ASSERT_TRUE(res);
+    res = m2->setReleaseDate(1);
+    ASSERT_TRUE(res);
+
+    QueryParameters params{};
+    params.sort = SortingCriteria::ReleaseDate;
+    r = T->ml->subscriptionMedia( &params )->all();
+    ASSERT_EQ( 2u, r.size() );
+    ASSERT_EQ(r[0]->fileName(), "2.mkv");
+    ASSERT_EQ(r[1]->fileName(), "1.mkv");
+
+    res = T->ml->removeSubscription(s2->id());
+    ASSERT_TRUE(res);
+
+    r = T->ml->subscriptionMedia( nullptr )->all();
+    ASSERT_EQ( 1u, r.size() );
+    ASSERT_EQ(r[0]->fileName(), "1.mkv");
+
+}
+
 static void ConvertToExternal( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>(
@@ -1665,6 +1717,7 @@ int main( int ac, char** av )
     ADD_TEST( SortByTrackId );
     ADD_TEST( ForceTitle );
     ADD_TEST( FetchInProgress );
+    ADD_TEST( FetchFromSubscriptions );
     ADD_TEST( ConvertToExternal );
     ADD_TEST( FlushUserProvidedThumbnails );
     ADD_TEST( Lyrics );
