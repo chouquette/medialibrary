@@ -649,6 +649,7 @@ media_tests = [
   'SortByTrackId',
   'ForceTitle',
   'FetchInProgress',
+  'FetchFromSubscriptions',
   'ConvertToExternal',
   'FlushUserProvidedThumbnails',
   'Lyrics',
