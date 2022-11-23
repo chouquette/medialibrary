@@ -1448,6 +1448,17 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
                                       sortRequest( params ), type ).build();
 }
 
+Query<IMedia> Media::listSubscriptionMedia( MediaLibraryPtr ml, const QueryParameters* params )
+{
+    std::string req = "FROM " + Media::Table::Name + " m ";
+
+    req += addRequestJoin( params );
+    req += " WHERE (m.nb_subscriptions > 0)";
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( params ) ).build();
+}
+
 int64_t Media::id() const
 {
     return m_id;

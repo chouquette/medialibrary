@@ -569,6 +569,15 @@ public:
     virtual Query<IMedia> movies( const QueryParameters* params = nullptr ) const = 0;
 
     /**
+     * @brief subscriptionMedia Returns the media discovered in subscriptions
+     * @param params Some query parameters.
+     * @return A query representing the results set
+     *
+     * \see{IMediaLibrary::audioFiles} for the supported sorting criteria
+     */
+    virtual Query<IMedia> subscriptionMedia( const QueryParameters* params = nullptr ) const = 0;
+
+    /**
      * @brief inProgressMedia Returns media for which playback wasn't completed
      * @param type The type of media to fetch, or 'Unknown' for all
      * @param params Some query parameters

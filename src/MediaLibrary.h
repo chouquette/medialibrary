@@ -105,6 +105,7 @@ public:
     virtual Query<IMedia> audioFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> videoFiles( const QueryParameters* params ) const override;
     virtual Query<IMedia> movies( const QueryParameters* params ) const override;
+    virtual Query<IMedia> subscriptionMedia( const QueryParameters* params ) const override;
     virtual Query<IMedia> inProgressMedia( IMedia::Type type,
                                            const QueryParameters* params ) const override;
 

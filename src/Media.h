@@ -313,6 +313,8 @@ class Media : public IMedia,
                                      Media::SubType subType );
         static Query<IMedia> listInProgress( MediaLibraryPtr ml, Type type,
                                              const QueryParameters* params );
+        static Query<IMedia> listSubscriptionMedia( MediaLibraryPtr ml,
+                                                    const QueryParameters* params );
 
         static Query<IMedia> search( MediaLibraryPtr ml, const std::string& title,
                                      const QueryParameters* params );
