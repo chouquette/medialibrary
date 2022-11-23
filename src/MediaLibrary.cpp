@@ -831,6 +831,11 @@ Query<IMedia> MediaLibrary::movies( const QueryParameters* params ) const
     return Media::listAll( this, IMedia::Type::Video, params, IMedia::SubType::Movie );
 }
 
+Query<IMedia> MediaLibrary::subscriptionMedia( const QueryParameters* params ) const
+{
+    return Media::listSubscriptionMedia(this, params);
+}
+
 Query<IMedia> MediaLibrary::inProgressMedia( IMedia::Type type, const QueryParameters *params ) const
 {
     return Media::listInProgress( this, type, params );
