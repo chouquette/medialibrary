@@ -584,6 +584,9 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
 
     return sqlite::Tools::checkTableSchema(
                 schema( Table::Name, Settings::DbModelVersion ), Table::Name ) &&
+           sqlite::Tools::checkTableSchema(
+                schema( MediaRelationTable::Name, Settings::DbModelVersion ),
+                MediaRelationTable::Name ) &&
            checkTrigger( Triggers::PropagateTaskDeletion ) &&
            checkTrigger( Triggers::IncrementCachedSize ) &&
            checkTrigger( Triggers::DecrementCachedSize ) &&
