@@ -459,6 +459,10 @@ void MediaLibrary::deleteAllTables( sqlite::Connection* dbConn )
         Bookmark::Table::Name,
         MediaGroup::Table::Name,
         MediaGroup::FtsTable::Name,
+        Service::Table::Name,
+        Subscription::Table::Name,
+        Subscription::FtsTable::Name,
+        Subscription::MediaRelationTable::Name,
         "Settings",
     };
     for ( const auto& table : tables )
