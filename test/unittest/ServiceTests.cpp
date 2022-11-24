@@ -243,6 +243,41 @@ static void Search( Tests* T )
     ASSERT_TRUE( r.empty() );
 }
 
+static void SearchMedia( Tests* T )
+{
+    auto s = T->ml->service( IService::Type::Podcast );
+
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", 0 );
+    ASSERT_NON_NULL( c1 );
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", 0 );
+    ASSERT_NON_NULL( c2 );
+
+    ASSERT_NON_NULL( c1 );
+    auto m1 = std::static_pointer_cast<Media>(
+                T->ml->addExternalMedia( "m1", -1 ) );
+    ASSERT_NON_NULL( m1 );
+    m1->setTitle("media 1", true);
+    auto m2 = std::static_pointer_cast<Media>(
+                T->ml->addMedia( "m2", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m2 );
+    m2->setTitle("media 2", true);
+
+    c1->addMedia( *m1 );
+    c2->addMedia( *m2 );
+
+    auto r = s->searchMedia( "media", nullptr )->all();
+    ASSERT_EQ( r.size(), 2u );
+    ASSERT_EQ( r[0]->fileName(), "m1" );
+    ASSERT_EQ( r[1]->fileName(), "m2" );
+
+    r = s->searchMedia( "2", nullptr )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->fileName(), "m2" );
+
+    r = s->searchMedia( "nope", nullptr )->all();
+    ASSERT_TRUE( r.empty() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Service )
@@ -256,6 +291,7 @@ int main( int ac, char** av )
     ADD_TEST( NbUnplayedMedia );
     ADD_TEST( ListMedia );
     ADD_TEST( Search );
+    ADD_TEST( SearchMedia );
 
     END_TESTS
 }
