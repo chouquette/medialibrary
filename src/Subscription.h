@@ -39,6 +39,10 @@ public:
         static const std::string PrimaryKeyColumn;
         static int64_t Subscription::*const PrimaryKey;
     };
+    struct FtsTable
+    {
+        static const std::string Name;
+    };
     struct MediaRelationTable
     {
         static const std::string Name;
@@ -65,6 +69,9 @@ public:
         DecrementMediaCountersOnDestroy,
         /* Handle play_count changes in the media table */
         UpdateUnplayedMedia,
+        InsertFts,
+        UpdateFts,
+        DeleteFts,
     };
 
     enum class Indexes : uint8_t

@@ -40,6 +40,7 @@ namespace medialibrary
 const std::string Subscription::Table::Name = "Subscription";
 const std::string Subscription::Table::PrimaryKeyColumn = "id_subscription";
 int64_t Subscription::*const Subscription::Table::PrimaryKey = &Subscription::m_id;
+const std::string Subscription::FtsTable::Name = "SubscriptionFts";
 const std::string Subscription::MediaRelationTable::Name = "SubscriptionMediaRelation";
 
 Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
@@ -316,6 +317,8 @@ void Subscription::createTable( sqlite::Connection* connection )
     sqlite::Tools::executeRequest( connection,
                                    schema( Table::Name, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
+                                   schema( FtsTable::Name, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
                                    schema( MediaRelationTable::Name, Settings::DbModelVersion ) );
 }
 
@@ -337,6 +340,12 @@ void Subscription::createTriggers( sqlite::Connection* connection )
             trigger( Triggers::DecrementMediaCountersOnDestroy, Settings::DbModelVersion ) );
     sqlite::Tools::executeRequest( connection,
             trigger( Triggers::UpdateUnplayedMedia, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+            trigger( Triggers::InsertFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+            trigger( Triggers::UpdateFts, Settings::DbModelVersion ) );
+    sqlite::Tools::executeRequest( connection,
+            trigger( Triggers::DeleteFts, Settings::DbModelVersion ) );
 }
 
 void Subscription::createIndexes( sqlite::Connection* connection )
@@ -352,7 +361,12 @@ void Subscription::createIndexes( sqlite::Connection* connection )
 std::string Subscription::schema( const std::string& name, uint32_t dbModel )
 {
     assert( dbModel >= 37 );
-    if ( name == MediaRelationTable::Name )
+    if ( name == FtsTable::Name )
+    {
+        return "CREATE VIRTUAL TABLE " + FtsTable::Name +
+               " USING FTS3(name)";
+    }
+    else if ( name == MediaRelationTable::Name )
     {
         return "CREATE TABLE " + MediaRelationTable::Name +
                "("
@@ -498,6 +512,27 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                " WHERE"
                    " id_subscription = items.subscription_id;"
                " END";
+    case Triggers::InsertFts:
+        return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+               " AFTER INSERT ON " + Table::Name +
+               " BEGIN"
+                   " INSERT INTO " + FtsTable::Name + "(rowid, name)"
+                        " VALUES(new.id_subscription, new.name);"
+               " END";
+    case Triggers::UpdateFts:
+        return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+               " AFTER UPDATE OF name ON " + Table::Name +
+               " BEGIN"
+                   " UPDATE " + FtsTable::Name + " SET name = new.name"
+                        " WHERE rowid = new.id_subscription;"
+               " END";
+    case Triggers::DeleteFts:
+        return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
+                    " BEFORE DELETE ON " + Table::Name +
+               " BEGIN"
+                    " DELETE FROM " + FtsTable::Name +
+                        " WHERE rowid = old.id_subscription;"
+               " END";
     }
     return "<invalid trigger>";
 }
@@ -525,6 +560,12 @@ std::string Subscription::triggerName( Triggers trigger, uint32_t dbModel )
         return "subscription_decrement_media_counters_on_media_destroy";
     case Triggers::UpdateUnplayedMedia:
         return "subscription_update_unplayed_media";
+    case Triggers::InsertFts:
+        return "subscription_insert_fts";
+    case Triggers::UpdateFts:
+        return "subscription_update_fts";
+    case Triggers::DeleteFts:
+        return "subscription_delete_fts";
     }
     return "<invalid trigger>";
 }
@@ -585,6 +626,8 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
     return sqlite::Tools::checkTableSchema(
                 schema( Table::Name, Settings::DbModelVersion ), Table::Name ) &&
            sqlite::Tools::checkTableSchema(
+                schema( FtsTable::Name, Settings::DbModelVersion ), FtsTable::Name ) &&
+           sqlite::Tools::checkTableSchema(
                 schema( MediaRelationTable::Name, Settings::DbModelVersion ),
                 MediaRelationTable::Name ) &&
            checkTrigger( Triggers::PropagateTaskDeletion ) &&
@@ -595,6 +638,9 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
            checkTrigger( Triggers::DecrementMediaCounters ) &&
            checkTrigger( Triggers::DecrementMediaCountersOnDestroy ) &&
            checkTrigger( Triggers::UpdateUnplayedMedia ) &&
+           checkTrigger( Triggers::InsertFts ) &&
+           checkTrigger( Triggers::UpdateFts ) &&
+           checkTrigger( Triggers::DeleteFts ) &&
            checkIndex( Indexes::ServiceId ) &&
            checkIndex( Indexes::RelationMediaId ) &&
            checkIndex( Indexes::RelationSubscriptionId );
