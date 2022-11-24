@@ -954,6 +954,7 @@ service_tests = [
   'NbSubscriptions',
   'NbUnplayedMedia',
   'ListMedia',
+  'Search',
 ]
 
 foreach t : service_tests

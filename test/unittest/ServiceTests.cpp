@@ -223,6 +223,26 @@ static void ListMedia( Tests* T )
     ASSERT_EQ( 2u, media.size() );
 }
 
+static void Search( Tests* T )
+{
+    auto s = T->ml->service( IService::Type::Podcast );
+
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", 0 );
+    ASSERT_NON_NULL( c1 );
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", 0 );
+    ASSERT_NON_NULL( c2 );
+
+    auto r = s->searchSubscription( "collection", nullptr )->all();
+    ASSERT_EQ( r.size(), 2u );
+
+    r = s->searchSubscription( "2", nullptr )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->name(), c2->name() );
+
+    r = s->searchSubscription( "nope", nullptr )->all();
+    ASSERT_TRUE( r.empty() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Service )
@@ -235,6 +255,7 @@ int main( int ac, char** av )
     ADD_TEST( NbSubscriptions );
     ADD_TEST( NbUnplayedMedia );
     ADD_TEST( ListMedia );
+    ADD_TEST( Search );
 
     END_TESTS
 }
