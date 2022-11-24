@@ -161,6 +161,9 @@ public:
                                                  std::string name, int64_t parentId );
     static Query<ISubscription> fromService( MediaLibraryPtr ml, IService::Type service,
                                              const QueryParameters* params );
+    static Query<ISubscription> searchInService( MediaLibraryPtr ml, IService::Type service,
+                                                 const std::string& pattern,
+                                                 const QueryParameters* params );
 
     static std::shared_ptr<Subscription> fromFile( MediaLibraryPtr ml, int64_t fileId );
 
