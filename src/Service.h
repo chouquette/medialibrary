@@ -54,6 +54,8 @@ public:
     virtual Query<ISubscription> searchSubscription( const std::string& pattern,
                                                      const QueryParameters* params ) const override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const override;
     virtual bool isAutoDownloadEnabled() const override;
     virtual bool setAutoDownloadEnabled(bool enabled) override;
     virtual bool isNewMediaNotificationEnabled() const override;

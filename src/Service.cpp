@@ -109,6 +109,12 @@ Query<IMedia> Service::media( const QueryParameters* params ) const
     return Media::fromService( m_ml, type(), params );
 }
 
+Query<IMedia> Service::searchMedia( const std::string& pattern,
+                                    const QueryParameters* params ) const
+{
+    return Media::searchInService( m_ml, pattern, type(), params );
+}
+
 bool Service::isAutoDownloadEnabled() const
 {
     return m_autoDownload;
