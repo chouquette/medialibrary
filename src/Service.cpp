@@ -98,6 +98,12 @@ Query<ISubscription> Service::subscriptions( const QueryParameters* params ) con
     return Subscription::fromService( m_ml, type(), params );
 }
 
+Query<ISubscription> Service::searchSubscription( const std::string& pattern,
+                                                  const QueryParameters* params ) const
+{
+    return Subscription::searchInService( m_ml, type(), pattern, params );
+}
+
 Query<IMedia> Service::media( const QueryParameters* params ) const
 {
     return Media::fromService( m_ml, type(), params );

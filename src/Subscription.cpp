@@ -670,6 +670,19 @@ Query<ISubscription> Subscription::fromService( MediaLibraryPtr ml, IService::Ty
                                                 orderBy( params ), service ).build();
 }
 
+Query<ISubscription> Subscription::searchInService( MediaLibraryPtr ml, IService::Type service,
+                                                 const std::string& pattern,
+                                                 const QueryParameters* params )
+{
+    std::string req = "FROM " + Subscription::Table::Name + " WHERE service_id = ?" +
+                      " AND " + Subscription::Table::PrimaryKeyColumn + " IN ("
+                      "SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
+
+    return make_query<Subscription, ISubscription>( ml, "*", req, orderBy( params ), service,
+                                                    sqlite::Tools::sanitizePattern( pattern ) )
+        .build();
+}
+
 std::shared_ptr<Subscription> Subscription::fromFile( MediaLibraryPtr ml, int64_t fileId )
 {
     const std::string req = "SELECT c.* FROM " + Table::Name + " c"
