@@ -2631,6 +2631,29 @@ Query<IMedia> Media::searchInSubscription( MediaLibraryPtr ml, const std::string
                                       sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
+Query<IMedia> Media::searchInService( MediaLibraryPtr ml, const std::string& pattern,
+                                      IService::Type type, const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " m ";
+
+    req += addRequestJoin( params );
+
+    req += "INNER JOIN " + Subscription::MediaRelationTable::Name +
+           " cmr ON cmr.media_id = m.id_media WHERE (SELECT service_id FROM " +
+           Subscription::Table::Name + " WHERE subscription_id = cmr.subscription_id) = ?";
+
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    if ( ( params != nullptr && params->publicOnly == true ) )
+        req += " AND m.is_public != 0";
+
+    req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " WHERE " +
+           Media::FtsTable::Name + " MATCH ?)";
+
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( params ), type,
+                                      sqlite::Tools::sanitizePattern( pattern ) ).build();
+}
+
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
     static const std::string req = "FROM " + Media::Table::Name +

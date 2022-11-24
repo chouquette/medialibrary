@@ -79,6 +79,8 @@ public:
     virtual Query<ISubscription> searchSubscription( const std::string& pattern,
                                                      const QueryParameters* params ) const = 0;
     virtual Query<IMedia> media( const QueryParameters* params ) const = 0;
+    virtual Query<IMedia> searchMedia( const std::string& pattern,
+                                       const QueryParameters* params ) const = 0;
     /**
      * @brief nbSubscriptions Returns the number of subscriptions associated with this service
      *
