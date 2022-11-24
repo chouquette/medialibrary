@@ -108,6 +108,11 @@ Query<IMedia> Subscription::media( const QueryParameters* params ) const
     return Media::fromSubscription( m_ml, m_id, params );
 }
 
+Query<IMedia> Subscription::search(const std::string &pattern, const QueryParameters* params ) const
+{
+    return Media::searchInSubscription( m_ml, pattern, m_id, params );
+}
+
 uint64_t Subscription::cachedSize() const
 {
     return m_cachedSize;
