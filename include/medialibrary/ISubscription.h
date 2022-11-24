@@ -42,6 +42,7 @@ public:
     virtual Query<ISubscription> childSubscriptions( const QueryParameters* params ) const = 0;
     virtual SubscriptionPtr parent() = 0;
     virtual Query<IMedia> media( const QueryParameters* params ) const = 0;
+    virtual Query<IMedia> search( const std::string&, const QueryParameters* ) const = 0;
     virtual bool refresh() = 0;
     /**
      * @brief cachedSize Returns the sum of all cached files for this collection

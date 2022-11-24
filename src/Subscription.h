@@ -85,6 +85,7 @@ public:
     virtual Query<ISubscription> childSubscriptions( const QueryParameters* params ) const override;
     virtual SubscriptionPtr parent() override;
     virtual Query<IMedia> media( const QueryParameters* params ) const override;
+    virtual Query<IMedia> search( const std::string&, const QueryParameters* ) const override;
     virtual uint64_t cachedSize() const override;
     virtual int32_t maxCachedMedia() const override;
     virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) override;

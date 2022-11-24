@@ -335,6 +335,8 @@ class Media : public IMedia,
         static Query<IMedia> searchInPlaylist( MediaLibraryPtr ml, const std::string& pattern,
                                                int64_t playlistId, const QueryParameters* params,
                                                bool forcePublic );
+        static Query<IMedia> searchInSubscription( MediaLibraryPtr ml, const std::string& pattern,
+                                                   int64_t subId, const QueryParameters* params );
         static Query<IMedia> fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
                                            const QueryParameters* params, bool publicOnly );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
