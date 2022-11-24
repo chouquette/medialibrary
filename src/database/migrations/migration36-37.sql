@@ -87,7 +87,7 @@ parser::Task::trigger( parser::Task::Triggers::DeleteSubscriptionLinkingTask, 37
     "forced_title BOOLEAN NOT NULL DEFAULT 0,"
     "artist_id UNSIGNED INTEGER,"
     "genre_id UNSIGNED INTEGER,"
-    "track_number UNSIGEND INTEGER,"
+    "track_number UNSIGNED INTEGER,"
     "album_id UNSIGNED INTEGER,"
     "disc_number UNSIGNED INTEGER,"
     "lyrics TEXT"
