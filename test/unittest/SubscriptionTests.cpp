@@ -139,6 +139,45 @@ static void ListMedia( Tests* T )
     ASSERT_EQ( 2u, media.size() );
 }
 
+static void SearchMedia( Tests* T )
+{
+    auto c1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    ASSERT_NON_NULL( c1 );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "m1.mkv", -1 ) );
+    ASSERT_NON_NULL( m1 );
+    m1->setTitle( "title 1", true );
+
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "m2.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m2 );
+    m2->setTitle( "title 2", true );
+
+    c1->addMedia( *m1 );
+    c1->addMedia( *m2 );
+
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection", 0 );
+    ASSERT_NON_NULL( c2 );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "m3.mp3", -1 ) );
+    ASSERT_NON_NULL( m3 );
+    m3->setTitle( "title 3", true );
+    c2->addMedia( *m3 );
+
+    auto r = c1->search( "1", nullptr )->all();
+    ASSERT_EQ( 1u, r.size() );
+    ASSERT_EQ( r[0]->fileName(), m1->fileName() );
+
+    r = c1->search( "title", nullptr )->all();
+    ASSERT_EQ( 2u, r.size() );
+    ASSERT_EQ( r[0]->fileName(), m1->fileName() );
+    ASSERT_EQ( r[1]->fileName(), m2->fileName() );
+
+    r = c2->search( "title", nullptr )->all();
+    ASSERT_EQ( 1u, r.size() );
+    ASSERT_EQ( r[0]->fileName(), m3->fileName() );
+
+    r = c2->search( "won't match", nullptr )->all();
+    ASSERT_TRUE( r.empty() );
+}
+
 static void CheckDbModel( Tests* T )
 {
     auto res = Subscription::checkDbModel( T->ml.get() );
@@ -426,6 +465,7 @@ int main( int ac, char** av )
     ADD_TEST( ListFromService );
     ADD_TEST( ChildSubscriptions );
     ADD_TEST( ListMedia );
+    ADD_TEST( SearchMedia );
     ADD_TEST( CheckDbModel );
     ADD_TEST( CachedSize );
     ADD_TEST( FetchUncached );

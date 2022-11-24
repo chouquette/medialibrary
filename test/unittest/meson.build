@@ -923,6 +923,7 @@ subscription_tests = [
   'ListFromService',
   'ChildSubscriptions',
   'ListMedia',
+  'SearchMedia',
   'CheckDbModel',
   'CachedSize',
   'FetchUncached',
