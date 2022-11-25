@@ -102,6 +102,7 @@ public:
     virtual bool setNewMediaNotification( int8_t value ) override;
     virtual uint32_t nbUnplayedMedia() const override;
     virtual uint32_t nbMedia() const override;
+    virtual const std::string& artworkMRL() const override;
 
     bool addMedia( Media& m );
     bool removeMedia( int64_t mediaId );

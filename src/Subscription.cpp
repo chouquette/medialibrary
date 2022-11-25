@@ -194,6 +194,11 @@ uint32_t Subscription::nbMedia() const
     return m_nbMedia;
 }
 
+const std::string &Subscription::artworkMRL() const
+{
+    return m_artworkMRL;
+}
+
 bool Subscription::refresh()
 {
     auto f = file();
