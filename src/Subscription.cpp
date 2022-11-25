@@ -303,9 +303,10 @@ bool Subscription::removeMedia( int64_t mediaId )
     return true;
 }
 
-std::shared_ptr<Subscription> Subscription::addChildSubscription( std::string name )
+std::shared_ptr<Subscription> Subscription::addChildSubscription( std::string name,
+                                                                  std::string artworkMRL )
 {
-    return create( m_ml, m_service, std::move( name ), "" /* TODO fill an artwork MRL */, m_id );
+    return create( m_ml, m_service, std::move( name ), std::move( artworkMRL ), m_id );
 }
 
 bool Subscription::clearContent()

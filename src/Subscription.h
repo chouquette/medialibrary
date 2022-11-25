@@ -142,7 +142,7 @@ public:
      */
     bool markCacheAsHandled();
 
-    std::shared_ptr<Subscription> addChildSubscription( std::string name );
+    std::shared_ptr<Subscription> addChildSubscription( std::string name, std::string artworkMRL );
 
     bool clearContent();
 
