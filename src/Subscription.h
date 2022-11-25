@@ -83,8 +83,8 @@ public:
 
 public:
     Subscription( MediaLibraryPtr ml, sqlite::Row& row );
-    Subscription( MediaLibraryPtr ml, IService::Type service, std::string name,
-                  int64_t parentId );
+    Subscription(MediaLibraryPtr ml, IService::Type service, std::string name,
+                 std::string artworkMRL, int64_t parentId);
 
     virtual int64_t id() const override;
     virtual IService::Type service() const override;
@@ -158,7 +158,8 @@ public:
     static bool addMedia( MediaLibraryPtr ml, int64_t collectionId, int64_t mediaId );
 
     static std::shared_ptr<Subscription> create( MediaLibraryPtr ml, IService::Type service,
-                                                 std::string name, int64_t parentId );
+                                                 std::string name, std::string artworkMRL,
+                                                 int64_t parentId);
     static Query<ISubscription> fromService( MediaLibraryPtr ml, IService::Type service,
                                              const QueryParameters* params );
     static Query<ISubscription> searchInService( MediaLibraryPtr ml, IService::Type service,
@@ -184,6 +185,7 @@ private:
     int8_t m_newMediaNotification;
     uint32_t m_nbUnplayedMedia;
     uint32_t m_nbMedia;
+    std::string m_artworkMRL;
 };
 
 }

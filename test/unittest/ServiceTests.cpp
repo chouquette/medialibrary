@@ -119,7 +119,7 @@ static void NbSubscriptions( Tests* T )
      * We can't use Service::addSubscription since it relies on the parser
      * which isn't started for unit tests
     */
-    auto sub = Subscription::create( T->ml.get(), s->type(), "test", 0 );
+    auto sub = Subscription::create( T->ml.get(), s->type(), "test", "artwork", 0 );
     ASSERT_NON_NULL( sub );
 
     s = T->ml->service( IService::Type::Podcast );
@@ -145,14 +145,14 @@ static void NbUnplayedMedia( Tests* T )
     ASSERT_EQ( 0u, s->nbUnplayedMedia() );
     ASSERT_EQ( 0u, s->nbMedia() );
 
-    auto sub = Subscription::create( T->ml.get(), s->type(), "test", 0 );
+    auto sub = Subscription::create( T->ml.get(), s->type(), "test", "artwork", 0 );
     ASSERT_NON_NULL( sub );
 
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "http://media.mk3", IMedia::Type::Audio ) );
     ASSERT_NON_NULL( m1 );
 
-    auto sub2 = Subscription::create( T->ml.get(), s->type(), "test 2", 0 );
+    auto sub2 = Subscription::create( T->ml.get(), s->type(), "test 2", "artwork", 0 );
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "http://media2.mk3", IMedia::Type::Audio ) );
     ASSERT_NON_NULL( m2 );
@@ -189,7 +189,7 @@ static void ListMedia( Tests* T )
 {
     auto s = T->ml->service( IService::Type::Podcast );
 
-    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection", 0 );
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection", "artwork", 0 );
     ASSERT_NON_NULL( c1 );
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addExternalMedia( "http://youtu.be/media1", -1 ) );
@@ -200,7 +200,7 @@ static void ListMedia( Tests* T )
     c1->addMedia( *m1 );
     c1->addMedia( *m2 );
 
-    auto c2 = Subscription::create( T->ml.get(), s->type(), "another collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "another collection", "artwork", 0 );
     ASSERT_NON_NULL( c2 );
     auto m3 = std::static_pointer_cast<Media>(T->ml->addExternalMedia( "http://podcast.io/something.mp3", -1 ));
     ASSERT_NON_NULL( m3 );
@@ -227,9 +227,9 @@ static void Search( Tests* T )
 {
     auto s = T->ml->service( IService::Type::Podcast );
 
-    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", 0 );
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", "artwork", 0 );
     ASSERT_NON_NULL( c1 );
-    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", 0 );
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", "artwork", 0 );
     ASSERT_NON_NULL( c2 );
 
     auto r = s->searchSubscription( "collection", nullptr )->all();
@@ -247,9 +247,9 @@ static void SearchMedia( Tests* T )
 {
     auto s = T->ml->service( IService::Type::Podcast );
 
-    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", 0 );
+    auto c1 = Subscription::create( T->ml.get(), s->type(), "collection 1", "artwork", 0 );
     ASSERT_NON_NULL( c1 );
-    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", 0 );
+    auto c2 = Subscription::create( T->ml.get(), s->type(), "collection 2", "artwork", 0 );
     ASSERT_NON_NULL( c2 );
 
     ASSERT_NON_NULL( c1 );

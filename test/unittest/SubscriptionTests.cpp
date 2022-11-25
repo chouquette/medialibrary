@@ -32,7 +32,8 @@
 
 static void Create( Tests* T )
 {
-    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                   "artwork",  0 );
     ASSERT_NON_NULL( c );
     ASSERT_EQ( c->name(), "collection" );
 }
@@ -45,9 +46,11 @@ static void ListFromService( Tests* T )
     auto collections = collectionQuery->all();
     ASSERT_TRUE( collections.empty() );
 
-    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection",
+                                   "artwork", 0 );
     ASSERT_NON_NULL( c );
-    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection",
+                                    "artwork", 0 );
     ASSERT_NON_NULL( c2 );
 
     collectionQuery = service->subscriptions( nullptr );
@@ -72,7 +75,8 @@ static void ListFromService( Tests* T )
 
 static void ListFromMedia( Tests* T )
 {
-    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", 0 );
+    auto c =
+        Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", "artwork", 0 );
     ASSERT_NON_NULL( c );
 
     auto m1 = std::static_pointer_cast<Media>(
@@ -88,7 +92,8 @@ static void ListFromMedia( Tests* T )
     ASSERT_EQ( res.size(), 1u );
     ASSERT_EQ( res[0]->id(), c->id() );
 
-    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection", 0 );
+    auto c2 =
+        Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection", "artwork", 0 );
     ASSERT_NON_NULL( c2 );
 
     c2->addMedia( *m1 );
@@ -112,7 +117,8 @@ static void ListFromMedia( Tests* T )
 
 static void ChildSubscriptions( Tests* T )
 {
-    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                   "artwork", 0 );
     ASSERT_NON_NULL( c );
     auto scQuery = c->childSubscriptions( nullptr );
     ASSERT_EQ( 0u, scQuery->count() );
@@ -157,7 +163,8 @@ static void ChildSubscriptions( Tests* T )
 
 static void ListMedia( Tests* T )
 {
-    auto c1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto c1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                    "artwork", 0 );
     ASSERT_NON_NULL( c1 );
     auto m1 = std::static_pointer_cast<Media>(
                 T->ml->addExternalMedia( "http://youtu.be/media1", -1 ) );
@@ -168,7 +175,8 @@ static void ListMedia( Tests* T )
     c1->addMedia( *m1 );
     c1->addMedia( *m2 );
 
-    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection",
+                                    "artwork", 0 );
     ASSERT_NON_NULL( c2 );
     auto m3 = T->ml->addExternalMedia( "http://podcast.io/something.mp3", -1 );
     ASSERT_NON_NULL( m3 );
@@ -181,7 +189,8 @@ static void ListMedia( Tests* T )
 
 static void SearchMedia( Tests* T )
 {
-    auto c1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto c1 =
+        Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", "artwork", 0 );
     ASSERT_NON_NULL( c1 );
     auto m1 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "m1.mkv", -1 ) );
     ASSERT_NON_NULL( m1 );
@@ -194,7 +203,8 @@ static void SearchMedia( Tests* T )
     c1->addMedia( *m1 );
     c1->addMedia( *m2 );
 
-    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection", 0 );
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "another collection",
+                                    "artwork", 0 );
     ASSERT_NON_NULL( c2 );
     auto m3 = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "m3.mp3", -1 ) );
     ASSERT_NON_NULL( m3 );
@@ -226,7 +236,8 @@ static void CheckDbModel( Tests* T )
 
 static void CachedSize( Tests* T )
 {
-    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                    "artwork", 0 );
     ASSERT_EQ( s1->cachedSize(), 0u );
 
     ASSERT_NON_NULL( s1 );
@@ -305,7 +316,8 @@ static void CachedSize( Tests* T )
 
 static void FetchUncached( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                   "artwork", 0 );
     ASSERT_NON_NULL( s );
 
     auto m1 = std::static_pointer_cast<Media>(
@@ -344,7 +356,8 @@ static void FetchUncached( Tests* T )
 
 static void MaxCachedMedia( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                   "artwork", 0 );
     ASSERT_NON_NULL( s );
 
     ASSERT_EQ( -1, s->maxCachedMedia() );
@@ -367,7 +380,8 @@ static void MaxCachedMedia( Tests* T )
 
 static void MaxCachedSize( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                    "artwork", 0 );
     ASSERT_NON_NULL( s );
 
     ASSERT_EQ( -1, s->maxCachedSize() );
@@ -390,7 +404,8 @@ static void MaxCachedSize( Tests* T )
 
 static void NewMediaNotify( Tests* T )
 {
-    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
+    auto s = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection",
+                                   "artwork", 0 );
     ASSERT_NON_NULL( s );
 
     ASSERT_EQ( -1, s->newMediaNotification() );
@@ -426,7 +441,8 @@ static void NbMedia( Tests* T )
     ASSERT_NON_NULL( m1 );
     ASSERT_NON_NULL( m2 );
 
-    auto sub = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub", 0 );
+    auto sub = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub",
+                                     "artwork", 0 );
     ASSERT_NON_NULL( sub );
     ASSERT_EQ( 0u, sub->nbUnplayedMedia() );
     ASSERT_EQ( 0u, sub->nbMedia() );
