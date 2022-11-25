@@ -55,12 +55,14 @@ Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
     , m_newMediaNotification( row.extract<decltype(m_newMediaNotification)>() )
     , m_nbUnplayedMedia( row.extract<decltype(m_nbUnplayedMedia)>() )
     , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
+    , m_artworkMRL( row.extract<decltype(m_artworkMRL)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
 
 Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
-                            std::string name, int64_t parentId )
+                            std::string name, std::string artworkMRL,
+                            int64_t parentId )
     : m_ml( ml )
     , m_id( 0 )
     , m_service( service )
@@ -72,6 +74,7 @@ Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
     , m_newMediaNotification( -1 )
     , m_nbUnplayedMedia( 0 )
     , m_nbMedia( 0 )
+    , m_artworkMRL( std::move( artworkMRL ) )
 {
 }
 
@@ -302,7 +305,7 @@ bool Subscription::removeMedia( int64_t mediaId )
 
 std::shared_ptr<Subscription> Subscription::addChildSubscription( std::string name )
 {
-    return create( m_ml, m_service, std::move( name ), m_id );
+    return create( m_ml, m_service, std::move( name ), "" /* TODO fill an artwork MRL */, m_id );
 }
 
 bool Subscription::clearContent()
@@ -399,6 +402,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                "new_media_notify INTEGER NOT NULL DEFAULT -1,"
                "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+               "artwork_mrl TEXT,"
                "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
                    "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
            ")";
@@ -647,12 +651,14 @@ bool Subscription::checkDbModel( MediaLibraryPtr ml )
 }
 
 std::shared_ptr<Subscription> Subscription::create( MediaLibraryPtr ml, IService::Type service,
-                                                    std::string name, int64_t parentId )
+                                                    std::string name, std::string artworkMRL,
+                                                    int64_t parentId )
 {
-    auto self = std::make_shared<Subscription>( ml, service, std::move( name ), parentId );
+    auto self = std::make_shared<Subscription>( ml, service, std::move( name ),
+                                                std::move( artworkMRL ), parentId );
     const std::string req = "INSERT INTO " + Table::Name +
-            "(service_id, name, parent_id) VALUES(?, ?, ?)";
-    if ( insert( ml, self, req, service, self->m_name,
+                            "(service_id, name, artwork_mrl, parent_id) VALUES(?, ?, ?, ?)";
+    if ( insert( ml, self, req, service, self->m_name, self->m_artworkMRL,
                  sqlite::ForeignKey{ parentId } ) == false )
         return nullptr;
     auto notifier = ml->getNotifier();

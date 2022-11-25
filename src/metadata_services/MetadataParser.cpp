@@ -537,7 +537,8 @@ Status MetadataAnalyzer::parseSubscription( IItem& item ) const
             name = utils::file::fileName( mrl );
         auto t = m_ml->getConn()->newTransaction();
         subscription = Subscription::create( m_ml, static_cast<IService::Type>( item.linkToId() ),
-                                         std::move( name ), 0 );
+                                             std::move( name ),
+                                             "" /* TODO Fill with the associated meta */, 0 );
         if ( subscription == nullptr )
             return Status::Fatal;
         auto file = File::createFromSubscription( m_ml, mrl, subscription->id() );

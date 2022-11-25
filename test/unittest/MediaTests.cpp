@@ -1331,7 +1331,7 @@ static void FetchFromSubscriptions( Tests* T )
     auto r = T->ml->subscriptionMedia( nullptr )->all();
     ASSERT_TRUE( r.empty() );
 
-    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "1", 0 );
+    auto s1 = Subscription::create( T->ml.get(), IService::Type::Podcast, "1", "artwork", 0 );
     ASSERT_NON_NULL( s1 );
 
     auto m1 = std::static_pointer_cast<Media>(
@@ -1343,7 +1343,7 @@ static void FetchFromSubscriptions( Tests* T )
     r = T->ml->subscriptionMedia( nullptr )->all();
     ASSERT_EQ( 1u, r.size() );
 
-    auto s2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "2", 0 );
+    auto s2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "2", "artwork", 0 );
     ASSERT_NON_NULL( s1 );
     auto m2 = std::static_pointer_cast<Media>(
                 T->ml->addMedia( "2.mkv", IMedia::Type::Video ) );
@@ -1552,7 +1552,8 @@ static void NbSubscriptions( Tests* T )
     auto m = std::static_pointer_cast<Media>( T->ml->addExternalMedia( "media.mkv", -1 ) );
     ASSERT_EQ( 0u, m->nbSubscriptions() );
 
-    auto subscription = Subscription::create( T->ml.get(), IService::Type::Podcast, "subscription", 0 );
+    auto subscription = Subscription::create( T->ml.get(), IService::Type::Podcast, "subscription",
+                                              "thumbnail", 0 );
     ASSERT_NON_NULL( subscription );
 
     auto res = subscription->addMedia( *m );
