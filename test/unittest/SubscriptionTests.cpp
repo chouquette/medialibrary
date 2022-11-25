@@ -36,6 +36,7 @@ static void Create( Tests* T )
                                    "artwork",  0 );
     ASSERT_NON_NULL( c );
     ASSERT_EQ( c->name(), "collection" );
+    ASSERT_EQ( c->artworkMRL(), "artwork" );
 }
 
 static void ListFromService( Tests* T )

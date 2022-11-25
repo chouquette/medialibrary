@@ -110,6 +110,13 @@ public:
      *                subscription.
      */
     virtual uint32_t nbMedia() const = 0;
+
+    /**
+     * @brief artworkMRL Returns the subscription's artwork MRL.
+     *
+     * @note An empty string is returned in case of no artwork MRL is available.
+     */
+    virtual const std::string& artworkMRL() const = 0;
 };
 
 }
