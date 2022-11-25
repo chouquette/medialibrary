@@ -125,9 +125,9 @@ static void ChildSubscriptions( Tests* T )
     auto sc = scQuery->all();
     ASSERT_EQ( 0u, sc.size() );
 
-    auto sc1 = c->addChildSubscription( "Z" );
+    auto sc1 = c->addChildSubscription( "Z", "https://child1.png" );
     ASSERT_NON_NULL( sc1 );
-    auto sc2 = c->addChildSubscription( "A" );
+    auto sc2 = c->addChildSubscription( "A", "https://child2.jpg" );
     ASSERT_NON_NULL( sc2 );
 
     ASSERT_EQ( 2u, scQuery->count() );
