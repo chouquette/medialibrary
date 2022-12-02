@@ -491,6 +491,14 @@ public:
     virtual bool isPublic() const = 0;
     virtual uint32_t nbSubscriptions() const = 0;
 
+    /// \brief linkedSubscriptions Returns a query representing subscriptions
+    ///        containing this media
+    /// \param params Some query parameters, or nullptr for the default
+    ///
+    /// The only query parameter supported for this query for now is to choose
+    /// a descending order of the name sorting.
+    virtual Query<ISubscription> linkedSubscriptions( const QueryParameters* ) const = 0;
+
     /**
      * @brief description Returns this media description, if available.
      * @return A description or a reference to an empty string when none is available.

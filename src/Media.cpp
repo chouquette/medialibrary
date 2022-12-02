@@ -1257,6 +1257,11 @@ uint32_t Media::nbSubscriptions() const
     return m_nbSubscriptions;
 }
 
+Query<ISubscription> Media::linkedSubscriptions( const QueryParameters* params ) const
+{
+    return Subscription::fromMedia( m_ml, m_id, params );
+}
+
 const std::string& Media::description() const
 {
     return m_description;

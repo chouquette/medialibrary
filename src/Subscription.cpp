@@ -683,6 +683,16 @@ Query<ISubscription> Subscription::searchInService( MediaLibraryPtr ml, IService
         .build();
 }
 
+Query<ISubscription> Subscription::fromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                              const QueryParameters* params )
+{
+    std::string req = "FROM " + Table::Name + " s INNER JOIN " + MediaRelationTable::Name +
+                      " cmr ON s." + Table::PrimaryKeyColumn + " = cmr.subscription_id"
+                      " WHERE cmr.media_id = ?";
+    return make_query<Subscription, ISubscription>( ml, "s.*", req, orderBy( params ), mediaId )
+        .build();
+}
+
 std::shared_ptr<Subscription> Subscription::fromFile( MediaLibraryPtr ml, int64_t fileId )
 {
     const std::string req = "SELECT c.* FROM " + Table::Name + " c"
