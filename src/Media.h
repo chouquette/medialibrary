@@ -305,6 +305,8 @@ class Media : public IMedia,
         bool setLyrics( std::string lyrics );
         virtual bool isPublic() const override;
         virtual uint32_t nbSubscriptions() const override;
+        virtual Query<ISubscription> linkedSubscriptions( const QueryParameters* ) const override;
+
         virtual const std::string& description() const override;
         bool setDescription( std::string desc );
 

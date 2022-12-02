@@ -165,6 +165,8 @@ public:
                                                  const std::string& pattern,
                                                  const QueryParameters* params );
 
+    static Query<ISubscription> fromMedia( MediaLibraryPtr ml, int64_t mediaId,
+                                           const QueryParameters* params );
     static std::shared_ptr<Subscription> fromFile( MediaLibraryPtr ml, int64_t fileId );
 
 private:
