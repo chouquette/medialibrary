@@ -70,6 +70,46 @@ static void ListFromService( Tests* T )
     ASSERT_EQ( c2->id(), collections[1]->id() );
 }
 
+static void ListFromMedia( Tests* T )
+{
+    auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "A collection", 0 );
+    ASSERT_NON_NULL( c );
+
+    auto m1 = std::static_pointer_cast<Media>(
+        T->ml->addMedia( "file:///path/to/movie.mkv", IMedia::Type::Video ) );
+    ASSERT_NON_NULL( m1 );
+
+    auto res = m1->linkedSubscriptions( nullptr )->all();
+    ASSERT_TRUE( res.empty() );
+
+    c->addMedia( *m1 );
+
+    res = m1->linkedSubscriptions( nullptr )->all();
+    ASSERT_EQ( res.size(), 1u );
+    ASSERT_EQ( res[0]->id(), c->id() );
+
+    auto c2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "Z collection", 0 );
+    ASSERT_NON_NULL( c2 );
+
+    c2->addMedia( *m1 );
+    res = m1->linkedSubscriptions( nullptr )->all();
+    ASSERT_EQ( res.size(), 2u );
+    ASSERT_EQ( res[0]->id(), c->id() );
+    ASSERT_EQ( res[1]->id(), c2->id() );
+
+    QueryParameters params{};
+    params.desc = true;
+    res = m1->linkedSubscriptions( &params )->all();
+    ASSERT_EQ( res.size(), 2u );
+    ASSERT_EQ( res[0]->id(), c2->id() );
+    ASSERT_EQ( res[1]->id(), c->id() );
+
+    c->removeMedia( m1->id() );
+    c2->removeMedia( m1->id() );
+    res = m1->linkedSubscriptions( nullptr )->all();
+    ASSERT_TRUE( res.empty() );
+}
+
 static void ChildSubscriptions( Tests* T )
 {
     auto c = Subscription::create( T->ml.get(), IService::Type::Podcast, "collection", 0 );
@@ -463,6 +503,7 @@ int main( int ac, char** av )
 
     ADD_TEST( Create );
     ADD_TEST( ListFromService );
+    ADD_TEST( ListFromMedia );
     ADD_TEST( ChildSubscriptions );
     ADD_TEST( ListMedia );
     ADD_TEST( SearchMedia );

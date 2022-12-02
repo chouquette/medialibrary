@@ -921,6 +921,7 @@ subscription_test_exe = executable('subscription_tests', 'SubscriptionTests.cpp'
 subscription_tests = [
   'Create',
   'ListFromService',
+  'ListFromMedia',
   'ChildSubscriptions',
   'ListMedia',
   'SearchMedia',
