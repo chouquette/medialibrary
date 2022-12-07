@@ -113,6 +113,8 @@ public:
     virtual bool remove( uint32_t position ) override;
     virtual bool isReadOnly() const override;
     virtual std::string mrl() const override;
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool favorite ) override;
 
     static void createTable( sqlite::Connection* dbConn );
     static void createTriggers( sqlite::Connection* dbConn );
@@ -180,6 +182,7 @@ private:
     uint32_t m_nbPresentUnknown;
     int64_t m_duration;
     uint32_t m_nbUnknownDuration;
+    bool m_isFavorite;
     bool m_publicOnlyListing;
 
     friend Playlist::Table;

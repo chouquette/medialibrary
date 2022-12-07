@@ -175,6 +175,9 @@ public:
     /// In case of errors, an empty string will be returned.
     ///
     virtual std::string mrl() const = 0;
+
+    virtual bool isFavorite() const = 0;
+    virtual bool setFavorite( bool favorite ) = 0;
 };
 
 }

@@ -1248,6 +1248,17 @@ static void SortMediaRequest( PlaylistTests* T )
     ASSERT_EQ( tracks[2]->fileName(), m1->fileName() );
 }
 
+static void Favorite( PlaylistTests* T )
+{
+    ASSERT_FALSE( T->pl->isFavorite() );
+
+    T->pl->setFavorite( true );
+    ASSERT_TRUE( T->pl->isFavorite() );
+
+    auto p = T->ml->playlist( T->pl->id() );
+    ASSERT_TRUE( T->pl->isFavorite() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( PlaylistTests );
@@ -1287,6 +1298,7 @@ int main( int ac, char** av )
     ADD_TEST( FilterByMediaType );
     ADD_TEST( Public );
     ADD_TEST( SortMediaRequest );
+    ADD_TEST( Favorite );
 
     END_TESTS
 }
