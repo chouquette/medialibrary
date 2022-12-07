@@ -734,6 +734,7 @@ playlist_tests = [
   'FilterByMediaType',
   'Public',
   'SortMediaRequest',
+  'Favorite',
 ]
 
 foreach t : playlist_tests

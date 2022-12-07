@@ -68,6 +68,7 @@ Playlist::Playlist( MediaLibraryPtr ml, sqlite::Row& row )
     , m_nbPresentUnknown( row.extract<decltype(m_nbPresentUnknown)>() )
     , m_duration( row.extract<decltype(m_duration)>() )
     , m_nbUnknownDuration( row.extract<decltype(m_nbUnknownDuration)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
 {
     if ( row.hasRemainingColumns() == true )
         m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
@@ -89,6 +90,7 @@ Playlist::Playlist( MediaLibraryPtr ml, std::string name )
     , m_nbPresentUnknown( 0 )
     , m_duration( 0 )
     , m_nbUnknownDuration( 0 )
+    , m_isFavorite( false )
     , m_publicOnlyListing( false )
 {
 }
@@ -543,6 +545,22 @@ std::string Playlist::mrl() const
     }
 }
 
+bool Playlist::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool Playlist::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_playlist = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
+    return true;
+}
+
 void Playlist::createTable( sqlite::Connection* dbConn )
 {
     std::string reqs[] = {
@@ -654,6 +672,27 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_file) ON DELETE CASCADE"
             ")";
         }
+        if ( dbModel < 37 )
+        {
+            return "CREATE TABLE " + Table::Name +
+            "("
+                + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "name TEXT COLLATE NOCASE,"
+                "creation_date UNSIGNED INT NOT NULL,"
+                "artwork_mrl TEXT,"
+                "nb_video UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_audio UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_present_video UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_video <= nb_video),"
+                "nb_present_audio UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_audio <= nb_audio),"
+                "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
+                    "CHECK(nb_present_unknown <= nb_unknown),"
+                "duration UNSIGNED INT NOT NULL DEFAULT 0,"
+                "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0"
+            ")";
+        }
         return "CREATE TABLE " + Table::Name +
         "("
             + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -670,7 +709,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
             "nb_present_unknown UNSIGNED INT NOT NULL DEFAULT 0 "
                 "CHECK(nb_present_unknown <= nb_unknown),"
             "duration UNSIGNED INT NOT NULL DEFAULT 0,"
-            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0"
+            "nb_duration_unknown UNSIGNED INT NOT NULL DEFAULT 0,"
             /*
              * Ideally we should check that nb_duration_unknown never increases
              * over nb_video + nb_audio + nb_unknown but we can't enforce this
@@ -678,6 +717,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
              * which we can't AFAIK (a transaction doesn't work, the CHECK would
              * still fire between updates
              */
+            " is_favorite BOOLEAN NOT NULL DEFAULT FALSE"
         ")";
     }
     assert( tableName == MediaRelationTable::Name );
