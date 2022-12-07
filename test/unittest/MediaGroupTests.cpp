@@ -1687,6 +1687,18 @@ static void NbSeen( Tests* T )
     ASSERT_EQ( 0u, g->nbSeen() );
 }
 
+static void Favorite( Tests* T )
+{
+    auto g = T->ml->createMediaGroup( "group" );
+    ASSERT_FALSE( g->isFavorite() );
+
+    g->setFavorite( true );
+    ASSERT_TRUE( g->isFavorite() );
+
+    g = T->ml->mediaGroup( g->id() );
+    ASSERT_TRUE( g->isFavorite() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( MediaGroup );
@@ -1732,6 +1744,7 @@ int main( int ac, char** av )
     ADD_TEST( ConvertExternalMediaType );
     ADD_TEST( ChangeExternalMediaGroup );
     ADD_TEST( NbSeen );
+    ADD_TEST( Favorite );
 
     END_TESTS;
 }

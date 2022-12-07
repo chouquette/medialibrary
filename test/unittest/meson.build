@@ -563,6 +563,7 @@ media_group_tests = [
   'ConvertExternalMediaType',
   'ChangeExternalMediaGroup',
   'NbSeen',
+  'Favorite',
 ]
 
 foreach t : media_group_tests
