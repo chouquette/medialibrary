@@ -70,6 +70,7 @@ Folder::Folder( MediaLibraryPtr ml, sqlite::Row& row )
      */
     , m_duration( row.hasRemainingColumns() == true ? row.extract<decltype(m_duration)>() : 0 )
     , m_isPublic( row.hasRemainingColumns() == true ? row.extract<decltype(m_isPublic)>() : false )
+    , m_isFavorite( row.hasRemainingColumns() == true ? row.extract<decltype(m_isFavorite)>() : false )
 {
     if ( row.hasRemainingColumns() == true )
         m_publicOnlyListing = row.extract<decltype(m_publicOnlyListing)>();
@@ -92,6 +93,7 @@ Folder::Folder(MediaLibraryPtr ml, std::string path, std::string name,
     , m_nbVideo( 0 )
     , m_duration( 0 )
     , m_isPublic( false )
+    , m_isFavorite( false )
     , m_publicOnlyListing( false )
 {
 }
@@ -191,6 +193,7 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
         "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
         "is_public BOOLEAN NOT NULL,"
+        " is_favorite BOOLEAN NOT NULL DEFAULT FALSE,"
 
         "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
         "(id_folder) ON DELETE CASCADE,"
@@ -1109,6 +1112,22 @@ uint32_t Folder::nbMedia() const
 int64_t Folder::duration() const
 {
     return m_duration;
+}
+
+bool Folder::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool Folder::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_folder = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
+    return true;
 }
 
 std::vector<std::shared_ptr<Folder>> Folder::fetchRootFolders( MediaLibraryPtr ml )

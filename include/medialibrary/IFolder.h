@@ -135,6 +135,9 @@ public:
      * If some media duration is unknown, it is ignored in this total.
      */
     virtual int64_t duration() const = 0;
+
+    virtual bool isFavorite() const = 0;
+    virtual bool setFavorite( bool favorite ) = 0;
 };
 
 }

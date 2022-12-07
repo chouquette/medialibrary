@@ -170,6 +170,8 @@ public:
     virtual uint32_t nbAudio() const override;
     virtual uint32_t nbMedia() const override;
     virtual int64_t duration() const override;
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool favorite ) override;
 
     static std::shared_ptr<Folder> fromMrl( MediaLibraryPtr ml,
                                             const std::string& mrl,
@@ -200,6 +202,7 @@ private:
     uint32_t m_nbVideo;
     int64_t m_duration;
     bool m_isPublic;
+    bool m_isFavorite;
     bool m_publicOnlyListing;
 
     mutable std::shared_ptr<Device> m_device;
