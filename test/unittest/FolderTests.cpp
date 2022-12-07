@@ -1129,6 +1129,24 @@ static void SetPublic( FolderTests* T )
     checkMediaPublicness( *subFolder, false );
 }
 
+static void Favorite( FolderTests* T )
+{
+    T->ml->discover( mock::FileSystemFactory::Root );
+    bool discovered = T->cbMock->waitDiscovery();
+    ASSERT_TRUE( discovered );
+
+    auto root = T->ml->folder( 1 );
+    ASSERT_NON_NULL( root );
+
+    ASSERT_FALSE( root->isFavorite() );
+
+    root->setFavorite( true );
+    ASSERT_TRUE( root->isFavorite() );
+
+    root = T->ml->folder( 1 );
+    ASSERT_TRUE( root->isFavorite() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( FolderTests );
@@ -1176,6 +1194,7 @@ int main( int ac, char** av )
     ADD_TEST( NbMediaAfterExternalInternalConversion );
     ADD_TEST( Duration );
     ADD_TEST( SetPublic );
+    ADD_TEST( Favorite );
 
     END_TESTS
 }

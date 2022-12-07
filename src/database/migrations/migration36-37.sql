@@ -39,7 +39,7 @@ Folder::schema( Folder::Table::Name, 37 ),
 
 "INSERT INTO " + Folder::Table::Name +
     " SELECT *, (SELECT TOTAL(IIF(duration > 0, duration, 0)) FROM "
-        + Media::Table::Name + " WHERE folder_id = id_folder), FALSE"
+        + Media::Table::Name + " WHERE folder_id = id_folder), FALSE, FALSE"
     " FROM " + Folder::Table::Name + "_backup",
 
 

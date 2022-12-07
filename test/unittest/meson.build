@@ -426,6 +426,7 @@ folder_tests = [
   'NbMediaAfterExternalInternalConversion',
   'Duration',
   'SetPublic',
+  'Favorite',
 ]
 
 foreach t : folder_tests
