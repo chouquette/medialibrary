@@ -192,6 +192,9 @@ public:
      * This will ungroup all media that are part of this group.
      */
     virtual bool destroy() = 0;
+
+    virtual bool isFavorite() const = 0;
+    virtual bool setFavorite( bool favorite ) = 0;
 };
 
 }

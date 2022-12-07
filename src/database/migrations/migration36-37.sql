@@ -160,6 +160,7 @@ Album::index( Album::Indexes::Title, 37 ),
 "ALTER TABLE " + Artist::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
 "ALTER TABLE " + Genre::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
 "ALTER TABLE " + Playlist::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
+"ALTER TABLE " + MediaGroup::Table::Name + " ADD COLUMN is_favorite BOOLEAN NOT NULL DEFAULT FALSE",
 
 "CREATE TEMPORARY TABLE " + File::Table::Name + "_backup"
 "("

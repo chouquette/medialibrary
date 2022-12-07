@@ -61,6 +61,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, sqlite::Row& row )
     , m_lastModificationDate( row.extract<decltype(m_lastModificationDate)>() )
     , m_userInteracted( row.extract<decltype(m_userInteracted)>() )
     , m_forcedSingleton( row.extract<decltype(m_forcedSingleton)>() )
+    , m_isFavorite( row.extract<decltype(m_isFavorite)>() )
 {
     assert( row.hasRemainingColumns() == false );
 }
@@ -84,6 +85,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml, std::string name, bool userInitiated
     , m_lastModificationDate( m_creationDate )
     , m_userInteracted( userInitiated )
     , m_forcedSingleton( isForcedSingleton )
+    , m_isFavorite( false )
 {
 }
 
@@ -105,6 +107,7 @@ MediaGroup::MediaGroup( MediaLibraryPtr ml , std::string name )
     , m_lastModificationDate( m_creationDate )
     , m_userInteracted( true )
     , m_forcedSingleton( false )
+    , m_isFavorite( false )
 {
 }
 
@@ -379,6 +382,22 @@ bool MediaGroup::destroy()
     }
     // Let the empty group be removed by the DeleteEmptyGroups trigger
     t->commit();
+    return true;
+}
+
+bool MediaGroup::isFavorite() const
+{
+    return m_isFavorite;
+}
+
+bool MediaGroup::setFavorite( bool favorite )
+{
+    static const std::string req = "UPDATE " + Table::Name + " SET is_favorite = ? WHERE id_group = ?";
+    if ( m_isFavorite == favorite )
+        return true;
+    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req, favorite, m_id ) == false )
+        return false;
+    m_isFavorite = favorite;
     return true;
 }
 
@@ -660,6 +679,32 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "forced_singleton BOOLEAN"
         ")";
     }
+    if ( dbModel < 37 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "name TEXT COLLATE NOCASE,"
+            "nb_video UNSIGNED INTEGER DEFAULT 0,"
+            "nb_audio UNSIGNED INTEGER DEFAULT 0,"
+            "nb_unknown UNSIGNED INTEGER DEFAULT 0,"
+            "nb_seen UNSIGNED INTEGER DEFAULT 0,"
+            "nb_external UNSIGNED INTEGER DEFAULT 0,"
+            "nb_present_video UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_video <= nb_video),"
+            "nb_present_audio UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_audio <= nb_audio),"
+            "nb_present_unknown UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_unknown <= nb_unknown),"
+            "nb_present_seen UNSIGNED INTEGER DEFAULT 0 "
+                "CHECK(nb_present_seen <= nb_seen),"
+            "duration INTEGER DEFAULT 0,"
+            "creation_date INTEGER NOT NULL,"
+            "last_modification_date INTEGER NOT NULL,"
+            "user_interacted BOOLEAN,"
+            "forced_singleton BOOLEAN"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_group INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -687,7 +732,8 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
         "creation_date INTEGER NOT NULL,"
         "last_modification_date INTEGER NOT NULL,"
         "user_interacted BOOLEAN,"
-        "forced_singleton BOOLEAN"
+        "forced_singleton BOOLEAN,"
+        " is_favorite BOOLEAN NOT NULL DEFAULT FALSE"
     ")";
 }
 

@@ -121,6 +121,9 @@ public:
      */
     virtual bool destroy() override;
 
+    virtual bool isFavorite() const override;
+    virtual bool setFavorite( bool favorite ) override;
+
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml, std::string name,
                                                bool usedInitiated, bool isForcedSingleton );
     static std::shared_ptr<MediaGroup> create( MediaLibraryPtr ml,
@@ -176,6 +179,7 @@ private:
      * This is true for groups we create to contain a single "ungrouped" media
      */
     bool m_forcedSingleton;
+    bool m_isFavorite;
 };
 
 }
