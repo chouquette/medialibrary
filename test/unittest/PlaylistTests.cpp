@@ -1257,6 +1257,49 @@ static void Favorite( PlaylistTests* T )
 
     auto p = T->ml->playlist( T->pl->id() );
     ASSERT_TRUE( T->pl->isFavorite() );
+
+    T->pl->setFavorite( false );
+
+    T->pl->setName( "1" );
+    auto p2 = T->ml->createPlaylist( "2" );
+    auto p3 = T->ml->createPlaylist( "3" );
+    T->ml->createPlaylist( "4" );
+
+    auto video = T->ml->addMedia( "a.mkv", IMedia::Type::Video );
+    p2->add( *video, 1 );
+
+    auto audio = T->ml->addMedia( "b.mp3", IMedia::Type::Audio );
+    p3->add( *audio, 1 );
+
+    QueryParameters params;
+    params.favouriteOnly = true;
+
+    auto playlists = T->ml->playlists( PlaylistType::All, &params )->all();
+    ASSERT_TRUE( playlists.empty() );
+
+    T->pl->setFavorite( true );
+    playlists = T->ml->playlists( PlaylistType::All, &params )->all();
+    ASSERT_EQ( playlists.size(), 1u );
+    ASSERT_EQ( playlists[0]->id(), T->pl->id() );
+
+    p2->setFavorite( true );
+    playlists = T->ml->playlists( PlaylistType::All, &params )->all();
+    ASSERT_EQ( playlists.size(), 2u );
+    ASSERT_EQ( playlists[0]->id(), T->pl->id() );
+    ASSERT_EQ( playlists[1]->id(), p2->id() );
+
+    playlists = T->ml->playlists( PlaylistType::Video, &params )->all();
+    ASSERT_EQ( playlists.size(), 1u );
+    ASSERT_EQ( playlists[0]->id(), p2->id() );
+
+    playlists = T->ml->searchPlaylists( "2", PlaylistType::All, &params )->all();
+    ASSERT_EQ( playlists.size(), 1u );
+    ASSERT_EQ( playlists[0]->id(), p2->id() );
+
+    playlists = T->ml->searchPlaylists( "3", PlaylistType::All, &params )->all();
+    ASSERT_TRUE( playlists.empty() );
+
+    p2->setFavorite( true );
 }
 
 int main( int ac, char** av )

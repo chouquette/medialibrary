@@ -1306,6 +1306,15 @@ std::string Playlist::playlistRequest( const QueryParameters* params, PlaylistTy
                " WHERE mrt.playlist_id = id_playlist AND m.is_public != 0)";
     }
 
+    const bool favoriteOnly = params != nullptr && params->favouriteOnly == true;
+    if ( favoriteOnly == true )
+    {
+        if ( req.empty() == false )
+            req += " AND";
+
+        req += " is_favorite = TRUE";
+    }
+
     return req;
 }
 
