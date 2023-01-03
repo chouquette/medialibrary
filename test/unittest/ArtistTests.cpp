@@ -892,6 +892,8 @@ static void Public( Tests* T )
 static void Favorite( Tests* T )
 {
     auto a = T->ml->createArtist( "Artist" );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "m1.mp3", IMedia::Type::Audio ) );
+    a->addMedia( *m1 );
 
     ASSERT_FALSE( a->isFavorite() );
 
@@ -902,6 +904,28 @@ static void Favorite( Tests* T )
     a->setFavorite( false );
     ASSERT_FALSE( a->isFavorite() );
     ASSERT_FALSE( T->ml->artist( a->id() )->isFavorite() );
+
+    auto a2 = T->ml->createArtist( "a" );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "m2.mp3", IMedia::Type::Audio ) );
+    a2->addMedia( *m2 );
+
+    QueryParameters params;
+    params.favouriteOnly = true;
+
+    auto r = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_TRUE( r.empty() );
+
+    r = T->ml->searchArtists( "a", ArtistIncluded::All, &params )->all();
+    ASSERT_TRUE( r.empty() );
+
+    a2->setFavorite( true );
+    r = T->ml->artists( ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->id(), a2->id() );
+
+    r = T->ml->searchArtists( "a", ArtistIncluded::All, &params )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->id(), a2->id() );
 }
 
 int main( int ac, char** av )
