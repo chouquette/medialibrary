@@ -782,16 +782,22 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
                                       const QueryParameters* params, int64_t genreId,
                                       bool forcePublic )
 {
-    std::string req = "FROM " + Table::Name + " a "
-                "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
-                "WHERE id_artist IN "
-                    "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)"
-                "AND m.genre_id = ? ";
+    std::string req = "FROM " + Table::Name +
+                      " art "
+                      "INNER JOIN " +
+                      Media::Table::Name +
+                      " m ON m.artist_id = art.id_artist"
+                      " WHERE id_artist IN "
+                      "(SELECT rowid FROM " +
+                      FtsTable::Name +
+                      " WHERE name MATCH ?)"
+                      " AND m.genre_id = ?";
     if ( ( params != nullptr && params->publicOnly == true ) || forcePublic == true )
-        req += "AND m.is_public != 0 ";
+        req += " AND m.is_public != 0";
 
-    std::string groupBy = "GROUP BY m.artist_id "
-                          "ORDER BY a.name";
+    req += addRequestConditions( params );
+
+    std::string groupBy = " GROUP BY m.artist_id ORDER BY art.name";
     if ( params != nullptr )
     {
         if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
@@ -799,10 +805,9 @@ Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pat
         if ( params->desc == true )
             groupBy += " DESC";
     }
-    return make_query<Artist, IArtist>( ml, "a.*", std::move( req ),
-                                        std::move( groupBy ),
-                                        sqlite::Tools::sanitizePattern( pattern ),
-                                        genreId ).build();
+    return make_query<Artist, IArtist>( ml, "art.*", std::move( req ), std::move( groupBy ),
+                                        sqlite::Tools::sanitizePattern( pattern ), genreId )
+        .build();
 }
 
 bool Artist::dropMediaArtistRelation( MediaLibraryPtr ml, int64_t mediaId )
