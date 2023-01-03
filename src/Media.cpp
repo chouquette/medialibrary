@@ -1366,9 +1366,9 @@ std::string Media::sortRequest( const QueryParameters* params )
         break;
     case SortingCriteria::Album:
         if ( desc == true )
-            req += "alb.title DESC, m.track_number";
+            req += "alb.title DESC, alb.id_album DESC, m.disc_number, m.track_number";
         else
-            req += "alb.title, m.track_number";
+            req += "alb.title, alb.id_album, m.disc_number, m.track_number";
         descAdded = true;
         break;
     case SortingCriteria::Artist:
