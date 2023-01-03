@@ -870,6 +870,34 @@ Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
     return make_query_with_count<Media, IMedia>( ml, countReq, req, playlistId );
 }
 
+Query<IMedia> Media::fromArtist( MediaLibraryPtr ml, int64_t artistId,
+                                 const QueryParameters* params, bool forcePublic )
+{
+    std::string req = "FROM " + Media::Table::Name +
+                      " m"
+                      " INNER JOIN " +
+                      Artist::MediaRelationTable::Name +
+                      " mar"
+                      " ON mar.media_id = m.id_media ";
+
+    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    if ( sort == SortingCriteria::Default )
+        sort = SortingCriteria::Album;
+
+    req += addRequestJoin( sort );
+
+    req += "WHERE mar.artist_id = ?";
+
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    const auto publicOnly = ( params != nullptr && params->publicOnly ) || forcePublic == true;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
+
+    const auto desc = params != nullptr ? params->desc : false;
+    return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( sort, desc ), artistId ).build();
+}
+
 bool Media::addToGroup( IMediaGroup& group )
 {
     if ( group.id() == m_groupId )
