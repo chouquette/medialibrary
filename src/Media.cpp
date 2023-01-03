@@ -1279,12 +1279,11 @@ bool Media::setDescription(std::string desc)
     return true;
 }
 
-std::string Media::addRequestJoin( const QueryParameters* params )
+std::string Media::addRequestJoin( SortingCriteria sort )
 {
     bool artist = false;
     bool album = false;
     bool file = false;
-    auto sort = params != nullptr ? params->sort : SortingCriteria::Alpha;
 
     switch( sort )
     {
@@ -1333,12 +1332,15 @@ std::string Media::addRequestJoin( const QueryParameters* params )
     return req;
 }
 
-std::string Media::sortRequest( const QueryParameters* params )
+std::string Media::addRequestJoin( const QueryParameters* params )
+{
+    return Media::addRequestJoin( params != nullptr ? params->sort : SortingCriteria::Default );
+}
+
+std::string Media::sortRequest( SortingCriteria sort, bool desc )
 {
     std::string req = " ORDER BY ";
 
-    auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
-    auto desc = params != nullptr ? params->desc : false;
     auto descAdded = false;
     switch ( sort )
     {
@@ -1395,6 +1397,14 @@ std::string Media::sortRequest( const QueryParameters* params )
     if ( desc == true && !descAdded )
         req += " DESC";
     return req;
+}
+
+std::string Media::sortRequest( const QueryParameters* params )
+{
+    const auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
+    const auto desc = params != nullptr ? params->desc : false;
+
+    return Media::sortRequest( sort, desc );
 }
 
 Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
