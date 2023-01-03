@@ -111,58 +111,7 @@ Query<IAlbum> Artist::searchAlbums( const std::string& pattern,
 
 Query<IMedia> Artist::tracks( const QueryParameters* params ) const
 {
-    SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::Default;
-    bool desc = params != nullptr ? params->desc : false;
-    std::string req = "FROM " + Media::Table::Name + " med "
-        "INNER JOIN " + MediaRelationTable::Name + " mar "
-            "ON mar.media_id = med.id_media ";
-    if ( sort != SortingCriteria::Duration &&
-         sort != SortingCriteria::InsertionDate &&
-         sort != SortingCriteria::ReleaseDate &&
-         sort != SortingCriteria::Alpha )
-    {
-        req += "INNER JOIN Album alb ON alb.id_album = med.album_id ";
-    }
-    req += "WHERE mar.artist_id = ?";
-
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND med.is_present != 0";
-    auto publicOnly = ( params != nullptr && params->publicOnly ) ||
-            m_publicOnlyListing == true;
-    if ( publicOnly == true )
-        req += " AND med.is_public != 0";
-    std::string orderBy = "ORDER BY ";
-    switch ( sort )
-    {
-    case SortingCriteria::Duration:
-        orderBy += "med.duration";
-        break;
-    case SortingCriteria::InsertionDate:
-        orderBy += "med.insertion_date";
-        break;
-    case SortingCriteria::ReleaseDate:
-        orderBy += "med.release_date";
-        break;
-    case SortingCriteria::Alpha:
-        orderBy += "med.title";
-        break;
-    default:
-        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default (Album)" );
-        /* fall-through */
-    case SortingCriteria::Album:
-    case SortingCriteria::Default:
-        if ( desc == true )
-            orderBy += "alb.title DESC, alb.id_album DESC, med.disc_number, med.track_number";
-        else
-            orderBy += "alb.title, alb.id_album, med.disc_number, med.track_number";
-        break;
-    }
-
-    if ( desc == true && sort != SortingCriteria::Album )
-        orderBy += " DESC";
-    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      std::move( orderBy ), m_id )
-            .markPublic( publicOnly ).build();
+    return Media::fromArtist( m_ml, m_id, params, m_publicOnlyListing );
 }
 
 Query<IMedia> Artist::searchTracks( const std::string& pattern, const QueryParameters* params ) const

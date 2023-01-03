@@ -345,6 +345,8 @@ class Media : public IMedia,
                                               IService::Type type, const QueryParameters* params );
         static Query<IMedia> fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
                                            const QueryParameters* params, bool publicOnly );
+        static Query<IMedia> fromArtist( MediaLibraryPtr ml, int64_t artistId,
+                                         const QueryParameters* params, bool forcePublic );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml, IMedia::Type type );
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
