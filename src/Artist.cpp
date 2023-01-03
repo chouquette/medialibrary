@@ -189,6 +189,17 @@ std::string Artist::addRequestJoin(const QueryParameters* params)
     }
 }
 
+std::string Artist::addRequestConditions( const QueryParameters* params )
+{
+    std::string req;
+
+    const bool includeMissing = params != nullptr ? params->includeMissing : false;
+    if ( includeMissing == false )
+        req = " AND art.is_present != 0";
+
+    return req;
+}
+
 bool Artist::setThumbnail( std::shared_ptr<Thumbnail> newThumbnail )
 {
     assert( newThumbnail != nullptr );
@@ -723,8 +734,9 @@ Query<IArtist> Artist::search( MediaLibraryPtr ml, const std::string& name,
     req += addRequestJoin( params );
     req += " WHERE id_artist IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE name MATCH ?)";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND art.is_present != 0";
+
+    req += addRequestConditions( params );
+
     // We are searching based on the name, so we're ignoring unknown/various artist
     // This means all artist we find has at least one track associated with it, so
     // we can simply filter out based on the number of associated albums
@@ -758,8 +770,9 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
         else
             req += "art.nb_tracks > 0";
     }
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND art.is_present != 0";
+
+    req += addRequestConditions( params );
+
     return make_query<Artist, IArtist>( ml, "art.*", std::move( req ),
                                         sortRequest( params ) )
             .markPublic( publicOnly ).build();
