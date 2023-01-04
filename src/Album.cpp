@@ -257,6 +257,26 @@ std::string Album::addRequestJoin( const QueryParameters* params,
     return req;
 }
 
+std::string Album::addRequestConditions( const QueryParameters* params, bool forcePublic )
+{
+    std::string req;
+    const bool includeMissing = params != nullptr ? params->includeMissing : false;
+    if ( includeMissing == false )
+        req += " alb.is_present != 0";
+
+    if ( params == nullptr )
+        return req;
+
+    if ( params->publicOnly || forcePublic )
+    {
+        if ( req.empty() == false )
+            req += " AND";
+        req += " EXISTS(SELECT album_id FROM " + Media::Table::Name +
+               " WHERE is_public != 0 AND album_id = alb.id_album)";
+    }
+    return req;
+}
+
 std::string Album::orderBy( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
@@ -900,11 +920,10 @@ Query<IAlbum> Album::search( MediaLibraryPtr ml, const std::string& pattern,
     req += "WHERE id_album IN "
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND alb.is_present != 0";
-    if ( params != nullptr && params->publicOnly == true )
-        req += " AND EXISTS(SELECT album_id FROM " + Media::Table::Name +
-                   " WHERE is_public != 0 AND album_id = alb.id_album)";
+    const auto cond = addRequestConditions( params, false );
+    if ( cond.empty() == false )
+        req += " AND" + cond;
+
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ) ).build();
@@ -919,11 +938,11 @@ Query<IAlbum> Album::searchFromArtist( MediaLibraryPtr ml, const std::string& pa
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)"
             " AND artist_id = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND alb.is_present != 0";
-    if ( params != nullptr && params->publicOnly == true )
-        req += " AND EXISTS(SELECT album_id FROM " + Media::Table::Name +
-                   " WHERE is_public != 0 AND album_id = alb.id_album)";
+
+    const auto cond = addRequestConditions( params, false );
+    if ( cond.empty() == false )
+        req += " AND" + cond;
+
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       orderBy( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -977,11 +996,11 @@ Query<IAlbum> Album::fromGenre( MediaLibraryPtr ml, int64_t genreId,
     std::string req = "FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, true );
     req += "WHERE m.genre_id = ?";
-    if ( ( params != nullptr && params->publicOnly == true ) ||
-         forcePublic == true )
-    {
-        req += " AND m.is_public != 0";
-    }
+
+    const auto cond = addRequestConditions( params, forcePublic );
+    if ( cond.empty() == false )
+        req += " AND" + cond;
+
     std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ), genreId ).build();
@@ -997,11 +1016,11 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
             "(SELECT rowid FROM " + FtsTable::Name + " WHERE " +
             FtsTable::Name + " MATCH ?)"
             "AND m.genre_id = ?";
-    if ( ( params != nullptr && params->publicOnly == true ) ||
-         forcePublic == true )
-    {
-        req += " AND m.is_public != 0";
-    }
+
+    const auto cond = addRequestConditions( params, forcePublic );
+    if ( cond.empty() == false )
+        req += " AND" + cond;
+
     std::string groupAndOrderBy = "GROUP BY m.album_id" + orderBy( params );
     return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ),
                                       std::move( groupAndOrderBy ),
