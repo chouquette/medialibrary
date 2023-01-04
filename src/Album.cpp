@@ -257,39 +257,6 @@ std::string Album::addRequestJoin( const QueryParameters* params,
     return req;
 }
 
-std::string Album::orderTracksBy( const QueryParameters* params = nullptr )
-{
-    std::string req = " ORDER BY ";
-    auto sort = params != nullptr ? params->sort : SortingCriteria::TrackId;
-    auto desc = params != nullptr ? params->desc : false;
-    switch ( sort )
-    {
-    case SortingCriteria::Alpha:
-        req += "med.title";
-        break;
-    case SortingCriteria::Duration:
-        req += "med.duration";
-        break;
-    case SortingCriteria::ReleaseDate:
-        req += "med.release_date";
-        break;
-    default:
-        LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Default" );
-        /* fall-through */
-    case SortingCriteria::TrackId:
-    case SortingCriteria::Default:
-        if ( desc == true )
-            req += "med.disc_number DESC, med.track_number DESC, med.filename";
-        else
-            req += "med.disc_number, med.track_number, med.filename";
-        break;
-    }
-
-    if ( desc == true )
-        req += " DESC";
-    return req;
-}
-
 std::string Album::orderBy( const QueryParameters* params )
 {
     std::string req = " ORDER BY ";
@@ -358,32 +325,14 @@ std::string Album::orderBy( const QueryParameters* params )
 
 Query<IMedia> Album::tracks( const QueryParameters* params ) const
 {
-    // This doesn't return the cached version, because it would be fairly complicated, if not impossible or
-    // counter productive, to maintain a cache that respects all orderings.
-    std::string req = "FROM " + Media::Table::Name + " med "
-        " WHERE med.album_id = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND med.is_present != 0";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) || m_publicOnlyListing;
-    if ( publicOnly == true )
-        req += " AND med.is_public != 0";
-    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-            orderTracksBy( params ), m_id ).markPublic( publicOnly ).build();
+    return Media::fromAlbum( m_ml, m_id, params, m_publicOnlyListing, nullptr );
 }
 
 Query<IMedia> Album::tracks( GenrePtr genre, const QueryParameters* params ) const
 {
     if ( genre == nullptr )
         return {};
-    std::string req = "FROM " + Media::Table::Name + " med "
-            " WHERE med.album_id = ?"
-            " AND med.genre_id = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND med.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) || m_publicOnlyListing == true )
-        req += " AND med.is_public != 0";
-    return make_query<Media, IMedia>( m_ml, "med.*", std::move( req ),
-                                      orderTracksBy( params ), m_id, genre->id() ).build();
+    return Media::fromAlbum( m_ml, m_id, params, m_publicOnlyListing, genre );
 }
 
 std::vector<MediaPtr> Album::cachedTracks() const

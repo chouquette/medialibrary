@@ -347,6 +347,9 @@ class Media : public IMedia,
                                            const QueryParameters* params, bool publicOnly );
         static Query<IMedia> fromArtist( MediaLibraryPtr ml, int64_t artistId,
                                          const QueryParameters* params, bool forcePublic );
+        static Query<IMedia> fromAlbum( MediaLibraryPtr ml, int64_t albumId,
+                                        const QueryParameters* params, bool forcePublic,
+                                        GenrePtr genreFilter );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
         static Query<IMedia> fetchHistory( MediaLibraryPtr ml, IMedia::Type type );
         static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );

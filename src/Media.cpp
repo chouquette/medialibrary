@@ -898,6 +898,51 @@ Query<IMedia> Media::fromArtist( MediaLibraryPtr ml, int64_t artistId,
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( sort, desc ), artistId ).build();
 }
 
+Query<IMedia> Media::fromAlbum( MediaLibraryPtr ml, int64_t albumId, const QueryParameters* params,
+                                bool forcePublic, GenrePtr genreFilter )
+{
+    // This doesn't return the cached version, because it would be fairly complicated, if not
+    // impossible or counter productive, to maintain a cache that respects all orderings.
+    std::string req = "FROM " + Media::Table::Name + " m";
+
+    std::string sort;
+    if ( params == nullptr || params->sort == SortingCriteria::Default ||
+         params->sort == SortingCriteria::TrackId )
+    {
+        const bool desc = params != nullptr ? params->desc : false;
+        if ( desc == true )
+            sort = "ORDER BY m.disc_number DESC, m.track_number DESC, m.filename DESC";
+        else
+            sort = "ORDER BY m.disc_number, m.track_number, m.filename";
+    }
+    else
+    {
+        req += addRequestJoin( params );
+        sort = sortRequest( params );
+    }
+
+    req += " WHERE m.album_id = ?";
+
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
+
+    if ( genreFilter != nullptr )
+    {
+        req += " AND m.genre_id = ?";
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ), std::move( sort ), albumId,
+                                          genreFilter->id() )
+            .markPublic( publicOnly )
+            .build();
+    }
+
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), std::move( sort ), albumId )
+        .markPublic( publicOnly )
+        .build();
+}
+
 bool Media::addToGroup( IMediaGroup& group )
 {
     if ( group.id() == m_groupId )
