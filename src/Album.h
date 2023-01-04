@@ -165,6 +165,7 @@ class Album : public IAlbum, public DatabaseHelpers<Album>
     private:
         static std::string addRequestJoin( const QueryParameters* params,
                                            bool albumTrack);
+        static std::string addRequestConditions( const QueryParameters* params, bool forcePublic );
         static std::string orderTracksBy( const QueryParameters* params );
         static std::string orderBy( const QueryParameters* params );
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
