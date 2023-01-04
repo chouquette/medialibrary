@@ -117,24 +117,7 @@ bool Genre::setFavorite( bool favorite )
 
 Query<IArtist> Genre::artists( const QueryParameters* params ) const
 {
-    std::string req = "FROM " + Artist::Table::Name + " a "
-            "INNER JOIN " + Media::Table::Name + " m ON m.artist_id = a.id_artist "
-            "WHERE m.genre_id = ?";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
-                        m_publicOnlyListing == true;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
-    std::string groupAndOrderBy = "GROUP BY m.artist_id ORDER BY a.name";
-    if ( params != nullptr )
-    {
-        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
-            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
-        if ( params->desc == true )
-            groupAndOrderBy += " DESC";
-    }
-    return make_query<Artist, IArtist>( m_ml, "a.*", std::move( req ),
-                                        std::move( groupAndOrderBy ), m_id )
-            .markPublic( publicOnly ).build();
+    return Artist::fromGenre( m_ml, m_id, params, m_publicOnlyListing );
 }
 
 Query<IArtist> Genre::searchArtists( const std::string& pattern,

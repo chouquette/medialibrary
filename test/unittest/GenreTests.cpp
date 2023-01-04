@@ -106,7 +106,9 @@ static void ListArtists( GenreTests* T )
         auto res = album2->addTrack( m, i, 1, a2->id(), T->g.get() );
         ASSERT_TRUE( res );
     }
-    auto query = T->g->artists( nullptr );
+    QueryParameters params;
+    params.includeMissing = true;
+    auto query = T->g->artists( &params );
     ASSERT_EQ( 2u, query->count() );
     artists = query->all();
     ASSERT_EQ( 2u, artists.size() );
@@ -534,6 +536,7 @@ static void Public( GenreTests* T )
 
     QueryParameters params{};
     params.publicOnly = true;
+    params.includeMissing = true;
     auto genresQuery = T->ml->genres( &params );
     ASSERT_EQ( 0u, genresQuery->count() );
     genres = genresQuery->all();

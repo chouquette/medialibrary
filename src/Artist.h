@@ -129,6 +129,8 @@ public:
                                   ArtistIncluded included, const QueryParameters* params );
     static Query<IArtist> listAll( MediaLibraryPtr ml, ArtistIncluded included,
                                    const QueryParameters* params );
+    static Query<IArtist> fromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                     const QueryParameters* params, bool forcePublic );
     static Query<IArtist> searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                          const QueryParameters* params, int64_t genreId,
                                          bool forcePublic );
