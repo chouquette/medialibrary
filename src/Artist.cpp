@@ -782,6 +782,35 @@ Query<IArtist> Artist::listAll( MediaLibraryPtr ml, ArtistIncluded included,
             .markPublic( publicOnly ).build();
 }
 
+Query<IArtist> Artist::fromGenre( MediaLibraryPtr ml, int64_t genreId,
+                                  const QueryParameters* params, bool forcePublic )
+{
+    std::string req = "FROM " + Table::Name +
+                      " art"
+                      " INNER JOIN " +
+                      Media::Table::Name +
+                      " m ON m.artist_id = art.id_artist"
+                      " WHERE m.genre_id = ?";
+    auto publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic == true;
+    if ( publicOnly == true )
+        req += " AND m.is_public != 0";
+
+    req += addRequestConditions( params );
+
+    std::string groupAndOrderBy = " GROUP BY m.artist_id ORDER BY art.name";
+    if ( params != nullptr )
+    {
+        if ( params->sort != SortingCriteria::Default && params->sort != SortingCriteria::Alpha )
+            LOG_WARN( "Unsupported sorting criteria, falling back to SortingCriteria::Alpha" );
+        if ( params->desc == true )
+            groupAndOrderBy += " DESC";
+    }
+    return make_query<Artist, IArtist>( ml, "art.*", std::move( req ), std::move( groupAndOrderBy ),
+                                        genreId )
+        .markPublic( publicOnly )
+        .build();
+}
+
 Query<IArtist> Artist::searchByGenre( MediaLibraryPtr ml, const std::string& pattern,
                                       const QueryParameters* params, int64_t genreId,
                                       bool forcePublic )
