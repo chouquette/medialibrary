@@ -485,11 +485,22 @@ std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& n
 
 std::string Genre::addRequestConditions( const QueryParameters* params )
 {
-    const bool publicOnly = params != nullptr && params->publicOnly == true;
-    if ( publicOnly == true )
-        return " EXISTS(SELECT genre_id FROM " + Media::Table::Name +
-               " WHERE genre_id = id_genre AND is_public != 0)";
-    return "";
+    if ( params == nullptr )
+        return "";
+
+    std::string req;
+    if ( params->publicOnly == true )
+        req = " EXISTS(SELECT genre_id FROM " + Media::Table::Name +
+              " WHERE genre_id = id_genre AND is_public != 0)";
+
+    if ( params->favouriteOnly == true )
+    {
+        if ( req.empty() == false )
+            req += " AND";
+        req += " is_favorite = TRUE";
+    }
+
+    return req;
 }
 
 Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,

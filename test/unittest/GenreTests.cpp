@@ -580,6 +580,26 @@ static void Favorite( GenreTests* T )
     T->g->setFavorite( false );
     ASSERT_FALSE( T->g->isFavorite() );
     ASSERT_FALSE( T->ml->genre( T->g->id() )->isFavorite() );
+
+    auto g2 = T->ml->createGenre( "Jazz" );
+
+    QueryParameters params;
+    params.favouriteOnly = true;
+
+    auto r = T->ml->genres( &params )->all();
+    ASSERT_TRUE( r.empty() );
+
+    r = T->ml->searchGenre( "ja", &params )->all();
+    ASSERT_TRUE( r.empty() );
+
+    g2->setFavorite( true );
+    r = T->ml->genres( &params )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->id(), g2->id() );
+
+    r = T->ml->searchGenre( "ja", &params )->all();
+    ASSERT_EQ( r.size(), 1u );
+    ASSERT_EQ( r[0]->id(), g2->id() );
 }
 
 int main( int ac, char** av )
