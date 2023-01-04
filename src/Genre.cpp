@@ -483,12 +483,26 @@ std::shared_ptr<Genre> Genre::fromName( MediaLibraryPtr ml, const std::string& n
     return fetch( ml, req, name );
 }
 
+std::string Genre::addRequestConditions( const QueryParameters* params )
+{
+    const bool publicOnly = params != nullptr && params->publicOnly == true;
+    if ( publicOnly == true )
+        return " EXISTS(SELECT genre_id FROM " + Media::Table::Name +
+               " WHERE genre_id = id_genre AND is_public != 0)";
+    return "";
+}
+
 Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
                              const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name + " WHERE id_genre IN "
             "(SELECT rowid FROM " + FtsTable::Name + " "
             "WHERE name MATCH ?)";
+
+    const auto cond = addRequestConditions( params );
+    if ( cond.empty() == false )
+        req += " AND" + cond;
+
     std::string orderBy = "ORDER BY name";
     if ( params != nullptr )
     {
@@ -505,12 +519,11 @@ Query<IGenre> Genre::search( MediaLibraryPtr ml, const std::string& name,
 Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
     std::string req = "FROM " + Table::Name;
-    auto publicOnly = params != nullptr && params->publicOnly == true;
-    if ( publicOnly == true )
-    {
-        req += " WHERE EXISTS(SELECT genre_id FROM " + Media::Table::Name +
-                " WHERE genre_id = id_genre AND is_public != 0)";
-    }
+
+    const auto cond = addRequestConditions( params );
+    if ( cond.empty() == false )
+        req += " WHERE" + cond;
+
     std::string orderBy = " ORDER BY name";
     if ( params != nullptr )
     {
@@ -519,6 +532,8 @@ Query<IGenre> Genre::listAll( MediaLibraryPtr ml, const QueryParameters* params 
         if ( params->desc == true )
             orderBy += " DESC";
     }
+
+    const bool publicOnly = params != nullptr && params->publicOnly == true;
     return make_query<Genre, IGenre>( ml, "*", std::move( req ),
                                       std::move( orderBy ) )
             .markPublic( publicOnly ).build();

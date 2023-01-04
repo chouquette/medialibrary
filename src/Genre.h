@@ -93,8 +93,9 @@ public:
 
 private:
     static bool shouldUpdateThumbnail( const Thumbnail& oldThumbnail );
+    static std::string addRequestConditions( const QueryParameters* params );
 
-private:
+  private:
     MediaLibraryPtr m_ml;
 
     int64_t m_id;
