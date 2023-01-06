@@ -815,6 +815,12 @@ std::string Media::addRequestConditions( const QueryParameters* params, bool for
     if ( ( params != nullptr && params->publicOnly == true ) || forcePublic )
         ret += " AND m.is_public != 0";
 
+    if ( params == nullptr )
+        return ret;
+
+    if ( params->favouriteOnly == true )
+        ret += "AND m.is_favorite != 0";
+
     return ret;
 }
 
