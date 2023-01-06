@@ -805,6 +805,19 @@ bool Media::isStream() const
     return m_importType == ImportType::Stream;
 }
 
+std::string Media::addRequestConditions( const QueryParameters* params, bool forcePublic )
+{
+    std::string ret;
+
+    if ( params == nullptr || params->includeMissing == false )
+        ret += " AND m.is_present != 0";
+
+    if ( ( params != nullptr && params->publicOnly == true ) || forcePublic )
+        ret += " AND m.is_public != 0";
+
+    return ret;
+}
+
 /* Static helper to allow MediaGroup class to assign a group to a media without
  * fetching an instance first.
  */
@@ -825,6 +838,7 @@ Query<IMedia> Media::fromSubscription( MediaLibraryPtr ml, int64_t subscriptionI
         "WHERE cmr.subscription_id = ?";
     //fixme: does it make sense to filter by import_type and/or presence here?
     req += addRequestJoin( params );
+    req += addRequestConditions( params, false );
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       subscriptionId ).build();
 }
@@ -838,6 +852,7 @@ Query<IMedia> Media::fromService( MediaLibraryPtr ml, IService::Type service,
         "WHERE (SELECT service_id FROM " + Subscription::Table::Name + " "
         "WHERE subscription_id = cmr.subscription_id) = ?";
     req += addRequestJoin( params );
+    req += addRequestConditions( params, false );
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ), service ).build();
 }
 
@@ -851,13 +866,7 @@ Query<IMedia> Media::fromPlaylist( MediaLibraryPtr ml, int64_t playlistId,
             " pmr ON pmr.media_id = m.id_media "
             "WHERE pmr.playlist_id = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        base += " AND m.is_present != 0";
-
-    const bool isPublicOnly =
-        ( params != nullptr && params->publicOnly == true ) || publicOnly == true;
-    if ( isPublicOnly == true )
-        base += " AND m.is_public != 0";
+    base += addRequestConditions( params, publicOnly );
 
     std::string sortRequest;
     if ( params != nullptr && params->sort != SortingCriteria::Default )
@@ -888,11 +897,7 @@ Query<IMedia> Media::fromArtist( MediaLibraryPtr ml, int64_t artistId,
 
     req += "WHERE mar.artist_id = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    const auto publicOnly = ( params != nullptr && params->publicOnly ) || forcePublic == true;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+    req += addRequestConditions( params, forcePublic );
 
     const auto desc = params != nullptr ? params->desc : false;
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( sort, desc ), artistId ).build();
@@ -923,11 +928,8 @@ Query<IMedia> Media::fromAlbum( MediaLibraryPtr ml, int64_t albumId, const Query
 
     req += " WHERE m.album_id = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+    const bool publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
+    req += addRequestConditions( params, forcePublic );
 
     if ( genreFilter != nullptr )
     {
@@ -1496,11 +1498,9 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
     else
         req += " WHERE m.type = ?";
     req +=  " AND m.import_type = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    auto publicOnly = params != nullptr && params->publicOnly == true;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+
+    const bool publicOnly = params != nullptr && params->publicOnly;
+    req += addRequestConditions( params, false );
 
     if ( subType != IMedia::SubType::Unknown )
     {
@@ -1524,8 +1524,8 @@ Query<IMedia> Media::listInProgress( MediaLibraryPtr ml, IMedia::Type type,
 
     req += addRequestJoin( params );
     req += " WHERE (m.last_position >= 0 OR m.last_time > 0)";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
+    req += addRequestConditions( params, false );
+
     if ( type == IMedia::Type::Unknown )
     {
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
@@ -1542,8 +1542,8 @@ Query<IMedia> Media::listSubscriptionMedia( MediaLibraryPtr ml, const QueryParam
 
     req += addRequestJoin( params );
     req += " WHERE (m.nb_subscriptions > 0)";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
+    req += addRequestConditions( params, false );
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( params ) ).build();
 }
 
@@ -2532,11 +2532,10 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.import_type = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    auto publicOnly = params != nullptr && params->publicOnly == true;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+
+    req += addRequestConditions( params, false );
+
+    const bool publicOnly = params != nullptr && params->publicOnly == true;
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ),
@@ -2556,10 +2555,9 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.type = ?"
             " AND m.import_type = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( params != nullptr && params->publicOnly == true )
-        req += " AND m.is_public != 0";
+
+    req += addRequestConditions( params, false );
+
     if ( subType != IMedia::SubType::Unknown )
     {
         req += " AND m.subtype = ?";
@@ -2586,10 +2584,7 @@ Query<IMedia> Media::searchFromSubscriptions( MediaLibraryPtr ml, const std::str
     req += " WHERE m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " WHERE " +
            Media::FtsTable::Name + " MATCH ?)";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( params != nullptr && params->publicOnly == true )
-        req += " AND m.is_public != 0";
+    req += addRequestConditions( params, false );
 
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( title ) )
@@ -2608,13 +2603,9 @@ Query<IMedia> Media::searchAlbumTracks( MediaLibraryPtr ml, const std::string& p
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.album_id = ?"
             " AND m.subtype = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) ||
-         forcePublic == true )
-    {
-        req += " AND m.is_public = 1";
-    }
+
+    req += addRequestConditions( params, forcePublic );
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -2634,13 +2625,9 @@ Query<IMedia> Media::searchArtistTracks( MediaLibraryPtr ml, const std::string& 
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.artist_id = ?"
             " AND m.subtype = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) ||
-         forcePublic == true )
-    {
-        req += " AND m.is_public = 1";
-    }
+
+    req += addRequestConditions( params, forcePublic );
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -2660,13 +2647,9 @@ Query<IMedia> Media::searchGenreTracks( MediaLibraryPtr ml, const std::string& p
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND m.genre_id = ?"
             " AND m.subtype = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) ||
-         forcePublic == true )
-    {
-        req += " AND m.is_public = 1";
-    }
+
+    req += addRequestConditions( params, forcePublic );
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -2686,8 +2669,9 @@ Query<IMedia> Media::searchShowEpisodes(MediaLibraryPtr ml, const std::string& p
             " WHERE " + Media::FtsTable::Name + " MATCH ?)"
             " AND ep.show_id = ?"
             " AND m.subtype = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
+
+    req += addRequestConditions( params, false );
+
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       sortRequest( params ),
                                       sqlite::Tools::sanitizePattern( pattern ),
@@ -2706,10 +2690,7 @@ Query<IMedia> Media::searchInPlaylist( MediaLibraryPtr ml, const std::string& pa
            "ON pmr.media_id = m.id_media "
            "WHERE pmr.playlist_id = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) || forcePublic == true )
-        req += " AND m.is_public != 0";
+    req += addRequestConditions( params, forcePublic );
 
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
            " WHERE " + Media::FtsTable::Name + " MATCH ?)";
@@ -2728,10 +2709,7 @@ Query<IMedia> Media::searchInSubscription( MediaLibraryPtr ml, const std::string
     req += "INNER JOIN " + Subscription::MediaRelationTable::Name +
            " cmr ON cmr.media_id = m.id_media WHERE cmr.subscription_id = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) )
-        req += " AND m.is_public != 0";
+    req += addRequestConditions( params, false );
 
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " WHERE " +
            Media::FtsTable::Name + " MATCH ?)";
@@ -2751,10 +2729,7 @@ Query<IMedia> Media::searchInService( MediaLibraryPtr ml, const std::string& pat
            " cmr ON cmr.media_id = m.id_media WHERE (SELECT service_id FROM " +
            Subscription::Table::Name + " WHERE subscription_id = cmr.subscription_id) = ?";
 
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
-    if ( ( params != nullptr && params->publicOnly == true ) )
-        req += " AND m.is_public != 0";
+    req += addRequestConditions( params, false );
 
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " WHERE " +
            Media::FtsTable::Name + " MATCH ?)";
@@ -2812,10 +2787,10 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
     std::string req = "FROM " + Table::Name +  " m ";
     req += addRequestJoin( params );
     req += " WHERE m.folder_id = ?";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
-                      forcePublic;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+
+    const bool publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
+    req += addRequestConditions( params, forcePublic );
+
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
@@ -2841,10 +2816,10 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
     req += " WHERE m.folder_id = ?";
     req += " AND m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name +
     " WHERE " + Media::FtsTable::Name + " MATCH ?)";
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
-                      forcePublic;
-    if ( publicOnly == true )
-        req += " AND m.is_public != 0";
+
+    const bool publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
+    req += addRequestConditions( params, forcePublic );
+
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
@@ -2868,8 +2843,9 @@ Query<IMedia> Media::fromMediaGroup(MediaLibraryPtr ml, int64_t groupId, Type ty
     std::string req = "FROM " + Table::Name + " m ";
     req += addRequestJoin( params );
     req += " WHERE m.group_id = ? AND m.import_type = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
+
+    req += addRequestConditions( params, false );
+
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
@@ -2890,8 +2866,9 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
     req += " WHERE m.id_media IN (SELECT rowid FROM " + FtsTable::Name +
             " WHERE " + FtsTable::Name + " MATCH ?)"
            " AND m.group_id = ? AND m.import_type = ?";
-    if ( params == nullptr || params->includeMissing == false )
-        req += " AND m.is_present != 0";
+
+    req += addRequestConditions( params, false );
+
     if ( type != Type::Unknown )
     {
         req += " AND m.type = ?";
@@ -2979,10 +2956,9 @@ Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
         req += " AND EXISTS(SELECT entity_id FROM " + Thumbnail::LinkingTable::Name +
                " WHERE entity_id = m.id_media AND entity_type = ?2)";
     }
-    auto publicOnly = ( params != nullptr && params->publicOnly == true ) ||
-            forcePublic == true;
-    if ( publicOnly == true )
-        req += " AND m.is_public = 1";
+
+    req += addRequestConditions( params, forcePublic );
+
     std::string orderBy = "ORDER BY ";
     auto sort = params != nullptr ? params->sort : SortingCriteria::Default;
     auto desc = params != nullptr ? params->desc : false;
@@ -3017,6 +2993,8 @@ Query<IMedia> Media::tracksFromGenre( MediaLibraryPtr ml, int64_t genreId,
         return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                           std::move( orderBy ), genreId,
                                           Thumbnail::EntityType::Media ).build();
+
+    const bool publicOnly = ( params != nullptr && params->publicOnly == true ) || forcePublic;
     return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
                                       std::move( orderBy ), genreId )
             .markPublic( publicOnly ).build();

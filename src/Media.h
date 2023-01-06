@@ -418,6 +418,7 @@ private:
         static std::string addRequestJoin( const QueryParameters* params );
         static std::string sortRequest( SortingCriteria, bool desc );
         static std::string sortRequest( const QueryParameters* params );
+        static std::string addRequestConditions( const QueryParameters* params, bool forcePublic );
         static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
