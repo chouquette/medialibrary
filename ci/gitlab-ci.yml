@@ -55,12 +55,10 @@ build:arch:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $MEDIALIB_MANUAL_JOB_NAME == null'
   stage: test
   script:
-    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-    - export PATH=/tmp/meson:$PATH
     - cd $CI_PROJECT_DIR
-    - meson.py -Db_coverage=true build
+    - meson -Db_coverage=true build
     - cd build
-    - meson.py test --no-stdsplit
+    - meson test --no-stdsplit
     - gcovr -r "$CI_PROJECT_DIR/" --json $CI_PROJECT_DIR/$CI_JOB_NAME.cov.json -j 4
   artifacts:
     reports:
@@ -154,12 +152,10 @@ asan-ubsan:
     - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
     - make install -j8
     - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
-    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-    - export PATH=/tmp/meson:$PATH
     - cd $CI_PROJECT_DIR
-    - meson.py -Db_sanitize=address,undefined -Dlong_running_tests=true build
-    - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
-    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
+    - meson -Db_sanitize=address,undefined -Dlong_running_tests=true build
+    - cd build && meson test --no-stdsplit --no-suite long_running_tests
+    - meson test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:
     when: on_failure
     paths:
@@ -175,19 +171,17 @@ asan-ubsan:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "$CI_DEFAULT_BRANCH@videolan/medialibrary"'
   stage: test
   script:
-    - cd /tmp/ && git clone --single-branch --branch=display_stack_on_timeout --depth=1 https://github.com/chouquette/meson
-    - export PATH=/tmp/meson:$PATH
     - cd $CI_PROJECT_DIR
     - >
       CXX=clang++
-      meson.py
+      meson
       -Dpkg_config_path=$PKG_CONFIG_PATH:$CI_PROJECT_DIR/vlc/prefix/lib/pkgconfig
       -Db_sanitize=$SANITIZERS
       -Db_lundef=false
       -Dlong_running_tests=true
       build
-    - cd build && meson.py test --no-stdsplit --no-suite long_running_tests
-    - meson.py test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
+    - cd build && meson test --no-stdsplit --no-suite long_running_tests
+    - meson test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:
     when: on_failure
     paths:
