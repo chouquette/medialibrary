@@ -509,6 +509,10 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
             break;
         }
     }
+
+    if ( params != nullptr && params->favouriteOnly == true )
+        req += " AND is_favorite = TRUE";
+
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) ).build();
 }
 
@@ -522,6 +526,9 @@ Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pa
         req += " AND (nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0)";
     else
         req += " AND (nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0)";
+
+    if ( params != nullptr && params->favouriteOnly == true )
+        req += " AND mg.is_favorite = TRUE";
 
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
                                                 sqlite::Tools::sanitizePattern( pattern ) ).build();

@@ -1692,11 +1692,28 @@ static void Favorite( Tests* T )
     auto g = T->ml->createMediaGroup( "group" );
     ASSERT_FALSE( g->isFavorite() );
 
+    auto m1 = T->ml->addMedia( "media.mkv", IMedia::Type::Video );
+    g->add( *m1 );
+
+    QueryParameters params;
+    params.favouriteOnly = true;
+    auto res = T->ml->mediaGroups( IMedia::Type::Video, &params )->all();
+    ASSERT_TRUE( res.empty() );
+    res = T->ml->searchMediaGroups( "grou", &params )->all();
+    ASSERT_TRUE( res.empty() );
+
     g->setFavorite( true );
     ASSERT_TRUE( g->isFavorite() );
 
     g = T->ml->mediaGroup( g->id() );
     ASSERT_TRUE( g->isFavorite() );
+
+    res = T->ml->mediaGroups( IMedia::Type::Video, &params )->all();
+    ASSERT_EQ( res.size(), 1u );
+    ASSERT_EQ( res[0]->id(), g->id() );
+    res = T->ml->searchMediaGroups( "grou", &params )->all();
+    ASSERT_EQ( res.size(), 1u );
+    ASSERT_EQ( res[0]->id(), g->id() );
 }
 
 int main( int ac, char** av )
