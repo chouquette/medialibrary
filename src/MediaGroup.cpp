@@ -486,9 +486,10 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
         case IMedia::Type::Unknown:
         {
             if ( params == nullptr || params->includeMissing == false )
-                req += "WHERE nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+                req += "WHERE (nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown "
+                       "> 0)";
             else
-                req += "WHERE nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
+                req += "WHERE (nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0)";
             break;
         }
         case IMedia::Type::Audio:
@@ -518,9 +519,10 @@ Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pa
             " WHERE id_group IN (SELECT rowid FROM " + FtsTable::Name +
                 " WHERE " + FtsTable::Name + " MATCH ?)";
     if ( params == nullptr || params->includeMissing == false )
-        req += " AND nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0";
+        req += " AND (nb_present_video > 0 OR nb_present_audio > 0 OR nb_present_unknown > 0)";
     else
-        req += " AND nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0";
+        req += " AND (nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0)";
+
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),
                                                 sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
