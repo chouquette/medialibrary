@@ -1140,11 +1140,20 @@ static void Favorite( FolderTests* T )
 
     ASSERT_FALSE( root->isFavorite() );
 
+    QueryParameters params;
+    params.favouriteOnly = true;
+    auto query = T->ml->roots( &params );
+    ASSERT_EQ( query->count(), 0u );
+
     root->setFavorite( true );
     ASSERT_TRUE( root->isFavorite() );
 
     root = T->ml->folder( 1 );
     ASSERT_TRUE( root->isFavorite() );
+
+    auto res = T->ml->roots( &params )->all();
+    ASSERT_EQ( res.size(), 1u );
+    ASSERT_EQ( res[0]->id(), root->id() );
 }
 
 int main( int ac, char** av )
