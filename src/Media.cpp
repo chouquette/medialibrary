@@ -2492,6 +2492,27 @@ Query<IMedia> Media::search( MediaLibraryPtr ml, const std::string& title,
                                       type, ImportType::Internal ).build();
 }
 
+Query<IMedia> Media::searchFromSubscriptions( MediaLibraryPtr ml, const std::string& title,
+                                              const QueryParameters* params )
+{
+    std::string req = "FROM " + Media::Table::Name + " m ";
+
+    req += addRequestJoin( params );
+    req += "INNER JOIN " + Subscription::MediaRelationTable::Name +
+           " cmr ON cmr.media_id = m.id_media";
+    req += " WHERE m.id_media IN (SELECT rowid FROM " + Media::FtsTable::Name + " WHERE " +
+           Media::FtsTable::Name + " MATCH ?)";
+
+    if ( params == nullptr || params->includeMissing == false )
+        req += " AND m.is_present != 0";
+    if ( params != nullptr && params->publicOnly == true )
+        req += " AND m.is_public != 0";
+
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( params ),
+                                      sqlite::Tools::sanitizePattern( title ) )
+        .build();
+}
+
 Query<IMedia> Media::searchAlbumTracks( MediaLibraryPtr ml, const std::string& pattern,
                                         int64_t albumId, const QueryParameters* params,
                                         bool forcePublic )

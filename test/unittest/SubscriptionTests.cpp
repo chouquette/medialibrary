@@ -514,6 +514,32 @@ static void NbMedia( Tests* T )
     ASSERT_EQ( 0u, sub->nbMedia() );
 }
 
+static void SearchAllMedia( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>(
+        T->ml->addMedia( "http://pod.ca/st/episode1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>(
+        T->ml->addMedia( "http://pod.ca/st/episode2.mp3", IMedia::Type::Audio ) );
+    ASSERT_NON_NULL( m1 );
+    ASSERT_NON_NULL( m2 );
+
+    auto sub = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub", "artwork", 0 );
+    ASSERT_NON_NULL( sub );
+    auto sub2 = Subscription::create( T->ml.get(), IService::Type::Podcast, "sub2", "artwork", 0 );
+    ASSERT_NON_NULL( sub );
+
+    auto res = T->ml->searchSubscriptionMedia( "epi" )->all();
+    ASSERT_TRUE( res.empty() );
+
+    sub->addMedia( *m1 );
+    sub->addMedia( *m2 );
+
+    res = T->ml->searchSubscriptionMedia( "epi" )->all();
+    ASSERT_EQ( res.size(), 2u );
+    ASSERT_EQ( res[0]->id(), m1->id() );
+    ASSERT_EQ( res[1]->id(), m2->id() );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS( Subscription )
@@ -531,6 +557,7 @@ int main( int ac, char** av )
     ADD_TEST( MaxCachedSize );
     ADD_TEST( NewMediaNotify );
     ADD_TEST( NbMedia );
+    ADD_TEST( SearchAllMedia );
 
     END_TESTS
 }
