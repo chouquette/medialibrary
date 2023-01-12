@@ -748,6 +748,16 @@ public:
     virtual Query<IMedia> searchMovie( const std::string& pattern,
                                        const QueryParameters* params = nullptr ) const = 0;
 
+    /**
+     * @brief searchSubscriptionMedia search a subscription media.
+     * @param pattern A 3 character or more pattern that will be matched against the media's title
+     *                or filename if no title was set for this media.
+     * @param params Some query parameters.
+     */
+    virtual Query<IMedia>
+    searchSubscriptionMedia( const std::string& pattern,
+                             const QueryParameters* params = nullptr ) const = 0;
+
     virtual Query<IPlaylist> searchPlaylists( const std::string& name, PlaylistType type,
                                               const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,

@@ -1201,6 +1201,11 @@ Query<IMedia> MediaLibrary::searchMovie( const std::string& pattern, const Query
 {
     return Media::search( this, pattern, IMedia::Type::Video, params, IMedia::SubType::Movie );
 }
+Query<IMedia> MediaLibrary::searchSubscriptionMedia( const std::string& pattern,
+                                                     const QueryParameters* params ) const
+{
+    return Media::searchFromSubscriptions( this, pattern, params );
+}
 
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name, PlaylistType type,
                                                 const QueryParameters* params ) const
