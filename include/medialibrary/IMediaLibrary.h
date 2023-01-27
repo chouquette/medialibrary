@@ -658,6 +658,7 @@ public:
     virtual ShowPtr show( int64_t id ) const = 0;
     virtual MoviePtr movie( int64_t id ) const = 0;
     virtual ArtistPtr artist( int64_t id ) const = 0;
+    virtual SubscriptionPtr subscription( int64_t id ) const = 0;
     virtual Query<IShow> shows( const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IShow> searchShows( const std::string& pattern,
                                       const QueryParameters* params = nullptr ) const = 0;

@@ -2561,6 +2561,11 @@ bool MediaLibrary::flushUserProvidedThumbnails()
     return Thumbnail::flushUserProvided( this );
 }
 
+SubscriptionPtr MediaLibrary::subscription( int64_t subscriptionId ) const
+{
+    return Subscription::fetch( this, subscriptionId );
+}
+
 bool MediaLibrary::removeSubscription( int64_t subscriptionId )
 {
     return Subscription::destroy( this, subscriptionId );
