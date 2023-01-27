@@ -268,6 +268,8 @@ public:
     virtual PriorityAccess acquirePriorityAccess() override;
 
     virtual bool flushUserProvidedThumbnails() override;
+
+    virtual SubscriptionPtr subscription( int64_t id ) const override;
     virtual bool removeSubscription( int64_t subscriptionId ) override;
 
     virtual bool fitsInSubscriptionCache( const IMedia& m ) const override;
