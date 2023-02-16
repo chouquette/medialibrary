@@ -1272,7 +1272,7 @@ static void Favorite( PlaylistTests* T )
     p3->add( *audio, 1 );
 
     QueryParameters params;
-    params.favouriteOnly = true;
+    params.favoriteOnly = true;
 
     auto playlists = T->ml->playlists( PlaylistType::All, &params )->all();
     ASSERT_TRUE( playlists.empty() );

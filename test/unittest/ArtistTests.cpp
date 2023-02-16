@@ -910,7 +910,7 @@ static void Favorite( Tests* T )
     a2->addMedia( *m2 );
 
     QueryParameters params;
-    params.favouriteOnly = true;
+    params.favoriteOnly = true;
 
     auto r = T->ml->artists( ArtistIncluded::All, &params )->all();
     ASSERT_TRUE( r.empty() );

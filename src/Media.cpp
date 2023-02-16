@@ -818,7 +818,7 @@ std::string Media::addRequestConditions( const QueryParameters* params, bool for
     if ( params == nullptr )
         return ret;
 
-    if ( params->favouriteOnly == true )
+    if ( params->favoriteOnly == true )
         ret += "AND m.is_favorite != 0";
 
     return ret;

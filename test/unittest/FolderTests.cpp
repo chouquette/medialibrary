@@ -1141,7 +1141,7 @@ static void Favorite( FolderTests* T )
     ASSERT_FALSE( root->isFavorite() );
 
     QueryParameters params;
-    params.favouriteOnly = true;
+    params.favoriteOnly = true;
     auto query = T->ml->roots( &params );
     ASSERT_EQ( query->count(), 0u );
 

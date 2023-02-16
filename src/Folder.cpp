@@ -797,8 +797,8 @@ Query<IFolder> Folder::withMedia( MediaLibraryPtr ml, IMedia::Type type,
     if ( publicOnly )
         req += " AND d.is_public != 0";
 
-    const bool favouriteOnly = params != nullptr && params->favouriteOnly == true;
-    if ( favouriteOnly == true )
+    const bool favoriteOnly = params != nullptr && params->favoriteOnly == true;
+    if ( favoriteOnly == true )
         req += " AND f.is_favorite = TRUE";
 
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ) )
@@ -827,8 +827,8 @@ Query<IFolder> Folder::searchWithMedia( MediaLibraryPtr ml,
         req += " AND d.is_public != 0";
     req += "AND " + filterByMediaType( type );
 
-    const bool favouriteOnly = params != nullptr && params->favouriteOnly == true;
-    if ( favouriteOnly == true )
+    const bool favoriteOnly = params != nullptr && params->favoriteOnly == true;
+    if ( favoriteOnly == true )
         req += " AND f.is_favorite = TRUE";
 
     return make_query<Folder, IFolder>( ml, "f.*", req, sortRequest( params ),
@@ -852,8 +852,8 @@ Query<IFolder> Folder::roots( MediaLibraryPtr ml, bool banned, int64_t deviceId,
     else
         req += " AND parent_id IS NULL";
 
-    const bool favouriteOnly = params != nullptr && params->favouriteOnly == true;
-    if ( favouriteOnly == true )
+    const bool favoriteOnly = params != nullptr && params->favoriteOnly == true;
+    if ( favoriteOnly == true )
         req += " AND f.is_favorite = TRUE";
 
     if ( deviceId == 0 )
@@ -1100,7 +1100,7 @@ Query<IMedia> Folder::searchMedia( const std::string& pattern, IMedia::Type type
 Query<IFolder> Folder::subfolders( const QueryParameters* params ) const
 {
     std::string req = "FROM " + Table::Name + " WHERE parent_id = ?";
-    if ( params != nullptr && params->favouriteOnly == true )
+    if ( params != nullptr && params->favoriteOnly == true )
         req += " AND is_favorite = TRUE";
 
     return make_query<Folder, IFolder>( m_ml, "*", req, sortRequest( params ), m_id )
