@@ -584,7 +584,7 @@ static void Favorite( GenreTests* T )
     auto g2 = T->ml->createGenre( "Jazz" );
 
     QueryParameters params;
-    params.favouriteOnly = true;
+    params.favoriteOnly = true;
 
     auto r = T->ml->genres( &params )->all();
     ASSERT_TRUE( r.empty() );

@@ -197,7 +197,7 @@ std::string Artist::addRequestConditions( const QueryParameters* params )
     if ( includeMissing == false )
         req = " AND art.is_present != 0";
 
-    const bool favoriteOnly = params != nullptr ? params->favouriteOnly : false;
+    const bool favoriteOnly = params != nullptr ? params->favoriteOnly : false;
     if ( favoriteOnly == true )
         req += " AND art.is_favorite = TRUE";
 

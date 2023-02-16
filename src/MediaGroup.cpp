@@ -510,7 +510,7 @@ Query<IMediaGroup> MediaGroup::listAll( MediaLibraryPtr ml, IMedia::Type mediaTy
         }
     }
 
-    if ( params != nullptr && params->favouriteOnly == true )
+    if ( params != nullptr && params->favoriteOnly == true )
         req += " AND is_favorite = TRUE";
 
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ) ).build();
@@ -527,7 +527,7 @@ Query<IMediaGroup> MediaGroup::search( MediaLibraryPtr ml, const std::string& pa
     else
         req += " AND (nb_video > 0 OR nb_audio > 0 OR nb_unknown > 0)";
 
-    if ( params != nullptr && params->favouriteOnly == true )
+    if ( params != nullptr && params->favoriteOnly == true )
         req += " AND mg.is_favorite = TRUE";
 
     return make_query<MediaGroup, IMediaGroup>( ml, "mg.*", req, orderBy( params ),

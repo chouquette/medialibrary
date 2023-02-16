@@ -1696,7 +1696,7 @@ static void Favorite( Tests* T )
     g->add( *m1 );
 
     QueryParameters params;
-    params.favouriteOnly = true;
+    params.favoriteOnly = true;
     auto res = T->ml->mediaGroups( IMedia::Type::Video, &params )->all();
     ASSERT_TRUE( res.empty() );
     res = T->ml->searchMediaGroups( "grou", &params )->all();

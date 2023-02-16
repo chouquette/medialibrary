@@ -493,7 +493,7 @@ std::string Genre::addRequestConditions( const QueryParameters* params )
         req = " EXISTS(SELECT genre_id FROM " + Media::Table::Name +
               " WHERE genre_id = id_genre AND is_public != 0)";
 
-    if ( params->favouriteOnly == true )
+    if ( params->favoriteOnly == true )
     {
         if ( req.empty() == false )
             req += " AND";
