@@ -426,6 +426,21 @@ static void Favorite( Tests* T )
 
     m = T->ml->media( m->id() );
     ASSERT_TRUE( m->isFavorite() );
+
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    m2->setFavorite(false);
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "media3.mkv", IMedia::Type::Video ) );
+    m3->setFavorite(true);
+
+    auto list = T->ml->videoFiles(nullptr)->all();
+    ASSERT_EQ(list.size(), 3u);
+
+    QueryParameters params;
+    params.favoriteOnly = true;
+    list = T->ml->videoFiles(&params)->all();
+    ASSERT_EQ(list.size(), 2u);
+    ASSERT_EQ(list[0]->id(), m->id());
+    ASSERT_EQ(list[1]->id(), m3->id());
 }
 
 static void History( Tests* T )
