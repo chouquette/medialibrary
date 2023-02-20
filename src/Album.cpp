@@ -274,6 +274,13 @@ std::string Album::addRequestConditions( const QueryParameters* params, bool for
         req += " EXISTS(SELECT album_id FROM " + Media::Table::Name +
                " WHERE is_public != 0 AND album_id = alb.id_album)";
     }
+
+    if ( params->favoriteOnly == true )
+    {
+        if ( req.empty() == false )
+            req += " AND";
+        req += " alb.is_favorite = TRUE";
+    }
     return req;
 }
 
