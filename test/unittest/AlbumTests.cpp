@@ -1018,6 +1018,26 @@ static void Favorite( Tests* T )
     a->setFavorite( false );
     ASSERT_FALSE( a->isFavorite() );
     ASSERT_FALSE( T->ml->album( a->id() )->isFavorite() );
+
+    a->setFavorite( true );
+
+    auto a2 = T->ml->createAlbum( "Album2" );
+    a2->setFavorite(false);
+    auto a3 = T->ml->createAlbum( "Album3" );
+    a3->setFavorite(true);
+
+    QueryParameters params;
+    params.includeMissing = true;
+    auto list = T->ml->albums(&params);
+    ASSERT_EQ(list->count(), 3u);
+
+    params.favoriteOnly = true;
+    list = T->ml->albums(&params);
+    const auto count = list->count();
+    const auto vec = list->all();
+    ASSERT_EQ(count, 2u);
+    ASSERT_EQ(vec[0]->id(), a->id());
+    ASSERT_EQ(vec[1]->id(), a3->id());
 }
 
 int main( int ac, char** av )
