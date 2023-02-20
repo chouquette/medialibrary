@@ -1037,35 +1037,18 @@ Query<IAlbum> Album::searchFromGenre( MediaLibraryPtr ml, const std::string& pat
 
 Query<IAlbum> Album::listAll( MediaLibraryPtr ml, const QueryParameters* params )
 {
-    std::string countReq = "SELECT COUNT(*) FROM " + Table::Name;
-    std::string req = "SELECT alb.*";
-    auto publicOnly = params != nullptr && params->publicOnly;
-    if ( publicOnly == true )
-        req += ", TRUE ";
-    req += " FROM " + Table::Name + " alb ";
+    std::string req = " FROM " + Table::Name + " alb ";
     req += addRequestJoin( params, false );
-    if ( publicOnly )
-    {
-        auto clause = " WHERE EXISTS(SELECT album_id FROM " + Media::Table::Name +
-                " WHERE is_public != 0 AND album_id = id_album)";
 
-        req += clause;
-        countReq += clause;
-        if ( params == nullptr || params->includeMissing == false )
-        {
-            countReq += " AND is_present != 0";
-            req += "AND alb.is_present != 0";
-        }
-    }
-    else if ( params == nullptr || params->includeMissing == false )
+    const auto cond = addRequestConditions( params, false );
+    if ( cond.empty() == false )
     {
-        countReq += " WHERE is_present != 0";
-        req += "WHERE alb.is_present != 0 ";
+        req += "WHERE" + cond;
     }
 
-    req += orderBy( params );
-    return make_query_with_count<Album, IAlbum>( ml, std::move( countReq ),
-                                                 std::move( req ) );
+    const auto publicOnly = params != nullptr && params->publicOnly;
+    return make_query<Album, IAlbum>( ml, "alb.*", std::move( req ), orderBy( params ) )
+            .markPublic( publicOnly ).build();
 }
 
 bool Album::checkDBConsistency( MediaLibraryPtr ml )
