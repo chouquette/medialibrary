@@ -322,15 +322,15 @@ std::string Album::orderBy( const QueryParameters* params )
     case SortingCriteria::PlayCount:
         /* This voluntarily overrides the initial "ORDER BY" in req, since
          * we need the GROUP BY first */
-        req = "GROUP BY alb.id_album "
-              "ORDER BY SUM(m.play_count) ";
+        req = " GROUP BY alb.id_album"
+              " ORDER BY SUM(m.play_count) ";
         if ( desc == false )
             req += "DESC "; // Most played first by default
         req += ", alb.title";
         break;
     case SortingCriteria::InsertionDate:
-        req = "GROUP BY alb.id_album "
-              "ORDER BY MIN(m.insertion_date) ";
+        req = " GROUP BY alb.id_album"
+              " ORDER BY MIN(m.insertion_date) ";
         if ( desc == true )
             req += "DESC ";
         break;
