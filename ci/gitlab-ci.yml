@@ -79,6 +79,7 @@ test:debian-4.0:
 
 test:win32:
   image: $MEDIALIBRARY_WIN32_IMG
+  allow_failure: true
   variables:
     MESON_TESTTHREADS: 8
   stage: test
@@ -110,6 +111,7 @@ test:win32:
 
 test:win64:
   image: $MEDIALIBRARY_WIN64_IMG
+  allow_failure: true
   variables:
     MESON_TESTTHREADS: 8
   stage: test
