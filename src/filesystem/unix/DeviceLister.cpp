@@ -237,8 +237,6 @@ bool DeviceLister::isRemovable( const std::string& partitionPath ) const
             std::to_string( major( s.st_rdev ) ) + ":" +
             std::to_string( minor( s.st_rdev ) );
 
-    // This path is a symlink to a /sys/devices/....../block/device/partition folder
-    // We are interested in the <device> part
     std::string partitionBlockPath;
     try
     {
