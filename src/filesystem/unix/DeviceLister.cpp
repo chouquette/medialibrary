@@ -206,6 +206,24 @@ DeviceLister::deviceFromDeviceMapper( const std::string& devicePath ) const
     return { dmName, res };
 }
 
+static std::string getDeviceName( const std::string& partitionBlockPath )
+{
+    const auto parentDirectory =
+        utils::file::directoryName( utils::file::parentDirectory( partitionBlockPath ) );
+
+    // Partition subfolder is not mandatory and filesytems can be written on a disk without one
+    // (pretty common with usb sticks for instance). In that case instead of having a partition
+    // absolute path mapped as:
+    //  `/sys/devices/....../block/device/partition/`
+    // we'll end up with a path pointing to the device folder directly, such as:
+    // `/sys/devices/....../block/device/`
+    //
+    // This block ensure we return the proper device folder.
+    if ( parentDirectory == "block" )
+        return utils::file::directoryName( partitionBlockPath );
+    return parentDirectory;
+}
+
 bool DeviceLister::isRemovable( const std::string& partitionPath ) const
 {
     // We have a partition, such as /dev/sda1. We need to find the associated
@@ -232,8 +250,8 @@ bool DeviceLister::isRemovable( const std::string& partitionPath ) const
                   " ", ex.what() );
         return false;
     }
-    auto deviceName = utils::file::directoryName(
-                        utils::file::parentDirectory( partitionBlockPath ) );
+
+    const auto deviceName = getDeviceName( partitionBlockPath );
 
     std::string removableFilePath = "/sys/block/" + deviceName + "/removable";
     std::unique_ptr<FILE, decltype(&fclose)> removableFile(
