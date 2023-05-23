@@ -50,7 +50,11 @@ std::unique_ptr<LockFile> LockFile::lock( const std::string& mlFolderPath )
     Handle handle;
 #ifdef _WIN32
     auto wide = charset::ToWide( lockFile.c_str() );
+# if _WIN32_WINNT >= 0x0602 /* _WIN32_WINNT_WIN8 */
+    handle = CreateFile2(wide.get(), GENERIC_WRITE, 0, CREATE_ALWAYS, NULL);
+# else
     handle = CreateFileW(wide.get(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
+# endif
     if ( handle == INVALID_HANDLE_VALUE )
     {
         LOG_ERROR( "Could not open lockfile: ", lockFile );
