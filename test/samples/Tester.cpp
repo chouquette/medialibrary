@@ -421,6 +421,20 @@ void Tests::checkVideoTracks( const rapidjson::Value& expectedTracks, const std:
     }
 }
 
+/**
+ * Check if a string value occur in a string list delimited by the '|' character.
+ */
+static bool isInStringList( const std::string& val, const std::string& strList )
+{
+    static constexpr char DELIMITER = '|';
+    std::istringstream input( strList );
+    std::string current;
+    while ( std::getline( input, current, DELIMITER ) )
+        if ( current == val )
+            return true;
+    return false;
+}
+
 void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::vector<AudioTrackPtr>& tracks)
 {
     ASSERT_TRUE( expectedTracks.IsArray() );
@@ -432,8 +446,12 @@ void Tests::checkAudioTracks(const rapidjson::Value& expectedTracks, const std::
         ASSERT_TRUE( expectedTrack.IsObject() );
         if ( expectedTrack.HasMember( "codec" ) )
         {
-            ASSERT_EQ( strcasecmp( expectedTrack["codec"].GetString(),
-                                   track->codec().c_str() ), 0 );
+            // XXX: There should be no need to check against a list here. Unfortunately codecs are
+            // returned nonhomogeneously between libvlc3 and 4 for some mp3 audio tracks
+            // exclusively.
+            // TODO: This should be reverted back to a simple string check once we drop libvlc3
+            // support.
+            ASSERT_TRUE( isInStringList( track->codec(), expectedTrack["codec"].GetString() ) );
         }
         if ( expectedTrack.HasMember( "sampleRate" ) )
         {

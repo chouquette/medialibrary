@@ -10,7 +10,7 @@
             "nbVideoTracks": 0,
             "nbAudioTracks": 1,
             "audioTracks": [{
-                "codec": "mpga",
+                "codec": "mp3 |mpga",
                 "bitrate": 128000,
                 "sampleRate": 44100,
                 "nbChannels": 2
