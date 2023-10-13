@@ -1,9 +1,9 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
-  MEDIALIBRARY_30_IMAGE: registry.videolan.org/medialibrary-3.0:20230106141620
-  MEDIALIBRARY_40_IMAGE: registry.videolan.org/medialibrary-4.0:20221215102057
-  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20230211055133
-  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20230211060017
+  MEDIALIBRARY_30_IMAGE: registry.videolan.org/medialibrary-3.0:20231017192545
+  MEDIALIBRARY_40_IMAGE: registry.videolan.org/medialibrary-4.0:20231017192545
+  MEDIALIBRARY_WIN32_IMG: registry.videolan.org/medialibrary-win32:20231013034500
+  MEDIALIBRARY_WIN64_IMG: registry.videolan.org/medialibrary-win64:20231013035411
   VLC_DEBIAN_UNSTABLE_IMG: registry.videolan.org/vlc-debian-unstable:20221213103803
   MEDIALIBRARY_ALPINE_IMG: registry.videolan.org/medialibrary-alpine:20220706115155
   MEDIALIBRARY_ARCH_IMG: registry.videolan.org/medialibrary-archlinux:20220706120650
