@@ -376,7 +376,7 @@ class Media : public IMedia,
         static Query<IMedia> fromService( MediaLibraryPtr ml, IService::Type service,
                                           const QueryParameters* params );
 
-        static bool clearHistory( MediaLibraryPtr ml );
+        static bool clearHistory( MediaLibraryPtr ml, HistoryType );
         static bool removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
         /**

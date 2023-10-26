@@ -1168,11 +1168,11 @@ Query<IMedia> MediaLibrary::videoHistory( const QueryParameters* params ) const
     return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Video, params );
 }
 
-bool MediaLibrary::clearHistory()
+bool MediaLibrary::clearHistory( HistoryType type )
 {
     try
     {
-        return Media::clearHistory( this );
+        return Media::clearHistory( this, type );
     }
     catch ( sqlite::errors::Exception& ex )
     {
