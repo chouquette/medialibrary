@@ -419,12 +419,13 @@ private:
         static std::string sortRequest( SortingCriteria, bool desc );
         static std::string sortRequest( const QueryParameters* params );
         static std::string addRequestConditions( const QueryParameters* params, bool forcePublic );
-        static Query<IMedia> fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type );
         static bool shouldUpdateThumbnail( const Thumbnail& currentThumbnail );
         static std::shared_ptr<Media> createExternalMedia( MediaLibraryPtr ml,
                                                            const std::string& mrl,
                                                            ImportType importType,
                                                            int64_t duration );
+        static Query<IMedia> fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
+                                                   IMedia::Type media_type );
         std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
         PositionTypes computePositionType( float position ) const;
         ProgressResult setLastPositionAndTime( PositionTypes positionType,
