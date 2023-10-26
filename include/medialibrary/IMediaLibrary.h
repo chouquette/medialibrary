@@ -168,7 +168,7 @@ enum class ThumbnailStatus : uint8_t
 enum class HistoryType : uint8_t
 {
     /// The history of media analyzed by the media library & external media
-    Media,
+    Local,
     /// The network streams history
     Network,
 };
