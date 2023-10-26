@@ -350,9 +350,9 @@ class Media : public IMedia,
         static Query<IMedia> fromAlbum( MediaLibraryPtr ml, int64_t albumId,
                                         const QueryParameters* params, bool forcePublic,
                                         GenrePtr genreFilter );
-        static Query<IMedia> fetchHistory( MediaLibraryPtr ml );
-        static Query<IMedia> fetchHistory( MediaLibraryPtr ml, IMedia::Type type );
-        static Query<IMedia> fetchStreamHistory( MediaLibraryPtr ml );
+        static Query<IMedia> fetchHistory( MediaLibraryPtr ml, HistoryType );
+        static Query<IMedia> fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType,
+                                                      IMedia::Type );
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
                                            const QueryParameters* params,

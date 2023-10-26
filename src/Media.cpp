@@ -2767,20 +2767,15 @@ Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
         .build();
 }
 
-Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
+Query<IMedia> Media::fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType type,
+                                              IMedia::Type media_type )
 {
-    return fetchHistoryInternal( ml, HistoryType::Local, IMedia::Type::Unknown );
+    return fetchHistoryInternal( ml, type, media_type );
 }
 
-Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
+Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, HistoryType type )
 {
-    assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
-    return fetchHistoryInternal( ml, HistoryType::Local, type );
-}
-
-Query<IMedia> Media::fetchStreamHistory( MediaLibraryPtr ml )
-{
-    return fetchHistoryInternal( ml, HistoryType::Network, IMedia::Type::Unknown );
+    return fetchHistoryInternal( ml, type, IMedia::Type::Unknown );
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,

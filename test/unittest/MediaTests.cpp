@@ -447,19 +447,20 @@ static void History( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    auto history = T->ml->history()->all();
+    auto history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setLastPosition( 0.5f );
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
 
     compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
-    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
+    auto m2 =
+        std::static_pointer_cast<Media>( T->ml->addMedia( "media2.mkv", IMedia::Type::Video ) );
     m2->setLastTime( 50 );
 
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m2->id(), history[0]->id() );
     ASSERT_EQ( m->id(), history[1]->id() );
@@ -469,34 +470,40 @@ static void StreamHistory( Tests* T )
 {
     auto m1 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.org/sample.mkv" ) );
     auto m2 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.org/sample2.mkv" ) );
-    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
+    auto m3 =
+        std::static_pointer_cast<Media>( T->ml->addMedia( "localfile.mkv", IMedia::Type::Video ) );
 
     m1->setLastPosition( 0.5 );
     m2->setLastPosition( 0.5 );
     m3->setLastPosition( 0.5 );
 
-    auto history = T->ml->streamHistory()->all();
+    auto history = T->ml->history( HistoryType::Network )->all();
     ASSERT_EQ( 2u, history.size() );
 
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Local )->all();
     ASSERT_EQ( 1u, history.size() );
+
+    history = T->ml->history( HistoryType::Global )->all();
+    ASSERT_EQ( 3u, history.size() );
 }
 
 static void HistoryByType( Tests* T )
 {
-    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "video.mkv", IMedia::Type::Video ) );
+    auto m1 =
+        std::static_pointer_cast<Media>( T->ml->addMedia( "video.mkv", IMedia::Type::Video ) );
     m1->setLastPosition( 0.5f );
 
-    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
+    auto m2 =
+        std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
     m2->setLastTime( 50 );
 
-    auto h = T->ml->history( IMedia::Type::Audio )->all();
+    auto h = T->ml->audioHistory()->all();
     ASSERT_EQ( 1u, h.size() );
 
-    h = T->ml->history( IMedia::Type::Video)->all();
+    h = T->ml->videoHistory()->all();
     ASSERT_EQ( 1u, h.size() );
 
-    h = T->ml->history()->all();
+    h = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 2u, h.size() );
 }
 
@@ -504,16 +511,16 @@ static void ClearHistory( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
 
-    auto history = T->ml->history()->all();
+    auto history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setLastPosition( 0.5f );
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 1u, history.size() );
 
     ASSERT_TRUE( T->ml->clearHistory() );
 
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
 
     m = T->ml->media( m->id() );
@@ -526,18 +533,18 @@ static void RemoveFromHistory( Tests* T )
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
     m->setDuration( 100 );
 
-    auto history = T->ml->history()->all();
+    auto history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
 
     m->setLastPosition( 1.f );
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 1u, history.size() );
     ASSERT_EQ( m->id(), history[0]->id() );
     ASSERT_EQ( 1u, m->playCount() );
 
     m->removeFromHistory();
 
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
     ASSERT_EQ( 0u, m->playCount() );
     ASSERT_EQ( -1.f, m->lastPosition() );
@@ -1529,7 +1536,7 @@ static void MarkAsPlayed( Tests* T )
     ASSERT_EQ( -1, m->lastTime() );
     ASSERT_TRUE( m->lastPosition() < .0f );
 
-    auto history = T->ml->history()->all();
+    auto history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 0u, history.size() );
 
     auto res = m->markAsPlayed();
@@ -1545,7 +1552,7 @@ static void MarkAsPlayed( Tests* T )
     ASSERT_EQ( -1, m->lastTime() );
     ASSERT_TRUE( m->lastPosition() < .0f );
 
-    history = T->ml->history()->all();
+    history = T->ml->history( HistoryType::Global )->all();
     ASSERT_EQ( 1u, history.size() );
 
     res = m->markAsPlayed();

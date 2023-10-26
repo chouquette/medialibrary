@@ -1153,19 +1153,19 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     }
 }
 
-Query<IMedia> MediaLibrary::history() const
-{
-    return Media::fetchHistory( this );
-}
-
-Query<IMedia> MediaLibrary::history( IMedia::Type type ) const
+Query<IMedia> MediaLibrary::history(HistoryType type) const
 {
     return Media::fetchHistory( this, type );
 }
 
-Query<IMedia> MediaLibrary::streamHistory() const
+Query<IMedia> MediaLibrary::audioHistory() const
 {
-    return Media::fetchStreamHistory( this );
+    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Audio );
+}
+
+Query<IMedia> MediaLibrary::videoHistory() const
+{
+    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Video );
 }
 
 bool MediaLibrary::clearHistory()

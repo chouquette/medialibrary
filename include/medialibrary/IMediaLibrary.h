@@ -712,13 +712,29 @@ public:
     /**
      * History
      */
-    virtual Query<IMedia> history() const = 0;
+
     /**
-     * @brief history Returns the history for media of the provided type
-     * @param type Can be either Audio or Video. Other types are not supported
+     * @brief history Fetch the media already played.
+     * @param type Filter the history.
      */
-    virtual Query<IMedia> history( IMedia::Type type ) const = 0;
-    virtual Query<IMedia> streamHistory() const = 0;
+    virtual Query<IMedia> history( HistoryType ) const = 0;
+
+    /**
+     * @brief audioHistory Fetch the local audio history.
+     *
+     * @note There's no way to filter network history with media types for now. Hence the lack of
+     * HistoryType parameters.
+     */
+    virtual Query<IMedia> audioHistory() const = 0;
+
+    /**
+     * @brief videoHistory Fetch the local video history.
+     *
+     * @note There's no way to filter network history with media types for now. Hence the lack of
+     * HistoryType parameters.
+     */
+    virtual Query<IMedia> videoHistory() const = 0;
+
     /**
      * @brief clearHistory will clear both streams history & media history.
      * @return true in case of success, false otherwise. The database will stay untouched in case
