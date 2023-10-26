@@ -2745,16 +2745,28 @@ Query<IMedia> Media::searchInService( MediaLibraryPtr ml, const std::string& pat
 }
 
 Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
-                                           IMedia::Type media_type )
+                                           IMedia::Type media_type, const QueryParameters* params )
 {
-    std::string req = "FROM " + Media::Table::Name + " WHERE last_played_date IS NOT NULL";
+    std::string req = "FROM " + Media::Table::Name + " m ";
+
+    const auto sort = params != nullptr ? params->sort : SortingCriteria::LastPlaybackDate;
+    req += addRequestJoin( sort );
+
+    req += " WHERE last_played_date IS NOT NULL";
 
     if ( media_type != IMedia::Type::Unknown )
         req += " AND type = " + std::to_string( static_cast<uint8_t>( media_type ) );
 
+    req += addRequestConditions( params, false );
+
+    const bool desc = params != nullptr ? params->desc : true;
+    const bool publicOnly = params != nullptr && params->publicOnly == true;
+
     if ( type == HistoryType::Global )
     {
-        return make_query<Media, IMedia>( ml, "*", req, "ORDER BY last_played_date DESC" ).build();
+        return make_query<Media, IMedia>( ml, "*", req, sortRequest( sort, desc ) )
+            .markPublic( publicOnly )
+            .build();
     }
 
     if ( type != HistoryType::Network )
@@ -2762,20 +2774,23 @@ Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
     else
         req += " AND import_type = ?";
 
-    return make_query<Media, IMedia>( ml, "*", req, "ORDER BY last_played_date DESC",
+    return make_query<Media, IMedia>( ml, "*", req, sortRequest( sort, desc ),
                                       Media::ImportType::Stream )
+        .markPublic( publicOnly )
         .build();
 }
 
 Query<IMedia> Media::fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType type,
-                                              IMedia::Type media_type )
+                                              IMedia::Type media_type,
+                                              const QueryParameters* params )
 {
-    return fetchHistoryInternal( ml, type, media_type );
+    return fetchHistoryInternal( ml, type, media_type, params );
 }
 
-Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, HistoryType type )
+Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, HistoryType type,
+                                   const QueryParameters* params )
 {
-    return fetchHistoryInternal( ml, type, IMedia::Type::Unknown );
+    return fetchHistoryInternal( ml, type, IMedia::Type::Unknown, params );
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,

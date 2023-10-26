@@ -1153,19 +1153,19 @@ bool MediaLibrary::deletePlaylist( int64_t playlistId )
     }
 }
 
-Query<IMedia> MediaLibrary::history(HistoryType type) const
+Query<IMedia> MediaLibrary::history( HistoryType type, const QueryParameters* params ) const
 {
-    return Media::fetchHistory( this, type );
+    return Media::fetchHistory( this, type, params );
 }
 
-Query<IMedia> MediaLibrary::audioHistory() const
+Query<IMedia> MediaLibrary::audioHistory( const QueryParameters* params ) const
 {
-    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Audio );
+    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Audio, params );
 }
 
-Query<IMedia> MediaLibrary::videoHistory() const
+Query<IMedia> MediaLibrary::videoHistory( const QueryParameters* params ) const
 {
-    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Video );
+    return Media::fetchHistoryByMediaType( this, HistoryType::Local, IMedia::Type::Video, params );
 }
 
 bool MediaLibrary::clearHistory()
