@@ -2744,40 +2744,38 @@ Query<IMedia> Media::searchInService( MediaLibraryPtr ml, const std::string& pat
                                       sqlite::Tools::sanitizePattern( pattern ) ).build();
 }
 
-Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
+Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
+                                           IMedia::Type media_type )
 {
-    static const std::string req = "FROM " + Media::Table::Name +
-            " WHERE last_played_date IS NOT NULL"
-            " AND import_type != ?";
-    return make_query<Media, IMedia>( ml, "*", req,
-                                      "ORDER BY last_played_date DESC",
-                                      ImportType::Stream ).build();
+    std::string req = "FROM " + Media::Table::Name + " WHERE last_played_date IS NOT NULL";
+
+    if ( media_type != IMedia::Type::Unknown )
+        req += " AND type = " + std::to_string( static_cast<uint8_t>( media_type ) );
+
+    if ( type != HistoryType::Network )
+        req += " AND import_type != ?";
+    else
+        req += " AND import_type = ?";
+
+    return make_query<Media, IMedia>( ml, "*", req, "ORDER BY last_played_date DESC",
+                                      Media::ImportType::Stream )
+        .build();
 }
 
-Query<IMedia> Media::fetchHistoryByType( MediaLibraryPtr ml, IMedia::Type type )
+Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
-    static const std::string req = "FROM " + Media::Table::Name +
-            " WHERE last_played_date IS NOT NULL"
-            " AND type = ? AND import_type = ?";
-    return make_query<Media, IMedia>( ml, "*", req,
-                                      "ORDER BY last_played_date DESC", type,
-                                      ImportType::Internal ).build();
+    return fetchHistoryInternal( ml, HistoryType::Media, IMedia::Type::Unknown );
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
 {
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
-    return fetchHistoryByType( ml, type );
+    return fetchHistoryInternal( ml, HistoryType::Media, type );
 }
 
-Query<IMedia> Media::fetchStreamHistory(MediaLibraryPtr ml)
+Query<IMedia> Media::fetchStreamHistory( MediaLibraryPtr ml )
 {
-    static const std::string req = "FROM " + Media::Table::Name +
-            " WHERE last_played_date IS NOT NULL"
-            " AND import_type = ?";
-    return make_query<Media, IMedia>( ml, "*", req,
-                                      "ORDER BY last_played_date DESC",
-                                      ImportType::Stream ).build();
+    return fetchHistoryInternal( ml, HistoryType::Network, IMedia::Type::Unknown );
 }
 
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
