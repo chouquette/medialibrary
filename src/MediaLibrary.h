@@ -160,7 +160,7 @@ public:
                                    const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> audioHistory( const QueryParameters* params = nullptr ) const override;
     virtual Query<IMedia> videoHistory( const QueryParameters* params = nullptr ) const override;
-    virtual bool clearHistory() override;
+    virtual bool clearHistory( HistoryType ) override;
 
     virtual Query<IMedia> searchMedia( const std::string& title,
                                        const QueryParameters* params ) const override;

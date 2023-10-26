@@ -2900,18 +2900,28 @@ Query<IMedia> Media::searchFromMediaGroup( MediaLibraryPtr ml, int64_t groupId,
                                       groupId, ImportType::Internal ).build();
 }
 
-bool Media::clearHistory( MediaLibraryPtr ml )
+bool Media::clearHistory( MediaLibraryPtr ml, HistoryType type )
 {
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
-    static const std::string req = "UPDATE " + Media::Table::Name + " SET "
-            "last_position = -1, last_time = -1, play_count = 0,"
-            "last_played_date = NULL";
+    std::string req = "UPDATE " + Media::Table::Name +
+                      " SET "
+                      "last_position = -1, last_time = -1, play_count = 0,"
+                      "last_played_date = NULL";
+
+    if ( type != HistoryType::Global )
+    {
+        if ( type == HistoryType::Network )
+            req += " WHERE import_type = ";
+        else
+            req += " WHERE import_type != ";
+        req += std::to_string( static_cast<uint8_t>( ImportType::Stream ) );
+    }
 
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
         return false;
     t->commit();
-    ml->getCb()->onHistoryChanged( HistoryType::Global );
+    ml->getCb()->onHistoryChanged( type );
     return true;
 }
 
