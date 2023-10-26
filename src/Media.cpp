@@ -407,7 +407,7 @@ Media::setLastPositionAndTime( PositionTypes positionType, float lastPos,
     m_lastPosition = curatedPosition;
     m_lastTime = curatedTime;
     m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Network :
-                                                  HistoryType::Media );
+                                                  HistoryType::Local );
     switch ( positionType )
     {
     case PositionTypes::Begin:
@@ -467,7 +467,7 @@ bool Media::markAsPlayed()
     m_lastPlayedDate = lastPlayedDate;
     ++m_playCount;
     m_ml->getCb()->onHistoryChanged( isStream() ? HistoryType::Network :
-                                                  HistoryType::Media );
+                                                  HistoryType::Local );
     return true;
 }
 
@@ -500,7 +500,7 @@ bool Media::removeFromHistory()
     m_lastTime = -1;
     m_lastPlayedDate = 0;
     m_playCount = 0;
-    auto historyType = isStream() ? HistoryType::Network: HistoryType::Media;
+    auto historyType = isStream() ? HistoryType::Network: HistoryType::Local;
     m_ml->getCb()->onHistoryChanged( historyType );
     return true;
 }
@@ -2764,13 +2764,13 @@ Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml )
 {
-    return fetchHistoryInternal( ml, HistoryType::Media, IMedia::Type::Unknown );
+    return fetchHistoryInternal( ml, HistoryType::Local, IMedia::Type::Unknown );
 }
 
 Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, IMedia::Type type )
 {
     assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
-    return fetchHistoryInternal( ml, HistoryType::Media, type );
+    return fetchHistoryInternal( ml, HistoryType::Local, type );
 }
 
 Query<IMedia> Media::fetchStreamHistory( MediaLibraryPtr ml )
@@ -2896,7 +2896,7 @@ bool Media::clearHistory( MediaLibraryPtr ml )
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
         return false;
     t->commit();
-    ml->getCb()->onHistoryChanged( HistoryType::Media );
+    ml->getCb()->onHistoryChanged( HistoryType::Local );
     ml->getCb()->onHistoryChanged( HistoryType::Network );
     return true;
 }
