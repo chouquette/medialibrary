@@ -2752,6 +2752,11 @@ Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
     if ( media_type != IMedia::Type::Unknown )
         req += " AND type = " + std::to_string( static_cast<uint8_t>( media_type ) );
 
+    if ( type == HistoryType::Global )
+    {
+        return make_query<Media, IMedia>( ml, "*", req, "ORDER BY last_played_date DESC" ).build();
+    }
+
     if ( type != HistoryType::Network )
         req += " AND import_type != ?";
     else
@@ -2896,8 +2901,7 @@ bool Media::clearHistory( MediaLibraryPtr ml )
     if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
         return false;
     t->commit();
-    ml->getCb()->onHistoryChanged( HistoryType::Local );
-    ml->getCb()->onHistoryChanged( HistoryType::Network );
+    ml->getCb()->onHistoryChanged( HistoryType::Global );
     return true;
 }
 
