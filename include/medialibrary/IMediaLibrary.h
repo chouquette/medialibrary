@@ -716,24 +716,30 @@ public:
     /**
      * @brief history Fetch the media already played.
      * @param type Filter the history.
+     * @params params Some query parameters, supports what is already supported for media listing.
+     *         Default sort is descending last play date.
      */
-    virtual Query<IMedia> history( HistoryType ) const = 0;
+    virtual Query<IMedia> history( HistoryType, const QueryParameters* params = nullptr ) const = 0;
 
     /**
      * @brief audioHistory Fetch the local audio history.
+     * @params params Some query parameters, supports what is already supported for media listing.
+     *         Default sort is descending last play date.
      *
      * @note There's no way to filter network history with media types for now. Hence the lack of
      * HistoryType parameters.
      */
-    virtual Query<IMedia> audioHistory() const = 0;
+    virtual Query<IMedia> audioHistory( const QueryParameters* params = nullptr ) const = 0;
 
     /**
      * @brief videoHistory Fetch the local video history.
+     * @params params Some query parameters, supports what is already supported for media listing.
+     *         Default sort is descending last play date.
      *
      * @note There's no way to filter network history with media types for now. Hence the lack of
      * HistoryType parameters.
      */
-    virtual Query<IMedia> videoHistory() const = 0;
+    virtual Query<IMedia> videoHistory( const QueryParameters* params = nullptr ) const = 0;
 
     /**
      * @brief clearHistory will clear both streams history & media history.

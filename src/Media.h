@@ -350,9 +350,10 @@ class Media : public IMedia,
         static Query<IMedia> fromAlbum( MediaLibraryPtr ml, int64_t albumId,
                                         const QueryParameters* params, bool forcePublic,
                                         GenrePtr genreFilter );
-        static Query<IMedia> fetchHistory( MediaLibraryPtr ml, HistoryType );
-        static Query<IMedia> fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType,
-                                                      IMedia::Type );
+        static Query<IMedia> fetchHistory( MediaLibraryPtr ml, HistoryType,
+                                           const QueryParameters* );
+        static Query<IMedia> fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType, IMedia::Type,
+                                                      const QueryParameters* );
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
                                            const QueryParameters* params,
@@ -425,7 +426,8 @@ private:
                                                            ImportType importType,
                                                            int64_t duration );
         static Query<IMedia> fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
-                                                   IMedia::Type media_type );
+                                                   IMedia::Type media_type,
+                                                   const QueryParameters* );
         std::vector<std::shared_ptr<Media>> fetchMatchingUngrouped();
         PositionTypes computePositionType( float position ) const;
         ProgressResult setLastPositionAndTime( PositionTypes positionType,

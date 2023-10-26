@@ -156,9 +156,10 @@ public:
     virtual PlaylistPtr playlist( int64_t id ) const override;
     virtual bool deletePlaylist( int64_t playlistId ) override;
 
-    virtual Query<IMedia> history(HistoryType) const override;
-    virtual Query<IMedia> audioHistory() const override;
-    virtual Query<IMedia> videoHistory() const override;
+    virtual Query<IMedia> history( HistoryType,
+                                   const QueryParameters* params = nullptr ) const override;
+    virtual Query<IMedia> audioHistory( const QueryParameters* params = nullptr ) const override;
+    virtual Query<IMedia> videoHistory( const QueryParameters* params = nullptr ) const override;
     virtual bool clearHistory() override;
 
     virtual Query<IMedia> searchMedia( const std::string& title,
