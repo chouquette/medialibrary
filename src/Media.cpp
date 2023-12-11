@@ -224,6 +224,10 @@ std::shared_ptr<Media> Media::createExternalMedia( MediaLibraryPtr ml,
         return nullptr;
 
     t->commit();
+
+    auto notifier = ml->getNotifier();
+    if ( notifier != nullptr)
+        notifier->notifyMediaCreation( self );
     return self;
 }
 
@@ -1062,9 +1066,6 @@ bool Media::markAsInternal( Type type, int64_t duration, int64_t deviceId, int64
                                        deviceId, folderId, ImportType::Internal,
                                        m_id ) == false )
         return false;
-    auto notifier = m_ml->getNotifier();
-    if ( notifier != nullptr )
-        notifier->notifyMediaCreation( shared_from_this() );
     m_type = type;
     m_duration = duration;
     m_deviceId = deviceId;
