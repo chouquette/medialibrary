@@ -1,6 +1,6 @@
 project('medialibrary', ['cpp','c'],
   license: 'LGPLv2+',
-  version: '0.13.0-rc.3',
+  version: '0.13.0-rc.4',
   meson_version: '>=0.56',
   default_options: [
     'cpp_std=c++14',
