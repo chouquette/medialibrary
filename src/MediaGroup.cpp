@@ -688,7 +688,7 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "forced_singleton BOOLEAN"
         ")";
     }
-    if ( dbModel < 37 )
+    if ( dbModel < 38 )
     {
         return "CREATE TABLE " + Table::Name +
         "("
