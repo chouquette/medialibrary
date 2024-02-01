@@ -372,6 +372,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
     assert( dbModel >= 37 );
     if ( name == FtsTable::Name )
     {
+        assert( dbModel >= 38 );
         return "CREATE VIRTUAL TABLE " + FtsTable::Name +
                " USING FTS3(name)";
     }
@@ -541,6 +542,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                    " id_subscription = items.subscription_id;"
                " END";
     case Triggers::InsertFts:
+        assert( dbModel >= 38 );
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER INSERT ON " + Table::Name +
                " BEGIN"
@@ -548,6 +550,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                         " VALUES(new.id_subscription, new.name);"
                " END";
     case Triggers::UpdateFts:
+        assert( dbModel >= 38 );
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                " AFTER UPDATE OF name ON " + Table::Name +
                " BEGIN"
@@ -555,6 +558,7 @@ std::string Subscription::trigger( Triggers trigger, uint32_t dbModel )
                         " WHERE rowid = new.id_subscription;"
                " END";
     case Triggers::DeleteFts:
+        assert( dbModel >= 38 );
         return "CREATE TRIGGER " + triggerName( trigger, dbModel ) +
                     " BEFORE DELETE ON " + Table::Name +
                " BEGIN"
