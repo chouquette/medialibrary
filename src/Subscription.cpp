@@ -396,6 +396,24 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                ")";
     }
     assert( name == Table::Name );
+    if ( dbModel < 38 )
+    {
+        return "CREATE TABLE " + Table::Name +
+               "("
+                   + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                   "service_id UNSIGNED INTEGER NOT NULL,"
+                   "name TEXT NOT NULL,"
+                   "parent_id UNSIGNED INTEGER,"
+                   "cached_size UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                   "max_cached_media INTEGER NOT NULL DEFAULT -1,"
+                   "max_cached_size INTEGER NOT NULL DEFAULT -1,"
+                   "new_media_notify INTEGER NOT NULL DEFAULT -1,"
+                   "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                   "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+                   "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
+                       "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
+               ")";
+    }
     return "CREATE TABLE " + Table::Name +
            "("
                + Table::PrimaryKeyColumn + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -408,7 +426,7 @@ std::string Subscription::schema( const std::string& name, uint32_t dbModel )
                "new_media_notify INTEGER NOT NULL DEFAULT -1,"
                "nb_unplayed_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
                "nb_media UNSIGNED INTEGER NOT NULL DEFAULT 0,"
-               "artwork_mrl TEXT,"
+               " artwork_mrl TEXT,"
                "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
                    "(" + Table::PrimaryKeyColumn + ") ON DELETE CASCADE"
            ")";
