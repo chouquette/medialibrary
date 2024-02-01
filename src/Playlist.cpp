@@ -672,7 +672,7 @@ std::string Playlist::schema( const std::string& tableName, uint32_t dbModel )
                 + "(id_file) ON DELETE CASCADE"
             ")";
         }
-        if ( dbModel < 37 )
+        if ( dbModel < 38 )
         {
             return "CREATE TABLE " + Table::Name +
             "("
