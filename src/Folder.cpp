@@ -180,6 +180,31 @@ std::string Folder::schema( const std::string& tableName, uint32_t dbModel )
             "UNIQUE(path,device_id) ON CONFLICT FAIL"
         ")";
     }
+    if ( dbModel < 38 )
+    {
+        return "CREATE TABLE " + Table::Name +
+        "("
+            "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "path TEXT,"
+            "name TEXT COLLATE NOCASE,"
+            "parent_id UNSIGNED INTEGER,"
+            "is_banned BOOLEAN NOT NULL DEFAULT 0,"
+            "device_id UNSIGNED INTEGER,"
+            "is_removable BOOLEAN NOT NULL,"
+            "nb_audio UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "nb_video UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "duration UNSIGNED INTEGER NOT NULL DEFAULT 0,"
+            "is_public BOOLEAN NOT NULL,"
+
+            "FOREIGN KEY(parent_id) REFERENCES " + Table::Name +
+            "(id_folder) ON DELETE CASCADE,"
+
+            "FOREIGN KEY(device_id) REFERENCES " + Device::Table::Name +
+            "(id_device) ON DELETE CASCADE,"
+
+            "UNIQUE(path,device_id) ON CONFLICT FAIL"
+        ")";
+    }
     return "CREATE TABLE " + Table::Name +
     "("
         "id_folder INTEGER PRIMARY KEY AUTOINCREMENT,"

@@ -2153,6 +2153,13 @@ void MediaLibrary::migrateModel37to38()
     sqlite::Connection::WeakDbContext weakConnCtx{ dbConn };
     auto t = dbConn->newTransaction();
 
+    std::string reqs[] = {
+#       include "database/migrations/migration37-38.sql"
+    };
+
+    for ( const auto& req : reqs )
+        sqlite::Tools::executeRequest( dbConn, req );
+
     Settings::createTable( dbConn );
     m_settings.load();
 
