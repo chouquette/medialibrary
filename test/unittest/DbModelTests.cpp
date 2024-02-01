@@ -779,6 +779,11 @@ static void Upgrade36to37( DbModel* T )
     ASSERT_EQ( media->insertionDate(), mainFile->insertionDate() );
 }
 
+static void Upgrade37to38( DbModel* T )
+{
+    T->CommonMigrationTest( SRC_DIR "/test/unittest/db_v37.sql" );
+}
+
 int main( int ac, char** av )
 {
     INIT_TESTS_C( DbModel )
@@ -807,6 +812,7 @@ int main( int ac, char** av )
     ADD_TEST( Upgrade34to35 );
     ADD_TEST( Upgrade35to36 );
     ADD_TEST( Upgrade36to37 );
+    ADD_TEST( Upgrade37to38 );
 
     END_TESTS
 }
