@@ -134,7 +134,7 @@ bool fromStr( const std::string& str, tm* t )
          * the timezone needs to be inverted when it comes to the offset we apply
          * to the hours/seconds.
          * We aim to express the time in UTC, so if it's 1:00pm in GMT +2 we need
-         * to substract 2 hours to the given date to express the time it was in
+         * to subtract 2 hours to the given date to express the time it was in
          * GMT/UTC (in this example, it's 11:00AM GMT)
          */
         int sign = *remainder == '-' ? 1 : -1;
