@@ -116,7 +116,7 @@ public:
           std::shared_ptr<fs::IDirectory> parentFolderFs );
 
     /**
-     * @brief Task Contructor for a link task
+     * @brief Task Constructor for a link task
      * @param ml A medialibrary instance pointer
      * @param linkToId The entity to link to ID
      * @param linkToType The entity to link to type
@@ -139,7 +139,7 @@ public:
           std::string linkToMrl, LinkType linkToType, int64_t linkExtra );
 
     /**
-     * @brief Task Contructor for restore tasks
+     * @brief Task Constructor for restore tasks
      * @param ml A medialibrary instance pointer
      * @param mrl The mrl of the entity to restore
      */

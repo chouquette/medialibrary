@@ -294,7 +294,7 @@ bool Task::restoreLinkedEntities( LastTaskInfo& lastTask )
 
     // Now we either have a task with an existing file, and we managed to fetch
     // it, or the task was not processed yet, and we don't have a fileId (and
-    // therefor no file instance)
+    // therefore no file instance)
     assert( m_fileId == 0 || file != nullptr );
 
     // In case we have a refresh task, old versions didn't provide the parent
