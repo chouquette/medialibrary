@@ -68,7 +68,7 @@ Connection::Handle Connection::handle()
      * avoid re-using an old connection on a new thread with the same id, as this
      * would result in a "Database is locked error"
      * In order to solve this, we use a single map to store all connection,
-     * indexed by std::thread::id (well, compat::thread::id). Additionaly, in
+     * indexed by std::thread::id (well, compat::thread::id). Additionally, in
      * order to know when a thread gets terminated, we store a thread_local
      * object to signal back when a thread returns, and to remove the now
      * unusable connection.
@@ -197,7 +197,7 @@ void Connection::setPragma( Connection::Handle conn, const std::string& pragmaNa
 void Connection::setForeignKeyEnabled( bool value )
 {
     // Changing this pragma during a transaction is a no-op (silently ignored by
-    // sqlite), so ensure we're doing something usefull here:
+    // sqlite), so ensure we're doing something useful here:
     assert( sqlite::Transaction::isInProgress() == false );
     // Ensure no transaction will be started during the pragma change
     auto ctx = acquireWriteContext();

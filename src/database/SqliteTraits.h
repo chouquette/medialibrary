@@ -84,7 +84,7 @@ struct Traits<T, typename std::enable_if<IsSameDecay<T, ForeignKey>::value>::typ
 };
 
 /**
- * Traits that handles raw string litteral without an intermediate std::string
+ * Traits that handles raw string literal without an intermediate std::string
  */
 template <typename T>
 struct Traits<T, typename std::enable_if<std::is_same<T, const char*>::value>::type>

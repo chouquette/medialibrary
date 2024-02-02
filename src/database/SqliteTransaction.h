@@ -47,7 +47,7 @@ class Transaction
 public:
     Transaction() = default;
     /**
-     * If a transaction is in progress and hasn't been commited, the destructor
+     * If a transaction is in progress and hasn't been committed, the destructor
      * will issue a ROLLBACK
      */
     virtual ~Transaction() = default;
