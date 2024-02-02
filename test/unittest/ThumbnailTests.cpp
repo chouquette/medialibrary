@@ -504,7 +504,7 @@ static void UpdateAfterSuccessAndFailure( Tests* T )
     // Now regenerate a new thumbnail over the previous failure.
     // The mrl & ownership will be the same, but we used to reject the update
     // request, causing the status not to be updated as well, and the thumbnail
-    // status would be stucked to Failure, while the generation succeeded
+    // status would be stuck to Failure, while the generation succeeded
     media->setThumbnail( mrl, ThumbnailSizeType::Thumbnail );
     t = media->thumbnail( ThumbnailSizeType::Thumbnail );
     ASSERT_EQ( ThumbnailStatus::Available, t->status() );

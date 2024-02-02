@@ -258,7 +258,7 @@ public:
      * @return true in case of success, false otherwise
      *
      * This is expected to be called before a rescan, as all thumbnails owned by
-     * the media library will explicitely deleted from the disk before being
+     * the media library will explicitly deleted from the disk before being
      * regenerated
      */
     static bool removeAllCleanupRequests( MediaLibraryPtr ml );
