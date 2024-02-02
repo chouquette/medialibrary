@@ -53,7 +53,7 @@ public:
     /// \brief signalStop Will trigger the threads for termination.
     /// This doesn't wait for the threads to be done, but ensure they won't
     /// queue another operation.
-    /// This is usefull to ask all the threads to terminate asynchronously, before
+    /// This is useful to ask all the threads to terminate asynchronously, before
     /// waiting for them to actually stop in the stop() method.
     ///
     void signalStop();

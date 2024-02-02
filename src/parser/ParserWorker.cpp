@@ -290,7 +290,7 @@ bool Worker::handleServiceResult( Task& task, Status status )
         // fail the analysis, and so on.
         // We can't not increment the retry count for metadata extraction, since
         // in case a file makes (lib)VLC crash, we would always try again, and
-        // therefor we would keep on crashing.
+        // therefore we would keep on crashing.
         // However we don't want to just increment the retry count, since it
         // would reach the maximum value too quickly (extraction would set retry
         // count to 1, analysis to 2, and in case of failure, next run would set
