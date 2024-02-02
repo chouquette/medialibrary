@@ -537,23 +537,23 @@ void Tests::checkSubscriptions( const rapidjson::Value& expectedSubscriptions,
     }
 }
 
-void Tests::checkMedias(const rapidjson::Value& expectedMedias)
+void Tests::checkMedias(const rapidjson::Value& expectedMediaList)
 {
-    ASSERT_TRUE( expectedMedias.IsArray() );
-    auto medias = m_ml->audioFiles( nullptr )->all();
+    ASSERT_TRUE( expectedMediaList.IsArray() );
+    auto media_list = m_ml->audioFiles( nullptr )->all();
     auto videos = m_ml->videoFiles( nullptr )->all();
-    medias.insert( begin( medias ), begin( videos ), end( videos ) );
-    for ( auto i = 0u; i < expectedMedias.Size(); ++i )
+    media_list.insert( begin( media_list ), begin( videos ), end( videos ) );
+    for ( auto i = 0u; i < expectedMediaList.Size(); ++i )
     {
-        const auto& expectedMedia = expectedMedias[i];
+        const auto& expectedMedia = expectedMediaList[i];
         ASSERT_TRUE( expectedMedia.HasMember( "title" ) );
         const auto expectedTitle = expectedMedia["title"].GetString();
-        auto it = std::find_if( begin( medias ), end( medias ), [expectedTitle](const MediaPtr& m) {
+        auto it = std::find_if( begin( media_list ), end( media_list ), [expectedTitle](const MediaPtr& m) {
             return strcasecmp( expectedTitle, m->title().c_str() ) == 0;
         });
-        ASSERT_TRUE( end( medias ) != it );
+        ASSERT_TRUE( end( media_list ) != it );
         const auto media = *it;
-        medias.erase( it );
+        media_list.erase( it );
         if ( expectedMedia.HasMember( "nbVideoTracks" ) || expectedMedia.HasMember( "videoTracks" ) )
         {
             auto videoTracks = media->videoTracks()->all();
