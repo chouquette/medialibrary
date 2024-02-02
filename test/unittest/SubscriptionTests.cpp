@@ -385,22 +385,22 @@ static void MaxCachedSize( Tests* T )
                                     "artwork", 0 );
     ASSERT_NON_NULL( s );
 
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 
-    auto res = s->setMaxCachedSize( 123 );
+    auto res = s->setMaxCacheSize( 123 );
     ASSERT_TRUE( res );
 
-    ASSERT_EQ( 123, s->maxCachedSize() );
+    ASSERT_EQ( 123, s->maxCacheSize() );
 
     s = Subscription::fetch( T->ml.get(), s->id() );
-    ASSERT_EQ( 123, s->maxCachedSize() );
+    ASSERT_EQ( 123, s->maxCacheSize() );
 
-    res = s->setMaxCachedSize( -123 );
+    res = s->setMaxCacheSize( -123 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 
     s = Subscription::fetch( T->ml.get(), s->id() );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 }
 
 static void NewMediaNotify( Tests* T )

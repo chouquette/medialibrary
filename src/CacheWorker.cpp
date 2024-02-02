@@ -289,7 +289,7 @@ bool CacheWorker::evictIfNeeded( const File& file, Subscription* s,
             maxMedia = m_ml->settings().nbCachedMediaPerSubscription();
         }
         auto subCacheSize = s->cachedSize();
-        auto maxSubCacheSize = s->maxCachedSize();
+        auto maxSubCacheSize = s->maxCacheSize();
         auto nbCachedMediaInSub = s->cachedMedia( false )->count();
         LOG_DEBUG( "Subscription #", s->id(), " has ", nbCachedMediaInSub,
                    "/", maxMedia, " cached media" );

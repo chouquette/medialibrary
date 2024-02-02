@@ -66,17 +66,17 @@ public:
      */
     virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) = 0;
     /**
-     * @brief maxCachedSize Returns the maximum size in bytes for this collection
+     * @brief maxCacheSize Returns the maximum size in bytes for this collection
      *
      * This will return the collection specific setting, regardless of the global
      * setting value.
      * In case the value is unset, -1 will be returned. In this case, the parent
      * setting will be used when performing caching.
      */
-    virtual int64_t maxCachedSize() const = 0;
+    virtual int64_t maxCacheSize() const = 0;
     /**
-     * @brief setMaxCachedSize Sets the maximum cached size for this collection
-     * @param maxCachedSize The size in bytes for this collection cache, or a
+     * @brief setMaxCacheSize Sets the maximum cache size for this collection
+     * @param maxCacheSize The size in bytes for this collection cache, or a
      *                      negative value to use the parent setting.
      * @return true if the change was successful, false otherwise.
      *
@@ -85,7 +85,7 @@ public:
      * prevail when caching.
      * If passing the current value, this will return true.
      */
-    virtual bool setMaxCachedSize( int64_t maxCachedSize ) = 0;
+    virtual bool setMaxCacheSize( int64_t maxCacheSize ) = 0;
     /**
      * @brief newMediaNotification Returns the new media notification setting
      * @return A positive value if explicitly enabled, 0 if explicitly disabled, -1 is unset

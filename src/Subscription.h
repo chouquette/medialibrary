@@ -96,8 +96,8 @@ public:
     virtual uint64_t cachedSize() const override;
     virtual int32_t maxCachedMedia() const override;
     virtual bool setMaxCachedMedia( int32_t nbCachedMedia ) override;
-    virtual int64_t maxCachedSize() const override;
-    virtual bool setMaxCachedSize( int64_t maxCachedSize ) override;
+    virtual int64_t maxCacheSize() const override;
+    virtual bool setMaxCacheSize( int64_t maxCacheSize ) override;
     virtual int8_t newMediaNotification() const override;
     virtual bool setNewMediaNotification( int8_t value ) override;
     virtual uint32_t nbUnplayedMedia() const override;
@@ -182,7 +182,7 @@ private:
     int64_t m_parentId;
     uint64_t m_cachedSize;
     int32_t m_maxCachedMedia;
-    int64_t m_maxCachedSize;
+    int64_t m_maxCacheSize;
     int8_t m_newMediaNotification;
     uint32_t m_nbUnplayedMedia;
     uint32_t m_nbMedia;
