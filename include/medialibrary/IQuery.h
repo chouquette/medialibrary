@@ -45,7 +45,7 @@ public:
     /**
      * @brief items returns a subset of a query result
      * @param nbItems The number of item requested
-     * @param offset The number of elements to omit from the begining of the result
+     * @param offset The number of elements to omit from the beginning of the result
      * @return A vector of shared pointer for the requested type.
      *
      * If nbItems & offset are both 0, then this method returns all results.
