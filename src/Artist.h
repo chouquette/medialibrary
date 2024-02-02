@@ -96,7 +96,7 @@ public:
      * For instance, if an artist gets assigned the cover from an album, the
      * thumbnail object is likely to have the Media origin if the album was just
      * created.
-     * Specifying the origin explicitely allows for a finer control on the hierarchy
+     * Specifying the origin explicitly allows for a finer control on the hierarchy
      *
      * The implementation may chose to ignore a thumbnail update based on the
      * current & new origin. In this case, `true` will still be returned.

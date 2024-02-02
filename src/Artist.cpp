@@ -477,7 +477,7 @@ std::string Artist::trigger( Triggers trigger, uint32_t dbModelVersion )
             // Automatically delete the artists that don't have any albums left,
             // except the 2 special artists.
             // Those are assumed to always exist, and deleting them would cause
-            // a constaint violation error when inserting an album with
+            // a constraint violation error when inserting an album with
             // unknown/various artist(s).
             // The alternative would be to always check the special artists for
             // existence, which would be much slower when inserting an unknown
