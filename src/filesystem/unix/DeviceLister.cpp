@@ -211,7 +211,7 @@ static std::string getDeviceName( const std::string& partitionBlockPath )
     const auto parentDirectory =
         utils::file::directoryName( utils::file::parentDirectory( partitionBlockPath ) );
 
-    // Partition subfolder is not mandatory and filesytems can be written on a disk without one
+    // Partition subfolder is not mandatory and filesystems can be written on a disk without one
     // (pretty common with usb sticks for instance). In that case instead of having a partition
     // absolute path mapped as:
     //  `/sys/devices/....../block/device/partition/`
