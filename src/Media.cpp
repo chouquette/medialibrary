@@ -125,7 +125,7 @@ Media::Media( MediaLibraryPtr ml, const std::string& title, Type type,
     , m_insertionDate( time( nullptr ) )
     , m_releaseDate( 0 )
     , m_title( title )
-    // When creating a Media, meta aren't parsed, and therefor, the title is the filename
+    // When creating a Media, meta aren't parsed, and therefore, the title is the filename
     , m_filename( title )
     , m_isFavorite( false )
     , m_isPresent( true )
@@ -2818,7 +2818,7 @@ Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
                                           folderId, type )
                 .markPublic( publicOnly ).build();
     }
-    // Don't explicitely filter by type since only video/audio media have a
+    // Don't explicitly filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       folderId )
@@ -2849,7 +2849,7 @@ Query<IMedia> Media::searchFromFolderId( MediaLibraryPtr ml,
                                           type )
                 .markPublic( publicOnly ).build();
     }
-    // Don't explicitely filter by type since only video/audio media have a
+    // Don't explicitly filter by type since only video/audio media have a
     // non NULL folder_id
     return make_query<Media, IMedia>( ml, "m.*", req, sortRequest( params ),
                                       folderId,
