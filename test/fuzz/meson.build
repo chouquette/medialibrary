@@ -1,4 +1,4 @@
-# This tests url encoding & spliting
+# This tests url encoding & splitting
 executable('fuzz_url_encode', 'url_encode.cpp',
   link_with: [medialib],
   link_args: '-fsanitize=fuzzer',
