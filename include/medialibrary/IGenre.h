@@ -87,7 +87,7 @@ public:
      * @param sizeType The thumbnail size type
      * @param takeOwnership If true, the medialibrary will copy the thumbnail in
      *                      its thumbnail directory and will manage its lifetime
-     * @return true if the thumbnail was successfully overriden, false otherwise.
+     * @return true if the thumbnail was successfully overridden, false otherwise.
      */
     virtual bool setThumbnail( const std::string& mrl, ThumbnailSizeType sizeType,
                                bool takeOwnership ) = 0;
