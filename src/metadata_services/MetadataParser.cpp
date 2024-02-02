@@ -737,7 +737,7 @@ Status MetadataAnalyzer::createFileAndMedia( IItem& item ) const
         if ( res != Status::Success )
             return res;
         // IItem::setFile will update the task in db, so run it as part of
-        // the transation
+        // the transaction
         item.setFile( std::move( file ) );
         t->commit();
         item.setMedia( std::move( media ) );
@@ -1125,7 +1125,7 @@ Status MetadataAnalyzer::parseAudioFile( IItem& item, Cache& cache )
         // If the application crashed before the parser bookkeeping completed
         // we might try to reprocess this task while it's finished.
         // If the AlbumTrack was already inserted, it means that we already
-        // commited the current transaction, so there's nothing more
+        // committed the current transaction, so there's nothing more
         // for this task to do.
         //
         // See https://code.videolan.org/videolan/medialibrary/issues/103
@@ -1236,7 +1236,7 @@ std::shared_ptr<Album> MetadataAnalyzer::findAlbum( IItem& item,
     cache.previousFolderId = 0;
 
     // Album matching depends on the difference between artist & album artist.
-    // Specificaly pass the albumArtist here.
+    // Specifically pass the albumArtist here.
     static const std::string req = "SELECT * FROM " + Album::Table::Name +
             " WHERE title = ?";
     auto albums = Album::fetchAll<Album>( m_ml, req, albumName );
