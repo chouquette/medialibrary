@@ -60,8 +60,8 @@ public:
     virtual bool setAutoDownloadEnabled(bool enabled) override;
     virtual bool isNewMediaNotificationEnabled() const override;
     virtual bool setNewMediaNotificationEnabled(bool enabled) override;
-    virtual int64_t maxCachedSize() const override;
-    virtual bool setMaxCachedSize(int64_t maxSize) override;
+    virtual int64_t maxCacheSize() const override;
+    virtual bool setMaxCacheSize(int64_t maxSize) override;
     virtual uint32_t nbSubscriptions() const override;
     virtual uint32_t nbUnplayedMedia() const override;
     virtual uint32_t nbMedia() const override;

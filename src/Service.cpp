@@ -149,12 +149,12 @@ bool Service::setNewMediaNotificationEnabled( bool enabled )
     return true;
 }
 
-int64_t Service::maxCachedSize() const
+int64_t Service::maxCacheSize() const
 {
     return m_maxCacheSize;
 }
 
-bool Service::setMaxCachedSize( int64_t maxSize )
+bool Service::setMaxCacheSize( int64_t maxSize )
 {
     if ( maxSize < 0 )
         maxSize = -1;

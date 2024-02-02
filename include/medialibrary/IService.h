@@ -60,20 +60,20 @@ public:
     virtual bool isNewMediaNotificationEnabled() const = 0;
     virtual bool setNewMediaNotificationEnabled( bool enabled ) = 0;
     /**
-     * @brief maxCachedSize Returns the maximum size of the cache for all of this service
+     * @brief maxCacheSize Returns the maximum size of the cache for all of this service
      * @return The maximum cache size or -1 if the limit isn't set for this service
      *
      * If the limit isn't set, the global maximum cache size setting will be
      * used instead.
      */
-    virtual int64_t maxCachedSize() const = 0;
+    virtual int64_t maxCacheSize() const = 0;
     /**
-     * @brief setMaxCachedSize Sets the maximum cache size for this service
+     * @brief setMaxCacheSize Sets the maximum cache size for this service
      * @param maxSize A size in bytes, or -1 to disable the setting for the service
      *                and inherit the default one.
      * @return true if the change was successful, false otherwise.
      */
-    virtual bool setMaxCachedSize( int64_t maxSize ) = 0;
+    virtual bool setMaxCacheSize( int64_t maxSize ) = 0;
     virtual bool addSubscription( std::string mrl ) = 0;
     virtual Query<ISubscription> subscriptions( const QueryParameters* params ) const = 0;
     virtual Query<ISubscription> searchSubscription( const std::string& pattern,
