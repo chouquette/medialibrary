@@ -76,7 +76,7 @@ std::string sanitize( const std::string& fileName )
         // A small subset of patterns to remove that contain separators, and
         // that we want to match using those separators. For instance, "5.1"
         // would be changed to "5 1", and we don't want to remove a potentially
-        // relevent string by assuming there was a dot before.
+        // relevant string by assuming there was a dot before.
         {
             std::regex{
                 "((\\b|" SEPARATORS ")"
@@ -100,7 +100,7 @@ std::string sanitize( const std::string& fileName )
         {
             // File size, which we need to handle before removing a potential dot
             // We do not use \b before the size pattern to avoid considering
-            // <something>.<number>.<nummber>GB as a size, we want a clean
+            // <something>.<number>.<number>GB as a size, we want a clean
             // <something unrelated><numerator>.<denominator><unit> pattern
             std::regex{
                 "(\\s|-|_)(\\d{1,4}(\\.\\d{1,3})?(MB|GB))\\b",
@@ -121,7 +121,7 @@ std::string sanitize( const std::string& fileName )
         {
             // Since this pattern ends with a '!', we can't use it with the other
             // list of patterns that are bound by `\b`. `\b` implies that the
-            // current caracter is an alphanumerical character, which isn't the
+            // current character is an alphanumerical character, which isn't the
             // case of '!'
             std::regex{
                 "\\bPuyaSubs!",
