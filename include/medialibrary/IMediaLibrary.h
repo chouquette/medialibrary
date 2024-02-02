@@ -222,7 +222,7 @@ struct SetupConfig
 
     /**
      * @brief logLevel The default log level to initialize the medialibrary with.
-     * This can be overwriten at a later point using IMediaLibrary::setVerbosity
+     * This can be overwritten at a later point using IMediaLibrary::setVerbosity
      */
     LogLevel logLevel = LogLevel::Error;
 
@@ -310,7 +310,7 @@ public:
      * @brief onDiscoveryCompleted Will be invoked when the discoverer finishes
      * all its queued operations and goes back to idle.
      *
-     * This callback will be invoked once for each invocation fo onDiscoveryStarted
+     * This callback will be invoked once for each invocation of onDiscoveryStarted
      */
     virtual void onDiscoveryCompleted() = 0;
 
@@ -327,7 +327,7 @@ public:
      *
      * This callback will only be emitted the first time the entry point gets
      * processed, after it has been inserted to the database.
-     * In case of failure, it might be emited every time the request is sent, since
+     * In case of failure, it might be emitted every time the request is sent, since
      * the provided entry point would most likely be invalid, and couldn't be inserted.
      * Later processing of that entry point will still cause \sa{onDiscoveryStarted}
      * \sa{onDiscoveryProgress} and \sa{onDiscoveryCompleted} events to be fired
@@ -338,7 +338,7 @@ public:
 
     /**
      * @brief onEntryPointRemoved will be invoked when an entrypoint removal
-     *                            request gets processsed
+     *                            request gets processed
      * by the appropriate worker thread.
      * @param entryPoint The entry point which removal was required
      * @param success A boolean representing the operation's success
@@ -361,7 +361,7 @@ public:
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
-     * There is no waranty about how often this will be called.
+     * There is no warranty about how often this will be called.
      * @param opsDone The number of operation the parser completed
      * @param opsScheduled The number of operations currently scheduled by the parser
      *
@@ -405,7 +405,7 @@ public:
      * IMediaLibrary::clearDatabase. After doing so, the medialibrary can still
      * be used without any further calls (but will need to rescan the entire user
      * collection). If clearDatabase isn't called, the database should be
-     * considered as corrupted, and therefor the medialibrary considered unusable.
+     * considered as corrupted, and therefore the medialibrary considered unusable.
      *
      * If clearSuggested is false, there are no certain way of knowing if the
      * database is still usable or not.
@@ -416,7 +416,7 @@ public:
     /**
      * @brief onRescanStarted will be invoked when a rescan is started.
      *
-     * This won't be emited when the media library issues a rescan itself, due
+     * This won't be emitted when the media library issues a rescan itself, due
      * to a migration.
      */
     virtual void onRescanStarted() = 0;
@@ -639,7 +639,7 @@ public:
     virtual Query<IMediaGroup> searchMediaGroups( const std::string& pattern,
                                                   const QueryParameters* params = nullptr ) const = 0;
     /**
-     * @brief regroupAll Attemps to regroup all media that belong to a forced singleton group
+     * @brief regroupAll Attempts to regroup all media that belong to a forced singleton group
      *
      * This will try to regroup all media that were manually removed from their
      * group, and now belong to a forced singleton group.
@@ -763,7 +763,7 @@ public:
      * @param params Some query parameters.
      *
      * Only media that were discovered by the medialibrary will be included.
-     * For instance, media that are added explicitely, playlist items that
+     * For instance, media that are added explicitly, playlist items that
      * point to remote content, will *not* be included
      *
      * \see{IMediaLibrary::audioFile} for the supported sorting criteria
@@ -802,7 +802,7 @@ public:
      * @brief discover Launch a discovery on the provided entry point.
      * This will start the discoverer thread, device listers, and file system
      * factories if needed
-     * The actuall discovery will run asynchronously, meaning this method will immediatly return.
+     * The actual discovery will run asynchronously, meaning this method will immediately return.
      * Depending on which discoverer modules where provided, this might or might not work
      * @note This must be called after initialize()
      * @param entryPoint The MRL of the entrypoint to discover.
@@ -990,7 +990,7 @@ public:
     /**
      * @brief enableFailedThumbnailRegeneration Allow failed thumbnail attempt to be retried
      *
-     * This will not attempt to regenerate the thumbnail immediatly, requestThumbnail
+     * This will not attempt to regenerate the thumbnail immediately, requestThumbnail
      * still has to be called afterward.
      */
     virtual void enableFailedThumbnailRegeneration() = 0;
@@ -1048,7 +1048,7 @@ public:
      * This will delete *ALL* removable devices from the database, causing *ALL*
      * files & media stored on that device to be deleted as well.
      * This is intended for applications with an external device lister to
-     * recover in case of an issue causing multiple devices or invalide entries
+     * recover in case of an issue causing multiple devices or invalid entries
      * to be inserted in the database
      */
     virtual bool deleteRemovableDevices() = 0;
