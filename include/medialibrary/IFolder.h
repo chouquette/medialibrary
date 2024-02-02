@@ -54,7 +54,7 @@ public:
     virtual bool isPresent() const = 0;
     virtual bool isRemovable() const = 0;
     /**
-     * @brief isBanned Will return true if the folder was explicitely banned
+     * @brief isBanned Will return true if the folder was explicitly banned
      * from being discovered.
      */
     virtual bool isBanned() const = 0;

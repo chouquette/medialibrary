@@ -658,8 +658,8 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     try
     {
         /*
-         * It's ok to instanciate a fs::IFolder even though the fs factories are
-         * not started, since no actual FS interraction will happen by doing so.
+         * It's ok to instantiate a fs::IFolder even though the fs factories are
+         * not started, since no actual FS interaction will happen by doing so.
          * This allows us to use the sanitized mrl that's returned
          * by fs::IFolder::mrl() (decoded & reencoded to ensure it matches our
          * encoding scheme)
@@ -668,7 +668,7 @@ std::shared_ptr<Folder> Folder::fromMrl( MediaLibraryPtr ml, const std::string& 
     }
     catch ( const fs::errors::System& ex )
     {
-        LOG_ERROR( "Failed to instanciate a folder for mrl: ", mrl, ": ",
+        LOG_ERROR( "Failed to instantiate a folder for mrl: ", mrl, ": ",
                    ex.what() );
         return nullptr;
     }
@@ -988,7 +988,7 @@ const std::string& Folder::mrl() const
 
     // We can't compute the full path of a folder if it's removable and the
     // device isn't present. When there's no device, we don't know the
-    // mountpoint, therefor we don't know the full path. Calling isPresent will
+    // mountpoint, therefore we don't know the full path. Calling isPresent will
     // ensure we have the device representation cached locally
     if ( isPresent() == false )
     {
