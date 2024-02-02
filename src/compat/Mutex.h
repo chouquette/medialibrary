@@ -22,7 +22,7 @@
 
 #pragma once
 
-// Include mutex unconditionnaly for lock_gard & unique_lock
+// Include mutex unconditionally for lock_gard & unique_lock
 #include <mutex>
 
 #if CXX11_MUTEX
