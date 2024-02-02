@@ -76,7 +76,7 @@ namespace fs
          * @param ml A media library instance pointer
          * @return true in case of success, false otherwise.
          *
-         * If this returns false, the factory will be abandonned and the shared_ptr
+         * If this returns false, the factory will be abandoned and the shared_ptr
          * for to that factory provided through SetupConfig will be destroyed
          * If this factory handles a scheme that was already registered, it will
          * not be used by the media library but this function will still be invoked
