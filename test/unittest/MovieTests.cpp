@@ -101,18 +101,18 @@ static void SortByAlpha( Tests* T )
     auto m3 = T->ml->createMovie( *media3 );
 
     QueryParameters params { SortingCriteria::Alpha, false };
-    auto medias = T->ml->movies( &params )->all();
-    ASSERT_EQ( 3u, medias.size() );
-    ASSERT_EQ( m->id(), medias[0]->id() );
-    ASSERT_EQ( m3->id(), medias[1]->id() );
-    ASSERT_EQ( m2->id(), medias[2]->id() );
+    auto all_media = T->ml->movies( &params )->all();
+    ASSERT_EQ( 3u, all_media.size() );
+    ASSERT_EQ( m->id(), all_media[0]->id() );
+    ASSERT_EQ( m3->id(), all_media[1]->id() );
+    ASSERT_EQ( m2->id(), all_media[2]->id() );
 
     params.desc = true;
-    medias = T->ml->movies( &params )->all();
-    ASSERT_EQ( 3u, medias.size() );
-    ASSERT_EQ( m2->id(), medias[0]->id() );
-    ASSERT_EQ( m3->id(), medias[1]->id() );
-    ASSERT_EQ( m->id(), medias[2]->id() );
+    all_media = T->ml->movies( &params )->all();
+    ASSERT_EQ( 3u, all_media.size() );
+    ASSERT_EQ( m2->id(), all_media[0]->id() );
+    ASSERT_EQ( m3->id(), all_media[1]->id() );
+    ASSERT_EQ( m->id(), all_media[2]->id() );
 }
 
 static void SetShortSummary( Tests* T )
