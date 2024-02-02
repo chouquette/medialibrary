@@ -74,7 +74,7 @@ bool Settings::load()
             m_nbCachedMediaPerSubscription = row.load<decltype(m_nbCachedMediaPerSubscription)>( 3 );
             m_maxSubscriptionCacheSize = row.load<decltype(m_maxSubscriptionCacheSize)>( 4 );
         }
-        // safety check: there sould only be one row
+        // safety check: there should only be one row
         assert( s.row() == nullptr );
     }
     return true;
