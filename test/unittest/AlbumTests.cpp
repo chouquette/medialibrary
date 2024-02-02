@@ -918,7 +918,7 @@ static void ConvertToExternal( Tests* T )
     ASSERT_TRUE( res );
 
     /*
-     * The swich to internal in itself doesn't add the genre back. Outside of a
+     * The switch to internal in itself doesn't add the genre back. Outside of a
      * test configuration, a switch back to internal is followed by a refresh
      * for the media.
      * Here, we need to simulate this

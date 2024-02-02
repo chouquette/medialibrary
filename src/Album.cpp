@@ -232,7 +232,7 @@ std::string Album::addRequestJoin( const QueryParameters* params,
         case SortingCriteria::ReleaseDate:
         case SortingCriteria::Duration:
         case SortingCriteria::TrackNumber:
-            /* No other tables required for this criterias */
+            /* No other tables required for this criteria */
             break;
         case SortingCriteria::PlayCount:
         case SortingCriteria::InsertionDate:
