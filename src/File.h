@@ -126,7 +126,7 @@ public:
      */
     static std::shared_ptr<File> fromMrl( MediaLibraryPtr ml, const std::string& mrl );
     /**
-     * @brief fromFileName  Attemps to fetch a file based on its filename and folder id
+     * @brief fromFileName  Attempts to fetch a file based on its filename and folder id
      * @param ml
      * @param fileName
      * @param folderId
