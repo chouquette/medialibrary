@@ -393,7 +393,7 @@ Thumbnail::updateOrReplace( MediaLibraryPtr ml,
          * can't be shared and we can just update it.
          * We also need to handle an update to an existing thumbnail through the
          * thumbnailer. In that case, we just need to ensure that the status
-         * is set accordingly, since the thumbnail was overriden on disk
+         * is set accordingly, since the thumbnail was overridden on disk
          */
         if ( oldThumbnail->status() != ThumbnailStatus::Available )
         {
