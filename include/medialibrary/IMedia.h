@@ -111,10 +111,10 @@ public:
      */
     enum class ProgressResult : uint8_t
     {
-        /// An error occured and the progress wasn't changed
+        /// An error occurred and the progress wasn't changed
         Error,
         /// The provided position/time was interpreted as the beginning of the
-        /// media and has been reset to -1. This nedia playback is now not
+        /// media and has been reset to -1. This media playback is now not
         /// considered started.
         Begin,
         /// The provided position/time was not interpreted as a special position
@@ -170,11 +170,11 @@ public:
      * @brief setLastPosition updates the last playback position
      *
      * @param lastPosition The current playback position expressed by a number in the range [0;1]
-     * @return a ProgressResult value indicating how the value was intepreted and
+     * @return a ProgressResult value indicating how the value was interpreted and
      *         if the operation succeeded
      *
      * The media library will interpret the value to determine if the playback
-     * is completed and the media should be marked as watched (therefor increasing
+     * is completed and the media should be marked as watched (therefore increasing
      * the playcount). If the progress isn't large enough, the media library will
      * ignore the new progress.
      * The base value for the beginning/end of a media is 5%, meaning that the
@@ -207,7 +207,7 @@ public:
     /**
      * @brief setLastTime Sets the last playback time.
      * @param lastTime A time in millisecond
-     * @return a ProgressResult value indicating how the value was intepreted and
+     * @return a ProgressResult value indicating how the value was interpreted and
      *         if the operation succeeded
      *
      * This is similar to setLastPosition but works with a time in
@@ -308,7 +308,7 @@ public:
     /// Upon completion (successful or not) IMediaLibraryCb::onMediaThumbnailReady
     /// will be called.
     /// In case a thumbnail was already generated for the media, a new thumbnail
-    /// will be generated, and the previous one will be overriden.
+    /// will be generated, and the previous one will be overridden.
     /// \param sizeType The size type of the thumbnail to generate
     /// \param desiredWidth The desired thumbnail width
     /// \param desiredHeight The desired thumbnail height
@@ -348,7 +348,7 @@ public:
     ///
     virtual std::unordered_map<MetadataType, std::string> metadata() const = 0;
     ///
-    /// \brief setMetadata Immediatly saves a metadata in database
+    /// \brief setMetadata Immediately saves a metadata in database
     ///
     virtual bool setMetadata( MetadataType type, const std::string& value ) = 0;
     virtual bool setMetadata( MetadataType type, int64_t value ) = 0;
@@ -412,12 +412,12 @@ public:
     ///
     /// \brief isDiscoveredMedia Returns true if this media was discovered
     ///                          during a scan.
-    /// false means that the media has been explicitely added by the user
+    /// false means that the media has been explicitly added by the user
     /// as a stream, or an external media
     ///
     virtual bool isDiscoveredMedia() const = 0;
     ///
-    /// \brief isExternalMedia Returns true if the media was explicitely added
+    /// \brief isExternalMedia Returns true if the media was explicitly added
     ///                        by the application.
     /// This is the opposite counterpart of isDiscoveredMedia
     ///
@@ -468,7 +468,7 @@ public:
     /// The media is considered present if the device containing its main file
     /// is present (ie. if a removable drive is mounted, or a network drive
     /// connected)
-    /// This is only relevent when the media is not external
+    /// This is only relevant when the media is not external
     ///
     virtual bool isPresent() const = 0;
 

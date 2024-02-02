@@ -165,7 +165,7 @@ class Media : public IMedia,
         bool setTitle( const std::string& title, bool forced );
         ///
         /// \brief setForcedTitle Force the forced_title field to true
-        /// \param mediaId The targetted media id
+        /// \param mediaId The targeted media id
         ///
         /// This is only used for migration 23 -> 24
         ///
@@ -243,7 +243,7 @@ class Media : public IMedia,
         virtual unsigned int insertionDate() const override;
         virtual time_t releaseDate() const override;
         /**
-         * @brief nbPlaylists Returns the number of occurence of this media in playlists
+         * @brief nbPlaylists Returns the number of occurrence of this media in playlists
          *
          * If the media is inserted twice in a playlist, this method will return 2.
          * This is solely meant for unit testing, and the value that matters is
@@ -400,7 +400,7 @@ private:
         enum class PositionTypes : uint8_t
         {
             /**
-             * The provided position is at the begining of the media, it should
+             * The provided position is at the beginning of the media, it should
              * be stored as -1 and the playback will not be considered started
             */
             Begin,
