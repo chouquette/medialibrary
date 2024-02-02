@@ -304,7 +304,7 @@ protected:
     virtual void onDbConnectionReady( sqlite::Connection* dbConn );
     void onBackgroundTasksIdleChanged( bool idle );
     /**
-     * @brief stopBackgroundJobs Explicitely stop all background jobs
+     * @brief stopBackgroundJobs Explicitly stop all background jobs
      *
      * This is intended to be used when tearing down the media library to ensure
      * the background jobs don't use fields that would be destroyed before the
@@ -341,7 +341,7 @@ private:
     void migrateModel37to38();
     /**
      * Runs some migration steps that depend on the actual C++ code, and that
-     * therefor require the migration to have already completed
+     * therefore require the migration to have already completed
      */
     void migrationEpilogue( uint32_t originalPreviousVersion );
     bool createAllTables();

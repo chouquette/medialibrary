@@ -701,7 +701,7 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
 
     // This instantiates our own network FsFactory's and adds them to the list of
     // available network factories, but they are not added to m_fsFactories yet.
-    // This will be done when the user explicitely
+    // This will be done when the user explicitly
     // invokes IMediaLibrary::setDiscoverNetworkEnabled
     populateNetworkFsFactories();
 
@@ -751,7 +751,7 @@ InitializeResult MediaLibrary::initialize( IMediaLibraryCb* mlCallback )
     if ( res == InitializeResult::Success || res == InitializeResult::DbReset )
     {
         /* In case the database was detected as corrupted, we don't want to
-         * interract with the database, but we want to mark the medialib as
+         * interact with the database, but we want to mark the medialib as
          * initialized, and let the application handle what to do with its
          * corrupted database
          */
@@ -1288,7 +1288,7 @@ void MediaLibrary::stopBackgroundJobs()
         std::lock_guard<compat::Mutex> lock{ m_thumbnailerWorkerMutex };
         m_thumbnailerWorker.reset();
     }
-    // Explicitely stop the discoverer, to avoid it writting while tearing down.
+    // Explicitly stop the discoverer, to avoid it writing while tearing down.
     m_discovererWorker.stop();
     m_parser.stop();
 }
@@ -2175,7 +2175,7 @@ void MediaLibrary::reload()
 {
     m_discovererWorker.reload();
     /*
-     * Initialize the parser and implicitely restart uncompleted parser tasks
+     * Initialize the parser and implicitly restart uncompleted parser tasks
      * If the parser was already started, this is a no-op
      */
     getParser();
