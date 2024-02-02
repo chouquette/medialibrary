@@ -34,7 +34,7 @@ namespace medialibrary
  *
  * An external device lister shall only be used when the medialibrary can't list
  * the devices itself.
- * The device/folder/file management will still be the medialibrary's responsability
+ * The device/folder/file management will still be the medialibrary's responsibility
  */
 class IDeviceListerCb
 {

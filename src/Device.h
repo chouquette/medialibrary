@@ -54,7 +54,7 @@ public:
     bool isNetwork() const;
     ///
     /// \brief scheme returns the scheme that was used for this device when it was
-    /// originally created. This allows to use the apropriate IFileSystemFactory to find the
+    /// originally created. This allows to use the appropriate IFileSystemFactory to find the
     /// recreate a IDevice based on its id or UUID
     /// \return
     ///
