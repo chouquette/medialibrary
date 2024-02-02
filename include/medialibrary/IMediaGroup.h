@@ -114,7 +114,7 @@ public:
     /**
      * @brief userInteracted Returns true if the group has had user interactions
      *
-     * This includes being renamed, or being explicitely created with some specific
+     * This includes being renamed, or being explicitly created with some specific
      * media or an explicit title.
      * It doesn't include groups that were automatically created by the media library
      * Removing a media from an automatically created group won't be interpreted
@@ -178,7 +178,7 @@ public:
     /**
      * @brief rename Rename a group
      * @param name The new name
-     * @return true if the rename was successfull, false otherwise
+     * @return true if the rename was successful, false otherwise
      *
      * This will not change the group content, however, it will prevent further
      * media that matched the previous name to be automatically added to this

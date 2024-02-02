@@ -858,7 +858,7 @@ static void RegroupLocked( Tests* T )
     /*
      * We only regroup media that are part of a locked group, so we need a bit
      * of setup to create the associated locked groups. We will add each media
-     * to a group, and remove those from there immediatly after
+     * to a group, and remove those from there immediately after
      */
     auto createLockedGroup = [T]( MediaPtr m ) {
         auto mg = T->ml->createMediaGroup( std::vector<int64_t>{ m->id() } );
@@ -1307,7 +1307,7 @@ static void RegroupAll( Tests* T )
 static void MergeAutoCreated( Tests* T )
 {
     /*
-     * Checks that we can appen a media from an automatically created group
+     * Checks that we can append a media from an automatically created group
      * into another automatically created group
      */
     auto m1 = std::static_pointer_cast<Media>(
