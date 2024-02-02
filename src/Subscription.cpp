@@ -51,7 +51,7 @@ Subscription::Subscription( MediaLibraryPtr ml, sqlite::Row& row )
     , m_parentId( row.extract<decltype(m_parentId)>() )
     , m_cachedSize( row.extract<decltype(m_cachedSize)>() )
     , m_maxCachedMedia( row.extract<decltype(m_maxCachedMedia)>() )
-    , m_maxCachedSize( row.extract<decltype(m_maxCachedSize)>() )
+    , m_maxCacheSize( row.extract<decltype(m_maxCacheSize)>() )
     , m_newMediaNotification( row.extract<decltype(m_newMediaNotification)>() )
     , m_nbUnplayedMedia( row.extract<decltype(m_nbUnplayedMedia)>() )
     , m_nbMedia( row.extract<decltype(m_nbMedia)>() )
@@ -70,7 +70,7 @@ Subscription::Subscription( MediaLibraryPtr ml, IService::Type service,
     , m_parentId( parentId )
     , m_cachedSize( 0 )
     , m_maxCachedMedia( -1 )
-    , m_maxCachedSize( -1 )
+    , m_maxCacheSize( -1 )
     , m_newMediaNotification( -1 )
     , m_nbUnplayedMedia( 0 )
     , m_nbMedia( 0 )
@@ -142,23 +142,23 @@ bool Subscription::setMaxCachedMedia( int32_t nbCachedMedia )
     return true;
 }
 
-int64_t Subscription::maxCachedSize() const
+int64_t Subscription::maxCacheSize() const
 {
-    return m_maxCachedSize;
+    return m_maxCacheSize;
 }
 
-bool Subscription::setMaxCachedSize( int64_t maxCachedSize )
+bool Subscription::setMaxCacheSize( int64_t maxCacheSize )
 {
-    if ( m_maxCachedSize == maxCachedSize )
+    if ( m_maxCacheSize == maxCacheSize )
         return true;
-    if ( maxCachedSize < 0 )
-        maxCachedSize = -1;
+    if ( maxCacheSize < 0 )
+        maxCacheSize = -1;
     const std::string req = "UPDATE " + Table::Name +
             " SET max_cached_size = ?1 WHERE id_subscription = ?2";
     if ( sqlite::Tools::executeUpdate( m_ml->getConn(), req,
-                                       maxCachedSize, m_id ) == false )
+                                       maxCacheSize, m_id ) == false )
         return false;
-    m_maxCachedSize = maxCachedSize;
+    m_maxCacheSize = maxCacheSize;
     return true;
 }
 
