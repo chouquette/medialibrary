@@ -151,7 +151,7 @@ AudioTrack::index( AudioTrack::Indexes::MediaId, 27 ),
  * applied too soon.
  * For instance, when migrating from model 23 to 24, we already recreate the table
  * with the new settings that should be added in model 27, causing the alter
- * table to fail because the colums already exist
+ * table to fail because the columns already exist
  */
 "DROP TABLE Settings",
 

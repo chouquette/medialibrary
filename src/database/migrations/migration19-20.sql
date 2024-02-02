@@ -10,7 +10,7 @@ Genre::schema( Genre::Table::Name, 20 ),
 Genre::schema( Genre::FtsTable::Name, 20 ),
 
 /* Migrate the task table to update the Task.link_to_id field to a NOT NULL one
- * and update the UNIQUE constaint on (task type/mrl/link_to_id) accordingly */
+ * and update the UNIQUE constraint on (task type/mrl/link_to_id) accordingly */
 
 "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
 "("

@@ -44,7 +44,7 @@ VideoGroup::schema( VideoGroup::Table::Name, 22 ),
 "ALTER TABLE Settings ADD COLUMN video_groups_minimum_media_count UNSIGNED INTEGER NOT NULL DEFAULT 1",
 
 /*
- * Update UNIQUE contraint and NOT NULL contraints for Taks.link_* fields
+ * Update UNIQUE constraint and NOT NULL constraints for Task.link_* fields
  */
  "CREATE TEMPORARY TABLE " + parser::Task::Table::Name + "_backup"
  "("
