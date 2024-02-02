@@ -203,7 +203,7 @@ public:
      * @brief The WeakDbContext struct exposes a context with foreign key &
      * recursive triggers disabled.
      *
-     * This is usefull for some migrations which will delete & recreate some
+     * This is useful for some migrations which will delete & recreate some
      * entities but for which we don't want those deletions to propagate
      */
     struct WeakDbContext

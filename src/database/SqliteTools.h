@@ -50,7 +50,7 @@ class Row
 public:
     /**
      * @brief Row Construct a row from an executed statement
-     * @param stmt A valide sqlite statement opaque object
+     * @param stmt A valid sqlite statement opaque object
      */
     explicit Row( sqlite3_stmt* stmt );
 
@@ -120,7 +120,7 @@ public:
     /**
      * @brief hasRemainingColumns Returns true if there are more column to extract
      *
-     * This is meant to be used after a serie of calls to extract().
+     * This is meant to be used after a series of calls to extract().
      * When load() is used, the internal index isn't updated and this function
      * would always return true if there is at least one column.
      */
