@@ -436,7 +436,7 @@ std::shared_ptr<MediaGroup> MediaGroup::create( MediaLibraryPtr ml,
             /*
              * Only assign the media title for the first media. If at a later
              * point there is no match, we will empty 'name', and we'd end up
-             * reseting it to an arbitrary media title if we'd only check if
+             * resetting it to an arbitrary media title if we'd only check if
              * 'name' was empty before assigning it
              */
             assert( name.empty() == true );
@@ -734,7 +734,7 @@ std::string MediaGroup::schema( const std::string& name, uint32_t dbModel )
             "CHECK(nb_present_audio <= nb_audio),"
         "nb_present_unknown UNSIGNED INTEGER DEFAULT 0 "
             "CHECK(nb_present_unknown <= nb_unknown),"
-        // Number of seen media, acccounting for their presence
+        // Number of seen media, accounting for their presence
         "nb_present_seen UNSIGNED INTEGER DEFAULT 0 "
             "CHECK(nb_present_seen <= nb_seen),"
         "duration INTEGER DEFAULT 0,"
