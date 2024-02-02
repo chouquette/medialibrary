@@ -228,7 +228,7 @@ static void Move( PlaylistTests* T )
     ASSERT_EQ( 1u, media[4]->id() );
     T->CheckContiguity();
 
-    // Move an item past the theorical last element
+    // Move an item past the theoretical last element
     T->pl->move( 1, 10 );
     // [<5,0>,<3,1>,<4,2>,<1,3>,<2,10/4>]
     media = T->pl->media( nullptr )->all();

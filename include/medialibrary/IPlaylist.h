@@ -159,7 +159,7 @@ public:
     virtual bool remove( uint32_t position ) = 0;
     ///
     /// \brief isReadOnly Return true if the playlist is backed by an actual file
-    ///                   and should therefor not modified directly.
+    ///                   and should therefore not modified directly.
     /// \return true if the playlist should be considered read-only, false otherwise
     ///
     /// If the application doesn't respect this, the medialibrary will, for
