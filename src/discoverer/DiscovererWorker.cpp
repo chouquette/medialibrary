@@ -371,7 +371,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
     if ( m_thread.joinable() == false )
     {
         /*
-         * This check is only relevent in discoverer tests configuration.
+         * This check is only relevant in discoverer tests configuration.
          * Otherwise we always have a valid fsHolder instance
          */
         if ( m_fsHolder != nullptr )

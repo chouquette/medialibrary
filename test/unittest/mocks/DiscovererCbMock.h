@@ -92,7 +92,7 @@ public:
     bool waitReload()
     {
         // A reload() request when no discovery has run will never reload anything
-        // and therefor won't invoke any callback
+        // and therefore won't invoke any callback
         if ( m_initialDiscoveryDone == false )
             return true;
         std::unique_lock<compat::Mutex> lock( m_mutex );

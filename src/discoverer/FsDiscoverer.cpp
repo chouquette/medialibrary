@@ -71,7 +71,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
     }
     catch ( const fs::errors::System& ex )
     {
-        LOG_INFO( "Failed to instanciate a directory for ", mrl, ": ", ex.what(),
+        LOG_INFO( "Failed to instantiate a directory for ", mrl, ": ", ex.what(),
                   ". Can't reload the folder." );
     }
     if ( directory == nullptr )
@@ -108,7 +108,7 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
     // discovered so far will be marked as non-present through sqlite hooks, and we'll resume the
     // discovery when the device gets plugged back in
     auto device = fsFolder.device();
-    // The device might not be present at all, and therefor we might miss a
+    // The device might not be present at all, and therefore we might miss a
     // representation for it.
     if ( device == nullptr || device->isRemovable() )
     {
@@ -268,7 +268,7 @@ bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
     }
     /*
      * We are about to add an entry point, and will need a device representation.
-     * Since this is a function that's (indirectly) called explicitely by the users
+     * Since this is a function that's (indirectly) called explicitly by the users
      * from a background thread, we can afford to wait a bit.
      */
     if ( fsFactory->waitForDevice( entryPoint, 5000 ) == false )
