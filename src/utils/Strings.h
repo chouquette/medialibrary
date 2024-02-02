@@ -50,7 +50,7 @@ size_t nbChars( const std::string& value );
  * @brief nbBytes Counts the number of bytes that contain the specified number
  *                of characters
  * @param input The string to analyze
- * @param offset An offset from the begining of the string, in bytes
+ * @param offset An offset from the beginning of the string, in bytes
  * @param nbChars The number of characters to check
  * @return The number of bytes that holds the first nbChars after the provided offset
  */
