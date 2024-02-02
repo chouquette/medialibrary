@@ -88,25 +88,25 @@ static void MaxCachedSize( Tests* T )
 {
     auto s = T->ml->service( IService::Type::Podcast );
     ASSERT_NON_NULL( s );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 
-    auto res = s->setMaxCachedSize( -666 );
+    auto res = s->setMaxCacheSize( -666 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 
-    res = s->setMaxCachedSize( 12345 );
+    res = s->setMaxCacheSize( 12345 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( 12345, s->maxCachedSize() );
+    ASSERT_EQ( 12345, s->maxCacheSize() );
 
     s = T->ml->service( IService::Type::Podcast );
-    ASSERT_EQ( 12345, s->maxCachedSize() );
+    ASSERT_EQ( 12345, s->maxCacheSize() );
 
-    res = s->setMaxCachedSize( -1 );
+    res = s->setMaxCacheSize( -1 );
     ASSERT_TRUE( res );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 
     s = T->ml->service( IService::Type::Podcast );
-    ASSERT_EQ( -1, s->maxCachedSize() );
+    ASSERT_EQ( -1, s->maxCacheSize() );
 }
 
 static void NbSubscriptions( Tests* T )
