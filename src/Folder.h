@@ -87,7 +87,7 @@ public:
          */
         RemovedFromDisk,
         /*
-         * The entry point was explicitely removed. Flag it as such in database
+         * The entry point was explicitly removed. Flag it as such in database
          * but keep its media on disk
          */
         EntrypointRemoved,
