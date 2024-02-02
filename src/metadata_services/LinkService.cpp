@@ -127,7 +127,7 @@ Status LinkService::linkToPlaylist( IItem& item )
         // trigger and we won't retry it anyway.
         return Status::Fatal;
     }
-    // Explicitely mark the task as completed, as there is nothing more to run.
+    // Explicitly mark the task as completed, as there is nothing more to run.
     // This shouldn't be needed, but requires a better handling of multiple pipeline.
     return Status::Completed;
 }
@@ -173,7 +173,7 @@ Status LinkService::linkToMedia( IItem &item )
         {
             /*
              * Assume that the task was already executed, and the file already linked
-             * but the task bookeeping failed afterward.
+             * but the task bookkeeping failed afterward.
              * Just ignore the error & mark the task as completed.
              */
         }
