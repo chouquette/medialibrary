@@ -1358,7 +1358,7 @@ bool Playlist::clearExternalPlaylistContent(MediaLibraryPtr ml)
 {
     // We can't delete all external playlist as such, since this would cause the
     // deletion of the associated task through the Task.playlist_id Playlist.id_playlist
-    // foreign key, and therefor they wouldn't be rescanned.
+    // foreign key, and therefore they wouldn't be rescanned.
     // Instead, flush the playlist content.
     auto t = ml->getConn()->newTransaction();
     const std::string req = "DELETE FROM " +
@@ -1505,7 +1505,7 @@ Playlist::backupPlaylists( MediaLibrary* ml, uint32_t dbModel )
         // which is what we want, but in case it returns false, it means the
         // playlist backup folder is actually a file, so we definitely don't
         // want to do anything with it.
-        // Baiscally, we *want* isDirectory to throw.
+        // Basically, we *want* isDirectory to throw.
         utils::fs::isDirectory( backupFolder );
         return std::make_tuple( false, 0, std::vector<std::string>{} );
     }
