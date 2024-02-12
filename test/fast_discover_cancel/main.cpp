@@ -86,10 +86,10 @@ int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
-        std::cerr << "usage: " << argv[0] << " <entrypoint path>" << std::endl;
+        std::cerr << "usage: " << argv[0] << " <root folder>" << std::endl;
         return 1;
     }
-    auto entrypoint = utils::file::toMrl( argv[1] );
+    auto root = utils::file::toMrl( argv[1] );
 
     auto mlDir = getTempPath( "fast_discoverer_cancel_test" );
     auto dbPath = mlDir + "test.db";
@@ -105,13 +105,13 @@ int main( int argc, char** argv )
     unlink( dbPath.c_str() );
     ml->initialize( testCb.get() );
 
-    ml->discover( entrypoint );
+    ml->discover( root );
 
     for ( auto i = 0; i < 500; ++i )
     {
         LOG_DEBUG( "Iteration ", i, "/", 500 );
-        auto fsFactory = ml->fsFactoryForMrl( entrypoint );
-        auto fsDir = fsFactory->createDirectory( entrypoint );
+        auto fsFactory = ml->fsFactoryForMrl( root );
+        auto fsDir = fsFactory->createDirectory( root );
         auto j = 0u;
         for ( const auto& d : fsDir->dirs() )
         {
@@ -122,14 +122,14 @@ int main( int argc, char** argv )
                 ml->unbanFolder( d->mrl() );
                 break;
             case 1:
-                ml->removeEntryPoint( d->mrl() );
+                ml->removeRoot( d->mrl() );
                 ml->discover( d->mrl() );
                 break;
             }
             ++j;
         }
     }
-    ml->reload( entrypoint );
+    ml->reload( root );
 
     testCb->markDoneQueuing();
     return testCb->waitForDiscoveryCompleted() == true ? 0 : 1;

@@ -166,9 +166,9 @@ private:
 
 static void usage(const char* const* argv)
 {
-    std::cerr << "usage: " << argv[0] << "[-q] [-n X] [-t] <entrypoint|database>\n"
+    std::cerr << "usage: " << argv[0] << "[-q] [-n X] [-t] <root|database>\n"
                  "-q: Use Error log level. Default is Debug\n"
-                 "-n X: Run X discover of the provided entrypoint\n"
+                 "-n X: Run X discover of the provided root folder\n"
                  "-t: Generate thumbnails for discovered videos\n"
                  "-m: Migrate the provided database in-place.\n"
                  "-r: When used in combination with -m, it will reload "
@@ -227,29 +227,29 @@ int main( int argc, char** argv )
 
     if ( optind >= argc )
     {
-        std::cerr << "Missing entry point" << std::endl;
+        std::cerr << "Missing root folder" << std::endl;
         usage(argv);
         exit(2);
     }
 
-    auto entrypoint = argv[optind];
+    auto root = argv[optind];
     std::string target;
     if ( migrate == false )
     {
         try
         {
-            utils::url::scheme( entrypoint );
-            target = entrypoint;
+            utils::url::scheme( root );
+            target = root;
         }
         catch ( const medialibrary::fs::errors::UnhandledScheme& )
         {
-            target = utils::file::toMrl( entrypoint );
+            target = utils::file::toMrl( root );
         }
 
         unlink( dbPath.c_str() );
     }
     else
-        dbPath = entrypoint;
+        dbPath = root;
 
     auto testCb = std::make_unique<TestCb>(thumbnails);
     std::unique_ptr<medialibrary::IMediaLibrary> ml{

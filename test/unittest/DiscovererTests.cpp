@@ -80,7 +80,7 @@ static void SimpleEnqueue( DiscovererTests* T )
     T->discoverer->discover( "file:///test/" );
     const auto& tasks = T->discoverer->tasks();
     ASSERT_EQ( 2u, tasks.size() );
-    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddRoot, tasks[0].type );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
@@ -91,7 +91,7 @@ static void FilterDoubleEnqueue( DiscovererTests* T )
     T->discoverer->discover( "file:///test/" );
     const auto& tasks = T->discoverer->tasks();
     ASSERT_EQ( 2u, tasks.size() );
-    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddRoot, tasks[0].type );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
@@ -115,7 +115,7 @@ static void ReduceDiscoverRemove( DiscovererTests* T )
 
     tasks = T->discoverer->tasks();
     ASSERT_EQ( 2u, tasks.size() );
-    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddEntryPoint, tasks[0].type );
+    ASSERT_EQ( DiscovererWorkerTest::Task::Type::AddRoot, tasks[0].type );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
 }
 
@@ -146,7 +146,7 @@ static void InterruptReload( DiscovererTests* T )
     ASSERT_EQ( 2u, tasks.size() );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Remove, tasks[0].type );
     ASSERT_EQ( DiscovererWorkerTest::Task::Type::Reload, tasks[1].type );
-    ASSERT_EQ( "", tasks[1].entryPoint );
+    ASSERT_EQ( "", tasks[1].root );
 }
 
 int main( int ac, char** av )

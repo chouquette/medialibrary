@@ -53,7 +53,7 @@ MockCallback::MockCallback()
     , m_parserDone( false )
     , m_discoveryCompleted( false )
     , m_removalCompleted( false )
-    , m_nbEntryPointsRemovalExpected( 0 )
+    , m_nbRootsRemovalExpected( 0 )
 {
 }
 
@@ -131,12 +131,12 @@ void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
     m_thumbnailCond.notify_all();
 }
 
-void MockCallback::onEntryPointRemoved( const std::string& entryPoint, bool )
+void MockCallback::onRootRemoved( const std::string& root, bool )
 {
-    assert( entryPoint.empty() == false );
+    assert( root.empty() == false );
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
-    assert( m_nbEntryPointsRemovalExpected > 0 );
-    if ( --m_nbEntryPointsRemovalExpected > 0 )
+    assert( m_nbRootsRemovalExpected > 0 );
+    if ( --m_nbRootsRemovalExpected > 0 )
         return;
     m_removalCompleted = true;
 }
@@ -1048,10 +1048,10 @@ void MockCallback::waitForPlaylistReload()
     });
 }
 
-void MockCallback::prepareForRemoval( uint32_t nbEntryPointsRemovalExpected )
+void MockCallback::prepareForRemoval( uint32_t nbRootsRemovalExpected )
 {
     std::lock_guard<compat::Mutex> lock{ m_parsingMutex };
-    m_nbEntryPointsRemovalExpected = nbEntryPointsRemovalExpected;
+    m_nbRootsRemovalExpected = nbRootsRemovalExpected;
     m_removalCompleted = false;
 }
 
