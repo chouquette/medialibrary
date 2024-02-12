@@ -186,7 +186,7 @@ public:
     virtual SearchAggregate search( const std::string& pattern,
                                     const QueryParameters* params ) const override;
 
-    virtual void discover( const std::string& entryPoint ) override;
+    virtual void discover( const std::string& root ) override;
     virtual bool setDiscoverNetworkEnabled( bool enabled ) override;
     virtual bool isDiscoverNetworkEnabled() const override;
     virtual Query<IFolder> roots( const QueryParameters* params ) const override;
@@ -199,10 +199,10 @@ public:
                                           const QueryParameters* params ) const override;
     virtual FolderPtr folder( int64_t id ) const override;
     virtual FolderPtr folder( const std::string& mrl ) const override;
-    virtual void removeEntryPoint( const std::string& entryPoint ) override;
-    virtual void banFolder( const std::string& entryPoint ) override;
-    virtual void unbanFolder( const std::string& entryPoint ) override;
-    virtual Query<IFolder> bannedEntryPoints() const override;
+    virtual void removeRoot( const std::string& root ) override;
+    virtual void banFolder( const std::string& root ) override;
+    virtual void unbanFolder( const std::string& root ) override;
+    virtual Query<IFolder> bannedRoots() const override;
 
     const std::string& thumbnailPath() const;
     const std::string& playlistPath() const;
@@ -213,7 +213,7 @@ public:
 
     //Temporarily public, move back to private as soon as we start monitoring the FS
     virtual void reload() override;
-    virtual void reload( const std::string& entryPoint ) override;
+    virtual void reload( const std::string& root ) override;
     virtual bool forceParserRetry() override;
     virtual bool clearDatabase( bool restorePlaylists ) override;
 
