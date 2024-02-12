@@ -42,8 +42,8 @@ class FsDiscoverer
 public:
     FsDiscoverer( MediaLibrary* ml, FsHolder& fsHolder, IMediaLibraryCb* cb );
     bool reload();
-    bool reload( const std::string& entryPoint );
-    bool addEntryPoint(const std::string& entryPoint );
+    bool reload( const std::string& root );
+    bool addRoot(const std::string& root );
     /**
      * @brief interrupt Interrupts the current operation and return ASAP
      */
