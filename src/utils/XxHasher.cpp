@@ -44,7 +44,7 @@
 # include <xxh_x86dispatch.h>
 #endif
 
-
+#include <functional>
 #include <memory>
 #include <cstdio>
 #include <cinttypes>
@@ -71,8 +71,8 @@ uint64_t xxFromBuff( const uint8_t* buff, size_t size )
 
 uint64_t xxFromFile( const std::string& path )
 {
-    std::unique_ptr<FILE, decltype(&fclose)> file{
-        fopen( path.c_str(), "rb" ), &fclose
+    std::unique_ptr<FILE, std::function<void(FILE*)>> file{
+        fopen( path.c_str(), "rb" ), [](FILE *f) { fclose(f); }
     };
     std::unique_ptr<XXH3_state_t, decltype(&XXH3_freeState)> state{
         XXH3_createState(), &XXH3_freeState
