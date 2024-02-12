@@ -325,7 +325,7 @@ void FsHolder::onDeviceMounted( const fs::IDevice& deviceFs,
     t->commit();
     if ( previousPresence == false )
     {
-        // We need to reload the entrypoint in case a previous discovery was
+        // We need to reload the root folder in case a previous discovery was
         // interrupted before its end (causing the tasks that were spawned
         // to be deleted when the device go away, requiring a new discovery)
         // Also, there might be new content on the device since it was last
