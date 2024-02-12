@@ -290,10 +290,10 @@ public:
 
     /**
      * @brief onDiscoveryStarted This callback will be invoked when the discoverer
-     * starts to crawl an entrypoint that was scheduled for discovery or reload.
+     * starts to crawl a root folder that was scheduled for discovery or reload.
      *
      * This callback will be invoked when the discoverer thread gets woken up
-     * regardless of how many entry points need to be discovered.
+     * regardless of how many roots need to be discovered.
      */
     virtual void onDiscoveryStarted() = 0;
     /**
@@ -301,7 +301,7 @@ public:
      * discoverer enters a new folder.
      * @param currentFolder The folder being discovered
      *
-     * This callback can be invoked multiple times even though a single entry point was asked to be
+     * This callback can be invoked multiple times even though a single root was asked to be
      * discovered. ie. In the case of a file system discovery, discovering a folder would make this
      * callback being invoked for all subfolders
      */
@@ -316,48 +316,47 @@ public:
 
     /**
      * @brief onDiscoveryFailed Will be invoked when a discovery operation fails
-     * @param entryPoint The entry point for which the discovery failed.
+     * @param root The root folder for which the discovery failed.
      */
-    virtual void onDiscoveryFailed( const std::string& entryPoint ) = 0;
+    virtual void onDiscoveryFailed( const std::string& root ) = 0;
 
     /**
-     * @brief onEntryPointAdded will be invoked when an entrypoint gets added
-     * @param entryPoint The entry point which was scheduled for discovery
+     * @brief onRootAdded will be invoked when an root folder is added
+     * @param root The root folder which was scheduled for discovery
      * @param success A boolean to represent the operation's success
      *
-     * This callback will only be emitted the first time the entry point gets
+     * This callback will only be emitted the first time the root folder is
      * processed, after it has been inserted to the database.
      * In case of failure, it might be emitted every time the request is sent, since
-     * the provided entry point would most likely be invalid, and couldn't be inserted.
-     * Later processing of that entry point will still cause \sa{onDiscoveryStarted}
+     * the provided folder would most likely be invalid, and couldn't be inserted.
+     * Later processing of the folder will still cause \sa{onDiscoveryStarted}
      * \sa{onDiscoveryProgress} and \sa{onDiscoveryCompleted} events to be fired
      * \warning This event will be fired after \sa{onDiscoveryStarted} since we
-     * don't know if an entry point is known before starting its processing
+     * don't know if a root folder is known before starting its processing
      */
-    virtual void onEntryPointAdded( const std::string& entryPoint, bool success ) = 0;
+    virtual void onRootAdded( const std::string& root, bool success ) = 0;
 
     /**
-     * @brief onEntryPointRemoved will be invoked when an entrypoint removal
-     *                            request gets processed
-     * by the appropriate worker thread.
-     * @param entryPoint The entry point which removal was required
+     * @brief onRootRemoved will be invoked when a root removal request is
+     *                              processsed by the appropriate worker thread.
+     * @param root The root folder which removal was required
      * @param success A boolean representing the operation's success
      */
-    virtual void onEntryPointRemoved( const std::string& entryPoint, bool success ) = 0;
+    virtual void onRootRemoved( const std::string& root, bool success ) = 0;
     /**
-     * @brief onEntryPointBanned will be called when an entrypoint ban request
-     *                           is done being processed.
-     * @param entryPoint The banned entrypoint
+     * @brief onRootBanned will be called when a root ban request
+     *                     has been processed.
+     * @param root The banned root folder
      * @param success A boolean representing the operation's success
      */
-    virtual void onEntryPointBanned( const std::string& entryPoint, bool success ) = 0;
+    virtual void onRootBanned( const std::string& root, bool success ) = 0;
     /**
-     * @brief onEntryPointUnbanned will be called when an entrypoint unban request
-     *                             is done being processed.
-     * @param entryPoint The unbanned entrypoint
+     * @brief onRootUnbanned will be called when a root unban request
+     *                       is done being processed.
+     * @param root The unbanned root folder
      * @param success A boolean representing the operation's success
      */
-    virtual void onEntryPointUnbanned( const std::string& entryPoint, bool success ) = 0;
+    virtual void onRootUnbanned( const std::string& root, bool success ) = 0;
     /**
      * @brief onParsingStatsUpdated Called when the parser statistics are updated
      *
@@ -799,15 +798,15 @@ public:
                                     const QueryParameters* params = nullptr ) const = 0;
 
     /**
-     * @brief discover Launch a discovery on the provided entry point.
+     * @brief discover Launch a discovery on the provided root folder.
      * This will start the discoverer thread, device listers, and file system
      * factories if needed
      * The actual discovery will run asynchronously, meaning this method will immediately return.
      * Depending on which discoverer modules where provided, this might or might not work
      * @note This must be called after initialize()
-     * @param entryPoint The MRL of the entrypoint to discover.
+     * @param root The MRL of the root folder to discover.
      */
-    virtual void discover( const std::string& entryPoint ) = 0;
+    virtual void discover( const std::string& root ) = 0;
     /**
      * @brief setDiscoverNetworkEnabled Enable discovery of network shares
      * @return true In case of success, false otherwise.
@@ -836,14 +835,15 @@ public:
      *
      * This is essentially a way of knowing what has been passed to discover()
      * throughout the database life.
-     * The resulting list includes entry points on device that are currently unmounted.
+     * The resulting list includes root folders on device that are currently
+     * unmounted.
      * If the passed params field publicOnly is true, this function will list
      * top level public folders instead of the folders provided to discover()
      */
     virtual Query<IFolder> roots( const QueryParameters* params ) const = 0;
     /**
-     * @brief isIndexed Returns true if the mrl point to a file of folder in an
-     *                  indexed entrypoint
+     * @brief isIndexed Returns true if the mrl point to a file or folder in an
+     *                  indexed root.
      * @param mrl The MRL to probe
      * @return true if the mrl is indexed, false otherwise
      */
@@ -876,7 +876,7 @@ public:
      * would return a query containing 'z' and 'c' as the other folders are
      * not containing any media.
      * In case a non flattened list is desired, the
-     * entryPoints() & IFolder::subFolders() functions should be used.
+     * roots() & IFolder::subFolders() functions should be used.
      */
     virtual Query<IFolder> folders( IMedia::Type type,
                                     const QueryParameters* params = nullptr ) const = 0;
@@ -886,10 +886,10 @@ public:
     virtual FolderPtr folder( int64_t folderId ) const = 0;
     virtual FolderPtr folder( const std::string& mrl ) const = 0;
     /**
-     * @brief removeEntryPoint Removes an entry point
-     * @param entryPoint The MRL of the entry point to remove
+     * @brief removeRoot Removes a root folder
+     * @param root The MRL of the root folder point to remove
      *
-     * This will remove the provided entry point from the list of know locations
+     * This will remove the provided root folder from the list of know locations
      * to manage by the media library.
      * The location will be ignored afterward, even if it is a sub folder of
      * another managed location.
@@ -899,9 +899,9 @@ public:
      *       task
      * @note This must be called after initialize()
      */
-    virtual void removeEntryPoint( const std::string& entryPoint ) = 0;
+    virtual void removeRoot( const std::string& root ) = 0;
     /**
-     * @brief banFolder will prevent an entry point folder from being discovered.
+     * @brief banFolder will prevent a root folder from being discovered.
      * If the folder was already discovered, it will be removed prior to the ban, and all
      * associated media will be discarded.
      * @param mrl The MRL to ban
@@ -912,9 +912,9 @@ public:
      */
     virtual void banFolder( const std::string& mrl ) = 0;
     /**
-     * @brief unbanFolder Unban an entrypoint.
-     * In case this entry point was indeed previously banned, this will issue a reload of
-     * that entry point
+     * @brief unbanFolder Unban a root folder.
+     * In case this root folder was indeed previously banned, this will issue a
+     * reload of that folder
      * @param mrl The MRL to unban
      * @note This method is asynchronous, but will interrupt any ongoing
      *       discovery, process the request, and resume the previously running
@@ -923,12 +923,12 @@ public:
      */
     virtual void unbanFolder( const std::string& mrl ) = 0;
     /**
-     * @brief bannedEntryPoints Returns a query representing the banned entry points
+     * @brief bannedRoots Returns a query representing the banned root folders.
      *
-     * The result set will include entry points on missing devices as well. Folder
-     * hierarchy isn't preserved, and the results are flattened.
+     * The result set will include root folders on missing devices as well.
+     * Folder hierarchy isn't preserved, and the results are flattened.
      */
-    virtual Query<IFolder> bannedEntryPoints() const = 0;
+    virtual Query<IFolder> bannedRoots() const = 0;
     /**
      * @brief pauseBackgroundOperations Will stop potentially CPU intensive background
      * operations, until resumeBackgroundOperations() is called.
@@ -941,7 +941,7 @@ public:
      */
     virtual void resumeBackgroundOperations() = 0;
     /**
-     * @brief reload Reload all known entry points
+     * @brief reload Reload all known roots
      * @note This must be called after initialize()
      *
      * This will start the discoverer thread, appropriate device listers and
@@ -949,14 +949,14 @@ public:
      */
     virtual void reload() = 0;
     /**
-     * @brief reload Reload a specific entry point
-     * @param entryPoint The entrypoint to reload
+     * @brief reload Reload a specific root folder.
+     * @param root The root folder to reload
      * @note This must be called after initialize()
      *
      * This will start the discoverer thread, appropriate device listers and
      * file system factories if needed.
      */
-    virtual void reload( const std::string& entryPoint ) = 0;
+    virtual void reload( const std::string& root ) = 0;
     /**
      * @brief forceParserRetry Forces a re-run of all metadata parsers and resets any
      * unterminated file retry count to 0, granting them 3 new tries at being parsed

@@ -2181,9 +2181,9 @@ void MediaLibrary::reload()
     getParser();
 }
 
-void MediaLibrary::reload( const std::string& entryPoint )
+void MediaLibrary::reload( const std::string& root )
 {
-    m_discovererWorker.reload( entryPoint );
+    m_discovererWorker.reload( root );
     getParser();
 }
 
@@ -2373,9 +2373,9 @@ std::shared_ptr<fs::IFileSystemFactory> MediaLibrary::fsFactoryForMrl( const std
     return m_fsHolder.fsFactoryForMrl( mrl );
 }
 
-void MediaLibrary::discover( const std::string& entryPoint )
+void MediaLibrary::discover( const std::string& root )
 {
-    m_discovererWorker.discover( entryPoint );
+    m_discovererWorker.discover( root );
 }
 
 bool MediaLibrary::setDiscoverNetworkEnabled( bool enabled )
@@ -2431,22 +2431,22 @@ FolderPtr MediaLibrary::folder( const std::string& mrl ) const
     return Folder::fromMrl( this, mrl, Folder::BannedType::Any );
 }
 
-void MediaLibrary::removeEntryPoint( const std::string& entryPoint )
+void MediaLibrary::removeRoot( const std::string& root )
 {
-    m_discovererWorker.remove( entryPoint );
+    m_discovererWorker.remove( root );
 }
 
-void MediaLibrary::banFolder( const std::string& entryPoint )
+void MediaLibrary::banFolder( const std::string& root )
 {
-    m_discovererWorker.ban( entryPoint );
+    m_discovererWorker.ban( root );
 }
 
-void MediaLibrary::unbanFolder( const std::string& entryPoint )
+void MediaLibrary::unbanFolder( const std::string& root )
 {
-    m_discovererWorker.unban( entryPoint );
+    m_discovererWorker.unban( root );
 }
 
-Query<IFolder> MediaLibrary::bannedEntryPoints() const
+Query<IFolder> MediaLibrary::bannedRoots() const
 {
     return Folder::roots( this, true, 0, nullptr );
 }
