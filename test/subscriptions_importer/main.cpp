@@ -158,7 +158,7 @@ int main( int argc, char** argv )
     ml->setVerbosity( quiet == true ? medialibrary::LogLevel::Error :
                                       medialibrary::LogLevel::Debug );
     auto initRes = ml->initialize( testCb.get() );
-    assert( initRes == InitializeResult::Success );
+    assert( initRes == InitializeResult::Success ); (void)initRes;
     ml->setDiscoverNetworkEnabled( true );
 
     auto service = ml->service( IService::Type::Podcast );

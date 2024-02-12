@@ -130,7 +130,7 @@ private:
                 m_nbThumbnails++;
             }
             auto res = m->requestThumbnail( ThumbnailSizeType::Thumbnail, 320, 0, 0.3f );
-            assert( res == true );
+            assert( res == true ); (void)res;
         }
     }
 
@@ -259,7 +259,7 @@ int main( int argc, char** argv )
     ml->setVerbosity( quiet == true ? medialibrary::LogLevel::Error :
                                       medialibrary::LogLevel::Debug );
     auto initRes = ml->initialize( testCb.get() );
-    assert( initRes == InitializeResult::Success );
+    assert( initRes == InitializeResult::Success ); (void)initRes;
     auto res = ml->setDiscoverNetworkEnabled( true );
     assert( res );
     if ( migrate == true )
