@@ -252,15 +252,14 @@ bool DeviceLister::isRemovable( const std::string& partitionPath ) const
     const auto deviceName = getDeviceName( partitionBlockPath );
 
     std::string removableFilePath = "/sys/block/" + deviceName + "/removable";
-    std::unique_ptr<FILE, decltype(&fclose)> removableFile(
-                fopen( removableFilePath.c_str(), "r" ), &fclose );
+    FILE *removableFile = fopen( removableFilePath.c_str(), "r" );
     // Assume the file isn't removable by default
     if ( removableFile != nullptr )
     {
         char buff;
-        if ( fread(&buff, sizeof(buff), 1, removableFile.get() ) == 1 )
-            return buff == '1';
-        return false;
+        if ( fread(&buff, sizeof(buff), 1, removableFile ) != 1 )
+            buff = 0;
+        return fclose( removableFile ) == 0 && buff == '1';
     }
     return false;
 }
