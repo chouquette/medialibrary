@@ -434,7 +434,7 @@ static void ReloadSubDir( FolderTests* T )
     ASSERT_EQ( 4u, files.size() );
 }
 
-static void FetchEntryPoints( FolderTests* T )
+static void FetchRoots( FolderTests* T )
 {
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
@@ -452,7 +452,7 @@ static void FetchEntryPoints( FolderTests* T )
     ASSERT_EQ( 1u, eps.size() );
 }
 
-static void RemoveRootEntryPoint( FolderTests* T )
+static void RemoveRootRoot( FolderTests* T )
 {
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
@@ -473,8 +473,8 @@ static void RemoveRootEntryPoint( FolderTests* T )
     ASSERT_NE( nullptr, m );
     ASSERT_FALSE( m->isExternalMedia() );
 
-    T->ml->removeEntryPoint( mock::FileSystemFactory::Root );
-    auto res = T->cbMock->waitEntryPointRemoved();
+    T->ml->removeRoot( mock::FileSystemFactory::Root );
+    auto res = T->cbMock->waitRootRemoved();
     ASSERT_TRUE( res );
 
     media = T->ml->files();
@@ -498,7 +498,7 @@ static void RemoveRootEntryPoint( FolderTests* T )
     ASSERT_EQ( 0u, eps.size() );
 }
 
-static void RemoveEntryPoint( FolderTests* T )
+static void RemoveRoot( FolderTests* T )
 {
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
@@ -511,8 +511,8 @@ static void RemoveEntryPoint( FolderTests* T )
     ASSERT_NE( nullptr, m );
     ASSERT_FALSE( m->isExternalMedia() );
 
-    T->ml->removeEntryPoint( mock::FileSystemFactory::SubFolder );
-    auto res = T->cbMock->waitEntryPointRemoved();
+    T->ml->removeRoot( mock::FileSystemFactory::SubFolder );
+    auto res = T->cbMock->waitRootRemoved();
     ASSERT_TRUE( res );
 
     media = T->ml->files();
@@ -532,14 +532,14 @@ static void RemoveEntryPoint( FolderTests* T )
     ASSERT_EQ( media.size(), media2.size() );
 }
 
-static void RemoveNonExistantEntryPoint( FolderTests* T )
+static void RemoveNonExistantRoot( FolderTests* T )
 {
     T->ml->discover( mock::FileSystemFactory::Root );
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    T->ml->removeEntryPoint( "/sea/otter" );
-    auto res = T->cbMock->waitEntryPointRemoved();
+    T->ml->removeRoot( "/sea/otter" );
+    auto res = T->cbMock->waitRootRemoved();
     ASSERT_TRUE( res );
 }
 
@@ -844,10 +844,10 @@ static void ListSubFolders( FolderTests* T )
 
     enforceFakeMediaTypes( T->ml.get() );
 
-    auto entryPoints = T->ml->roots( nullptr )->all();
-    ASSERT_EQ( 1u, entryPoints.size() );
+    auto roots = T->ml->roots( nullptr )->all();
+    ASSERT_EQ( 1u, roots.size() );
 
-    auto root = entryPoints[0];
+    auto root = roots[0];
     QueryParameters params{};
     params.sort = SortingCriteria::NbMedia;
     auto rootSubFolders = root->subfolders( &params )->all();
@@ -933,9 +933,9 @@ static void IsBanned( FolderTests* T )
     ASSERT_FALSE( res );
 }
 
-static void BannedEntryPoints( FolderTests* T )
+static void BannedRoots( FolderTests* T )
 {
-    auto res = T->ml->bannedEntryPoints();
+    auto res = T->ml->bannedRoots();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 0u, res->all().size() );
     ASSERT_EQ( 0u, res->count() );
@@ -943,7 +943,7 @@ static void BannedEntryPoints( FolderTests* T )
     T->ml->banFolder( mock::FileSystemFactory::SubFolder );
     T->cbMock->waitBanFolder();
 
-    res = T->ml->bannedEntryPoints();
+    res = T->ml->bannedRoots();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
@@ -953,7 +953,7 @@ static void BannedEntryPoints( FolderTests* T )
     bool discovered = T->cbMock->waitDiscovery();
     ASSERT_TRUE( discovered );
 
-    res = T->ml->bannedEntryPoints();
+    res = T->ml->bannedRoots();
     ASSERT_NE( nullptr, res );
     ASSERT_EQ( 1u, res->all().size() );
     ASSERT_EQ( 1u, res->count() );
@@ -1181,10 +1181,10 @@ int main( int ac, char** av )
     ADD_TEST( InsertNoMedia );
     ADD_TEST( InsertNoMediaInRoot );
     ADD_TEST( ReloadSubDir );
-    ADD_TEST( FetchEntryPoints );
-    ADD_TEST( RemoveRootEntryPoint );
-    ADD_TEST( RemoveEntryPoint );
-    ADD_TEST( RemoveNonExistantEntryPoint );
+    ADD_TEST( FetchRoots );
+    ADD_TEST( RemoveRootRoot );
+    ADD_TEST( RemoveRoot );
+    ADD_TEST( RemoveNonExistantRoot );
     ADD_TEST( RemoveRootFolder );
     ADD_TEST( NbMedia );
     ADD_TEST( NbMediaDeletionTrigger );
@@ -1198,7 +1198,7 @@ int main( int ac, char** av )
     ADD_TEST( SearchFolders );
     ADD_TEST( Name );
     ADD_TEST( IsBanned );
-    ADD_TEST( BannedEntryPoints );
+    ADD_TEST( BannedRoots );
     ADD_TEST( CheckDbModel );
     ADD_TEST( NbMediaAfterExternalInternalConversion );
     ADD_TEST( Duration );

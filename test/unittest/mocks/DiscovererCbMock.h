@@ -43,7 +43,7 @@ public:
         , m_initialDiscoveryDone( false )
         , m_banFolderDone( false )
         , m_unbanFolderDone( false )
-        , m_entryPointRemoved( false )
+        , m_rootRemoved( false )
     {
     }
 
@@ -53,28 +53,28 @@ public:
         m_cond.notify_all();
     }
 
-    virtual void onDiscoveryFailed( const std::string& entryPoint ) override
+    virtual void onDiscoveryFailed( const std::string& root ) override
     {
-        assert( entryPoint.empty() == false );
+        assert( root.empty() == false );
         m_discoveryDone = true;
         m_cond.notify_all();
     }
 
-    virtual void onEntryPointBanned( const std::string&, bool ) override
+    virtual void onRootBanned( const std::string&, bool ) override
     {
         m_banFolderDone = true;
         m_cond.notify_all();
     }
 
-    virtual void onEntryPointUnbanned( const std::string&, bool ) override
+    virtual void onRootUnbanned( const std::string&, bool ) override
     {
         m_unbanFolderDone = true;
         m_cond.notify_all();
     }
 
-    virtual void onEntryPointRemoved( const std::string&, bool ) override
+    virtual void onRootRemoved( const std::string&, bool ) override
     {
-        m_entryPointRemoved = true;
+        m_rootRemoved = true;
         m_cond.notify_all();
     }
 
@@ -123,13 +123,13 @@ public:
         return res;
     }
 
-    bool waitEntryPointRemoved()
+    bool waitRootRemoved()
     {
         std::unique_lock<compat::Mutex> lock( m_mutex );
         auto res =  m_cond.wait_for( lock, std::chrono::seconds{ 15 }, [this]() {
-            return m_entryPointRemoved.load();
+            return m_rootRemoved.load();
         });
-        m_entryPointRemoved = false;
+        m_rootRemoved = false;
         return res;
     }
 
@@ -138,7 +138,7 @@ private:
     std::atomic_bool m_initialDiscoveryDone;
     std::atomic_bool m_banFolderDone;
     std::atomic_bool m_unbanFolderDone;
-    std::atomic_bool m_entryPointRemoved;
+    std::atomic_bool m_rootRemoved;
     compat::ConditionVariable m_cond;
     compat::Mutex m_mutex;
 };

@@ -77,10 +77,10 @@ int main( int argc, char** argv )
 {
     if ( argc < 2 )
     {
-        std::cerr << "usage: " << argv[0] << " <entrypoint>" << std::endl;
+        std::cerr << "usage: " << argv[0] << " <root>" << std::endl;
         return 1;
     }
-    auto entryPoint = utils::file::toMrl( argv[1] );
+    auto root = utils::file::toMrl( argv[1] );
 
     auto mlDir = getTempPath( "fast_teardown_test" );
     auto dbPath = mlDir + "test.db";
@@ -93,7 +93,7 @@ int main( int argc, char** argv )
                     NewMediaLibrary( dbPath.c_str(), mlDir.c_str(), false, nullptr ) );
         ml->initialize( testCb.get() );
         testCb->prepareWait();
-        ml->discover( entryPoint );
+        ml->discover( root );
         ml->reload();
         testCb->waitForDiscoveryStarted();
     }

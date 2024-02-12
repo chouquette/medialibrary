@@ -56,7 +56,7 @@ static void ParseTwice( Tests* T )
         {
             auto samplesDir = Tests::Directory + "samples/" + T->input[i].GetString();
             samplesDir = utils::fs::toAbsolute( samplesDir );
-            T->m_ml->removeEntryPoint( utils::file::toMrl( samplesDir ) );
+            T->m_ml->removeRoot( utils::file::toMrl( samplesDir ) );
         }
         ASSERT_TRUE( T->m_cb->waitForRemovalComplete() );
         T->m_cb->reinit();

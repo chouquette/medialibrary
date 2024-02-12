@@ -59,8 +59,8 @@ public:
     bool waitForThumbnail();
     void prepareForPlaylistReload();
     void waitForPlaylistReload();
-    void prepareForDiscovery( uint32_t nbEntryPointsExpected );
-    void prepareForRemoval( uint32_t nbEntryPointsRemovalExpected );
+    void prepareForDiscovery( uint32_t nbRootsExpected );
+    void prepareForRemoval( uint32_t nbRootsRemovalExpected );
     /*
      * May be invoked directly by tests which don't discover anything, such
      * as collection tests which only discover external MRLs
@@ -71,7 +71,7 @@ protected:
     virtual void onParsingStatsUpdated( uint32_t done, uint32_t scheduled ) override;
     virtual void onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType sizeType,
                                         bool success ) override;
-    virtual void onEntryPointRemoved( const std::string& entryPoint, bool res ) override;
+    virtual void onRootRemoved( const std::string& root, bool res ) override;
     virtual void onBackgroundTasksIdleChanged( bool idle ) override;
 
     compat::ConditionVariable m_parsingCompleteVar;
@@ -84,7 +84,7 @@ protected:
     bool m_parserDone;
     bool m_discoveryCompleted;
     bool m_removalCompleted;
-    uint32_t m_nbEntryPointsRemovalExpected;
+    uint32_t m_nbRootsRemovalExpected;
 };
 
 class MockResumeCallback : public MockCallback
