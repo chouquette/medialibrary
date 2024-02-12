@@ -52,19 +52,19 @@ protected:
             Ban,
             Unban,
             ReloadDevice,
-            AddEntryPoint,
+            AddRoot,
         };
 
         Task() = default;
-        Task( const std::string& entryPoint, Type type )
-            : entryPoint( entryPoint ), entityId( 0 ), type( type ) {}
+        Task( const std::string& root, Type type )
+            : root( root ), entityId( 0 ), type( type ) {}
         Task( int64_t entityId, Type type )
             : entityId( entityId ), type( type ) {}
         bool isLongRunning() const
         {
             return type == Type::Reload;
         }
-        std::string entryPoint;
+        std::string root;
         int64_t entityId;
         Type type;
     };
@@ -80,27 +80,27 @@ public:
     void pause();
     void resume();
 
-    bool discover( const std::string& entryPoint );
-    void remove( const std::string& entryPoint );
+    bool discover( const std::string& root );
+    void remove( const std::string& root );
     void reload();
-    void reload( const std::string& entryPoint );
-    void ban( const std::string& entryPoint );
-    void unban( const std::string& entryPoint );
+    void reload( const std::string& root );
+    void ban( const std::string& root );
+    void unban( const std::string& root );
     void reloadDevice( int64_t deviceId );
 
 private:
     void enqueue( Task t );
-    void enqueue( const std::string& entryPoint, Task::Type type );
+    void enqueue( const std::string& root, Task::Type type );
     void enqueue( int64_t entityId, Task::Type type );
     virtual void notify();
     void run();
-    void runReload( const std::string& entryPoint );
-    void runRemove( const std::string& entryPoint );
-    void runBan( const std::string& entryPoint );
-    void runUnban( const std::string& entryPoint );
+    void runReload( const std::string& root );
+    void runRemove( const std::string& root );
+    void runBan( const std::string& root );
+    void runUnban( const std::string& root );
     void runReloadDevice( int64_t deviceId );
     void runReloadAllDevices();
-    void runAddEntryPoint( const std::string& entryPoint );
+    void runAddRoot( const std::string& root );
     bool filter( const Task& newTask );
     virtual void onDeviceReappearing( int64_t deviceId ) override;
     virtual void onDeviceDisappearing( int64_t deviceId ) override;
