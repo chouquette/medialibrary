@@ -65,29 +65,36 @@ bool copy( const std::string& from, const std::string& to )
             return false;
     }
 #endif
-    std::unique_ptr<FILE, decltype(&fclose)> input{
-        fopen( from.c_str(), "rb" ), &fclose
-    };
-    std::unique_ptr<FILE, decltype(&fclose)> output{
-        fopen( to.c_str(), "wb" ), &fclose
-    };
-    if ( input == nullptr || output == nullptr )
+    FILE *input = fopen( from.c_str(), "rb" );
+    if ( input == nullptr )
         return false;
+
+    FILE *output = fopen( to.c_str(), "wb" );
+    if ( output == nullptr )
+    {
+        fclose( input );
+        return false;
+    }
     unsigned char buff[4096];
 
+    bool success = true;
     do
     {
-        auto nbRead = fread( buff, 1, 4096, input.get() );
+        auto nbRead = fread( buff, 1, 4096, input );
         if ( nbRead == 0 )
+            break;
+        if ( fwrite( buff, 1, nbRead, output ) == 0 )
         {
-            if ( ferror( input.get() ) )
-                return false;
+            success = false;
             break;
         }
-        if ( fwrite( buff, 1, nbRead, output.get() ) == 0 )
-            return false;
-    } while ( feof( input.get() ) == 0 );
-    return true;
+    } while ( feof( input ) == 0 );
+
+    if ( ferror( input ) )
+        return false;
+    fclose( input );
+
+    return fclose( output ) == 0 && success;
 }
 
 bool remove( const std::string& path )
