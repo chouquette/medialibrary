@@ -55,7 +55,7 @@ public:
 
     virtual void onDiscoveryFailed( const std::string& root ) override
     {
-        assert( root.empty() == false );
+        assert( root.empty() == false ); (void)root;
         m_discoveryDone = true;
         m_cond.notify_all();
     }

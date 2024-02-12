@@ -128,7 +128,7 @@ struct Tester
             else
                 ml->forceRescan();
             auto res = cbMock->waitForParsingComplete();
-            assert( res == true );
+            assert( res == true ); (void)res;
             std::cout << "Parsing #" << i << " completed." << std::endl;
         }
     }

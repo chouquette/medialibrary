@@ -133,7 +133,7 @@ void MockCallback::onMediaThumbnailReady( MediaPtr media, ThumbnailSizeType,
 
 void MockCallback::onRootRemoved( const std::string& root, bool )
 {
-    assert( root.empty() == false );
+    assert( root.empty() == false ); (void)root;
     std::lock_guard<compat::Mutex> lock( m_parsingMutex );
     assert( m_nbRootsRemovalExpected > 0 );
     if ( --m_nbRootsRemovalExpected > 0 )
