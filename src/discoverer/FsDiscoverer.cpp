@@ -79,7 +79,7 @@ bool FsDiscoverer::reloadFolder( std::shared_ptr<Folder> f,
         auto device = fsFactory.createDeviceFromMrl( mrl );
         if ( device == nullptr || device->isRemovable() == false )
         {
-            LOG_DEBUG( "Failed to find folder matching entrypoint ", mrl, ". "
+            LOG_DEBUG( "Failed to find folder matching root ", mrl, ". "
                       "Removing that folder" );
             Folder::remove( m_ml, std::move( f ), Folder::RemovalBehavior::RemovedFromDisk );
             return false;
@@ -145,7 +145,7 @@ void FsDiscoverer::checkRemovedDevices( fs::IDirectory& fsFolder,
     // - ignore it when we're discovering a new folder.
     // - delete it when it was discovered in the past. This is likely to be due to a permission change
     //   as we would not check the folder if it wasn't present during the parent folder browsing
-    //   but it might also be that we're checking an entry point.
+    //   but it might also be that we're checking a root folder.
     //   The error won't arise earlier, as we only perform IO when reading the folder from this function.
     // If we ever came across this folder, its content is now unaccessible: let's remove it.
     Folder::remove( m_ml, std::move( folder ),
@@ -200,7 +200,7 @@ bool FsDiscoverer::reload()
         catch ( const fs::errors::DeviceRemoved& ex )
         {
             // If the device was removed, let's wait until it comes back, but
-            // don't abort all entry points reloading
+            // don't abort all root folders reloading
             LOG_INFO( "Can't reload folder on a removed device" );
             continue;
         }
@@ -226,22 +226,22 @@ bool FsDiscoverer::reload()
     return true;
 }
 
-bool FsDiscoverer::reload( const std::string& entryPoint )
+bool FsDiscoverer::reload( const std::string& root )
 {
     resetInterrupt();
-    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
+    auto fsFactory = m_ml->fsFactoryForMrl( root );
     if ( fsFactory == nullptr )
         return false;
 
-    auto folder = Folder::fromMrl( m_ml, entryPoint );
+    auto folder = Folder::fromMrl( m_ml, root );
     if ( folder == nullptr )
     {
-        LOG_ERROR( "Can't reload ", entryPoint, ": folder wasn't found in database" );
+        LOG_ERROR( "Can't reload ", root, ": folder wasn't found in database" );
         return false;
     }
     if ( folder->isPresent() == false )
     {
-        LOG_INFO( "Folder ", entryPoint, " isn't present, and therefore won't "
+        LOG_INFO( "Folder ", root, " isn't present, and therefore won't "
                   "be reloaded" );
         return false;
     }
@@ -249,29 +249,29 @@ bool FsDiscoverer::reload( const std::string& entryPoint )
     return true;
 }
 
-bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
+bool FsDiscoverer::addRoot( const std::string& root )
 {
-    auto fsFactory = m_ml->fsFactoryForMrl( entryPoint );
+    auto fsFactory = m_ml->fsFactoryForMrl( root );
     if ( fsFactory == nullptr )
         return false;
 
     std::shared_ptr<fs::IDirectory> fsDir;
     try
     {
-        fsDir = fsFactory->createDirectory( entryPoint );
+        fsDir = fsFactory->createDirectory( root );
     }
     catch ( const fs::errors::System& ex )
     {
-        LOG_ERROR( "Can't create IDirectory to represent ", entryPoint,
+        LOG_ERROR( "Can't create IDirectory to represent ", root,
                    ": ", ex.what() );
         return false;
     }
     /*
-     * We are about to add an entry point, and will need a device representation.
+     * We are about to add a root folder, and will need a device representation.
      * Since this is a function that's (indirectly) called explicitly by the users
      * from a background thread, we can afford to wait a bit.
      */
-    if ( fsFactory->waitForDevice( entryPoint, 5000 ) == false )
+    if ( fsFactory->waitForDevice( root, 5000 ) == false )
         return false;
      // Use the canonical path computed by IDirectory
     try
@@ -280,7 +280,7 @@ bool FsDiscoverer::addEntryPoint( const std::string& entryPoint )
     }
     catch ( const sqlite::errors::ConstraintViolation& ex )
     {
-        LOG_WARN( "Can't add entrypoint ", entryPoint, ": ", ex.what() );
+        LOG_WARN( "Can't add root ", root, ": ", ex.what() );
         return false;
     }
 }
