@@ -102,20 +102,20 @@ void DiscovererWorker::resume()
     m_discoverer->resume();
 }
 
-bool DiscovererWorker::discover( const std::string& entryPoint )
+bool DiscovererWorker::discover( const std::string& root )
 {
-    if ( entryPoint.length() == 0 )
+    if ( root.length() == 0 )
         return false;
-    auto ep = utils::file::toFolderPath( entryPoint );
-    LOG_INFO( "Adding ", ep, " to the folder discovery list" );
-    enqueue( ep, Task::Type::AddEntryPoint );
-    enqueue( ep, Task::Type::Reload );
+    auto path = utils::file::toFolderPath( root );
+    LOG_INFO( "Adding ", path, " to the folder discovery list" );
+    enqueue( root, Task::Type::AddRoot );
+    enqueue( root, Task::Type::Reload );
     return true;
 }
 
-void DiscovererWorker::remove( const std::string& entryPoint )
+void DiscovererWorker::remove( const std::string& root )
 {
-    enqueue( entryPoint, Task::Type::Remove );
+    enqueue( root, Task::Type::Remove );
 }
 
 void DiscovererWorker::reload()
@@ -123,19 +123,19 @@ void DiscovererWorker::reload()
     enqueue( "", Task::Type::Reload );
 }
 
-void DiscovererWorker::reload( const std::string& entryPoint )
+void DiscovererWorker::reload( const std::string& root )
 {
-    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Reload );
+    enqueue( utils::file::toFolderPath( root ), Task::Type::Reload );
 }
 
-void DiscovererWorker::ban( const std::string& entryPoint )
+void DiscovererWorker::ban( const std::string& root )
 {
-    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Ban );
+    enqueue( utils::file::toFolderPath( root ), Task::Type::Ban );
 }
 
-void DiscovererWorker::unban( const std::string& entryPoint )
+void DiscovererWorker::unban( const std::string& root )
 {
-    enqueue( utils::file::toFolderPath( entryPoint ), Task::Type::Unban );
+    enqueue( utils::file::toFolderPath( root ), Task::Type::Unban );
 }
 
 void DiscovererWorker::reloadDevice(int64_t deviceId)
@@ -149,21 +149,21 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
     auto filterOut = false;
     switch ( newTask.type )
     {
-        case Task::Type::AddEntryPoint:
+        case Task::Type::AddRoot:
         {
             /*
-             * We are required to discover an entry point.
-             * If another discover task is queued for this entry point, we can
+             * We are required to discover a root folder.
+             * If another discover task is queued for this root folder, we can
              * simply ignore it.
              * If we encounter a task which aims at removing this
-             * entry point, we can delete it from the task list since this is its
+             * root folder, we can delete it from the task list since this is its
              * inverse operation.
-             * If we see a reload task for this entry point, we can also remove it
+             * If we see a reload task for this root folder, we can also remove it
              * since the discover will also issue a reload.
              */
             for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
             {
-                if ( (*it).entryPoint == newTask.entryPoint )
+                if ( (*it).root == newTask.root )
                 {
                     if ( (*it).type == Task::Type::Remove ||
                          (*it).type == Task::Type::Reload )
@@ -171,7 +171,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
                         it = m_tasks.erase( it );
                         continue;
                     }
-                    if ( (*it).type == Task::Type::AddEntryPoint )
+                    if ( (*it).type == Task::Type::AddRoot )
                         return true;
                 }
                 ++it;
@@ -181,15 +181,15 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
         case Task::Type::Reload:
         {
             /*
-             * We need to reload an entry point.
-             * If another task reloading the same entry point is already scheduled
+             * We need to reload a root folder.
+             * If another task reloading the same root folder is already scheduled
              * we can ignore it.
-             * If another task banning/removing this entry point is scheduled,
+             * If another task banning/removing this root folder is scheduled,
              * we can ignore it as well.
              */
             for ( const auto& t : m_tasks )
             {
-                if ( t.entryPoint == newTask.entryPoint &&
+                if ( t.root == newTask.root &&
                      ( t.type == Task::Type::Reload ||
                        t.type == Task::Type::Remove ||
                        t.type == Task::Type::Ban ) )
@@ -200,17 +200,17 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
         case Task::Type::Remove:
         {
             /*
-             * We are about to remove an entry point.
-             * If we see a task adding or reloading this entry point, we
+             * We are about to remove a root folder.
+             * If we see a task adding or reloading this root folder, we
              * can remove those.
-             * If another remove task for the same entrypoint is scheduled, we
+             * If another remove task for the same root folder is scheduled, we
              * can filter this one out
              */
             for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
             {
-                if ( (*it).entryPoint == newTask.entryPoint )
+                if ( (*it).root == newTask.root )
                 {
-                    if ( (*it).type == Task::Type::AddEntryPoint ||
+                    if ( (*it).type == Task::Type::AddRoot ||
                          (*it).type == Task::Type::Reload )
                     {
                         it = m_tasks.erase( it );
@@ -227,7 +227,7 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
         case Task::Type::Ban:
         {
             /*
-             * We are about to ban an entry point.
+             * We are about to ban a root folder.
              * If it's scheduled to be discovered/reload/unbanned, we can remove
              * those tasks.
              * If an identical ban request is to be found, we can discard the new
@@ -235,9 +235,9 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
              */
             for ( auto it = begin( m_tasks ); it != end( m_tasks ); )
             {
-                if ( (*it).entryPoint == newTask.entryPoint )
+                if ( (*it).root == newTask.root )
                 {
-                    if ( (*it).type == Task::Type::AddEntryPoint ||
+                    if ( (*it).type == Task::Type::AddRoot ||
                          (*it).type == Task::Type::Reload ||
                          (*it).type == Task::Type::Unban )
                     {
@@ -254,13 +254,13 @@ bool DiscovererWorker::filter( const DiscovererWorker::Task& newTask )
         case Task::Type::Unban:
         {
             /*
-             * We are about to unban an entry point.
+             * We are about to unban a root folder.
              * If we find a queue request for banning this folder, we can remove
              * it and not queue this request
              */
             for ( auto it = begin( m_tasks ); it != end( m_tasks ); ++it )
             {
-                if ( (*it).entryPoint == newTask.entryPoint &&
+                if ( (*it).root == newTask.root &&
                      (*it).type == Task::Type::Ban )
                 {
                     m_tasks.erase( it );
@@ -315,7 +315,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
         case Task::Type::Ban:
         case Task::Type::Unban:
         case Task::Type::ReloadDevice:
-        case Task::Type::AddEntryPoint:
+        case Task::Type::AddRoot:
         {
             /*
              * These types need to be processed as soon as possible, meaning we
@@ -335,7 +335,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                  * discover & reload tasks. Others are just a few requests and
                  * some bookkeeping, which we can wait for.
                  * We requeue a reload task for the currently processed
-                 * entrypoint instead of requeuing the same task type, since we
+                 * root folder instead of requeuing the same task type, since we
                  * could end up requeuing a discovery task, which would
                  * effectively cancel any potential remove operation we might
                  * be queuing.
@@ -343,7 +343,7 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                 if ( m_discoverer != nullptr )
                 {
                     LOG_DEBUG( "Interrupting long running discovery task on "
-                        "entrypoint ", m_currentTask->entryPoint );
+                        "root folder ", m_currentTask->root );
                     m_discoverer->interrupt();
                 }
                 /*
@@ -354,11 +354,11 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
                 if ( m_currentTask->type != Task::Type::Reload ||
                      ( t.type != Task::Type::Ban &&
                        t.type != Task::Type::Remove ) ||
-                     t.entryPoint != m_currentTask->entryPoint )
+                     t.root != m_currentTask->root )
                 {
-                    LOG_DEBUG( "Requeuing reload task of entrypoint ",
-                               m_currentTask->entryPoint );
-                    it = m_tasks.emplace( it, m_currentTask->entryPoint,
+                    LOG_DEBUG( "Requeuing reload task of root folder ",
+                               m_currentTask->root );
+                    it = m_tasks.emplace( it, m_currentTask->root,
                                           Task::Type::Reload );
                 }
             }
@@ -385,20 +385,20 @@ void DiscovererWorker::enqueue( DiscovererWorker::Task t )
         notify();
 }
 
-void DiscovererWorker::enqueue( const std::string& entryPoint, Task::Type type )
+void DiscovererWorker::enqueue( const std::string& root, Task::Type type )
 {
     assert( type != Task::Type::ReloadDevice );
 
-    if ( entryPoint.empty() == false )
+    if ( root.empty() == false )
     {
-        LOG_INFO( "Queuing entrypoint ", entryPoint, " of type ", type );
+        LOG_INFO( "Queuing root folder ", root, " of type ", type );
     }
     else
     {
         assert( type == Task::Type::Reload );
         LOG_INFO( "Queuing global reload request" );
     }
-    enqueue( Task{ entryPoint, type } );
+    enqueue( Task{ root, type } );
 }
 
 void DiscovererWorker::enqueue( int64_t entityId, Task::Type type )
@@ -487,18 +487,18 @@ void DiscovererWorker::run()
                     m_ml->getCb()->onDiscoveryStarted();
                     m_discoveryNotified = true;
                 }
-                runReload( task.entryPoint );
+                runReload( task.root );
                 break;
             case Task::Type::Remove:
-                runRemove( task.entryPoint );
+                runRemove( task.root );
                 needTaskRefresh = true;
                 break;
             case Task::Type::Ban:
-                runBan( task.entryPoint );
+                runBan( task.root );
                 needTaskRefresh = true;
                 break;
             case Task::Type::Unban:
-                runUnban( task.entryPoint );
+                runUnban( task.root );
                 /*
                  * No need to refresh the parser tasks for this case, as this
                  * will only add new one which can be done on the fly
@@ -508,8 +508,8 @@ void DiscovererWorker::run()
                 runReloadDevice( task.entityId );
                 needTaskRefresh = true;
                 break;
-            case Task::Type::AddEntryPoint:
-                runAddEntryPoint( task.entryPoint );
+            case Task::Type::AddRoot:
+                runAddRoot( task.root );
                 break;
             default:
                 assert(false);
@@ -522,21 +522,21 @@ void DiscovererWorker::run()
     m_fsHolder->unregisterCallback( this );
 }
 
-void DiscovererWorker::runReload( const std::string& entryPoint )
+void DiscovererWorker::runReload( const std::string& root )
 {
     try
     {
-        if ( entryPoint.empty() == true )
+        if ( root.empty() == true )
         {
             // Let the discoverer invoke the callbacks for all its known folders
             m_discoverer->reload();
         }
         else
         {
-            LOG_INFO( "Reloading folder ", entryPoint );
-            auto res = m_discoverer->reload( entryPoint );
+            LOG_INFO( "Reloading folder ", root );
+            auto res = m_discoverer->reload( root );
             if ( res == false )
-                m_ml->getCb()->onDiscoveryFailed( entryPoint );
+                m_ml->getCb()->onDiscoveryFailed( root );
         }
     }
     catch(std::exception& ex)
@@ -545,41 +545,41 @@ void DiscovererWorker::runReload( const std::string& entryPoint )
     }
 }
 
-void DiscovererWorker::runRemove( const std::string& ep )
+void DiscovererWorker::runRemove( const std::string& path )
 {
-    auto entryPoint = utils::file::toFolderPath( ep );
-    auto folder = Folder::fromMrl( m_ml, entryPoint );
+    auto root = utils::file::toFolderPath( path );
+    auto folder = Folder::fromMrl( m_ml, root );
     if ( folder == nullptr )
     {
-        LOG_WARN( "Can't remove unknown entrypoint: ", entryPoint );
-        m_ml->getCb()->onEntryPointRemoved( ep, false );
+        LOG_WARN( "Can't remove unknown root folder: ", root );
+        m_ml->getCb()->onRootRemoved( path, false );
         return;
     }
     auto res = Folder::remove( m_ml, std::move( folder ),
-                               Folder::RemovalBehavior::EntrypointRemoved );
-    m_ml->getCb()->onEntryPointRemoved( ep, res );
+                               Folder::RemovalBehavior::RootRemoved );
+    m_ml->getCb()->onRootRemoved( path, res );
 }
 
-void DiscovererWorker::runBan( const std::string& entryPoint )
+void DiscovererWorker::runBan( const std::string& root )
 {
-    auto res = Folder::ban( m_ml, entryPoint );
-    m_ml->getCb()->onEntryPointBanned( entryPoint, res );
+    auto res = Folder::ban( m_ml, root );
+    m_ml->getCb()->onRootBanned( root, res );
 }
 
-void DiscovererWorker::runUnban( const std::string& entryPoint )
+void DiscovererWorker::runUnban( const std::string& root )
 {
-    auto folder = Folder::bannedFolder( m_ml, entryPoint );
+    auto folder = Folder::bannedFolder( m_ml, root );
     if ( folder == nullptr )
     {
-        LOG_WARN( "Can't unban ", entryPoint, " as it wasn't banned" );
-        m_ml->getCb()->onEntryPointUnbanned( entryPoint, false );
+        LOG_WARN( "Can't unban ", root, " as it wasn't banned" );
+        m_ml->getCb()->onRootUnbanned( root, false );
         return;
     }
     auto res = Folder::remove( m_ml, std::move( folder ),
                                 Folder::RemovalBehavior::RemovedFromDisk );
-    m_ml->getCb()->onEntryPointUnbanned( entryPoint, res );
+    m_ml->getCb()->onRootUnbanned( root, res );
 
-    auto parentPath = utils::file::parentDirectory( entryPoint );
+    auto parentPath = utils::file::parentDirectory( root );
     /*
      * If the parent folder was never added to the media library,
      * the discoverer will reject it.
@@ -600,15 +600,15 @@ void DiscovererWorker::runReloadDevice( int64_t deviceId )
         LOG_ERROR( "Can't fetch device ", deviceId, " to reload it" );
         return;
     }
-    auto entryPoints = Folder::roots( m_ml, false, device->id(), nullptr );
-    if ( entryPoints == nullptr )
+    auto roots = Folder::roots( m_ml, false, device->id(), nullptr );
+    if ( roots == nullptr )
         return;
-    for ( const auto& ep : entryPoints->all() )
+    for ( const auto& root : roots->all() )
     {
         try
         {
-            auto mrl = ep->mrl();
-            LOG_INFO( "Reloading entrypoint on mounted device: ", mrl );
+            auto mrl = root->mrl();
+            LOG_INFO( "Reloading root folder on mounted device: ", mrl );
             runReload( mrl );
         }
         catch ( const fs::errors::DeviceRemoved& )
@@ -625,10 +625,10 @@ void DiscovererWorker::runReloadAllDevices()
     MediaLibrary::removeOldEntities( m_ml );
 }
 
-void DiscovererWorker::runAddEntryPoint( const std::string& entryPoint )
+void DiscovererWorker::runAddRoot( const std::string& root )
 {
-    auto res = m_discoverer->addEntryPoint( entryPoint );
-    m_ml->getCb()->onEntryPointAdded( entryPoint, res );
+    auto res = m_discoverer->addRoot( root );
+    m_ml->getCb()->onRootAdded( root, res );
 }
 
 std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t )
@@ -650,8 +650,8 @@ std::ostream& operator<<( std::ostream& s, DiscovererWorker::Task::Type& t )
         case DiscovererWorker::Task::Type::ReloadDevice:
             s << "ReloadDevice";
             break;
-        case DiscovererWorker::Task::Type::AddEntryPoint:
-            s << "AddEntryPoint";
+        case DiscovererWorker::Task::Type::AddRoot:
+            s << "AddRoot";
             break;
         default:
             assert( !"Invalid task type" );
