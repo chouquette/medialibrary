@@ -1578,9 +1578,7 @@ bool Playlist::writeBackup( const std::string& name,
                             const std::vector<std::string>& mrls,
                             const std::string& destFile )
 {
-    auto file = std::unique_ptr<FILE, decltype(&fclose)>{
-        fopen( destFile.c_str(), "w" ), &fclose
-    };
+    FILE *file = fopen( destFile.c_str(), "w");
     if ( file == nullptr )
         return false;
 
@@ -1603,10 +1601,11 @@ bool Playlist::writeBackup( const std::string& name,
     {
         auto remaining = length - i;
         auto nmemb = remaining <= ChunkSize ? remaining : ChunkSize;
-        auto res = fwrite( buff + i, sizeof( *buff ), nmemb, file.get() );
+        auto res = fwrite( buff + i, sizeof( *buff ), nmemb, file );
         i += res;
     }
-    return true;
+
+    return fclose(file) == 0;
 }
 
 }
