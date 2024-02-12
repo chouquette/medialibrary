@@ -942,7 +942,7 @@ bool Folder::remove( MediaLibraryPtr ml, std::shared_ptr<Folder> folder,
         }
         t->commit();
     }
-    /* If we're banning an entry point, we just need to delete if from the database */
+    /* If we're banning a root folder, we just need to delete if from the database */
     if ( folder->isRootFolder() == true )
         return DatabaseHelpers<Folder>::destroy( ml, folder->id() );
     /* Otherwise we need to flag that it was banned so that it's not discovered again */
