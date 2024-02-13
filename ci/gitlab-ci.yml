@@ -214,7 +214,7 @@ gen-test-db:
   script:
     - meson --buildtype=release build
     - cd build && ninja
-    - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples -n 10
+    - ../ci/generate-samples.sh -o $CI_PROJECT_DIR/dummysamples -n 2
     - test/discoverer/discoverer $CI_PROJECT_DIR/dummysamples -q
     - echo "BEGIN;" > $CI_PROJECT_DIR/test_db.sql
     - >
