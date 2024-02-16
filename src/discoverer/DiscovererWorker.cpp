@@ -108,8 +108,8 @@ bool DiscovererWorker::discover( const std::string& root )
         return false;
     auto path = utils::file::toFolderPath( root );
     LOG_INFO( "Adding ", path, " to the folder discovery list" );
-    enqueue( root, Task::Type::AddRoot );
-    enqueue( root, Task::Type::Reload );
+    enqueue( path, Task::Type::AddRoot );
+    enqueue( path, Task::Type::Reload );
     return true;
 }
 
