@@ -73,7 +73,7 @@ private:
     void checkCache();
     bool removeFromCache( const std::string& mrl );
     bool evictIfNeeded( const File& file, Subscription* s, IFile::CacheType cacheType );
-    void queueTask( std::shared_ptr<Media> m, bool cache );
+    bool queueTask( std::shared_ptr<Media> m, bool cache );
     uint64_t availableSubscriptionCacheSize() const;
     uint64_t availableCacheSize() const;
 
