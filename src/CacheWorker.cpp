@@ -58,7 +58,7 @@ void CacheWorker::setCacher( std::shared_ptr<ICacher> cacher )
     m_cacher = std::move( cacher );
 }
 
-void CacheWorker::queueTask( std::shared_ptr<Media> m, bool cache )
+bool CacheWorker::queueTask( std::shared_ptr<Media> m, bool cache )
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
     m_tasks.emplace( std::move( m ), cache );
@@ -66,6 +66,7 @@ void CacheWorker::queueTask( std::shared_ptr<Media> m, bool cache )
         m_thread = compat::Thread{ &CacheWorker::run, this };
     else
         m_cond.notify_all();
+    return true;
 }
 
 bool CacheWorker::cacheMedia( std::shared_ptr<Media> m )
@@ -78,8 +79,7 @@ bool CacheWorker::cacheMedia( std::shared_ptr<Media> m )
         LOG_DEBUG( "Media ", m->id(), " is already cached" );
         return true;
     }
-    queueTask( std::move( m ), true );
-    return true;
+    return queueTask( std::move( m ), true );
 }
 
 bool CacheWorker::removeCached( std::shared_ptr<Media> m )
@@ -92,8 +92,7 @@ bool CacheWorker::removeCached( std::shared_ptr<Media> m )
         LOG_DEBUG( "Media ", m->id(), " is not cached" );
         return false;
     }
-    queueTask( std::move( m ), false );
-    return true;
+    return queueTask( std::move( m ), false );
 }
 
 void CacheWorker::cacheSubscriptions()
