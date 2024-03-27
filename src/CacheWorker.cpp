@@ -61,6 +61,13 @@ void CacheWorker::setCacher( std::shared_ptr<ICacher> cacher )
 bool CacheWorker::queueTask( std::shared_ptr<Media> m, bool cache )
 {
     std::lock_guard<compat::Mutex> lock{ m_mutex };
+
+    if ( m_cacher == nullptr )
+    {
+        LOG_WARN( "Cache implementation not provided" );
+        return false;
+    }
+
     m_tasks.emplace( std::move( m ), cache );
     if ( m_thread.joinable() == false )
         m_thread = compat::Thread{ &CacheWorker::run, this };
@@ -116,7 +123,9 @@ void CacheWorker::resume()
 
 void CacheWorker::stop()
 {
-    m_cacher->interrupt();
+    if ( m_cacher != nullptr )
+        m_cacher->interrupt();
+
     {
         std::lock_guard<compat::Mutex> lock{ m_mutex };
         if ( m_thread.joinable() == false )
