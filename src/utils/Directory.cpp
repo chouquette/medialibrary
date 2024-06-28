@@ -73,6 +73,8 @@ bool isDirectory( const std::string& path )
 {
 #ifdef _WIN32
     auto wpath = charset::ToWide( path.c_str() );
+    if ( !wpath )
+        throw errors::System{ GetLastError(), ERR_FS_OBJECT_ACCESS + path };
     auto attr = GetFileAttributes( wpath.get() );
     if ( attr == INVALID_FILE_ATTRIBUTES )
         throw errors::System{ GetLastError(), ERR_FS_OBJECT_ACCESS + path };
@@ -98,7 +100,7 @@ std::string toAbsolute( const std::string& path )
 #else
     wchar_t buff[MAX_PATH];
     auto wpath = charset::ToWide( path.c_str() );
-    if ( GetFullPathNameW( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
+    if ( !wpath || GetFullPathNameW( wpath.get(), MAX_PATH, buff, nullptr ) == 0 )
     {
         LOG_ERROR( "Failed to convert ", path, " to absolute path" );
         throw errors::System{ GetLastError(), "Failed to convert to absolute path" };
@@ -136,7 +138,7 @@ bool mkdir( const std::string& path )
             continue;
         }
         auto wFullPath = charset::ToWide( fullPath.c_str() );
-        if ( _wmkdir( wFullPath.get() ) != 0 )
+        if ( !wFullPath || _wmkdir( wFullPath.get() ) != 0 )
 #else
         if ( ::mkdir( fullPath.c_str(), S_IRWXU ) != 0 )
 #endif
@@ -203,6 +205,8 @@ bool rmdir( std::string path )
     WIN32_FIND_DATA f;
     auto pattern = path + '*';
     auto wpattern = charset::ToWide( pattern.c_str() );
+    if ( !wpattern )
+        return false;
     auto h = FindFirstFile( wpattern.get(), &f );
     if ( h == INVALID_HANDLE_VALUE )
     {
@@ -231,6 +235,8 @@ bool rmdir( std::string path )
         }
     } while ( FindNextFile( h, &f ) != 0 );
     auto wPath = charset::ToWide( path.c_str() );
+    if ( !wPath )
+        return false;
     auto res = _wrmdir( wPath.get() );
     if ( res == 0 )
         return true;
