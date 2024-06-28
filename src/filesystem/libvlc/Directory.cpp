@@ -174,8 +174,10 @@ void Directory::addFile( std::string mrl, fs::IFile::LinkedFileType linkedType,
 
 #ifdef _WIN32
         /* We can't use _wstat here, see #323 */
+        auto wpath = charset::ToWide( path.c_str() );
         WIN32_FILE_ATTRIBUTE_DATA attributes;
-        if ( GetFileAttributesExW( charset::ToWide( path.c_str() ).get(),
+        if ( !wpath ||
+             GetFileAttributesExW( wpath.get(),
                                    GetFileExInfoStandard, &attributes ) == 0 )
         {
             LOG_ERROR( "Failed to get ", path, " attributes" );
