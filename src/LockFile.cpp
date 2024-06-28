@@ -50,6 +50,9 @@ std::unique_ptr<LockFile> LockFile::lock( const std::string& mlFolderPath )
     Handle handle;
 #ifdef _WIN32
     auto wide = charset::ToWide( lockFile.c_str() );
+    if ( !wide )
+        handle = INVALID_HANDLE_VALUE;
+    else
 # if _WIN32_WINNT >= 0x0602 /* _WIN32_WINNT_WIN8 */
     handle = CreateFile2(wide.get(), GENERIC_WRITE, 0, CREATE_ALWAYS, NULL);
 # else
