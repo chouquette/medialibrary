@@ -104,6 +104,11 @@ std::string toAbsolute( const std::string& path )
         throw errors::System{ GetLastError(), "Failed to convert to absolute path" };
     }
     auto upath = charset::FromWide( buff );
+    if ( !upath )
+    {
+        LOG_ERROR( "Failed to convert ", path, " to UTF8" );
+        throw errors::System{ GetLastError(), "Failed to convert to UTF8" };
+    }
     return file::toFolderPath( upath.get() );
 #endif
 }
@@ -209,6 +214,8 @@ bool rmdir( std::string path )
     do
     {
         auto file = charset::FromWide( f.cFileName );
+        if ( !file )
+            continue;
         if ( strcmp( file.get(), "." ) == 0 ||
              strcmp( file.get(), ".." ) == 0 )
             continue;
