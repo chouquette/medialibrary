@@ -36,6 +36,8 @@ static inline std::string getTempDir()
     WCHAR path[MAX_PATH];
     GetTempPathW( MAX_PATH, path );
     auto utf8 = medialibrary::charset::FromWide( path );
+    if ( !utf8 )
+        return {};
     return utf8.get();
 #else
     return "/tmp/";
