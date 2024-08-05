@@ -1493,10 +1493,24 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
                               const QueryParameters* params,
                               IMedia::SubType subType )
 {
-    assert( type == IMedia::Type::Audio || type == IMedia::Type::Video );
+    const bool publicOnly = params != nullptr && params->publicOnly;
+
     std::string req = "FROM " + Media::Table::Name + " m ";
 
     req += addRequestJoin( params );
+
+    // When all the media is to be listed
+    if ( type == IMedia::Type::Unknown )
+    {
+        req += " WHERE m.import_type = ?";
+
+        req += addRequestConditions( params, false );
+
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ),
+                                        sortRequest( params ),
+                                        ImportType::Internal )
+                .markPublic( publicOnly ).build();
+    }
     // We want to include unknown media to the video listing, so we invert the
     // filter to exclude Audio (ie. we include Unknown & Video)
     // If we only want audio media, then we just filter 'type = Audio'
@@ -1506,7 +1520,6 @@ Query<IMedia> Media::listAll( MediaLibraryPtr ml, IMedia::Type type,
         req += " WHERE m.type = ?";
     req +=  " AND m.import_type = ?";
 
-    const bool publicOnly = params != nullptr && params->publicOnly;
     req += addRequestConditions( params, false );
 
     if ( subType != IMedia::SubType::Unknown )

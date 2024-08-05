@@ -820,6 +820,11 @@ bool MediaLibrary::removeExternalMedia(MediaPtr media)
     return Media::destroy( this, media->id() );
 }
 
+Query<IMedia> MediaLibrary::mediaFiles( const QueryParameters* params ) const
+{
+    return Media::listAll( this, IMedia::Type::Unknown, params, IMedia::SubType::Unknown );
+}
+
 Query<IMedia> MediaLibrary::audioFiles( const QueryParameters* params ) const
 {
     return Media::listAll( this, IMedia::Type::Audio, params, IMedia::SubType::Unknown );

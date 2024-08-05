@@ -538,7 +538,7 @@ public:
     virtual bool removeExternalMedia( MediaPtr media ) = 0;
 
     /**
-     * @brief audioFiles Returns the media classified as Audio
+     * @brief mediaFiles Returns the media unclassified
      * @param params Some query parameters.
      * @return A query representing the results set
      *
@@ -553,13 +553,21 @@ public:
      *   - FileSize
      * Default sorting parameter uses the media's title, in ascending order
      */
+    virtual Query<IMedia> mediaFiles( const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief audioFiles Returns the media classified as Audio
+     * @param params Some query parameters.
+     * @return A query representing the results set
+     *
+     * \see{IMediaLibrary::mediaFiles} for the supported sorting criteria
+     */
     virtual Query<IMedia> audioFiles( const QueryParameters* params = nullptr ) const = 0;
     /**
      * @brief videoFiles Returns the media classified as Video
      * @param params Some query parameters.
      * @return A query representing the results set
      *
-     * \see{IMediaLibrary::audioFile} for the supported sorting criteria
+     * \see{IMediaLibrary::mediaFiles} for the supported sorting criteria
      */
     virtual Query<IMedia> videoFiles( const QueryParameters* params = nullptr ) const = 0;
 
