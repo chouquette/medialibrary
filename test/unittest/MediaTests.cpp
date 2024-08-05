@@ -416,6 +416,28 @@ static void SearchWeirdPatterns( Tests* T )
     ASSERT_EQ( 0u, media.size() );
 }
 
+static void ListByType( Tests* T )
+{
+    auto mUnk = std::static_pointer_cast<Media>( T->ml->addMedia( "unknown media", IMedia::Type::Unknown )),
+         mVid = std::static_pointer_cast<Media>( T->ml->addMedia( "video media.mp4", IMedia::Type::Video )),
+         mAud = std::static_pointer_cast<Media>( T->ml->addMedia( "audio media.mp3", IMedia::Type::Audio ));
+
+    auto list = T->ml->mediaFiles( nullptr )->all();
+    ASSERT_EQ( list.size(), 3u );
+    ASSERT_EQ( list[0]->id(), mAud->id() );
+    ASSERT_EQ( list[1]->id(), mUnk->id() );
+    ASSERT_EQ( list[2]->id(), mVid->id() );
+
+    list = T->ml->videoFiles( nullptr )->all();
+    ASSERT_EQ( list.size(), 2u );
+    ASSERT_EQ( list[0]->id(), mUnk->id() );
+    ASSERT_EQ( list[1]->id(), mVid->id() );
+
+    list = T->ml->audioFiles( nullptr )->all();
+    ASSERT_EQ( list.size(), 1u );
+    ASSERT_EQ( list[0]->id(), mAud->id() );
+}
+
 static void Favorite( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
@@ -933,6 +955,9 @@ static void ExternalMrl( Tests* T )
     ASSERT_TRUE( m->isExternalMedia() );
 
     // External files shouldn't appear in listings
+    auto medias = T->ml->mediaFiles( nullptr )->all();
+    ASSERT_EQ( medias.size(), 0u );
+
     auto videos = T->ml->videoFiles( nullptr )->all();
     ASSERT_EQ( 0u, videos.size() );
 
@@ -1746,6 +1771,7 @@ int main( int ac, char** av )
     ADD_TEST( SearchTracks );
     ADD_TEST( SortByLastPlayedDate );
     ADD_TEST( SearchWeirdPatterns );
+    ADD_TEST( ListByType );
     ADD_TEST( Favorite );
     ADD_TEST( History );
     ADD_TEST( StreamHistory );

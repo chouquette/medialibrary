@@ -615,6 +615,7 @@ media_tests = [
   'SearchTracks',
   'SortByLastPlayedDate',
   'SearchWeirdPatterns',
+  'ListByType',
   'Favorite',
   'History',
   'StreamHistory',
