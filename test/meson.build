@@ -5,7 +5,13 @@ if get_option('fuzz')
 else
   subdir('unittest')
 
-  subdir('samples')
+  rapidjson_dep = dependency('RapidJSON', required: false)
+  if rapidjson_dep.found()
+    subdir('samples')
+  else
+    warning('RapidJSON not found, disabling functional tests.')
+  endif
+
   subdir('discoverer')
   subdir('sqlite_load')
   subdir('fast_teardown')
