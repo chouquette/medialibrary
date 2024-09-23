@@ -180,11 +180,16 @@ public:
     ///
     virtual bool move( uint32_t from, uint32_t to ) = 0;
     ///
-    /// \brief remove Removes an item from the playlist
+    /// \brief remove Removes a range of items from the playlist
     /// \param position The position of the item to remove.
+    /// \param count The number of element to remove (one by default)
     /// \return true on success, false on failure
     ///
-    virtual bool remove( uint32_t position ) = 0;
+    /// For instance, a playlist with <media,position> like
+    /// [<A,0>, <B,1>, <C,2>, <D,3>] on which remove(1, 2) is called will result in the
+    /// playlist being changed to[<A,0>, <D,1>]
+    ///
+    virtual bool remove( uint32_t position, uint32_t count = 1 ) = 0;
     ///
     /// \brief isReadOnly Return true if the playlist is backed by an actual file
     ///                   and should therefore not modified directly.

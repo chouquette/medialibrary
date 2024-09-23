@@ -420,64 +420,62 @@ bool Playlist::addInternal( const std::vector<int64_t>& mediaList, uint32_t posi
     return true;
 }
 
-bool Playlist::removeInternal( uint32_t position, int64_t mediaId , bool updateCounters )
+bool Playlist::removeInternal( uint32_t position, uint32_t count , bool updateCounters )
 {
-    std::unique_ptr<sqlite::Transaction> t;
-    if ( updateCounters == true )
-        t = m_ml->getConn()->newTransaction();
-    static const std::string req = "DELETE FROM " + MediaRelationTable::Name +
-            " WHERE playlist_id = ? AND position = ?";
-    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position ) == false )
-        return false;
-
-    if ( updateCounters == false )
+    if ( count == 0 )
         return true;
 
-    auto media = m_ml->media( mediaId );
-    if ( media == nullptr )
-        return false;
+    std::unique_ptr<sqlite::Transaction> t;
 
-    auto videoDecrement = 0u;
-    auto audioDecrement = 0u;
-    auto unknownDecrement = 0u;
-    switch ( media->type() )
+    t = m_ml->getConn()->newTransaction();
+
+    CounterAccumulator counterAcc;
+    if ( updateCounters == true )
     {
-        case IMedia::Type::Video:
-            videoDecrement = 1;
-            break;
-        case IMedia::Type::Audio:
-            audioDecrement = 1;
-            break;
-        case IMedia::Type::Unknown:
-            unknownDecrement = 1;
-            break;
-    }
-    auto isPresent = media->isPresent();
-    const std::string updateCountReq = "UPDATE " + Table::Name + " SET"
+
+        auto deletedMediasQuery = this->media( nullptr );
+        if ( !deletedMediasQuery )
+            return false;
+        auto deletedMedias = deletedMediasQuery->items( count, position );
+
+        for ( auto m : deletedMedias )
+            counterAcc.update( *m );
+
+        const std::string updateCountReq = "UPDATE " + Table::Name + " SET"
             " nb_video = nb_video - ?, nb_present_video = nb_present_video - ?,"
             " nb_audio = nb_audio - ?, nb_present_audio = nb_present_audio - ?,"
             " nb_unknown = nb_unknown - ?, nb_present_unknown = nb_present_unknown - ?,"
             " duration = duration - ?, nb_duration_unknown = nb_duration_unknown - ?"
             " WHERE id_playlist = ?";
-    auto duration = media->duration() > 0 ? media->duration() : 0;
-    auto unknownDurationDecrement = duration <= 0 ? 1 : 0;
-    if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
-                                       videoDecrement, videoDecrement & isPresent,
-                                       audioDecrement, audioDecrement & isPresent,
-                                       unknownDecrement, unknownDecrement & isPresent,
-                                       duration, unknownDurationDecrement, m_id ) == false )
+
+        if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
+                counterAcc.video, counterAcc.videoPresent,
+                counterAcc.audio, counterAcc.audioPresent,
+                counterAcc.unknown, counterAcc.unknownPresent,
+                counterAcc.duration, counterAcc.unknownDuration, m_id ) == false )
         return false;
+    }
+
+    static const std::string req = "DELETE FROM " + MediaRelationTable::Name +
+                                   " WHERE playlist_id = ? AND position >= ? AND position < ?";
+    if ( sqlite::Tools::executeDelete( m_ml->getConn(), req, m_id, position, position + count ) == false )
+        return false;
+
     if ( t != nullptr )
         t->commit();
 
-    m_nbVideo -= videoDecrement;
-    m_nbPresentVideo -= videoDecrement & isPresent;
-    m_nbAudio -= audioDecrement;
-    m_nbPresentAudio -= audioDecrement & isPresent;
-    m_nbUnknown -= unknownDecrement;
-    m_nbPresentUnknown -= unknownDecrement & isPresent;
-    m_duration -= duration;
-    m_nbUnknownDuration -= unknownDurationDecrement;
+
+    if ( updateCounters )
+    {
+        m_nbVideo -= counterAcc.video;
+        m_nbPresentVideo -= counterAcc.videoPresent;
+        m_nbAudio -= counterAcc.audio;
+        m_nbPresentAudio -= counterAcc.audioPresent;
+        m_nbUnknown -= counterAcc.unknown;
+        m_nbPresentUnknown -= counterAcc.unknownPresent;
+        m_duration -= counterAcc.duration;
+        m_nbUnknownDuration -= counterAcc.unknownDuration;
+    }
 
     return true;
 }
@@ -564,7 +562,7 @@ bool Playlist::move( uint32_t from, uint32_t position )
         LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
         return false;
     }
-    if ( removeInternal( from, mediaId, false ) == false )
+    if ( removeInternal( from, 1, false ) == false )
     {
         LOG_ERROR( "Failed to remove element ", from, " from playlist" );
         return false;
@@ -583,12 +581,9 @@ bool Playlist::move( uint32_t from, uint32_t position )
     return true;
 }
 
-bool Playlist::remove( uint32_t position )
+bool Playlist::remove( uint32_t position, uint32_t count )
 {
-    auto mediaId = mediaAt( position );
-    if ( mediaId == 0 )
-        return false;
-    return removeInternal( position, mediaId, true );
+    return removeInternal( position, count, true );
 }
 
 bool Playlist::isReadOnly() const
