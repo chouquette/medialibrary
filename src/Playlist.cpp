@@ -544,8 +544,16 @@ bool Playlist::add( const std::vector<MediaPtr>& mediaList, uint32_t position )
     return add( mediaListId, position );
 }
 
-bool Playlist::move( uint32_t from, uint32_t position )
+bool Playlist::move( uint32_t from, uint32_t position, uint32_t count )
 {
+    //no-op
+    if (count == 0)
+        return true;
+
+    // no-op
+    if ( from <= position  && (position + 1) <= (from + count) )
+        return true;
+
     auto dbConn = m_ml->getConn();
 
     /*
@@ -556,18 +564,26 @@ bool Playlist::move( uint32_t from, uint32_t position )
      * However to do so, we need to fetch the media ID at the previous location.
      */
     auto t = dbConn->newTransaction();
-    auto mediaId = mediaAt( from );
-    if ( mediaId == 0 )
+    std::vector<int64_t> medialist;
+    for ( uint32_t i = from; i < from + count; i++ )
     {
-        LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
-        return false;
+        auto mediaId = mediaAt( i );
+        if ( mediaId == 0 )
+        {
+            LOG_ERROR( "Failed to find an item at position ", from, " in playlist" );
+            return false;
+        }
+        medialist.push_back(mediaId);
     }
-    if ( removeInternal( from, 1, false ) == false )
+
+    if ( removeInternal( from, count, false ) == false )
     {
         LOG_ERROR( "Failed to remove element ", from, " from playlist" );
         return false;
     }
-    if ( addInternal( mediaId, position, false ) == false )
+    auto newPosition = (position < from) ? position : (position - (count - 1));
+
+    if ( addInternal( medialist, newPosition, false ) == false )
     {
         LOG_ERROR( "Failed to re-add element in playlist" );
         return false;

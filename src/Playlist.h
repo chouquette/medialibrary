@@ -115,7 +115,7 @@ public:
     virtual bool append( const std::vector<MediaPtr>& mediaList ) override;
     virtual bool add( const std::vector<MediaPtr>& mediaList, uint32_t position ) override;
 
-    virtual bool move( uint32_t from, uint32_t position ) override;
+    virtual bool move( uint32_t from, uint32_t position, uint32_t count = 1 ) override;
     virtual bool remove( uint32_t position, uint32_t count = 1 ) override;
     virtual bool isReadOnly() const override;
     virtual std::string mrl() const override;
