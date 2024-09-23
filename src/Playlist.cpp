@@ -308,78 +308,113 @@ int64_t Playlist::mediaAt( uint32_t position )
 
 bool Playlist::addInternal( int64_t mediaId, uint32_t position, bool updateCounters )
 {
-    auto media = m_ml->media( mediaId );
-    if ( media == nullptr )
-        return false;
-    return addInternal( *media, position, updateCounters );
+    std::vector<int64_t> mediaList{ mediaId };
+    return addInternal( mediaList, position, updateCounters );
 }
 
-bool Playlist::addInternal( const IMedia& media, uint32_t position, bool updateCounters )
+struct CounterAccumulator
 {
-    auto t = m_ml->getConn()->newTransaction();
+    uint32_t video = 0u;
+    uint32_t videoPresent = 0u;
+    uint32_t audio = 0u;
+    uint32_t audioPresent = 0u;
+    uint32_t unknown = 0u;
+    uint32_t unknownPresent = 0u;
+    int64_t duration = 0u;
+    uint32_t unknownDuration = 0u;
 
-    bool res;
-    if ( position == UINT32_MAX )
+    void update( const IMedia& media )
     {
-        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
-                "(media_id, playlist_id, position) VALUES(?1, ?2, "
-                "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-                " WHERE playlist_id = ?2))";
-        res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                            m_id );
-    }
-    else
-    {
-        static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
-                "(media_id, playlist_id, position) VALUES(?1, ?2,"
-                "min(?3, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
-                " WHERE playlist_id = ?2)))";
-        res = sqlite::Tools::executeInsert( m_ml->getConn(), req, media.id(),
-                                           m_id, position );
-    }
-    if ( res == false )
-        return false;
-    if ( updateCounters == true )
-    {
-        auto videoIncrement = 0u;
-        auto audioIncrement = 0u;
-        auto unknownIncrement = 0u;
+        auto present = media.isPresent() ? 1 : 0;
+        auto mediaDuration = media.duration() > 0 ? media.duration() : 0;
+
         switch ( media.type() )
         {
             case IMedia::Type::Video:
-                videoIncrement = 1;
+                video += 1;
+                videoPresent += present;
                 break;
             case IMedia::Type::Audio:
-                audioIncrement = 1;
+                audio += 1;
+                audioPresent += present;
                 break;
             case IMedia::Type::Unknown:
-                unknownIncrement = 1;
+                unknown += 1;
+                unknownPresent += present;
                 break;
         }
+        duration += mediaDuration;
+        unknownDuration += (mediaDuration <= 0) ? 1 : 0;
+    }
+};
+
+bool Playlist::addInternal( const std::vector<int64_t>& mediaList, uint32_t position, bool updateCounters )
+{
+    auto t = m_ml->getConn()->newTransaction();
+
+    CounterAccumulator counterAcc;
+
+    bool res;
+    for ( int64_t mediaId : mediaList )
+    {
+        if ( position == UINT32_MAX )
+        {
+            static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name +
+                    "(media_id, playlist_id, position) VALUES(?1, ?2, "
+                    "(SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                    " WHERE playlist_id = ?2))";
+            res = sqlite::Tools::executeInsert( m_ml->getConn(), req, mediaId,
+                                                m_id );
+        }
+        else
+        {
+            static const std::string req = "INSERT INTO " + Playlist::MediaRelationTable::Name + " "
+                    "(media_id, playlist_id, position) VALUES(?1, ?2,"
+                    "min(?3, (SELECT COUNT(media_id) FROM " + Playlist::MediaRelationTable::Name +
+                    " WHERE playlist_id = ?2)))";
+            res = sqlite::Tools::executeInsert( m_ml->getConn(), req, mediaId,
+                                               m_id, position );
+            position++;
+        }
+        if ( res == false )
+            return false;
+
+        if ( updateCounters == true )
+        {
+            auto media = m_ml->media( mediaId );
+            if ( media == nullptr )
+                return false;
+            counterAcc.update(*media);
+        }
+    }
+    if ( updateCounters == true )
+    {
         const std::string updateCountReq = "UPDATE " + Table::Name + " SET"
                 " nb_video = nb_video + ?, nb_present_video = nb_present_video + ?,"
                 " nb_audio = nb_audio + ?, nb_present_audio = nb_present_audio + ?,"
                 " nb_unknown = nb_unknown + ?, nb_present_unknown = nb_present_unknown + ?,"
                 " duration = duration + ?, nb_duration_unknown = nb_duration_unknown + ?"
                 " WHERE id_playlist = ?";
-        auto isPresent = media.isPresent();
-        auto duration = media.duration() > 0 ? media.duration() : 0;
-        auto unknownDurationIncrement = duration <= 0 ? 1 : 0;
+
         if ( sqlite::Tools::executeUpdate( m_ml->getConn(), updateCountReq,
-                                           videoIncrement, videoIncrement & isPresent,
-                                           audioIncrement, audioIncrement & isPresent,
-                                           unknownIncrement, unknownIncrement & isPresent,
-                                           duration, unknownDurationIncrement, m_id ) == false )
+                counterAcc.video,
+                counterAcc.videoPresent,
+                counterAcc.audio,
+                counterAcc.audioPresent,
+                counterAcc.unknown,
+                counterAcc.unknownPresent,
+                counterAcc.duration,
+                counterAcc.unknownDuration, m_id ) == false )
             return false;
 
-        m_nbVideo += videoIncrement;
-        m_nbPresentVideo += videoIncrement & isPresent;
-        m_nbAudio += audioIncrement;
-        m_nbPresentAudio += audioIncrement & isPresent;
-        m_nbUnknown += unknownIncrement;
-        m_nbPresentUnknown += unknownIncrement & isPresent;
-        m_duration += duration;
-        m_nbUnknownDuration += unknownDurationIncrement;
+        m_nbVideo += counterAcc.video;
+        m_nbPresentVideo += counterAcc.video;
+        m_nbAudio += counterAcc.audio;
+        m_nbPresentAudio += counterAcc.audioPresent;
+        m_nbUnknown += counterAcc.unknown;
+        m_nbPresentUnknown += counterAcc.unknownPresent;
+        m_duration += counterAcc.duration;
+        m_nbUnknownDuration += counterAcc.unknownDuration;
     }
     t->commit();
     return true;
@@ -456,28 +491,59 @@ std::shared_ptr<File> Playlist::file() const
 
 bool Playlist::append( const IMedia& media )
 {
-    return addInternal( media, UINT32_MAX, true );
+    std::vector<int64_t> mediaList { media.id() };
+    return append( mediaList );
 }
 
 bool Playlist::add( const IMedia& media, uint32_t position )
 {
-    return addInternal( media, position, true );
+    std::vector<int64_t> mediaList { media.id() };
+    return add( mediaList, position );
 }
 
 bool Playlist::append( int64_t mediaId )
 {
-    auto media = m_ml->media( mediaId );
-    if ( media == nullptr )
-        return false;
-    return append( *media );
+    std::vector<int64_t> mediaList { mediaId };
+    return append( mediaList );
 }
 
 bool Playlist::add( int64_t mediaId, uint32_t position )
 {
-    auto media = m_ml->media( mediaId );
-    if ( media == nullptr )
-        return false;
-    return add( *media, position );
+    std::vector<int64_t> mediaList { mediaId };
+    return add( mediaList, position );
+}
+
+bool Playlist::append( const std::vector<int64_t>& mediaList )
+{
+    return addInternal( mediaList, UINT32_MAX, true );
+}
+
+bool Playlist::add( const std::vector<int64_t>& mediaList, uint32_t position )
+{
+    return addInternal( mediaList, position, true );
+}
+
+bool Playlist::append( const std::vector<MediaPtr>& mediaList )
+{
+    std::vector<int64_t> mediaListId;
+    std::transform(
+        mediaList.cbegin(), mediaList.cend(),
+        std::back_inserter(mediaListId), [](const MediaPtr& media) {
+            return media->id();
+        });
+    return append( mediaListId );
+}
+
+bool Playlist::add( const std::vector<MediaPtr>& mediaList, uint32_t position )
+{
+    std::vector<int64_t> mediaListId;
+    std::transform(
+        mediaList.cbegin(), mediaList.cend(),
+        std::back_inserter(mediaListId),
+        [](const MediaPtr& media) {
+            return media->id();
+        });
+    return add( mediaListId, position );
 }
 
 bool Playlist::move( uint32_t from, uint32_t position )
