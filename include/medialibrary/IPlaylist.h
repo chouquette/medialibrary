@@ -164,6 +164,7 @@ public:
     /// \brief move Change the position of a media
     /// \param from The position of the item being moved
     /// \param to The moved item target position
+    /// \param count The number of elements to move
     ///
     /// \return true on success, false on failure
     ///
@@ -173,12 +174,21 @@ public:
     /// [<A,0>, <B,1>, <C,2>] on which move(0, 1) is called will result in the
     /// playlist being changed to
     /// [<B,0>, <A,1>, <C,2>]
+    ///
+    /// Likewise, when moving multiple elements:
+    /// On the playlist [<A,0>, <B,1>, <C,2>, <D,3>, <E,4>], move(1, 3, 2) results in
+    /// [<A,0>, <D,1>, <B,2>, <C,3>, <E,4>]
+    ///
+    /// Moving one or multiple elements at the same position or within its range has no effects.
+    /// On the playlist [<A,0>, <B,1>, <C,2>, <D,3>, <E,4>], move(1,1) or move(2,3,2)
+    /// doesn't alter the playlist. Modification won't be notified, the function returns true
+    ///
     /// If the target position is out of range (ie greater than the playlist size)
     /// the target position will be interpreted as the playlist size (prior to insertion).
-    /// For instance, on the playlist [<B,0>, <A,1>, <C,2>], if move(0, 999)
-    /// gets called, the resulting playlist will be [<A,0>, <C,1>, <B,2>]
+    /// For instance, on the playlist [<A,0>, <B,1>, <C,2>], if move(0, 999)
+    /// gets called, the resulting playlist will be [<B,0>, <C,1>, <A,2>].
     ///
-    virtual bool move( uint32_t from, uint32_t to ) = 0;
+    virtual bool move( uint32_t from, uint32_t to, uint32_t count = 1 ) = 0;
     ///
     /// \brief remove Removes a range of items from the playlist
     /// \param position The position of the item to remove.
