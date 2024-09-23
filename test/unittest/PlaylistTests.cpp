@@ -372,6 +372,71 @@ static void Remove( PlaylistTests* T )
     T->CheckContiguity();
 }
 
+static void RemoveMany( PlaylistTests* T )
+{
+    for ( auto i = 1; i <= 8; ++i )
+    {
+        auto m = T->ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        ASSERT_NE( nullptr, m );
+        auto res = T->pl->append( *m );
+        ASSERT_TRUE( res );
+    }
+    // [<1,0>,<2,1>,<3,2>,<4,3>,<5,4>]
+    auto media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 8u, media.size() );
+    T->CheckContiguity();
+
+    //remove in the middle
+    T->pl->remove( 2, 2 );
+    // [<1,0>,<2,1>,<5,3>]
+
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 6u, media.size() );
+
+    ASSERT_EQ( 1u, media[0]->id() );
+    ASSERT_EQ( 2u, media[1]->id() );
+    ASSERT_EQ( 5u, media[2]->id() );
+    ASSERT_EQ( 6u, media[3]->id() );
+    ASSERT_EQ( 7u, media[4]->id() );
+    ASSERT_EQ( 8u, media[5]->id() );
+    T->CheckContiguity();
+
+    //remove in the front
+    T->pl->remove( 0, 2 );
+    // [<5,0>,<6,1>,<7,2>,<8,3>]
+
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 4u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 6u, media[1]->id() );
+    ASSERT_EQ( 7u, media[2]->id() );
+    ASSERT_EQ( 8u, media[3]->id() );
+    T->CheckContiguity();
+
+    //remove past the end, no-op
+    T->pl->remove( 5, 2 );
+    // [<5,0>,<6,1>,<7,2>,<8,3>]
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 4u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 6u, media[1]->id() );
+    ASSERT_EQ( 7u, media[2]->id() );
+    ASSERT_EQ( 8u, media[3]->id() );
+    T->CheckContiguity();
+
+    //remove end and beyond
+    T->pl->remove( 2, 5 );
+    // [<5,0>,<6,1>]
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 2u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 6u, media[1]->id() );
+    T->CheckContiguity();
+}
+
 static void DeleteFile( PlaylistTests* T )
 {
     for ( auto i = 1; i < 6; ++i )
@@ -855,6 +920,13 @@ static void NbMedia( PlaylistTests* T )
     ASSERT_TRUE( res );
     ASSERT_EQ( 6u, T->pl->nbMedia() );
     ASSERT_EQ( 6u, T->pl->nbPresentMedia() );
+
+    /* remove the media we just inserted */
+    res = T->pl->remove( 2, 3 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3u, T->pl->nbMedia() );
+    ASSERT_EQ( 3u, T->pl->nbPresentMedia() );
+
 }
 
 static void Duration( PlaylistTests* T )
@@ -983,6 +1055,11 @@ static void Duration( PlaylistTests* T )
     res = T->pl->add( medialist, 2 );
     ASSERT_TRUE( res );
     ASSERT_EQ( 6 * m1->duration(), T->pl->duration() );
+
+    /* remove the medias we just inserted */
+    res = T->pl->remove( 2, 3 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3 * m1->duration(), T->pl->duration() );
 }
 
 static void UpdateNbMediaOnInsertAndDelete( PlaylistTests* T )
@@ -1038,6 +1115,13 @@ static void UpdateNbMediaOnInsertAndDelete( PlaylistTests* T )
     ASSERT_EQ( 5u, T->pl->nbAudio() );
     ASSERT_EQ( 2u, T->pl->nbVideo() );
     ASSERT_EQ( 6u, T->pl->nbUnknown() );
+
+    //remove the elements we just inserted
+    res = T->pl->remove( 2, 6 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 3u, T->pl->nbUnknown() );
 }
 
 static void UpdateNbMediaOnMediaRemoval( PlaylistTests* T )
@@ -1444,6 +1528,7 @@ int main( int ac, char** av )
     ADD_TEST( InsertMany );
     ADD_TEST( Move );
     ADD_TEST( Remove );
+    ADD_TEST( RemoveMany );
     ADD_TEST( DeleteFile );
     ADD_TEST( Search );
     ADD_TEST( SearchAndSort );

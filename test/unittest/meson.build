@@ -716,6 +716,7 @@ playlist_tests = [
   'InsertMany',
   'Move',
   'Remove',
+  'RemoveMany',
   'DeleteFile',
   'Search',
   'SearchAndSort',
