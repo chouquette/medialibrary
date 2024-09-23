@@ -160,6 +160,46 @@ static void Append( PlaylistTests* T )
     T->CheckContiguity();
 }
 
+static void AppendMany( PlaylistTests* T )
+{
+    for ( auto i = 1; i <= 4; ++i )
+    {
+        auto m = T->ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        ASSERT_NE( nullptr, m );
+        T->pl->append( *m );
+    }
+    // [1,2,3,4]
+    auto media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 4u, media.size() );
+    T->CheckContiguity();
+
+    std::vector<MediaPtr> mediaList;
+    for ( auto i = 5; i <= 8; ++i )
+    {
+        auto media = T->ml->addMedia( "append" + std::to_string( i ) +  ".mkv", IMedia::Type::Video );
+        mediaList.push_back( media  );
+    }
+    // [1,2,3,4,5,6,7,8]
+    T->pl->append( mediaList );
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 8u, media.size() );
+    T->CheckContiguity();
+
+    for ( auto i = 0u; i < 4; ++i )
+    {
+        auto name = "media" + std::to_string( i+1 ) + ".mkv";
+        ASSERT_EQ( media[i]->title(), name );
+        ASSERT_EQ( media[i]->id(), i+1 );
+    }
+    for ( auto i = 4u; i < 8; ++i )
+    {
+        auto name = "append" + std::to_string( i+1 ) + ".mkv";
+        ASSERT_EQ( media[i]->title(), name );
+        ASSERT_EQ( media[i]->id(), i+1 );
+    }
+}
+
+
 static void Insert( PlaylistTests* T )
 {
     for ( auto i = 1; i < 4; ++i )
@@ -189,6 +229,52 @@ static void Insert( PlaylistTests* T )
     ASSERT_EQ( 2u, media[3]->id() );
     ASSERT_EQ( 3u, media[4]->id() );
 }
+
+static void InsertMany( PlaylistTests* T )
+{
+    for ( auto i = 1; i <= 3; ++i )
+    {
+        auto m = T->ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        ASSERT_NE( nullptr, m );
+        auto res = T->pl->append( m->id() );
+        ASSERT_TRUE( res );
+    }
+    // [<1,0>,<2,1>,<3,2>]
+
+    std::vector<MediaPtr> frontMedias;
+    for ( auto i = 4; i <= 6; ++i )
+    {
+        auto media = T->ml->addMedia( "front" + std::to_string( i ) +  ".mkv", IMedia::Type::Video );
+        frontMedias.push_back( media  );
+    }
+
+    T->pl->add( frontMedias, 0 );
+    T->CheckContiguity();
+
+    std::vector<MediaPtr> middleMedias;
+    for ( auto i = 7; i <= 9; ++i )
+    {
+        auto media = T->ml->addMedia( "middle" + std::to_string( i ) +  ".mkv", IMedia::Type::Video );
+        middleMedias.push_back( media );
+    }
+    T->pl->add( middleMedias, 2 );
+    T->CheckContiguity();
+    // [<4,0>,<1,1>,<5,2>,<2,3>,<3,4>]
+
+    auto media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 9u, media.size() );
+
+    ASSERT_EQ( 4u, media[0]->id() );
+    ASSERT_EQ( 5u, media[1]->id() );
+    ASSERT_EQ( 7u, media[2]->id() );
+    ASSERT_EQ( 8u, media[3]->id() );
+    ASSERT_EQ( 9u, media[4]->id() );
+    ASSERT_EQ( 6u, media[5]->id() );
+    ASSERT_EQ( 1u, media[6]->id() );
+    ASSERT_EQ( 2u, media[7]->id() );
+    ASSERT_EQ( 3u, media[8]->id() );
+}
+
 
 static void Move( PlaylistTests* T )
 {
@@ -758,6 +844,17 @@ static void NbMedia( PlaylistTests* T )
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
     ASSERT_EQ( 0u, T->pl->nbMedia() );
     ASSERT_EQ( 0u, T->pl->nbPresentMedia() );
+
+    std::vector<MediaPtr> medialist = { media, media, media };
+    res = T->pl->append( medialist );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3u, T->pl->nbMedia() );
+    ASSERT_EQ( 3u, T->pl->nbPresentMedia() );
+
+    res = T->pl->add( medialist, 2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 6u, T->pl->nbMedia() );
+    ASSERT_EQ( 6u, T->pl->nbPresentMedia() );
 }
 
 static void Duration( PlaylistTests* T )
@@ -873,12 +970,26 @@ static void Duration( PlaylistTests* T )
     T->ml->deleteMedia( m1->id() );
     T->pl = std::static_pointer_cast<Playlist>( T->ml->playlist( T->pl->id() ) );
     ASSERT_EQ( 0, T->pl->duration() );
+
+    /* Now insert a list of media */
+    auto m3 = T->ml->addExternalMedia( "http://media.org/test2.mkv", 1300 );
+    ASSERT_EQ( m3->duration(), 1300 );
+
+    std::vector<MediaPtr> medialist = { m3, m3, m3 };
+    res = T->pl->append( medialist );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3 * m1->duration(), T->pl->duration() );
+
+    res = T->pl->add( medialist, 2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 6 * m1->duration(), T->pl->duration() );
 }
 
 static void UpdateNbMediaOnInsertAndDelete( PlaylistTests* T )
 {
     auto m1 = T->ml->addMedia( "media1.mp3", IMedia::Type::Audio );
     auto m2 = T->ml->addMedia( "media2.mkv", IMedia::Type::Video );
+    auto m3 = T->ml->addMedia( "media3.unk", IMedia::Type::Unknown );
 
     ASSERT_EQ( 0u, T->pl->nbAudio() );
     ASSERT_EQ( 0u, T->pl->nbVideo() );
@@ -913,6 +1024,20 @@ static void UpdateNbMediaOnInsertAndDelete( PlaylistTests* T )
     ASSERT_EQ( 1u, T->pl->nbAudio() );
     ASSERT_EQ( 0u, T->pl->nbVideo() );
     ASSERT_EQ( 0u, T->pl->nbUnknown() );
+
+    // append/add a range of medias
+    std::vector<MediaPtr> medialist = { m1, m2, m1, m3, m3, m3 };
+    res = T->pl->append( medialist );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 3u, T->pl->nbAudio() );
+    ASSERT_EQ( 1u, T->pl->nbVideo() );
+    ASSERT_EQ( 3u, T->pl->nbUnknown() );
+
+    res = T->pl->add( medialist, 2 );
+    ASSERT_TRUE( res );
+    ASSERT_EQ( 5u, T->pl->nbAudio() );
+    ASSERT_EQ( 2u, T->pl->nbVideo() );
+    ASSERT_EQ( 6u, T->pl->nbUnknown() );
 }
 
 static void UpdateNbMediaOnMediaRemoval( PlaylistTests* T )
@@ -1314,7 +1439,9 @@ int main( int ac, char** av )
     ADD_TEST( FetchAll );
     ADD_TEST( Add );
     ADD_TEST( Append );
+    ADD_TEST( AppendMany );
     ADD_TEST( Insert );
+    ADD_TEST( InsertMany );
     ADD_TEST( Move );
     ADD_TEST( Remove );
     ADD_TEST( DeleteFile );
