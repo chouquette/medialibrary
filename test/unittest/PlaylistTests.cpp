@@ -340,9 +340,87 @@ static void Move( PlaylistTests* T )
     ASSERT_EQ( 2u, media[3]->id() );
     ASSERT_EQ( 3u, media[4]->id() );
 
+    // move an element at the same place
+    T->pl->move( 2, 2 );
+    // [<5,0>,<4,1>,<1,2>,<2,3>,<3,9/4>]
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 5u, media[0]->id() );
+    ASSERT_EQ( 4u, media[1]->id() );
+    ASSERT_EQ( 1u, media[2]->id() );
+    ASSERT_EQ( 2u, media[3]->id() );
+    ASSERT_EQ( 3u, media[4]->id() );
+
     // Try to remove a dummy element and check that it's handled properly
     res = T->pl->move( 123, 2 );
     ASSERT_FALSE( res );
+}
+
+static void MoveMany( PlaylistTests* T )
+{
+    for ( auto i = 1; i < 6; ++i )
+    {
+        auto m = T->ml->addMedia( "media" + std::to_string( i ) + ".mkv", IMedia::Type::Video );
+        ASSERT_NE( nullptr, m );
+        auto res = T->pl->append( *m );
+        ASSERT_TRUE( res );
+    }
+    T->CheckContiguity();
+    // [1,2,3,4,5]
+
+    // move a range of elements after its original position
+    T->pl->move( 1, 3, 2 );
+    // [1,4,2,3,5]
+
+    auto media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 1u, media[0]->id() );
+    ASSERT_EQ( 4u, media[1]->id() );
+    ASSERT_EQ( 2u, media[2]->id() );
+    ASSERT_EQ( 3u, media[3]->id() );
+    ASSERT_EQ( 5u, media[4]->id() );
+
+    // move a range of elements before its original position
+    T->pl->move( 2, 0, 2 );
+    // [2,3,1,4,5]
+
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 2u, media[0]->id() );
+    ASSERT_EQ( 3u, media[1]->id() );
+    ASSERT_EQ( 1u, media[2]->id() );
+    ASSERT_EQ( 4u, media[3]->id() );
+    ASSERT_EQ( 5u, media[4]->id() );
+
+    // move a range of elements past the last element
+    T->pl->move( 2, 10, 2 );
+    // [2,3,1,4,5]
+
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 2u, media[0]->id() );
+    ASSERT_EQ( 3u, media[1]->id() );
+    ASSERT_EQ( 5u, media[2]->id() );
+    ASSERT_EQ( 1u, media[3]->id() );
+    ASSERT_EQ( 4u, media[4]->id() );
+
+    // move a range of elements at the same place
+    T->pl->move( 2, 3, 2 );
+    // [2,3,1,4,5]
+
+    media = T->pl->media( nullptr )->all();
+    ASSERT_EQ( 5u, media.size() );
+
+    ASSERT_EQ( 2u, media[0]->id() );
+    ASSERT_EQ( 3u, media[1]->id() );
+    ASSERT_EQ( 5u, media[2]->id() );
+    ASSERT_EQ( 1u, media[3]->id() );
+    ASSERT_EQ( 4u, media[4]->id() );
+
 }
 
 static void Remove( PlaylistTests* T )
@@ -1527,6 +1605,7 @@ int main( int ac, char** av )
     ADD_TEST( Insert );
     ADD_TEST( InsertMany );
     ADD_TEST( Move );
+    ADD_TEST( MoveMany );
     ADD_TEST( Remove );
     ADD_TEST( RemoveMany );
     ADD_TEST( DeleteFile );
