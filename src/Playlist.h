@@ -109,6 +109,12 @@ public:
     virtual bool add( const IMedia& media, uint32_t position ) override;
     virtual bool append( int64_t mediaId ) override;
     virtual bool add( int64_t mediaId, uint32_t position ) override;
+
+    virtual bool append( const std::vector<int64_t>& mediaList ) override;
+    virtual bool add( const std::vector<int64_t>& mediaList, uint32_t position) override;
+    virtual bool append( const std::vector<MediaPtr>& mediaList ) override;
+    virtual bool add( const std::vector<MediaPtr>& mediaList, uint32_t position ) override;
+
     virtual bool move( uint32_t from, uint32_t position ) override;
     virtual bool remove( uint32_t position ) override;
     virtual bool isReadOnly() const override;
@@ -163,7 +169,7 @@ private:
      */
     int64_t mediaAt( uint32_t position );
     bool addInternal( int64_t mediaId, uint32_t position, bool updateCounters );
-    bool addInternal( const IMedia& media, uint32_t position, bool updateCounters );
+    bool addInternal( const std::vector<int64_t>& mediaList, uint32_t position, bool updateCounters );
     bool removeInternal( uint32_t position, int64_t mediaId, bool updateCounters );
     std::shared_ptr<File> file() const;
 

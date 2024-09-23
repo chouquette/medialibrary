@@ -123,14 +123,42 @@ public:
     /// If the position is greater than the playlist size, it will be interpreted
     /// as a regular append operation, and the item position will be set to
     /// <playlist size>
-    /// For instance, on the playlist [<B,0>, <A,1>, <C,2>], if add(D, 999)
-    /// gets called, the resulting playlist will be [<A,0>, <C,1>, <B,2>, <D,3>]
+    /// For instance, on the playlist [<A,0>, <B,1>, <C,2>], if add(D, 999)
+    /// gets called, the resulting playlist will be [<A,0>, <B,1>, <C,2>, <D,3>]
     ///
     virtual bool add( const IMedia& media, uint32_t position ) = 0;
+
+    /// \brief append a list of medias to a playlist
+    /// The medias will be the last element of a subsequent call to media()
+    /// \param mediaList The medias to add
+    /// \return true on success, false on failure.
+    ///
+    /// For instance on the playlist [<A,0>, <B,1>, <C,2>], if apend([D,E])
+    /// gets called, the resulting playlist will be [<A,0>, <B,1>, <C,2>, <D,3>, <E,4>]
+    ///
+    virtual bool append( const std::vector<MediaPtr>& mediaList ) = 0;
+    ///
+    /// \brief add Add a list of medias to the playlist at the given position.
+    /// \param mediaList The medias to add
+    /// \param position The position of this new medias, in the [0;size-1] range
+    /// \return true on success, false on failure
+    ///
+    /// For instance on the playlist [<A,0>, <B,1>, <C,2>], if apend([D,E], 2)
+    /// gets called, the resulting playlist will be [<A,0>, <B,1>, <D,2>, <E,3>, <C,4>]
+    ///
+    /// If the position is greater than the playlist size, it will be interpreted
+    /// as a regular append operation, and the item position will be set to
+    /// <playlist size
+    /// For instance, on the playlist [<A,0>, <B,1>, <C,2>], if add([D,E], 999)
+    /// gets called, the resulting playlist will be [<A,0>, <B,1>, <C,2>, <D,3>, <E,4>]
+    ///
+    virtual bool add( const std::vector<MediaPtr>& mediaList, uint32_t position ) = 0;
 
     /// Convenience wrappers
     virtual bool append( int64_t mediaId ) = 0;
     virtual bool add( int64_t mediaId, uint32_t position ) = 0;
+    virtual bool append( const std::vector<int64_t>& mediaList ) = 0;
+    virtual bool add( const std::vector<int64_t>& mediaList, uint32_t position ) = 0;
 
     ///
     /// \brief move Change the position of a media
