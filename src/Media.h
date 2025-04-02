@@ -354,6 +354,9 @@ class Media : public IMedia,
                                            const QueryParameters* );
         static Query<IMedia> fetchHistoryByMediaType( MediaLibraryPtr ml, HistoryType, IMedia::Type,
                                                       const QueryParameters* );
+        static Query<IMedia> searchInHistory( MediaLibraryPtr ml, HistoryType hisType,
+                                              const std::string& pattern, const QueryParameters* params,
+                                              Media::Type type, Media::SubType subType );
         static Query<IMedia> fromFolderId( MediaLibraryPtr ml, Type type,
                                            int64_t folderId,
                                            const QueryParameters* params,
