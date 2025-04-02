@@ -622,6 +622,62 @@ static void RemoveFromHistory( Tests* T )
     ASSERT_EQ( -1, m->lastTime() );
 }
 
+static void HistorySearch( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mp4", IMedia::Type::Video ) );
+    m1->setLastPosition( 0.2f );
+
+    compat::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addStream( "http://media.mp4" ) );
+    m2->setLastPosition( 0.3f );
+
+    auto list = T->ml->searchInHistory( HistoryType::Local, "boy" )->all();
+    ASSERT_EQ( 0u, list.size() );
+
+    list = T->ml->searchInHistory( HistoryType::Local, "med" )->all();
+    ASSERT_EQ( 1u, list.size() );
+    ASSERT_EQ( m1->id(), list[0]->id() );
+
+    list = T->ml->searchInHistory( HistoryType::Network, "boy" )->all();
+    ASSERT_EQ( 0u, list.size() );
+
+    list = T->ml->searchInHistory( HistoryType::Network, "med" )->all();
+    ASSERT_EQ( 1u, list.size() );
+    ASSERT_EQ( m2->id(), list[0]->id() );
+
+    list = T->ml->searchInHistory( HistoryType::Global, "boy" )->all();
+    ASSERT_EQ( 0u, list.size() );
+
+    list = T->ml->searchInHistory( HistoryType::Global, "med" )->all();
+    ASSERT_EQ( 2u, list.size() );
+    ASSERT_EQ( m2->id(), list[0]->id() );
+    ASSERT_EQ( m1->id(), list[1]->id() );
+}
+
+static void HistorySearchByType( Tests* T )
+{
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "video.mp4", IMedia::Type::Video ) );
+    m1->setLastPosition( 0.4f );
+
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
+    m2->setLastTime( 50 );
+
+    auto list = T->ml->searchInVideoHistory( "cat" )->all();
+    ASSERT_EQ( 0u, list.size() );
+
+    list = T->ml->searchInVideoHistory( "vid" )->all();
+    ASSERT_EQ( 1u, list.size() );
+    ASSERT_EQ( m1->id(), list[0]->id() );
+
+    list = T->ml->searchInAudioHistory( "rat" )->all();
+    ASSERT_EQ( 0u, list.size() );
+
+    list = T->ml->searchInAudioHistory( "aud" )->all();
+    ASSERT_EQ( 1u, list.size() );
+    ASSERT_EQ( m2->id(), list[0]->id() );
+}
+
 static void SetReleaseDate( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "movie.mkv", IMedia::Type::Video ) );
@@ -1778,6 +1834,8 @@ int main( int ac, char** av )
     ADD_TEST( HistoryByType );
     ADD_TEST( ClearHistory );
     ADD_TEST( RemoveFromHistory );
+    ADD_TEST( HistorySearch );
+    ADD_TEST( HistorySearchByType );
     ADD_TEST( SetReleaseDate );
     ADD_TEST( SortByAlpha );
     ADD_TEST( SortByReleaseDate );
