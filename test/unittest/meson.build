@@ -621,6 +621,8 @@ media_tests = [
   'HistoryByType',
   'ClearHistory',
   'RemoveFromHistory',
+  'HistorySearch',
+  'HistorySearchByType',
   'SetReleaseDate',
   'SortByAlpha',
   'SortByReleaseDate',
