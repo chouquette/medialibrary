@@ -794,6 +794,41 @@ public:
     searchSubscriptionMedia( const std::string& pattern,
                              const QueryParameters* params = nullptr ) const = 0;
 
+    /**
+     * @brief searchInHistory Search the media already played, based on a pattern.
+     * @param hisType Filter the history.
+     * @param pattern A 3 character or more pattern that will be matched against the media's title
+     *                or filename if no title was set for this media.
+     * @param params Some query parameters, supports what is already supported for media listing.
+     *               Default sort is descending last play date.
+     */
+    virtual Query<IMedia> searchInHistory( HistoryType hisType, const std::string& pattern,
+                                           const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief searchInAudioHistory Search the local audio history, based on a pattern.
+     * @param pattern A 3 character or more pattern that will be matched against the audio's title
+     *                or filename if no title was set for this audio.
+     * @param params Some query parameters, supports what is already supported for audio listing.
+     *               Default sort is descending last play date.
+     *
+     * @note There's no way to filter network history with media types for now.
+     *       Hence the lack of HistoryType parameter.
+     */
+    virtual Query<IMedia> searchInAudioHistory( const std::string& pattern,
+                                                const QueryParameters* params = nullptr ) const = 0;
+    /**
+     * @brief searchInVideoHistory Search the local video history, based on a pattern.
+     * @param pattern A 3 character or more pattern that will be matched against the video's title
+     *                or filename if no title was set for this video.
+     * @param params Some query parameters, supports what is already supported for video listing.
+     *               Default sort is descending last play date.
+     *
+     * @note There's no way to filter network history with media types for now.
+     *       Hence the lack of HistoryType parameter.
+     */
+    virtual Query<IMedia> searchInVideoHistory( const std::string& pattern,
+                                                const QueryParameters* params = nullptr ) const = 0;
+
     virtual Query<IPlaylist> searchPlaylists( const std::string& name, PlaylistType type,
                                               const QueryParameters* params = nullptr ) const = 0;
     virtual Query<IAlbum> searchAlbums( const std::string& pattern,
