@@ -1212,6 +1212,24 @@ Query<IMedia> MediaLibrary::searchSubscriptionMedia( const std::string& pattern,
     return Media::searchFromSubscriptions( this, pattern, params );
 }
 
+Query<IMedia> MediaLibrary::searchInHistory( HistoryType hisType, const std::string& pattern,
+                                             const QueryParameters* params ) const
+{
+    return Media::searchInHistory( this, hisType, pattern, params, Media::Type::Unknown, Media::SubType::Unknown );
+}
+
+Query<IMedia> MediaLibrary::searchInAudioHistory( const std::string& pattern,
+                                                  const QueryParameters* params ) const
+{
+    return Media::searchInHistory( this, HistoryType::Local, pattern, params, Media::Type::Audio, Media::SubType::Unknown );
+}
+
+Query<IMedia> MediaLibrary::searchInVideoHistory( const std::string& pattern,
+                                                  const QueryParameters* params ) const
+{
+    return Media::searchInHistory( this, HistoryType::Local, pattern, params, Media::Type::Video, Media::SubType::Unknown );
+}
+
 Query<IPlaylist> MediaLibrary::searchPlaylists( const std::string& name, PlaylistType type,
                                                 const QueryParameters* params ) const
 {
