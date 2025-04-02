@@ -2807,6 +2807,52 @@ Query<IMedia> Media::fetchHistory( MediaLibraryPtr ml, HistoryType type,
     return fetchHistoryInternal( ml, type, IMedia::Type::Unknown, params );
 }
 
+Query<IMedia> Media::searchInHistory( MediaLibraryPtr ml, HistoryType hisType,
+                                      const std::string& pattern, const QueryParameters* params,
+                                      Media::Type type, Media::SubType subType )
+{
+    std::string req = "FROM " + Media::Table::Name + " m ";
+
+    const SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::LastPlaybackDate;
+
+    const bool desc = params != nullptr ? params->desc : true;
+    const bool publicOnly = params != nullptr && params->publicOnly;
+
+    req += addRequestJoin( sort );
+
+    req += " WHERE"
+           " m.id_media IN ( SELECT rowid FROM " + Media::FtsTable::Name +
+           " WHERE " + Media::FtsTable::Name + " MATCH ? )"
+           " AND m.last_played_date IS NOT NULL";
+
+    if ( type != Media::Type::Unknown )
+    {
+        req += " AND m.type = " + std::to_string( static_cast<uint8_t>( type ) );
+
+        if ( subType != Media::SubType::Unknown )
+            req += " AND m.subtype = " + std::to_string( static_cast<uint8_t>( subType ) );
+    }
+
+    req += addRequestConditions( params, false );
+
+    if ( hisType == HistoryType::Global )
+    {
+        return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( sort, desc ),
+                                          sqlite::Tools::sanitizePattern( pattern ) )
+                .markPublic( publicOnly ).build();
+    }
+
+    if ( hisType != HistoryType::Network )
+        req += " AND m.import_type != ?";
+    else
+        req += " AND m.import_type = ?";
+
+    return make_query<Media, IMedia>( ml, "m.*", std::move( req ), sortRequest( sort, desc ),
+                                      sqlite::Tools::sanitizePattern( pattern ),
+                                      ImportType::Stream )
+            .markPublic( publicOnly ).build();
+}
+
 Query<IMedia> Media::fromFolderId( MediaLibraryPtr ml, IMedia::Type type,
                                    int64_t folderId, const QueryParameters* params,
                                    bool forcePublic )
