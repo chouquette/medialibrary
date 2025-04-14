@@ -495,9 +495,17 @@ static void History( Tests* T )
     ASSERT_EQ( m->id(), history[0]->id() );
     ASSERT_EQ( m2->id(), history[1]->id() );
 
+    p.sort = SortingCriteria::Default,
+    p.desc = true;
+    history = T->ml->history( HistoryType::Global, &p )->all();
+    ASSERT_EQ( 2u, history.size() );
+    ASSERT_EQ( m2->id(), history[0]->id() );
+    ASSERT_EQ( m->id(), history[1]->id() );
+
     m2->markAsPlayed();
     m2->markAsPlayed();
-    p.sort = SortingCriteria::PlayCount;
+    p.sort = SortingCriteria::PlayCount,
+    p.desc = false;
     history = T->ml->history( HistoryType::Global, &p )->all();
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m2->id(), history[0]->id() );
@@ -534,6 +542,13 @@ static void StreamHistory( Tests* T )
     ASSERT_EQ( 2u, history.size() );
     ASSERT_EQ( m1->id(), history[0]->id() );
     ASSERT_EQ( m2->id(), history[1]->id() );
+
+    p.sort = SortingCriteria::Default,
+    p.desc = true;
+    history = T->ml->history( HistoryType::Network, &p )->all();
+    ASSERT_EQ( 2u, history.size() );
+    ASSERT_EQ( m2->id(), history[0]->id() );
+    ASSERT_EQ( m1->id(), history[1]->id() );
 }
 
 static void HistoryByType( Tests* T )
@@ -650,6 +665,15 @@ static void HistorySearch( Tests* T )
     ASSERT_EQ( 0u, list.size() );
 
     list = T->ml->searchInHistory( HistoryType::Global, "med" )->all();
+    ASSERT_EQ( 2u, list.size() );
+    ASSERT_EQ( m2->id(), list[0]->id() );
+    ASSERT_EQ( m1->id(), list[1]->id() );
+
+    QueryParameters p;
+    p.sort = SortingCriteria::Default,
+    p.desc = true;
+
+    list = T->ml->searchInHistory( HistoryType::Global, "med", &p )->all();
     ASSERT_EQ( 2u, list.size() );
     ASSERT_EQ( m2->id(), list[0]->id() );
     ASSERT_EQ( m1->id(), list[1]->id() );
