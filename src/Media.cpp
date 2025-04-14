@@ -2763,7 +2763,8 @@ Query<IMedia> Media::fetchHistoryInternal( MediaLibraryPtr ml, HistoryType type,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    const auto sort = params != nullptr ? params->sort : SortingCriteria::LastPlaybackDate;
+    const auto sort = (params != nullptr && params->sort != SortingCriteria::Default)
+                      ? params->sort : SortingCriteria::LastPlaybackDate;
     req += addRequestJoin( sort );
 
     req += " WHERE last_played_date IS NOT NULL";
@@ -2813,7 +2814,8 @@ Query<IMedia> Media::searchInHistory( MediaLibraryPtr ml, HistoryType hisType,
 {
     std::string req = "FROM " + Media::Table::Name + " m ";
 
-    const SortingCriteria sort = params != nullptr ? params->sort : SortingCriteria::LastPlaybackDate;
+    const SortingCriteria sort = (params != nullptr && params->sort != SortingCriteria::Default)
+                                 ? params->sort : SortingCriteria::LastPlaybackDate;
 
     const bool desc = params != nullptr ? params->desc : true;
     const bool publicOnly = params != nullptr && params->publicOnly;
