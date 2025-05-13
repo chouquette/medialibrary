@@ -107,6 +107,8 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/Errors.h"
+#include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 
 #ifdef __APPLE__
 # include <TargetConditionals.h>

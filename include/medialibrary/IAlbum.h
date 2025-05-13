@@ -25,7 +25,8 @@
 #include <cstdint>
 #include <string>
 
-#include "IMediaLibrary.h"
+#include "IQuery.h"
+#include "Types.h"
 
 namespace medialibrary
 {

@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include "IMediaLibrary.h"
 #include <cstdint>
 #include <memory>
 #include <string>
 
 namespace medialibrary
 {
+
+class IShow;
 
 class IShowEpisode
 {

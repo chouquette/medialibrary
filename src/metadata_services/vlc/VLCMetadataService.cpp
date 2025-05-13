@@ -36,6 +36,8 @@
 #include "utils/Url.h"
 #include "utils/XxHasher.h"
 
+#include "medialibrary/parser/Parser.h"
+
 #ifdef FORCE_ATTACHMENTS_API
 # include "utils/Defer.h"
 #endif

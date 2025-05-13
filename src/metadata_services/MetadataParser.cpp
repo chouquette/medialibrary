@@ -31,6 +31,7 @@
 #include "medialibrary/filesystem/Errors.h"
 #include "medialibrary/filesystem/IDevice.h"
 #include "medialibrary/filesystem/IDirectory.h"
+#include "medialibrary/filesystem/IFile.h"
 #include "Folder.h"
 #include "Genre.h"
 #include "Media.h"

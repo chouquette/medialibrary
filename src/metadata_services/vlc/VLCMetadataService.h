@@ -25,6 +25,7 @@
 #include "compat/ConditionVariable.h"
 #include <vlcpp/vlc.hpp>
 
+#include "medialibrary/parser/IItem.h"
 #include "medialibrary/parser/IParserService.h"
 
 namespace medialibrary

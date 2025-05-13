@@ -22,12 +22,15 @@
 
 #pragma once
 
-#include "medialibrary/parser/Parser.h"
-#include "medialibrary/parser/IItem.h"
 #include <cstdint>
 
 namespace medialibrary
 {
+
+class IMediaLibrary;
+namespace parser { class IItem; }
+namespace parser { enum class Status; }
+namespace parser { enum class Step : uint8_t; }
 
 class IMediaLibrary;
 

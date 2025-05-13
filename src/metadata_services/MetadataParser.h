@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "medialibrary/parser/IItem.h"
 #include "medialibrary/parser/IParserService.h"
 #include "medialibrary/IMedia.h"
 #include "compat/Mutex.h"
