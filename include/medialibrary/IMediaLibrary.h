@@ -41,6 +41,9 @@ namespace medialibrary
 {
 
 class PriorityAccessImpl;
+namespace fs { class IFileSystemFactory; }
+namespace parser { class IParserService; }
+
 class PriorityAccess
 {
 public:

@@ -22,10 +22,12 @@
 
 #pragma once
 
-#include "IMediaLibrary.h"
 #include <cstdint>
 #include <time.h>
 #include <string>
+
+#include "IQuery.h"
+#include "Types.h"
 
 namespace medialibrary
 {

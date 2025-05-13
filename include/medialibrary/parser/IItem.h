@@ -28,13 +28,14 @@
 #include <vector>
 #include <memory>
 
-#include "medialibrary/filesystem/IFile.h"
-#include "medialibrary/filesystem/IDirectory.h"
 #include "medialibrary/Types.h"
 #include "medialibrary/IFile.h"
 
 namespace medialibrary
 {
+
+namespace fs { class IDirectory; }
+namespace fs { class IFile; }
 
 namespace parser
 {

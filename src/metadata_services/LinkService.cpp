@@ -33,6 +33,8 @@
 #include "Subscription.h"
 #include "utils/ModificationsNotifier.h"
 
+#include "medialibrary/parser/IItem.h"
+
 namespace medialibrary
 {
 namespace parser

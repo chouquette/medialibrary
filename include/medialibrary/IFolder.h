@@ -24,9 +24,10 @@
 
 #include <string>
 #include <cstdint>
+
+#include "Types.h"
 #include "IQuery.h"
 #include "IMedia.h"
-#include "IMediaLibrary.h"
 
 namespace medialibrary
 {
