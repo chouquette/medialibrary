@@ -22,8 +22,10 @@
 
 #pragma once
 
-#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace medialibrary
 {

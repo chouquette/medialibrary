@@ -22,6 +22,10 @@
 
 #pragma once
 
+#include <cstdint>
+#include <string>
+#include <vector>
+
 #include "Types.h"
 #include "IQuery.h"
 

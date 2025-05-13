@@ -23,6 +23,8 @@
 #pragma once
 
 #include "medialibrary/Types.h"
+#include <cstdint>
+#include <string>
 
 namespace medialibrary
 {

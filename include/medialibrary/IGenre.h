@@ -23,6 +23,8 @@
 #pragma once
 
 #include "IMediaLibrary.h"
+#include <cstdint>
+#include <string>
 
 namespace medialibrary
 {
