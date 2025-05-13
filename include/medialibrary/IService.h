@@ -22,15 +22,13 @@
 
 #pragma once
 
-#include "IQuery.h"
 #include <string>
+
+#include "Types.h"
+#include "IQuery.h"
 
 namespace medialibrary
 {
-
-class ISubscription;
-class IMedia;
-struct QueryParameters;
 
 /**
  * @brief The IService interface represents a service that can allow the user

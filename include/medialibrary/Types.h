@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 namespace medialibrary
@@ -53,6 +54,14 @@ class IMediaGroup;
 class ISubscription;
 class ICacher;
 class IService;
+class IShowEpisode;
+class ITrackInformation;
+class IMetadata;
+
+struct QueryParameters;
+
+enum class ThumbnailSizeType : uint8_t;
+enum class ThumbnailStatus : uint8_t;
 
 namespace parser
 {
