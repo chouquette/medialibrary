@@ -27,6 +27,7 @@
 #include "compat/Mutex.h"
 #include "compat/ConditionVariable.h"
 #include "Types.h"
+#include <vector>
 
 namespace medialibrary
 {

@@ -23,6 +23,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 #include "IQuery.h"
 #include "IMedia.h"
 #include "IMediaLibrary.h"

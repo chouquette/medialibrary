@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "Types.h"

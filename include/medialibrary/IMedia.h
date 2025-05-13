@@ -22,9 +22,11 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
+#include <cstdint>
+#include <string>
+#include <time.h>
 #include <unordered_map>
+#include <vector>
 
 #include "IFile.h"
 #include "IQuery.h"

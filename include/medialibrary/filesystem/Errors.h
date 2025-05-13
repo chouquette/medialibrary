@@ -23,6 +23,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 #include <system_error>
 
 namespace medialibrary

@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include "medialibrary/Types.h"
 #include "medialibrary/IQuery.h"
