@@ -27,18 +27,11 @@
 #include <unordered_map>
 
 #include "IFile.h"
-#include "Types.h"
 #include "IQuery.h"
+#include "Types.h"
 
 namespace medialibrary
 {
-
-class IShowEpisode;
-class ITrackInformation;
-class IMetadata;
-struct QueryParameters;
-enum class ThumbnailSizeType : uint8_t;
-enum class ThumbnailStatus : uint8_t;
 
 class IMedia
 {
