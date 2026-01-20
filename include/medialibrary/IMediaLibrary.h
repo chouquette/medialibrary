@@ -99,6 +99,8 @@ enum class SortingCriteria
     // Only valid for artists for now
     NbAlbum,
     LastPlaybackDate,
+    // Sort by track Number with albums sorted by their release date
+    TrackNumberAlbumReleaseYear,
 };
 
 

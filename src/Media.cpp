@@ -1392,6 +1392,9 @@ std::string Media::addRequestJoin( SortingCriteria sort )
         case SortingCriteria::TrackId:
             album = true;
             break;
+        case SortingCriteria::TrackNumberAlbumReleaseYear:
+            album = true;
+            break;
         default:
             // Unrelated to media requests
             break;
@@ -1466,6 +1469,13 @@ std::string Media::sortRequest( SortingCriteria sort, bool desc )
             req += "alb.title, m.track_number DESC, m.disc_number";
         else
             req += "alb.title, m.track_number, m.disc_number";
+        descAdded = true;
+        break;
+    case SortingCriteria::TrackNumberAlbumReleaseYear:
+        if ( desc == true )
+            req += "alb.release_year DESC, m.track_number, m.disc_number";
+        else
+            req += "alb.release_year, m.track_number, m.disc_number";
         descAdded = true;
         break;
     default:

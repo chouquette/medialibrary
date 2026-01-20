@@ -654,6 +654,7 @@ media_tests = [
   'SetPlayCount',
   'CheckDbModel',
   'SortByTrackId',
+  'SortByAlbumReleaseDate',
   'ForceTitle',
   'FetchInProgress',
   'FetchFromSubscriptions',

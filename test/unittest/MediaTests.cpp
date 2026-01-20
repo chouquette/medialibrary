@@ -1399,6 +1399,67 @@ static void SortByTrackId( Tests* T )
     ASSERT_EQ( tracks[2]->id(), m3->id() );
 }
 
+static void SortByAlbumReleaseDate( Tests* T )
+{
+    auto a1 = T->ml->createAlbum( "album 1" );
+    auto m1 = std::static_pointer_cast<Media>( T->ml->addMedia( "B-track1.mp3", IMedia::Type::Audio ) );
+    auto m2 = std::static_pointer_cast<Media>( T->ml->addMedia( "A-track2.mp3", IMedia::Type::Audio ) );
+
+    auto res = a1->addTrack( m1, 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+    res = a1->addTrack( m2, 2, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+
+    auto a2 = T->ml->createAlbum( "album 2" );
+    auto m3 = std::static_pointer_cast<Media>( T->ml->addMedia( "B-track3.mp3", IMedia::Type::Audio ) );
+    auto m4 = std::static_pointer_cast<Media>( T->ml->addMedia( "A-track4.mp3", IMedia::Type::Audio ) );
+
+    res = a2->addTrack( m3, 1, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+    res = a2->addTrack( m4, 2, 1, 0, nullptr );
+    ASSERT_TRUE( res );
+
+    a1->setReleaseYear( 1000, false );
+    a2->setReleaseYear( 2000, false );
+
+    // check all tracks in albums using default sorting order
+    auto tracks = a1->tracks( nullptr )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( m1->id(), tracks[0]->id() );
+    ASSERT_EQ( m2->id(), tracks[1]->id() );
+
+    tracks = a2->tracks( nullptr )->all();
+    ASSERT_EQ( 2u, tracks.size() );
+    ASSERT_EQ( m3->id(), tracks[0]->id() );
+    ASSERT_EQ( m4->id(), tracks[1]->id() );
+
+    // First check the release years of the albums themselves
+    // Just an extra layer of precaution to check our tracks assertions below are written correctly
+    QueryParameters params { SortingCriteria::ReleaseDate, true };
+    auto albums = T->ml->albums( &params )->all();
+    ASSERT_EQ( 2u, albums.size() );
+    ASSERT_EQ( a1->id(), albums[1]->id() );
+    ASSERT_EQ( a2->id(), albums[0]->id() );
+
+    // Sort by Album release year in descending order
+    params = { SortingCriteria::TrackNumberAlbumReleaseYear, true };
+    tracks = T->ml->audioFiles( &params )->all();
+    ASSERT_EQ( 4u, tracks.size() );
+    ASSERT_EQ( m2->id(), tracks[3]->id() );
+    ASSERT_EQ( m1->id(), tracks[2]->id() );
+    ASSERT_EQ( m4->id(), tracks[1]->id() );
+    ASSERT_EQ( m3->id(), tracks[0]->id() );
+
+    // Sort by Album release date in ascending order
+    params = { SortingCriteria::TrackNumberAlbumReleaseYear, false };
+    tracks = T->ml->audioFiles( &params )->all();
+    ASSERT_EQ( 4u, tracks.size() );
+    ASSERT_EQ( m4->id(), tracks[3]->id() );
+    ASSERT_EQ( m3->id(), tracks[2]->id() );
+    ASSERT_EQ( m2->id(), tracks[1]->id() );
+    ASSERT_EQ( m1->id(), tracks[0]->id() );
+}
+
 static void ForceTitle( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>(
@@ -1890,6 +1951,7 @@ int main( int ac, char** av )
     ADD_TEST( SetPlayCount );
     ADD_TEST( CheckDbModel );
     ADD_TEST( SortByTrackId );
+    ADD_TEST( SortByAlbumReleaseDate );
     ADD_TEST( ForceTitle );
     ADD_TEST( FetchInProgress );
     ADD_TEST( FetchFromSubscriptions );
