@@ -768,6 +768,17 @@ public:
     virtual bool clearHistory(HistoryType) = 0;
 
     /**
+     * @brief clearHistoryByMediaType Clear the local playback history for a
+     *        specific media type.
+     * @param mediaType The media type to clear (Audio or Video).
+     * @return true in case of success, false otherwise.
+     *
+     * This will clear the history and reset playback progress for the given
+     * media type only. The stream history will be left untouched.
+     */
+    virtual bool clearHistoryByMediaType(IMedia::Type mediaType) = 0;
+
+    /**
      * Search
      */
 

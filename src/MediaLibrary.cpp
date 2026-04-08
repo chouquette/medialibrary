@@ -1188,6 +1188,19 @@ bool MediaLibrary::clearHistory( HistoryType type )
     }
 }
 
+bool MediaLibrary::clearHistoryByMediaType( IMedia::Type mediaType )
+{
+    try
+    {
+        return Media::clearHistoryByMediaType( this, mediaType );
+    }
+    catch ( sqlite::errors::Exception& ex )
+    {
+        LOG_ERROR( "Failed to clear history by media type: ", ex.what() );
+        return false;
+    }
+}
+
 Query<IMedia> MediaLibrary::searchMedia( const std::string& title,
                                                 const QueryParameters* params ) const
 {

@@ -380,6 +380,7 @@ class Media : public IMedia,
                                           const QueryParameters* params );
 
         static bool clearHistory( MediaLibraryPtr ml, HistoryType );
+        static bool clearHistoryByMediaType( MediaLibraryPtr ml, IMedia::Type mediaType );
         static bool removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime );
 
         /**

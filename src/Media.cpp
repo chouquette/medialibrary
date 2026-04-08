@@ -2997,6 +2997,26 @@ bool Media::clearHistory( MediaLibraryPtr ml, HistoryType type )
     return true;
 }
 
+bool Media::clearHistoryByMediaType( MediaLibraryPtr ml, IMedia::Type mediaType )
+{
+    auto dbConn = ml->getConn();
+    auto t = dbConn->newTransaction();
+    std::string req = "UPDATE " + Media::Table::Name +
+                      " SET "
+                      "last_position = -1, last_time = -1, play_count = 0,"
+                      "last_played_date = NULL"
+                      " WHERE import_type != " +
+                      std::to_string( static_cast<uint8_t>( ImportType::Stream ) ) +
+                      " AND type = " +
+                      std::to_string( static_cast<uint8_t>( mediaType ) );
+
+    if ( sqlite::Tools::executeUpdate( dbConn, req ) == false )
+        return false;
+    t->commit();
+    ml->getCb()->onHistoryChanged( HistoryType::Local );
+    return true;
+}
+
 bool Media::removeOldMedia( MediaLibraryPtr ml, std::chrono::seconds maxLifeTime )
 {
     // Media that were never played have a real_last_played_date = NULL, so they
