@@ -609,6 +609,58 @@ static void ClearHistory( Tests* T )
     ASSERT_EQ( 0u, history.size() );
 }
 
+static void ClearHistoryByMediaType( Tests* T )
+{
+    auto video = std::static_pointer_cast<Media>( T->ml->addMedia( "video.mkv", IMedia::Type::Video ) );
+    auto audio = std::static_pointer_cast<Media>( T->ml->addMedia( "audio.mp3", IMedia::Type::Audio ) );
+    auto stream = std::static_pointer_cast<Media>( T->ml->addStream( "http://stream.mkv" ) );
+
+    video->setLastPosition( 0.5f );
+    audio->setLastPosition( 0.3f );
+    stream->setLastPosition( 0.7f );
+
+    auto history = T->ml->history( HistoryType::Global )->all();
+    ASSERT_EQ( 3u, history.size() );
+
+    // Clearing video history should only remove the video entry
+    ASSERT_TRUE( T->ml->clearHistoryByMediaType( IMedia::Type::Video ) );
+
+    history = T->ml->history( HistoryType::Global )->all();
+    ASSERT_EQ( 2u, history.size() );
+
+    video = T->ml->media( video->id() );
+    ASSERT_EQ( -1.f, video->lastPosition() );
+    ASSERT_EQ( -1, video->lastTime() );
+    ASSERT_EQ( 0u, video->playCount() );
+
+    // Audio and stream entries must remain untouched
+    audio = T->ml->media( audio->id() );
+    ASSERT_NE( -1.f, audio->lastPosition() );
+    stream = T->ml->media( stream->id() );
+    ASSERT_NE( -1.f, stream->lastPosition() );
+
+    // Clearing audio should only remove the audio entry
+    ASSERT_TRUE( T->ml->clearHistoryByMediaType( IMedia::Type::Audio ) );
+
+    history = T->ml->history( HistoryType::Global )->all();
+    ASSERT_EQ( 1u, history.size() );
+    ASSERT_EQ( stream->id(), history[0]->id() );
+
+    audio = T->ml->media( audio->id() );
+    ASSERT_EQ( -1.f, audio->lastPosition() );
+    ASSERT_EQ( -1, audio->lastTime() );
+    ASSERT_EQ( 0u, audio->playCount() );
+
+    stream = T->ml->media( stream->id() );
+    ASSERT_NE( -1.f, stream->lastPosition() );
+
+    // Unknown types shouldn't be supported
+    ASSERT_FALSE( T->ml->clearHistoryByMediaType( IMedia::Type::Unknown ) );
+
+    stream = T->ml->media( stream->id() );
+    ASSERT_NE( -1.f, stream->lastPosition() );
+}
+
 static void RemoveFromHistory( Tests* T )
 {
     auto m = std::static_pointer_cast<Media>( T->ml->addMedia( "media.mkv", IMedia::Type::Video ) );
@@ -1918,6 +1970,7 @@ int main( int ac, char** av )
     ADD_TEST( StreamHistory );
     ADD_TEST( HistoryByType );
     ADD_TEST( ClearHistory );
+    ADD_TEST( ClearHistoryByMediaType );
     ADD_TEST( RemoveFromHistory );
     ADD_TEST( HistorySearch );
     ADD_TEST( HistorySearchByType );

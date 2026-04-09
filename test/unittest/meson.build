@@ -621,6 +621,7 @@ media_tests = [
   'StreamHistory',
   'HistoryByType',
   'ClearHistory',
+  'ClearHistoryByMediaType',
   'RemoveFromHistory',
   'HistorySearch',
   'HistorySearchByType',
