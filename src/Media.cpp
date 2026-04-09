@@ -2999,6 +2999,9 @@ bool Media::clearHistory( MediaLibraryPtr ml, HistoryType type )
 
 bool Media::clearHistoryByMediaType( MediaLibraryPtr ml, IMedia::Type mediaType )
 {
+    if ( mediaType == IMedia::Type::Unknown )
+        return false;
+
     auto dbConn = ml->getConn();
     auto t = dbConn->newTransaction();
     std::string req = "UPDATE " + Media::Table::Name +
