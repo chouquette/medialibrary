@@ -26,15 +26,6 @@ medialib_micro_version = ver_arr[2]
 
 cxx = meson.get_compiler('cpp')
 
-extra_warnings = [
-]
-
-foreach w : extra_warnings
-  if cxx.has_argument(w)
-    add_project_arguments(w, language: 'cpp')
-  endif
-endforeach
-
 if get_option('b_sanitize') == 'thread'
   if cxx.get_id() != 'clang'
     error('thread sanitizer requires clang and libc++')
