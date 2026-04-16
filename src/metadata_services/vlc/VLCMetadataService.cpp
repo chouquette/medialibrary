@@ -249,6 +249,8 @@ void VLCMetadataService::mediaToItem( VLC::Media& media, IItem& item )
                   media.meta( libvlc_meta_DiscTotal ) );
     item.setMeta( IItem::Metadata::Description,
                   media.meta( libvlc_meta_Description ) );
+    item.setMeta( IItem::Metadata::Rating,
+                  media.meta( libvlc_meta_Rating ) );
     item.setDuration( media.duration() );
 
 #if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)

@@ -76,6 +76,7 @@ public:
         DiscNumber,
         DiscTotal,
         Description,
+        Rating,
 
         /* for convenience, please keep this last */
         NbValues,

@@ -231,6 +231,10 @@ Status MetadataAnalyzer::run( IItem& item )
     }
     auto media = std::static_pointer_cast<Media>( item.media() );
 
+    auto rating = item.meta( IItem::Metadata::Rating );
+    if ( rating.empty() == false )
+        media->setMetadata( IMedia::MetadataType::Rating, rating );
+
     if ( media->type() == IMedia::Type::Audio )
     {
         Cache cache{};
