@@ -1,0 +1,5 @@
+[wrap-git]
+url = https://code.videolan.org/videolan/libvlcpp.git
+depth = 1
+
+revision = 33214afee13df36dc46309ef5416d681b56db5b9

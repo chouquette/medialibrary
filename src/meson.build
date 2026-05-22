@@ -85,7 +85,7 @@ if not libxxhash_dep.found()
   )
 endif
 
-if libvlc_dep.found()
+if libvlcpp_dep.found()
   if libvlc_dep.version().version_compare('>=4.0')
     medialib_src += [
         'thumbnails/CoreThumbnailer.cpp',
@@ -135,7 +135,6 @@ medialib = library('medialibrary', medialib_src,
     dependencies: [
         sqlite_dep,
         libjpeg_dep,
-        libvlc_dep,
         libvlcpp_dep,
         threads_dep,
         libxxhash_dep,

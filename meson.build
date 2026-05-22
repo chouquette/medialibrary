@@ -101,13 +101,15 @@ endif
 sqlite_dep = dependency('sqlite3', version: '>= 3.33.0',
                         required: true)
 
-libvlc_dep = dependency('libvlc', version: '>= 3.0', required: get_option('libvlc'))
-if libvlc_dep.found()
+libvlc_dep = []
+libvlcpp_dep = dependency('libvlcpp', required: get_option('libvlc'))
+if libvlcpp_dep.found()
+  libvlc_dep = dependency('libvlc', version: '>= 3.0')
   cdata.set('HAVE_LIBVLC', 1)
 endif
 
 # We only require libjpeg when using the 3.0 thumbnailer, using vmem
-if libvlc_dep.found() and libvlc_dep.version().version_compare('< 4.0')
+if libvlcpp_dep.found() and libvlc_dep.version().version_compare('< 4.0')
   libjpeg_dep = dependency('libjpeg', required: false)
   if not libjpeg_dep.found()
     jpegprefix = get_option('libjpeg_prefix')
@@ -124,26 +126,10 @@ else
   libjpeg_dep = []
 endif
 
-if libvlc_dep.found()
-  libvlcpp_dep = dependency('libvlcpp', required: false)
-    if not libvlcpp_dep.found()
-      vlcpp_inc_dir = include_directories('libvlcpp/')
-      if cxx.has_header('vlcpp/vlc.hpp', include_directories: vlcpp_inc_dir)
-        libvlcpp_dep = declare_dependency(
-          include_directories: vlcpp_inc_dir
-          )
-      else
-        error('libvlcpp not found. Please install it or initialize the submodule')
-      endif
-    endif
-else
-  libvlcpp_dep = []
-endif
-
 libxxhash_dep = dependency('libxxhash', required: false)
 
 if get_option('force_attachment_api')
-  if not libvlc_dep.found()
+  if not libvlcpp_dep.found()
     warning('Invalid option \'force_attachment_api\' provided without libvlc enabled')
   elif libvlc_dep.version().version_compare('>=4.0')
     warning('Invalid option \'force_attachment_api\' provided with libvlc >=4.x')
@@ -169,7 +155,7 @@ subdir('src')
 # Ideally we shouldn't need an option to build tests, but we need
 # https://github.com/mesonbuild/meson/issues/2518
 # to be fixed first
-if libvlc_dep.found() and not get_option('tests').disabled()
+if libvlcpp_dep.found() and not get_option('tests').disabled()
   subdir('test')
 endif
 
