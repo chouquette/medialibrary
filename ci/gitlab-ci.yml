@@ -152,12 +152,22 @@ asan-ubsan:
     LSAN_OPTIONS: 'detect_leaks=0'
   script:
     - git clone https://code.videolan.org/videolan/vlc.git --depth=1
-    - cd vlc && ./bootstrap
-    - ./configure LDFLAGS="-lasan -lubsan" --prefix=$(pwd)/prefix --disable-qt --with-sanitizer=address,undefined --disable-medialibrary --disable-nls --enable-debug
-    - make install -j8
-    - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/prefix/lib/pkgconfig"
+    - cd vlc
+    - >
+      meson setup build
+      --native-file ../ci/libvlc-minimal.ini
+      -Db_sanitize=address,undefined
+    - ninja -C build
+    - mkdir -p build/lib/pkgconfig
+    - sed "s|@VLC_DIR@|$(pwd)|" ../ci/libvlc.pc.in > build/lib/pkgconfig/libvlc.pc
+    - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$(pwd)/build/lib/pkgconfig"
+    - export VLC_PLUGIN_PATH="$(pwd)/build/modules"
     - cd $CI_PROJECT_DIR
-    - meson -Db_sanitize=address,undefined -Dlong_running_tests=true build
+    - >
+      meson setup build
+      -Db_sanitize=address,undefined
+      -Db_lundef=false
+      -Dlong_running_tests=true
     - cd build && meson test --no-stdsplit --no-suite long_running_tests
     - meson test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:

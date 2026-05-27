@@ -1,0 +1,14 @@
+# VLC's meson build support is experimental and does not generate a pkgconfig
+# file or an install target yet. This file is a workaround for CI use, generated
+# from the build tree directly. @VLC_DIR@ is substituted at build time with
+# the path to the VLC source/build directory.
+# This should be removed once VLC adds install and pkgconf support.
+prefix=@VLC_DIR@
+libdir=${prefix}/build/lib
+includedir=${prefix}/include
+
+Name: libvlc
+Description: VLC library
+Version: 4.0.0
+Libs: -L${libdir} -lvlc
+Cflags: -I${includedir}
