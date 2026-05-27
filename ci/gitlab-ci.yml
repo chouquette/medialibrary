@@ -263,7 +263,7 @@ gen-coverage:
     - mkdir html
     - >
       gcovr --add-tracefile '*.cov.json'
-      -e "$CI_PROJECT_DIR/libvlcpp"
+      -e "$CI_PROJECT_DIR/subprojects/libvlcpp"
       -e "$CI_PROJECT_DIR/test"
       -e "$CI_PROJECT_DIR/src/database/SqliteErrors.h"
       -e "$CI_PROJECT_DIR/src/database/SqliteErrors.cpp"
