@@ -150,6 +150,7 @@ asan-ubsan:
   stage: test
   variables:
     LSAN_OPTIONS: 'detect_leaks=0'
+    MESON_SANITIZER_EXTRA_ARGS: '-Dcpp_args=-fno-sanitize=pointer-overflow'
   script:
     - git clone https://code.videolan.org/videolan/vlc.git --depth=1
     - cd vlc
@@ -157,6 +158,7 @@ asan-ubsan:
       meson setup build
       --native-file ../ci/libvlc-minimal.ini
       -Db_sanitize=address,undefined
+      $MESON_SANITIZER_EXTRA_ARGS
     - ninja -C build
     - mkdir -p build/lib/pkgconfig
     - sed "s|@VLC_DIR@|$(pwd)|" ../ci/libvlc.pc.in > build/lib/pkgconfig/libvlc.pc
@@ -168,6 +170,7 @@ asan-ubsan:
       -Db_sanitize=address,undefined
       -Db_lundef=false
       -Dlong_running_tests=true
+      $MESON_SANITIZER_EXTRA_ARGS
     - cd build && meson test --no-stdsplit --no-suite long_running_tests
     - meson test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
   artifacts:
@@ -193,6 +196,7 @@ asan-ubsan:
       -Db_sanitize=$SANITIZERS
       -Db_lundef=false
       -Dlong_running_tests=true
+      $MESON_SANITIZER_EXTRA_ARGS
       build
     - cd build && meson test --no-stdsplit --no-suite long_running_tests
     - meson test --suite long_running_tests --test-args $CI_PROJECT_DIR/test/samples/samples --no-stdsplit --logbase longtests
@@ -216,6 +220,7 @@ test:asan-ubsan:
   variables:
     LSAN_OPTIONS: 'detect_leaks=0'
     SANITIZERS: address,undefined
+    MESON_SANITIZER_EXTRA_ARGS: '-Dcpp_args=-fno-sanitize=pointer-overflow'
 
 gen-test-db:
   image: $MEDIALIBRARY_30_IMAGE
