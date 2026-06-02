@@ -114,6 +114,8 @@ test:win64:
   allow_failure: true
   variables:
     MESON_TESTTHREADS: 8
+    WINEARCH: win64
+    WINEPREFIX: /home/videolan/.wine64
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
