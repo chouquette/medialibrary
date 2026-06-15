@@ -117,7 +117,10 @@ using ThumbnailerType = medialibrary::VmemThumbnailer;
 namespace medialibrary
 {
 
-const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
+namespace
+{
+
+const std::vector<const char*> SupportedMediaExtensions = {
     "3g2",
     "3ga",
     "3gp",
@@ -248,7 +251,7 @@ const std::vector<const char*> MediaLibrary::SupportedMediaExtensions = {
     "xm"
 };
 
-const std::vector<const char*> MediaLibrary::SupportedPlaylistExtensions = {
+const std::vector<const char*> SupportedPlaylistExtensions = {
     "asx",
     "b4s",
     "conf",
@@ -265,7 +268,7 @@ const std::vector<const char*> MediaLibrary::SupportedPlaylistExtensions = {
     "xspf"
 };
 
-const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
+const std::vector<const char*> SupportedSubtitleExtensions = {
     "aqt",
     "ass",
     "cdg",
@@ -291,6 +294,8 @@ const std::vector<const char*> MediaLibrary::SupportedSubtitleExtensions = {
     "vtt",
     "webvtt"
 };
+
+}
 
 std::unique_ptr<MediaLibrary> MediaLibrary::create( const std::string& dbPath,
                                                     const std::string& mlFolderPath,
@@ -894,18 +899,12 @@ bool MediaLibrary::regroupAll()
 
 bool MediaLibrary::isMediaExtensionSupported( const char* ext ) const
 {
-    return std::binary_search( std::begin( SupportedMediaExtensions ),
-        std::end( SupportedMediaExtensions ), ext, [](const char* l, const char* r) {
-            return strcasecmp( l, r ) < 0;
-        });
+    return medialibrary::isMediaExtensionSupported( ext );
 }
 
 bool MediaLibrary::isPlaylistExtensionSupported( const char* ext ) const
 {
-    return std::binary_search( std::begin( SupportedPlaylistExtensions ),
-        std::end( SupportedPlaylistExtensions ), ext, [](const char* l, const char* r) {
-            return strcasecmp( l, r ) < 0;
-    });
+    return medialibrary::isPlaylistExtensionSupported( ext );
 }
 
 bool MediaLibrary::isDeviceKnown( const std::string &uuid,
@@ -929,15 +928,51 @@ bool MediaLibrary::deleteRemovableDevices()
     return Device::deleteRemovable( this );
 }
 
-const std::vector<const char*>&MediaLibrary::supportedSubtitleExtensions() const
+const std::vector<const char*>& MediaLibrary::supportedSubtitleExtensions() const
+{
+    return medialibrary::supportedSubtitleExtensions();
+}
+
+bool MediaLibrary::isSubtitleExtensionSupported( const char* ext ) const
+{
+    return medialibrary::isSubtitleExtensionSupported( ext );
+}
+
+const std::vector<const char*>& supportedMediaExtensions()
+{
+    return SupportedMediaExtensions;
+}
+
+bool isMediaExtensionSupported( const char* ext )
+{
+    return std::binary_search( std::begin( SupportedMediaExtensions ),
+        std::end( SupportedMediaExtensions ), ext, []( const char* l, const char* r ) {
+            return strcasecmp( l, r ) < 0;
+        });
+}
+
+const std::vector<const char*>& supportedPlaylistExtensions()
+{
+    return SupportedPlaylistExtensions;
+}
+
+bool isPlaylistExtensionSupported( const char* ext )
+{
+    return std::binary_search( std::begin( SupportedPlaylistExtensions ),
+        std::end( SupportedPlaylistExtensions ), ext, []( const char* l, const char* r ) {
+            return strcasecmp( l, r ) < 0;
+        });
+}
+
+const std::vector<const char*>& supportedSubtitleExtensions()
 {
     return SupportedSubtitleExtensions;
 }
 
-bool MediaLibrary::isSubtitleExtensionSupported(const char* ext) const
+bool isSubtitleExtensionSupported( const char* ext )
 {
     return std::binary_search( std::begin( SupportedSubtitleExtensions ),
-        std::end( SupportedSubtitleExtensions ), ext, [](const char* l, const char* r) {
+        std::end( SupportedSubtitleExtensions ), ext, []( const char* l, const char* r ) {
             return strcasecmp( l, r ) < 0;
         });
 }
@@ -2585,12 +2620,12 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
 
 const std::vector<const char*>& MediaLibrary::supportedMediaExtensions() const
 {
-    return SupportedMediaExtensions;
+    return medialibrary::supportedMediaExtensions();
 }
 
 const std::vector<const char*>& MediaLibrary::supportedPlaylistExtensions() const
 {
-    return SupportedPlaylistExtensions;
+    return medialibrary::supportedPlaylistExtensions();
 }
 
 bool MediaLibrary::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,

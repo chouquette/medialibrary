@@ -297,11 +297,6 @@ public:
     virtual uint64_t getMaxCacheSize() const override;
     virtual bool refreshAllSubscriptions() override;
 
-private:
-    static const std::vector<const char*> SupportedMediaExtensions;
-    static const std::vector<const char*> SupportedPlaylistExtensions;
-    static const std::vector<const char*> SupportedSubtitleExtensions;
-
 protected:
     virtual void startDeletionNotifier();
     virtual void populateNetworkFsFactories();

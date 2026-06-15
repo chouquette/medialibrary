@@ -1284,6 +1284,40 @@ public:
     virtual bool refreshAllSubscriptions() = 0;
 };
 
+/**
+ * @brief supportedMediaExtensions Returns the supported media extensions
+ *
+ * The list is guaranteed to be ordered alphabetically
+ */
+const std::vector<const char*>& supportedMediaExtensions();
+/**
+ * @brief isMediaExtensionSupported Checks if the provided media extension
+ *                                  is supported.
+ */
+bool isMediaExtensionSupported( const char* ext );
+/**
+ * @brief supportedPlaylistExtensions Returns the supported playlist extensions
+ *
+ * The list is guaranteed to be ordered alphabetically
+ */
+const std::vector<const char*>& supportedPlaylistExtensions();
+/**
+ * @brief isPlaylistExtensionSupported Checks if the provided playlist extension
+ *                                     is supported.
+ */
+bool isPlaylistExtensionSupported( const char* ext );
+/**
+ * @brief supportedSubtitleExtensions Returns the supported subtitle extensions
+ *
+ * The list is guaranteed to be ordered alphabetically
+ */
+const std::vector<const char*>& supportedSubtitleExtensions();
+/**
+ * @brief isSubtitleExtensionSupported Checks if the provided subtitle extension
+ *                                     is supported.
+ */
+bool isSubtitleExtensionSupported( const char* ext );
+
 }
 
 extern "C"
