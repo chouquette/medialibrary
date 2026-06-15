@@ -937,7 +937,7 @@ const std::vector<const char*>&MediaLibrary::supportedSubtitleExtensions() const
 bool MediaLibrary::isSubtitleExtensionSupported(const char* ext) const
 {
     return std::binary_search( std::begin( SupportedSubtitleExtensions ),
-        std::end( SupportedMediaExtensions ), ext, [](const char* l, const char* r) {
+        std::end( SupportedSubtitleExtensions ), ext, [](const char* l, const char* r) {
             return strcasecmp( l, r ) < 0;
         });
 }
