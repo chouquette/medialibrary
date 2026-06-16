@@ -253,13 +253,6 @@ public:
 
     static void removeOldEntities( MediaLibraryPtr ml );
 
-    virtual const std::vector<const char*>& supportedMediaExtensions() const override;
-    virtual const std::vector<const char*>& supportedPlaylistExtensions() const override;
-    virtual bool isMediaExtensionSupported( const char* ext ) const override;
-    virtual bool isPlaylistExtensionSupported( const char* ext ) const override;
-    virtual const std::vector<const char*>& supportedSubtitleExtensions() const override;
-    virtual bool isSubtitleExtensionSupported( const char* ext ) const override;
-
     virtual bool isDeviceKnown( const std::string& uuid,
                                 const std::string& mountpoint,
                                 bool isRemovable ) override;

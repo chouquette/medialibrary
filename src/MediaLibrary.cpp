@@ -897,16 +897,6 @@ bool MediaLibrary::regroupAll()
     return Media::regroupAll( this );
 }
 
-bool MediaLibrary::isMediaExtensionSupported( const char* ext ) const
-{
-    return medialibrary::isMediaExtensionSupported( ext );
-}
-
-bool MediaLibrary::isPlaylistExtensionSupported( const char* ext ) const
-{
-    return medialibrary::isPlaylistExtensionSupported( ext );
-}
-
 bool MediaLibrary::isDeviceKnown( const std::string &uuid,
                                   const std::string &mountpoint, bool isRemovable )
 {
@@ -926,16 +916,6 @@ bool MediaLibrary::isDeviceKnown( const std::string &uuid,
 bool MediaLibrary::deleteRemovableDevices()
 {
     return Device::deleteRemovable( this );
-}
-
-const std::vector<const char*>& MediaLibrary::supportedSubtitleExtensions() const
-{
-    return medialibrary::supportedSubtitleExtensions();
-}
-
-bool MediaLibrary::isSubtitleExtensionSupported( const char* ext ) const
-{
-    return medialibrary::isSubtitleExtensionSupported( ext );
 }
 
 const std::vector<const char*>& supportedMediaExtensions()
@@ -2616,16 +2596,6 @@ void MediaLibrary::addThumbnailer( std::shared_ptr<IThumbnailer> thumbnailer )
         LOG_WARN( "Discarding previous thumbnailer since one has already been provided" );
     }
     m_thumbnailer = std::move( thumbnailer );
-}
-
-const std::vector<const char*>& MediaLibrary::supportedMediaExtensions() const
-{
-    return medialibrary::supportedMediaExtensions();
-}
-
-const std::vector<const char*>& MediaLibrary::supportedPlaylistExtensions() const
-{
-    return medialibrary::supportedPlaylistExtensions();
 }
 
 bool MediaLibrary::requestThumbnail( int64_t mediaId, ThumbnailSizeType sizeType,

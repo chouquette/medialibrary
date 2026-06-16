@@ -77,21 +77,21 @@ struct MiscTests : public Tests
 
 static void MediaExtensions( MiscTests* T )
 {
-    const auto supportedExtensions = T->ml->supportedMediaExtensions();
+    const auto supportedExtensions = medialibrary::supportedMediaExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }
 
 static void PlaylistExtensions( MiscTests* T )
 {
-    const auto supportedExtensions = T->ml->supportedPlaylistExtensions();
+    const auto supportedExtensions = medialibrary::supportedPlaylistExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }
 
 static void SubtitleExtensions( MiscTests* T )
 {
-    const auto supportedExtensions = T->ml->supportedSubtitleExtensions();
+    const auto supportedExtensions = medialibrary::supportedSubtitleExtensions();
     auto res = checkAlphaOrderedVector( supportedExtensions );
     ASSERT_TRUE( res );
 }

@@ -1067,29 +1067,6 @@ public:
     virtual bool clearDatabase( bool restorePlaylists ) = 0;
 
     /**
-     * @brief supportedMediaExtensions Returns the supported media extensions
-     *
-     * The list is guaranteed to be ordered alphabetically
-     */
-    virtual const std::vector<const char*>& supportedMediaExtensions() const = 0;
-    /**
-     * @brief isMediaExtensionSupported Checks if the provided media extension
-     *                                  is supported.
-     */
-    virtual bool isMediaExtensionSupported( const char* ext ) const = 0;
-    /**
-     * @brief supportedPlaylistExtensions Returns the supported playlist extensions
-     *
-     * The list is guaranteed to be ordered alphabetically
-     */
-    virtual const std::vector<const char*>& supportedPlaylistExtensions() const = 0;
-    /**
-     * @brief isPlaylistExtensionSupported Checks if the provided playlist extension
-     *                                     is supported.
-     */
-    virtual bool isPlaylistExtensionSupported( const char* ext ) const = 0;
-
-    /**
      * @brief isDeviceKnown Probes a device to know if it has been seen by the medialibrary
      * @param uuid The device UUID
      * @param mountpoint The device mountpoint, as an MRL
@@ -1114,18 +1091,6 @@ public:
      * to be inserted in the database
      */
     virtual bool deleteRemovableDevices() = 0;
-
-    /**
-     * @brief supportedSubtitlesExtensions Returns the supported subtitle extensions
-     *
-     * The list is guaranteed to be ordered alphabetically
-     */
-    virtual const std::vector<const char*>& supportedSubtitleExtensions() const = 0;
-    /**
-     * @brief isSubtitleExtensionSupported Checks if the provided subtitle extension
-     *                                     is supported.
-     */
-    virtual bool isSubtitleExtensionSupported( const char* ext ) const = 0;
 
     /**
      * @brief requestThumbnail Request an asynchronous thumbnail generation
